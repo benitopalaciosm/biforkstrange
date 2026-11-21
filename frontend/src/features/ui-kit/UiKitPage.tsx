@@ -41,7 +41,7 @@ export function UiKitPage() {
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 20px", display: "flex", flexDirection: "column", gap: 24 }}>
         <Stack gap={12}>
           <Row gap={12} style={{ alignItems: "center", justifyContent: "space-between" }}>
-            <Pill>BiforkStrange · UI kit</Pill>
+            <Pill>Agarrar la pala · UI kit</Pill>
             <a href="/" className="vd-meta">
               Ir a la app
             </a>

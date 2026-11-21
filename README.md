@@ -1,6 +1,6 @@
-# BiforkStrange
+# Agarrar la pala
 
-<img src="./project-logo.png" alt="BiforkStrange" width="200" />
+<img src="./project-logo.png" alt="Agarrar la pala" width="200" />
 
 Track: Simulations · Platanus Hack 26 Santiago, team 32
 

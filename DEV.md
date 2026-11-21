@@ -1,4 +1,4 @@
-# BiforkStrange: desarrollo
+# Agarrar la pala: desarrollo
 
 ## Arranque
 
