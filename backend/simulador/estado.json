@@ -887,6 +887,14 @@
    "inicio": "eleccion"
   },
   {
+   "nombre": "universidad_destino",
+   "tipo": "eleccion",
+   "dominio": [],
+   "unidad": "",
+   "descripcion": "Universidad donde hace el magíster (código SIES; lo elige el jugador).",
+   "inicio": "eleccion"
+  },
+  {
    "nombre": "quien_enferma",
    "tipo": "eleccion",
    "dominio": [

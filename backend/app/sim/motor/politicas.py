@@ -85,7 +85,7 @@ def elecciones_internas(vida: Vida, opcion: Opcion) -> list[dict]:
     """Lo que hay que elegir dentro de una opción (a qué rubro, a qué ocupación), con sus alternativas."""
     pq, e = vida.pq, vida.e
     usadas = _variables_usadas(opcion)
-    if not usadas & {"rubro_destino", "ocupacion_destino", "region_destino"}:
+    if not usadas & {"rubro_destino", "ocupacion_destino", "region_destino", "universidad_destino"}:
         return []
     salida = []
     if "rubro_destino" in usadas:
@@ -108,7 +108,20 @@ def elecciones_internas(vida: Vida, opcion: Opcion) -> list[dict]:
                  if f["educacion"] == "todas" and f["region"] not in ("Metropolitana", "Nacional")}
         salida.append({"variable": "region_destino", "pregunta": "¿A qué región?", "alternativas": [
             {"valor": r, "nombre": r, "prob": p} for r, p in sorted(gente.items())]})
+    if "universidad_destino" in usadas:
+        # peso: cuántos magísteres vigentes tiene cada universidad (SIES 2026)
+        salida.append({"variable": "universidad_destino", "pregunta": "¿En qué universidad?", "alternativas": [
+            {"valor": f["universidad_id"], "nombre": _universidad(f), "prob": float(f["programas"]),
+             "selectiva": f["selectiva"] == "1", "arancel_anual": float(f["arancel_anual"]), "anios": float(f["anios"])}
+            for f in pq.filas("sies_magister_2026")]})
     return salida
+
+
+def _universidad(f: dict) -> str:
+    """Nombre corto para el selector: sigla o nombre, arancel y si es selectiva."""
+    nombre = f["sigla"] or f["universidad"].replace("Universidad ", "U. ")
+    arancel = f"{float(f['arancel_anual']):,.0f}".replace(",", ".")
+    return f"{nombre} · ${arancel} al año" + (" · selectiva" if f["selectiva"] == "1" else "")
 
 
 _USADAS: dict[int, frozenset[str]] = {}

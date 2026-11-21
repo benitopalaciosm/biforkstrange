@@ -450,6 +450,30 @@
    "pais": "",
    "tipo": "supuesto",
    "verificacion": "supuesto"
+  },
+  {
+   "id": "sies_2026",
+   "cita": "SIES (Mineduc), oferta académica de postgrado 2026",
+   "url": "https://www.mifuturo.cl/bases-de-datos-de-oferta-academica/",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "demre_paes",
+   "cita": "DEMRE, resultados PAES 2024 y 2025 por institución de destino",
+   "url": "https://demre.cl/portales/portal-bases-datos",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_esi_panel",
+   "cita": "INE, ESI 2023-2025, panel por rotación de la ENE (pares 2023-24 y 2024-25), estimación propia",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/ingresos-y-gastos/encuesta-suplementaria-de-ingresos",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
   }
  ]
 }
