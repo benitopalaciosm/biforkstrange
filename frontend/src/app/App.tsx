@@ -7,7 +7,7 @@ export default function App() {
 
   return (
     <main style={{ fontFamily: "system-ui", maxWidth: 720, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1>Pegaverso</h1>
+      <h1>Agarrar la pala</h1>
       <p>
         <a href="/ui">Ver el kit de UI</a>
       </p>

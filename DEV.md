@@ -1,4 +1,4 @@
-# Pegaverso: desarrollo
+# Agarrar la pala: desarrollo
 
 ## Arranque
 
