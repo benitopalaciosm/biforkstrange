@@ -83,6 +83,7 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         # variables que elige el jugador dentro de una opción
         rubro_destino=perfil.rubro or RUBROS_DESTINO, region_destino="Valparaíso",
         ocupacion_destino=2, quien_enferma="madre",
+        universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
     )
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)

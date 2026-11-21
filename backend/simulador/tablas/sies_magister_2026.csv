@@ -1,0 +1,52 @@
+universidad_id,universidad,sigla,selectiva,programas,arancel_anual,anios,frac_no_diurna
+86,Pontificia Universidad Católica de Chile,UC,1,131,5864000,2,0.45
+70,Universidad de Chile,UCH,1,124,4876162,2,0.5
+23,Universidad Adolfo Ibáñez,UAI,1,75,8546030,2,0.493
+87,Universidad de Concepción,UDEC,1,72,4378000,2,0.278
+31,Universidad Autónoma de Chile,UA,0,66,5490000,2,0.955
+20,Universidad Andrés Bello,UNAB,0,58,6825000,2,0.897
+39,Universidad San Sebastián,USS,0,56,3645000,2,0.875
+72,Universidad de Valparaíso,UV,0,48,3000000,2,0.688
+71,Universidad de Santiago de Chile,USACH,1,45,2948420,2,0.711
+89,Pontificia Universidad Católica de Valparaíso,PUCV,1,42,3125000,2,0.69
+90,Universidad Austral de Chile,UACH,0,42,3011000,2,0.714
+34,Universidad de los Andes,UANDES,1,36,4598578,2,0.417
+10,Universidad Mayor,UMAYOR,0,34,2930000,2,0.971
+45,Universidad del Desarrollo,UDD,1,33,4883446,2,0.606
+3,Universidad Diego Portales,UDP,1,32,3491666,2,0.812
+4,Universidad Central de Chile,UCENTRAL,0,31,2965200,2,1.0
+69,Universidad Alberto Hurtado,UAH,0,30,2540000,2,1.0
+76,Universidad de la Frontera,UFRO,1,30,2725000,2,0.1
+91,Universidad Católica del Norte,UCN,0,27,3322500,2,0.481
+93,Universidad Católica de la Santisima Concepción,UCSC,0,26,3535000,2,0.846
+78,Universidad de Talca,UTAL,0,25,3176278,2,0.44
+75,Universidad del Bío-Bío,UBB,0,25,2791000,2,0.24
+88,Universidad Técnica Federico Santa María,UTFSM,1,20,7110000,2,0.15
+92,Universidad Católica del Maule,UCM,0,19,2748000,2,0.211
+1,Universidad Gabriela Mistral,UGM,0,18,6401000,2,1.0
+19,Universidad de las Americas,UDLA,0,17,4680000,2,0.941
+85,Universidad Tecnológica Metropolitana,UTEM,0,14,3325000,2,0.857
+2,Universidad Finis Terrae,UFT,0,13,2825000,2,0.846
+13,Universidad Santo Tomas,UST,0,13,2908350,2,1.0
+22,Universidad de Viña del Mar,,0,13,5454649,2,1.0
+82,Universidad Metropolitana de Ciencias de la Educación,UMCE,0,12,3216000,2,0.833
+79,Universidad de Atacama,UDA,0,11,3240000,2,0.455
+83,Universidad de Playa Ancha de Ciencias de la Educacion,UPA,0,10,2500000,2,0.4
+80,Universidad de Tarapacá,UTA,0,10,3000000,2,0.3
+84,Universidad de los Lagos,ULAG,0,10,2440000,2,0.0
+81,Universidad Arturo Prat,UNAP,0,9,2223500,2,0.667
+50,Universidad Bernardo O'Higgins,UBO,0,7,2750000,2,1.0
+94,Universidad Católica de Temuco,UCT,0,7,2289000,2,0.714
+77,Universidad de Magallanes,UMAG,0,7,3535000,2,0.857
+74,Universidad de la Serena,ULS,0,7,2528500,2,0.286
+73,Universidad de Antofagasta,UANT,0,6,2600000,2,0.0
+895,Universidad de O'higgins,UOH,0,6,3307500,2,0.5
+11,Universidad Academia de Humanismo Cristiano,UACADEMIA,0,5,4500000,2,1.0
+38,Universidad Adventista de Chile,UNACH,0,3,2757000,2,1.0
+68,Universidad Miguel de Cervantes,,0,3,3570000,2,1.0
+26,"Universidad de Artes, Ciencias y Comunicacion - Uniacc",,0,3,4500000,2,1.0
+9,Universidad del Alba,,0,3,3956000,2,1.0
+674,Academia Nacional de Estudios Politicos y Estrategicos Anepe,,0,1,2750000,2,1.0
+42,Universidad Católica Cardenal Raul Silva Henriquez,UCSH,0,1,2135250,2,1.0
+46,Universidad de Aconcagua,,0,1,2921625,2,1.0
+896,Universidad de Aysén,UAYSEN,0,1,5000000,2,1.0

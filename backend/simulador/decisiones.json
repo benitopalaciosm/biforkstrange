@@ -765,7 +765,7 @@
     {
      "id": "beca",
      "nombre": "Postular a beca y estudiar a tiempo completo",
-     "detalle": "Dos años sin sueldo. Los becarios ganan cerca de USD 150 más al séptimo año.",
+     "detalle": "Dos años sin sueldo con la beca pagando el arancel. Si la universidad es selectiva, los becarios ganan cerca de USD 199 más al mes; en las demás, casi nada.",
      "resultados": [
       {
        "id": "termina",
@@ -791,7 +791,7 @@
         {
          "var": "sueldo_ref",
          "op": "multiplica",
-         "valor": "1 + k('PREMIO_MAGISTER')"
+         "valor": "1 + k('PREMIO_MAGISTER', tabla('sies_magister_2026', 'selectiva', 'universidad_id', universidad_destino))"
         },
         {
          "var": "edad",
@@ -820,14 +820,16 @@
       }
      ],
      "fuentes": [
-      "dipres_2026"
+      "dipres_2026",
+      "sies_2026",
+      "demre_paes"
      ],
      "calidad": "mixto"
     },
     {
      "id": "vespertino",
      "nombre": "Estudiar de noche sin dejar la pega",
-     "detalle": "Pagas unos $9 millones y duermes menos dos años.",
+     "detalle": "Pagas el arancel de la universidad que elijas (SIES 2026) y duermes menos dos años.",
      "resultados": [
       {
        "id": "termina",
@@ -843,7 +845,7 @@
         {
          "var": "ahorro",
          "op": "suma",
-         "valor": -9000000
+         "valor": "-(tabla('sies_magister_2026', 'arancel_anual', 'universidad_id', universidad_destino) * tabla('sies_magister_2026', 'anios', 'universidad_id', universidad_destino))"
         },
         {
          "var": "energia",
@@ -853,7 +855,7 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "1 + k('PREMIO_MAGISTER')",
+         "valor": "1 + k('PREMIO_MAGISTER', tabla('sies_magister_2026', 'selectiva', 'universidad_id', universidad_destino))",
          "cuando": "estado == 'empleado'"
         }
        ]
@@ -867,7 +869,7 @@
         {
          "var": "ahorro",
          "op": "suma",
-         "valor": -4000000
+         "valor": "-tabla('sies_magister_2026', 'arancel_anual', 'universidad_id', universidad_destino)"
         },
         {
          "var": "energia",
@@ -879,6 +881,8 @@
      ],
      "fuentes": [
       "dipres_2026",
+      "sies_2026",
+      "demre_paes",
       "equipo"
      ],
      "calidad": "mixto",
@@ -913,11 +917,16 @@
      "fuente": "ine_esi_2025",
      "cifra": "Postgrado gana ~70% más que universitario, sin controlar",
      "uso": "no usar como efecto causal"
+    },
+    {
+     "fuente": "sies_2026",
+     "cifra": "51 universidades con magísteres vigentes; arancel anual mediano entre $2,1 y $8,5 millones; 11 son selectivas",
+     "uso": "costo y prima según la universidad elegida"
     }
    ],
    "calidad": "mixto",
    "en_juego": "postgrado",
-   "creencia_vs_dato": "La correlación simple dice +70%; el estudio causal de DIPRES da cerca de 10% al séptimo año."
+   "creencia_vs_dato": "La correlación simple dice +70%; el estudio causal de DIPRES da cerca de 9% en universidades selectivas y casi cero en las demás."
   },
   {
    "id": "doctorado",
@@ -2281,7 +2290,7 @@
     {
      "id": "si",
      "nombre": "Sí, 55 horas o más",
-     "detalle": "Más chance de ascenso; menos tiempo con tu gente y más riesgo de salud.",
+     "detalle": "Menos tiempo con tu gente y más riesgo de salud. En Chile casi no sube tu chance de ascenso.",
      "resultados": [
       {
        "id": "ano_largo",
@@ -2324,6 +2333,7 @@
      "fuentes": [
       "ine_enut_2023",
       "oms_oit_2021",
+      "ine_esi_panel",
       "equipo"
      ],
      "calidad": "mixto"
@@ -2363,10 +2373,16 @@
      "fuente": "oms_oit_2021",
      "cifra": "ACV +35% y cardiopatía +17% con 55+ horas",
      "uso": "riesgo de salud"
+    },
+    {
+     "fuente": "ine_esi_panel",
+     "cifra": "Quien pasa a 50+ horas con el mismo empleador gana -1,5% al año siguiente (IC95 -10,6% a +7,6%) y no asciende más (+0,6 pp, ee 1,0)",
+     "uso": "ascenso extra por horas"
     }
    ],
    "calidad": "mixto",
-   "en_juego": "horas"
+   "en_juego": "horas",
+   "creencia_vs_dato": "Quedarse hasta tarde parece el camino al ascenso; en el panel de la ESI no sube ni el sueldo ni el cargo."
   },
   {
    "id": "jefatura",

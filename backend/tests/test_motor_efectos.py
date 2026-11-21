@@ -135,7 +135,7 @@ def test_prob_ascenso_derivada_es_la_del_evento_ascenso():
     assert vida(Perfil(nivel=1, tipo_empleador="startup")).e["prob_ascenso"] == pytest.approx(0.13)
     assert vida(Perfil(nivel=1, tipo_empleador="publico")).e["prob_ascenso"] == pytest.approx(0.04)
     assert vida(Perfil(nivel=1), parcial=1).e["prob_ascenso"] == pytest.approx(0.04)
-    assert vida(Perfil(nivel=1), horas=55).e["prob_ascenso"] == pytest.approx(0.15)
+    assert vida(Perfil(nivel=1), horas=55).e["prob_ascenso"] == pytest.approx(0.08 + 0.0064)  # ASCENSO_HORAS: panel ESI
     assert vida(Perfil(nivel=3), marcado=1).e["prob_ascenso"] == pytest.approx(0.01)  # piso del clamp
     assert vida(Perfil(nivel=1, antiguedad=0)).e["prob_ascenso"] == 0.0
     assert vida(Perfil(nivel=4)).e["prob_ascenso"] == 0.0

@@ -8,7 +8,7 @@ elecciones, la partida queda detenida en la decisión pendiente.
 
 from dataclasses import dataclass
 
-from app.sim.motor import gemelos
+from app.sim.motor import empresas, gemelos
 from app.sim.motor.azar import Dados
 from app.sim.motor.motor import FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import Paquete, paquete
@@ -115,7 +115,9 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         "narrativa": narrar(d["id"], contexto, semilla, vida.anio, ocurrencia),
         "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
         "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"), "evidencia": d.get("evidencia", []),
-        "opciones": [{**opcion_a_dict(o), "elecciones_internas": elecciones_internas(vida, o)} for o in falta.opciones],
+        "opciones": [{**opcion_a_dict(o), "elecciones_internas": elecciones_internas(vida, o),
+                      "ejemplo_real": empresas.para_opcion(pq, d["id"], o.id, vida.e, semilla, vida.anio)}
+                     for o in falta.opciones],
         "comparacion": comparar_pendiente(partida, semilla, n_gemelos, parametros),
     }
     return salida

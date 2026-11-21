@@ -1001,6 +1001,27 @@
    "script": "scripts/simulador/internacional.py",
    "advertencia": "No hay fecha de cierre: se usa el estado actual de cohortes de distinta edad, mezclando efecto edad y efecto cohorte (las de 2020-2021 son mucho más grandes). Cierres subregistrados.",
    "filas": 15
+  },
+  {
+   "tabla": "sies_magister_2026",
+   "archivo": "tablas/sies_magister_2026.csv",
+   "descripcion": "Magísteres de cada universidad: arancel anual y duración medianos, cuántos programas tiene y si es selectiva.",
+   "columnas": {
+    "universidad_id": "código SIES de la universidad",
+    "universidad": "nombre de la universidad",
+    "sigla": "sigla, si tiene",
+    "selectiva": "1 si más de la mitad de sus estudiantes está en el 30% superior de la PAES 2024 y 2025 (regla de DIPRES 2026)",
+    "programas": "magísteres vigentes con estudiantes nuevos en 2026",
+    "arancel_anual": "arancel anual mediano de sus magísteres, CLP",
+    "anios": "duración mediana, años",
+    "frac_no_diurna": "fracción de sus magísteres en jornada vespertina, semipresencial o a distancia"
+   },
+   "poblacion": "Universidades con magísteres vigentes y estudiantes nuevos en la oferta SIES 2026",
+   "ponderador": "ninguno",
+   "fuente_id": "sies_2026",
+   "script": "datos_laborales/scripts/modelo/magister_*.py (traído del PR #3)",
+   "advertencia": "Arancel y duración son medianas por universidad, no por programa. La selectividad replica la regla de DIPRES con la PAES de DEMRE.",
+   "filas": 51
   }
  ]
 }

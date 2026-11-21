@@ -33,7 +33,7 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 
 ### Motor del juego (`backend/app/sim/motor`)
 
-El juego corre sobre el paquete de datos de `backend/simulador/` (43 decisiones, 16 eventos, 67 parámetros, 49 tablas). El motor no reescribe esas reglas: las ejecuta. Para cambiar una probabilidad o un efecto se edita el paquete, no el código.
+El juego corre sobre el paquete de datos de `backend/simulador/` (43 decisiones, 16 eventos, 67 parámetros, 50 tablas). El motor no reescribe esas reglas: las ejecuta. Para cambiar una probabilidad o un efecto se edita el paquete, no el código.
 
 | Archivo | Qué hace |
 |---|---|
@@ -45,14 +45,19 @@ El juego corre sobre el paquete de datos de `backend/simulador/` (43 decisiones,
 | `gemelos.py` | 500 gemelos por opción con los mismos dados |
 | `partida.py` | La partida de la persona; no guarda nada, se vuelve a jugar en cada llamada |
 | `validacion.py` | Cohorte de 5.000 personas contra las 37 metas del paquete y el panel ELSOC |
+| `supuestos.py` | Cada parámetro con su calidad (dato, mixto, supuesto), fuente y país |
+| `empresas.py` | Un empleador u oferta real (SII, Get on Board, Y Combinator, empleospublicos.cl) como ejemplo de cada opción de trabajo; no entra a la simulación |
 
-API: `GET /api/juego/catalogo`, `POST /api/juego/dudas`, `POST /api/juego/partida`. Pantalla: `frontend/src/features/juego` (ruta `/`).
+API: `GET /api/juego/catalogo`, `POST /api/juego/dudas`, `POST /api/juego/partida`, `GET /api/juego/supuestos`, `GET /api/juego/validacion?n=1000`. Pantalla: `frontend/src/features/juego` (ruta `/`).
 
 ```bash
 make jugar DUDA=unirse_a_startup   # partida en el terminal
 make comparar DUDA=oferta_externa  # solo la tabla de gemelos de una decisión
 make validar                       # cuántas metas de Chile cuadran
+make supuestos CALIDAD=supuesto    # qué números siguen siendo supuestos del equipo
 ```
+
+Las empresas reales están en `backend/data/empresas/` y se regeneran con `backend/scripts/datos_empresas.py`. Son referencia: la historia de cada carta usa empresas ficticias (`narrativa.py`) para no inventar hechos sobre empresas que existen.
 
 Los supuestos que pone el motor (lo que el paquete no define) están listados en `docs/motor/TICKETS.md`; el resultado de la validación, en `docs/motor/VALIDACION.md`.
 

@@ -14,6 +14,7 @@ El juego (motor del paquete, `app/sim/motor/`):
     python -m app.cli jugar --duda unirse_a_startup --semilla 7 --auto
     python -m app.cli jugar --duda cambiar_de_rubro --elecciones 1:3,2,1 --auto
     python -m app.cli validar
+    python -m app.cli supuestos
 """
 
 import argparse
@@ -909,6 +910,17 @@ def cmd_validar(args: argparse.Namespace) -> str | None:
     return tabla(resultado)
 
 
+def cmd_supuestos(args: argparse.Namespace) -> str:
+    from app.sim.motor import supuestos
+
+    resultado = supuestos.listar()
+    if args.calidad:
+        resultado["parametros"] = [p for p in resultado["parametros"] if p["calidad"] == args.calidad]
+    if args.json:
+        return json.dumps(resultado, ensure_ascii=False, indent=2)
+    return supuestos.texto(resultado, ANCHO)
+
+
 # ── entrada ──────────────────────────────────────────────────────────────────
 
 
@@ -990,6 +1002,11 @@ def _parser() -> argparse.ArgumentParser:
     va.add_argument("--semilla", type=int, default=0, help="semilla de los dados (por defecto 0)")
     va.add_argument("--json", action="store_true", help="imprime el resultado crudo en JSON")
     va.set_defaults(func=cmd_validar)
+
+    su = sub.add_parser("supuestos", help="cada parámetro del motor con su calidad, fuente y país")
+    su.add_argument("--calidad", choices=["dato", "mixto", "supuesto"], help="muestra solo esa calidad")
+    su.add_argument("--json", action="store_true", help="imprime la lista cruda en JSON")
+    su.set_defaults(func=cmd_supuestos)
     return parser
 
 

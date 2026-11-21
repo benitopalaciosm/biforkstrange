@@ -1,4 +1,4 @@
-.PHONY: install back front test perfil simular jugar comparar dudas validar
+.PHONY: install back front test perfil simular jugar comparar dudas validar supuestos
 install:
 	cd backend && uv sync
 	cd frontend && npm install
@@ -40,3 +40,6 @@ dudas:
 	cd backend && uv run python -m app.cli dudas $(PERFIL_JUEGO)
 validar:
 	cd backend && uv run python -m app.cli validar --n $(N) $(if $(SEMILLA),--semilla $(SEMILLA))
+# De dónde sale cada número: make supuestos  (o make supuestos CALIDAD=supuesto)
+supuestos:
+	cd backend && uv run python -m app.cli supuestos $(if $(CALIDAD),--calidad $(CALIDAD))

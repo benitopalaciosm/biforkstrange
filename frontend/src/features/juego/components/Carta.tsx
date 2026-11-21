@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, CheckIcon, Chip, DecisionArt, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars } from "@/shared/ui";
 import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, deCada, minuscula, plata, sinSueldo } from "../textos";
-import type { ContraBase, Eleccion, OpcionComparada, OpcionPendiente, ParametrosComparar, Vista } from "../types";
+import type { ContraBase, EjemploReal, Eleccion, OpcionComparada, OpcionPendiente, ParametrosComparar, Vista } from "../types";
 import { Abanico, BarraPartes, Info, LeyendaNube, NubeGemelos, ProgresoAnios, repartir, type Reparto } from "./graficos";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
@@ -68,11 +68,22 @@ const repartoDe = (o: OpcionComparada): Reparto | null =>
     ? null
     : { mas: o.gana_mas_que_base, menos: o.gana_menos_que_base, igual: o.igual_que_base ?? Math.max(0, 1 - o.gana_mas_que_base - o.gana_menos_que_base) };
 
+/** Un empleador u oferta real de ese tipo, con su fuente. Es referencia: no es la empresa de la historia. */
+function EjemploRealLinea({ ejemplo }: { ejemplo: EjemploReal }) {
+  const quien = ejemplo.cargo ? `${ejemplo.cargo} en ${ejemplo.nombre}` : ejemplo.nombre;
+  return (
+    <span className="vd-opcion-sub jg-ejemplo-real" title={`Fuente: ${ejemplo.fuente}`}>
+      Ejemplo real: {quien} · {ejemplo.detalle} <span className="jg-chico">({ejemplo.fuente})</span>
+    </span>
+  );
+}
+
 /** La opción para elegir: qué es, el veredicto en una frase y el sueldo típico. La simulación va aparte, más abajo. */
 function OpcionConGemelos({
-  o, base, unica, tope, riesgo, selected, onSelect, supuesto, edadFinal, sueldoHoy,
+  o, base, unica, tope, riesgo, selected, onSelect, supuesto, edadFinal, sueldoHoy, ejemplo,
 }: {
   o: OpcionComparada;
+  ejemplo?: EjemploReal | null;
   base: OpcionComparada | undefined;
   /** La otra opción, cuando la carta tiene solo dos: con ella se compara la base. */
   unica: OpcionComparada | undefined;
@@ -97,6 +108,7 @@ function OpcionConGemelos({
         <span className="vd-opcion-titulo">{o.nombre}</span>
         {o.detalle && <span className="vd-opcion-sub">{o.detalle}</span>}
         {supuesto && <span className="vd-opcion-sub">En la simulación vas a: {supuesto}</span>}
+        {ejemplo && <EjemploRealLinea ejemplo={ejemplo} />}
         <span className="jg-veredicto">{veredicto}</span>
       </span>
 
@@ -359,6 +371,7 @@ export function Carta({
               supuesto={supuestoDe(o)}
               edadFinal={edadGemelos}
               sueldoHoy={sueldoHoy}
+              ejemplo={pendiente.opciones.find((x) => x.opcion === o.opcion)?.ejemplo_real}
             />
           ))}
         </div>
@@ -376,7 +389,7 @@ export function Carta({
               id: o.opcion,
               art: <DecisionArt kind={arte(pendiente.categoria)} />,
               title: o.nombre,
-              subtitle: o.detalle || undefined,
+              subtitle: [o.detalle, o.ejemplo_real && `Ejemplo real: ${o.ejemplo_real.nombre}`].filter(Boolean).join(" · ") || undefined,
               tags: [{ label: CALIDAD[o.calidad]?.nombre ?? o.calidad, tone: o.calidad === "supuesto" ? ("minus" as const) : ("default" as const) }],
             }))}
           />

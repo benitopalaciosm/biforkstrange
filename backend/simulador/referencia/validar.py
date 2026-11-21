@@ -156,7 +156,8 @@ def estado_al_azar():
          'anos_en_carrera': R.randint(0, 5), 'anos_en_startup': R.randint(0, 6), 'financia': R.choice(['', 'cae']), 'ingles': R.randint(0, 1), 'isapre': R.randint(0, 1),
          'marcado': R.randint(0, 1), 'validado': 0, 'propietario': R.randint(0, 1), 'primer_grande': R.randint(0, 1), 'oferta_al_titularse': 0, 'ocupacion': R.randint(1, 9),
          'edad_decide_estudios': 18, 'cierra_en': 0,
-         'rubro_destino': R.choice(RUBROS), 'region_destino': R.choice(REGIONES), 'ocupacion_destino': R.randint(1, 9), 'quien_enferma': R.choice(['madre', 'padre'])}
+         'rubro_destino': R.choice(RUBROS), 'region_destino': R.choice(REGIONES), 'ocupacion_destino': R.randint(1, 9), 'quien_enferma': R.choice(['madre', 'padre']),
+         'universidad_destino': R.choice([f['universidad_id'] for f in pq.filas('sies_magister_2026')])}
     for v in EST.values():
         if v['tipo'] == 'modificador':
             e.setdefault(v['nombre'], 1 if v['inicio'] == '1' else 0)

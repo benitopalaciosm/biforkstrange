@@ -2,12 +2,13 @@
 (perfil, semilla, duda y elecciones) y el servidor la vuelve a jugar."""
 
 from datetime import date
+from functools import lru_cache
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.juego import DudasIn, PartidaIn, TextoPerfilIn
 from app.services import perfil_ia
-from app.sim.motor import partida
+from app.sim.motor import partida, supuestos, validacion
 from app.sim.motor.paquete import paquete
 from app.sim.motor.perfil import NIVELES
 
@@ -31,6 +32,28 @@ def catalogo():
             for f in pq.filas("mifuturo_carreras")
         ],
     }
+
+
+@router.get("/supuestos")
+def supuestos_del_motor():
+    """Cada parámetro del motor con su calidad (dato, mixto o supuesto), su fuente y su país."""
+    return supuestos.listar()
+
+
+@lru_cache(maxsize=4)
+def _validacion(n: int, semilla: int) -> dict:
+    resultado = validacion.validar(n, semilla, procesos=1)  # sin procesos hijos dentro del servidor
+    return {k: v for k, v in resultado.items() if k not in ("fallas", "decisiones")}
+
+
+@router.get("/validacion")
+def validacion_contra_chile(n: int = Query(1000, ge=200, le=5000), semilla: int = Query(0, ge=0)):
+    """Una cohorte simulada desde los 18 años comparada con las metas de Chile (ESI, EPS, ENE) y con ELSOC.
+
+    Cada meta dice si es insumo del motor, calibrada o validación de verdad (no entró al motor).
+    La primera llamada simula la cohorte (unos segundos con n=1000); después queda en memoria.
+    """
+    return _validacion(n, semilla)
 
 
 @router.post("/dudas")

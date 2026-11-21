@@ -1,0 +1,26 @@
+{
+ "descripcion": "Empleadores y ofertas reales. Se regeneran con backend/scripts/datos_empresas.py desde los archivos crudos.",
+ "archivos": {
+  "concursos_estado.csv": {
+   "fuente": "Servicio Civil, convocatorias de empleospublicos.cl 2025-2026",
+   "url": "https://www.empleospublicos.cl",
+   "filas": 240,
+   "nota": "Muestra al azar de 80 concursos por estamento con renta publicada."
+  },
+  "startups": {
+   "fuente": "Directorio de Y Combinator, startups con sede u operación en Chile",
+   "url": "https://www.ycombinator.com/companies",
+   "nota": "Tabla yc_chile del paquete simulador."
+  },
+  "sii_empleadores.csv": {
+   "fuente": "SII, Nómina de empresas personas jurídicas, año comercial 2024",
+   "url": "https://www.sii.cl/sobre_el_sii/nominapersonasjuridicas.html",
+   "nota": "Empresas activas. Grandes: tramo de ventas 10 a 13 y 200 o más trabajadores, las 40 con más trabajadores de cada rubro. Pymes: tramo 5 a 9 y 10 a 199 trabajadores, 100 por rubro."
+  },
+  "getonbrd_ofertas.csv": {
+   "fuente": "Get on Board, API pública v0, avisos vigentes con sueldo publicado (21 de noviembre de 2026)",
+   "url": "https://www.getonbrd.com/api-doc.html",
+   "nota": "Avisos en Chile o 100% remotos, con empresa, cargo, seniority, sueldo bruto mensual en USD y postulantes."
+  }
+ }
+}
