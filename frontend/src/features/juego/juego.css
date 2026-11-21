@@ -1,0 +1,90 @@
+/* Juego: lo que se compone encima del kit (clases vd-*) sin tocarlo. Usa sus variables de color. */
+
+/* La carta necesita ancho para poner las opciones lado a lado en escritorio */
+@media (min-width: 760px) {
+  .vd-pantalla.jg-ancha { max-width: 940px; }
+  .jg-ancha .jg-columna { max-width: 560px; }
+}
+
+/* Campos de texto y listas del perfil */
+.jg-campo { width: 100%; min-height: 48px; padding: 0 14px; border: 2px solid var(--tinta); border-radius: 14px; background: var(--papel); color: var(--tinta); font: 500 16px/22px var(--font); }
+.jg-campo:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+select.jg-campo { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--tinta) 50%), linear-gradient(135deg, var(--tinta) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 36px; }
+.jg-etiqueta { font: 600 13px/16px var(--font); }
+.jg-resultados { display: flex; flex-direction: column; border: 1.5px solid var(--linea); border-radius: 14px; overflow: hidden; background: var(--papel); }
+.jg-resultados button { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border: 0; border-top: 1.5px solid var(--linea); background: transparent; color: var(--tinta); font: 500 15px/20px var(--font); text-align: left; cursor: pointer; }
+.jg-resultados button:first-child { border-top: 0; }
+.jg-resultados button:hover { background: var(--niebla); }
+.jg-resultados small { font: 400 12px/16px var(--font); color: var(--suave); }
+
+/* Opciones lado a lado */
+.jg-opciones { display: grid; grid-template-columns: repeat(var(--jg-n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; padding: 10px 8px 6px 0; }
+.jg-opciones[data-cargando="true"] { opacity: .55; transition: opacity .2s ease; }
+@media (max-width: 759px) {
+  /* En teléfono caben dos; con tres o cuatro se desliza hacia el lado */
+  .jg-opciones[data-muchas="true"] { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(148px, 42%); overflow-x: auto; scroll-snap-type: x proximity; margin-right: -20px; padding-right: 20px; }
+  .jg-opciones[data-muchas="true"] > * { scroll-snap-align: start; }
+}
+.vd-opcion.jg-opcion { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 12px; }
+.jg-opcion-cabeza { display: flex; flex-direction: column; gap: 4px; }
+.jg-opcion-bloque { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; border-top: 1.5px solid var(--linea); }
+.jg-opcion-num { font: 700 22px/26px var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.jg-chico { font: 400 12px/16px var(--font); color: var(--suave); }
+.jg-fuerte { font: 600 14px/18px var(--font); color: var(--tinta); }
+.jg-frase { font: 500 13px/18px var(--font); color: var(--tinta); }
+.jg-destacado { padding: 8px 10px; border-radius: 10px; background: var(--sol); color: var(--sobre-sol); font: 600 13px/18px var(--font); }
+.jg-extremos { display: flex; justify-content: space-between; gap: 6px; font: 500 11px/14px var(--mono); color: var(--suave); font-variant-numeric: tabular-nums; }
+.jg-pista-tu { background: transparent; }
+.jg-pista-tu span { position: absolute; top: -1px; width: 14px; height: 14px; margin-left: -7px; border: 2px solid var(--tinta); border-radius: 50%; background: var(--sol); }
+
+/* Tabla del porqué */
+.jg-tabla { width: 100%; border-collapse: collapse; font: 400 14px/20px var(--font); }
+.jg-tabla th { padding: 0 8px 6px 0; text-align: left; vertical-align: bottom; font: 500 11px/14px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+.jg-tabla td { padding: 8px 8px 8px 0; border-top: 1.5px solid var(--linea); vertical-align: top; }
+.jg-tabla td:not(:first-child), .jg-tabla th:not(:first-child) { white-space: nowrap; text-align: right; padding-right: 0; padding-left: 8px; font-variant-numeric: tabular-nums; }
+
+/* Filas "nombre: valor" de cómo quedaste */
+.jg-datos { display: flex; flex-direction: column; }
+.jg-dato { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1.5px solid var(--linea); }
+.jg-dato:first-child { border-top: 0; padding-top: 0; }
+.jg-dato:last-child { padding-bottom: 0; }
+.jg-dato > span:first-child { font: 600 13px/18px var(--font); }
+.jg-dato > span:last-child { font: 500 14px/18px var(--font); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Noticia: la notificación del kit, pero el texto se lee completo */
+.jg-noti { align-items: flex-start; }
+.jg-noti .vd-noti-msg { white-space: normal; }
+.jg-noti .vd-noti-hora { text-align: right; max-width: 92px; }
+
+/* Línea de tiempo del cierre: lo que pasó, no lo que se dejó pasar (sin tachar) */
+.jg-vivido .vd-paso-que { text-decoration: none; color: var(--tinta); }
+.jg-vivido .vd-paso::before { border-style: solid; border-color: var(--tinta); }
+.jg-vivido .vd-tren { display: none; }
+
+/* Carga: los gemelos viviendo */
+.jg-cargando { display: flex; align-items: center; gap: 10px; font: 500 14px/20px var(--font); color: var(--suave); }
+.jg-cargando i { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--acento); animation: jg-pulso 1s ease-in-out infinite alternate; }
+@keyframes jg-pulso { from { transform: scale(.6); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+.jg-error { padding: 12px 14px; border: 2px dashed var(--tinta); border-radius: 14px; font: 500 14px/20px var(--font); }
+.jg-enlaces { display: flex; gap: 16px; justify-content: center; }
+.jg-enlaces a { color: var(--suave); }
+/* Pie con la acción principal siempre a la vista en pantallas largas */
+.jg-pie-fijo { position: sticky; bottom: 0; z-index: 2; margin-top: auto; padding: 12px 0 16px; margin-bottom: -16px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to bottom, transparent, var(--papel) 14px); }
+@media (min-width: 760px) { .jg-ancha .jg-pie-fijo > * { max-width: 420px; width: 100%; margin-left: auto; margin-right: auto; } }
+/* Fondo detrás de la columna de la pantalla, como en /ui */
+.jg-fondo { min-height: 100dvh; background: var(--niebla); }
+.jg-vivido .vd-paso { padding: 9px 0; }
+/* Cinco o seis opciones lado a lado (la cesantía) */
+@media (min-width: 760px) { .vd-pantalla.jg-muy-ancha { max-width: 1240px; } }
+.jg-tabla td:last-child:not(:nth-child(2)), .jg-tabla th:last-child:not(:nth-child(2)) { white-space: normal; }
+/* Tu trayectoria: texto para que Claude llene el perfil */
+textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; font: 400 15px/22px var(--font); }
+.jg-plegable { border: 1.5px solid var(--linea); border-radius: 14px; background: var(--papel); }
+.jg-plegable summary { padding: 10px 14px; font: 600 14px/20px var(--font); cursor: pointer; }
+.jg-plegable summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; border-radius: 12px; }
+.jg-plegable ul { margin: 0; padding: 0 14px 12px 32px; display: flex; flex-direction: column; gap: 6px; font: 400 14px/20px var(--font); color: var(--media); }
+.jg-revisa { align-self: flex-start; white-space: normal; height: auto; min-height: 22px; padding-top: 3px; padding-bottom: 3px; line-height: 1.3; }
+.jg-marcado { padding: 10px 12px; margin: 0 -12px; border-radius: 14px; background: color-mix(in srgb, var(--sol) 22%, transparent); }
+
+/* La historia de la carta: quién te escribe y desde qué empresa */
+.jg-situacion { font-size: 17px; line-height: 25px; color: var(--tinta, inherit); border-left: 3px solid var(--acento); padding-left: 12px; }

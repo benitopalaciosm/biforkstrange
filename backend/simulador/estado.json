@@ -1,0 +1,1055 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Variables de estado del gemelo. tipo: entero, numero, categoria, bool, eleccion (la elige el jugador dentro de una opción) o modificador (la mueven los efectos y el simulador la aplica en sus fórmulas). inicio \"deriva\" = se recalcula cada año.",
+ "variables": [
+  {
+   "nombre": "edad",
+   "tipo": "entero",
+   "dominio": [
+    15,
+    60
+   ],
+   "unidad": "años",
+   "descripcion": "Edad cumplida del gemelo.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "sexo",
+   "tipo": "categoria",
+   "dominio": [
+    "h",
+    "m"
+   ],
+   "unidad": "",
+   "descripcion": "Sexo registrado: h hombre, m mujer.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "edu",
+   "tipo": "categoria",
+   "dominio": [
+    "media",
+    "tecnica",
+    "universitaria",
+    "postgrado"
+   ],
+   "unidad": "",
+   "descripcion": "Nivel educacional más alto terminado.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "estado",
+   "tipo": "categoria",
+   "dominio": [
+    "estudiando",
+    "buscando",
+    "empleado",
+    "independiente",
+    "fundador",
+    "inactivo"
+   ],
+   "unidad": "",
+   "descripcion": "Situación principal del año.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "primer_empleo",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 mientras no ha tenido un empleo estable.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "carrera_id",
+   "tipo": "entero",
+   "dominio": [
+    -1,
+    251
+   ],
+   "unidad": "",
+   "descripcion": "Fila de mifuturo_carreras; -1 si no estudió educación superior.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "area",
+   "tipo": "categoria",
+   "dominio": [
+    "Administración y Comercio",
+    "Agropecuaria",
+    "Arte y Arquitectura",
+    "Ciencias Básicas",
+    "Ciencias Sociales",
+    "Derecho",
+    "Educación",
+    "Humanidades",
+    "Salud",
+    "Tecnología",
+    ""
+   ],
+   "unidad": "",
+   "descripcion": "Área de la carrera.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "tipo_institucion",
+   "tipo": "categoria",
+   "dominio": [
+    "U",
+    "IP",
+    "CFT",
+    ""
+   ],
+   "unidad": "",
+   "descripcion": "Tipo de institución de la carrera.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "semestres_restantes",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    16
+   ],
+   "unidad": "semestres",
+   "descripcion": "Lo que falta para titularse si está estudiando.",
+   "inicio": "tabla mifuturo_carreras.duracion_real_semestres"
+  },
+  {
+   "nombre": "anos_titulado",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    40
+   ],
+   "unidad": "años",
+   "descripcion": "Años desde que terminó su último estudio.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "tipo_empleador",
+   "tipo": "categoria",
+   "dominio": [
+    "grande",
+    "pyme",
+    "startup",
+    "publico",
+    "extranjero",
+    ""
+   ],
+   "unidad": "",
+   "descripcion": "Tipo de empleador actual.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "rubro",
+   "tipo": "categoria",
+   "dominio": [
+    "Minería",
+    "Finanzas y seguros",
+    "Información y comunicaciones",
+    "Comercio",
+    "Salud",
+    "Enseñanza",
+    "Servicios profesionales",
+    "Construcción",
+    "Industria manufacturera",
+    "Transporte",
+    "Agricultura y pesca",
+    "Hoteles y restaurantes",
+    "Artes y entretención",
+    "Servicios administrativos",
+    "Administración pública",
+    "Otros servicios",
+    ""
+   ],
+   "unidad": "",
+   "descripcion": "Rubro del empleador.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "nivel",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    4
+   ],
+   "unidad": "",
+   "descripcion": "0 junior, 1 semi senior, 2 senior, 3 jefatura, 4 gerencia.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "sueldo",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    30000000
+   ],
+   "unidad": "CLP líquidos al mes",
+   "descripcion": "Ingreso del trabajo actual; 0 si no trabaja.",
+   "inicio": "perfil o tabla esi_perfil_edad_edu"
+  },
+  {
+   "nombre": "sueldo_ref",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    30000000
+   ],
+   "unidad": "CLP líquidos al mes",
+   "descripcion": "Último sueldo; sirve de referencia al volver a trabajar.",
+   "inicio": "igual a sueldo"
+  },
+  {
+   "nombre": "antiguedad",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    40
+   ],
+   "unidad": "años",
+   "descripcion": "Años en el empleador actual.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "meses_cesante",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    120
+   ],
+   "unidad": "meses",
+   "descripcion": "Meses seguidos buscando trabajo.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "hueco",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si viene de una pausa elegida (sabático, cuidado) en los últimos 2 años.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "horas",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    80
+   ],
+   "unidad": "horas por semana",
+   "descripcion": "Horas habituales de trabajo.",
+   "inicio": "44"
+  },
+  {
+   "nombre": "parcial",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si trabaja media jornada.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "remoto",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si trabaja remoto o híbrido.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "formal",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si cotiza (empleo formal).",
+   "inicio": "1"
+  },
+  {
+   "nombre": "pais",
+   "tipo": "categoria",
+   "dominio": [
+    "chile",
+    "afuera"
+   ],
+   "unidad": "",
+   "descripcion": "Dónde vive y trabaja.",
+   "inicio": "chile"
+  },
+  {
+   "nombre": "region",
+   "tipo": "categoria",
+   "dominio": [
+    "rm",
+    "otra"
+   ],
+   "unidad": "",
+   "descripcion": "Región Metropolitana u otra región.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "pareja",
+   "tipo": "categoria",
+   "dominio": [
+    "no",
+    "pololeo",
+    "convive",
+    "casado"
+   ],
+   "unidad": "",
+   "descripcion": "Situación de pareja.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "hijos",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    6
+   ],
+   "unidad": "hijos",
+   "descripcion": "Hijos.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "edad_hijo_menor",
+   "tipo": "entero",
+   "dominio": [
+    -1,
+    40
+   ],
+   "unidad": "años",
+   "descripcion": "-1 si no tiene hijos.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "ahorro",
+   "tipo": "numero",
+   "dominio": [
+    -100000000,
+    2000000000
+   ],
+   "unidad": "CLP",
+   "descripcion": "Patrimonio líquido neto (ahorro menos deudas de consumo).",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "deuda_estudios",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    60000000
+   ],
+   "unidad": "CLP",
+   "descripcion": "Saldo de crédito para estudios (CAE u otro).",
+   "inicio": "0"
+  },
+  {
+   "nombre": "animo",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Satisfacción con la vida; 1 punto de ELSOC s01 (1-5) = 25 puntos.",
+   "inicio": "64"
+  },
+  {
+   "nombre": "energia",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Cansancio acumulado; bajo 25 hay riesgo de licencia.",
+   "inicio": "70"
+  },
+  {
+   "nombre": "salud",
+   "tipo": "categoria",
+   "dominio": [
+    "bien",
+    "licencia",
+    "cancer",
+    "cronica"
+   ],
+   "unidad": "",
+   "descripcion": "Estado de salud del año.",
+   "inicio": "bien"
+  },
+  {
+   "nombre": "red",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Contactos profesionales.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "skill",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Oficio acumulado.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "riesgo",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Tolerancia al riesgo del gemelo; mueve qué elige cuando juega solo.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "ambicion",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    100
+   ],
+   "unidad": "puntos",
+   "descripcion": "Ambición de carrera del gemelo.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "usa_ia",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si aprendió a trabajar con IA.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "empresa_anos",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    30
+   ],
+   "unidad": "años",
+   "descripcion": "Años de vida de su empresa si es fundador.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "empresa_fondos",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si su empresa levantó capital.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "madre_edad",
+   "tipo": "entero",
+   "dominio": [
+    -1,
+    110
+   ],
+   "unidad": "años",
+   "descripcion": "-1 si murió.",
+   "inicio": "edad + edad de la madre al tenerlo (ine_vitales)"
+  },
+  {
+   "nombre": "padre_edad",
+   "tipo": "entero",
+   "dominio": [
+    -1,
+    110
+   ],
+   "unidad": "años",
+   "descripcion": "-1 si murió.",
+   "inicio": "edad de la madre + 2,5"
+  },
+  {
+   "nombre": "familiar_enfermo",
+   "tipo": "categoria",
+   "dominio": [
+    "",
+    "madre",
+    "padre",
+    "abuela"
+   ],
+   "unidad": "",
+   "descripcion": "Familiar con enfermedad grave que necesita cuidado.",
+   "inicio": "''"
+  },
+  {
+   "nombre": "recesion",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si el país está en recesión este año.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "mujer",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: sexo == 'm'.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "banda3",
+   "tipo": "categoria",
+   "dominio": [
+    "18-29",
+    "30-44",
+    "45-59"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: tramos de la EPS.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "banda7",
+   "tipo": "categoria",
+   "dominio": [
+    "18-24",
+    "25-29",
+    "30-34",
+    "35-39",
+    "40-44",
+    "45-49",
+    "50-54"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: tramos de la ESI.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "banda5",
+   "tipo": "categoria",
+   "dominio": [
+    "15-19",
+    "20-24",
+    "25-29",
+    "30-34",
+    "35-39",
+    "40-44",
+    "45-49"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: quinquenios de estadísticas vitales e IARC.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "percentil",
+   "tipo": "numero",
+   "dominio": [
+    1,
+    99
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: percentil del sueldo dentro de su edad y educación (esi_perfil_edad_edu).",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "sexo_txt",
+   "tipo": "categoria",
+   "dominio": [
+    "hombre",
+    "mujer"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: etiqueta de sexo de las tablas ESI.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "edu_esi",
+   "tipo": "categoria",
+   "dominio": [
+    "media_o_menos",
+    "tecnica",
+    "universitaria",
+    "postgrado"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: etiqueta de educación de las tablas ESI.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "exposicion_ia",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: aplicabilidad de IA del área de la carrera (mifuturo_carreras.exposicion_ia_area); 0,143 sin carrera.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "estamento",
+   "tipo": "categoria",
+   "dominio": [
+    "Administrativos",
+    "Técnicos",
+    "Profesionales"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: media → Administrativos, técnica → Técnicos, universitaria o postgrado → Profesionales.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "seniority",
+   "tipo": "categoria",
+   "dominio": [
+    "Junior",
+    "Semi Senior",
+    "Senior",
+    "Expert"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: nivel 0 Junior, 1 Semi Senior, 2 Senior, 3-4 Expert.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "region_nombre",
+   "tipo": "categoria",
+   "dominio": [
+    "Metropolitana",
+    "Valparaíso",
+    "Biobío",
+    "Antofagasta"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: 'Metropolitana' si region == 'rm'; si no, la región del perfil (Valparaíso por omisión).",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "quintil",
+   "tipo": "categoria",
+   "dominio": [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V"
+   ],
+   "unidad": "",
+   "descripcion": "Deriva: quintil del hogar según percentil del sueldo.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "prob_ascenso",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    0.4
+   ],
+   "unidad": "probabilidad",
+   "descripcion": "Deriva: probabilidad de ascenso del año (evento ascenso).",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "crecimiento_esi",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    0.06
+   ],
+   "unidad": "tasa",
+   "descripcion": "Deriva: alza anual según el perfil por edad de esi_perfil_edad_edu (mediana de la banda siguiente sobre la actual, anualizada).",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "crecimiento_carrera",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    0.2
+   ],
+   "unidad": "tasa",
+   "descripcion": "Deriva: alza anual del sueldo de la carrera entre los años 1 y 5 de titulado (mifuturo_carreras).",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "anos_en_carrera",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    10
+   ],
+   "unidad": "años",
+   "descripcion": "Años cursados de la carrera actual.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "anos_en_startup",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    20
+   ],
+   "unidad": "años",
+   "descripcion": "Años en la startup actual.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "financia",
+   "tipo": "categoria",
+   "dominio": [
+    "",
+    "gratuidad",
+    "cae",
+    "familia"
+   ],
+   "unidad": "",
+   "descripcion": "Cómo paga sus estudios.",
+   "inicio": "''"
+  },
+  {
+   "nombre": "ingles",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si trabaja en inglés.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "isapre",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si su salud es isapre; 0 Fonasa.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "marcado",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si su jefatura lo tiene mal evaluado (contraoferta fallida, licencia).",
+   "inicio": "0"
+  },
+  {
+   "nombre": "validado",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si probó su emprendimiento en paralelo con clientes.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "propietario",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si tiene vivienda propia.",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "primer_grande",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si su primer empleador fue una empresa grande.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "oferta_al_titularse",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si la práctica le dejó una oferta.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "pareja_previa",
+   "tipo": "categoria",
+   "dominio": [
+    "no",
+    "pololeo",
+    "convive",
+    "casado"
+   ],
+   "unidad": "",
+   "descripcion": "Situación de pareja al inicio del año.",
+   "inicio": "deriva"
+  },
+  {
+   "nombre": "ocupacion",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    9
+   ],
+   "unidad": "",
+   "descripcion": "Gran grupo CIUO-08/ISCO a 1 dígito (0 Fuerzas Armadas, 1 directores ... 9 elementales).",
+   "inicio": "perfil"
+  },
+  {
+   "nombre": "edad_decide_estudios",
+   "tipo": "entero",
+   "dominio": [
+    18,
+    30
+   ],
+   "unidad": "años",
+   "descripcion": "Edad en que vuelve a decidir qué estudiar tras una pausa.",
+   "inicio": "18"
+  },
+  {
+   "nombre": "cierra_en",
+   "tipo": "entero",
+   "dominio": [
+    0,
+    10
+   ],
+   "unidad": "años",
+   "descripcion": "Años que le quedan a la startup antes de cerrar, si se sorteó el cierre.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "rubro_destino",
+   "tipo": "eleccion",
+   "dominio": [],
+   "unidad": "",
+   "descripcion": "Rubro al que se quiere cambiar (lo elige el jugador).",
+   "inicio": "eleccion"
+  },
+  {
+   "nombre": "region_destino",
+   "tipo": "eleccion",
+   "dominio": [],
+   "unidad": "",
+   "descripcion": "Región a la que se muda (lo elige el jugador).",
+   "inicio": "eleccion"
+  },
+  {
+   "nombre": "ocupacion_destino",
+   "tipo": "eleccion",
+   "dominio": [],
+   "unidad": "",
+   "descripcion": "Ocupación a la que quiere cambiar (lo elige el jugador).",
+   "inicio": "eleccion"
+  },
+  {
+   "nombre": "quien_enferma",
+   "tipo": "eleccion",
+   "dominio": [
+    "madre",
+    "padre"
+   ],
+   "unidad": "",
+   "descripcion": "Lo sortea el evento enferma_familiar en proporción al riesgo de cada uno.",
+   "inicio": "eleccion"
+  },
+  {
+   "nombre": "tiempo_con_tu_gente",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    2
+   ],
+   "unidad": "multiplicador",
+   "descripcion": "Multiplica el tiempo con familia y amigos (indicador de vida personal).",
+   "inicio": "1"
+  },
+  {
+   "nombre": "riesgo_acv",
+   "tipo": "modificador",
+   "dominio": [
+    1,
+    2
+   ],
+   "unidad": "riesgo relativo",
+   "descripcion": "Multiplica el riesgo de un accidente cerebrovascular.",
+   "inicio": "1"
+  },
+  {
+   "nombre": "prob_ascenso_extra",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    0.2
+   ],
+   "unidad": "puntos",
+   "descripcion": "Se suma a la probabilidad de ascenso del año.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "p_renuncia",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    2
+   ],
+   "unidad": "multiplicador",
+   "descripcion": "Multiplica la probabilidad de renunciar.",
+   "inicio": "1"
+  },
+  {
+   "nombre": "p_encontrar",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    2
+   ],
+   "unidad": "multiplicador",
+   "descripcion": "Multiplica la probabilidad de encontrar trabajo.",
+   "inicio": "1"
+  },
+  {
+   "nombre": "aprendizaje",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    2
+   ],
+   "unidad": "multiplicador",
+   "descripcion": "Multiplica cuánto skill gana por año trabajado.",
+   "inicio": "1"
+  },
+  {
+   "nombre": "deja_de_trabajar",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "Si queda en 1, el simulador pasa a estado inactivo al cierre del año.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "horas_cuidado_dia",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    12
+   ],
+   "unidad": "horas por día",
+   "descripcion": "Horas de cuidado no remunerado.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "gasto_mensual",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    10000000
+   ],
+   "unidad": "CLP",
+   "descripcion": "Gasto fijo del hogar; se descuenta del ahorro.",
+   "inicio": "epf_quintiles.gasto_hogar del quintil"
+  },
+  {
+   "nombre": "tasa_ahorro",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    0.5
+   ],
+   "unidad": "fracción",
+   "descripcion": "Parte del sueldo que ahorra.",
+   "inicio": "TASA_AHORRO según percentil"
+  },
+  {
+   "nombre": "acompana",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "fracción",
+   "descripcion": "Qué parte del proceso de enfermedad del familiar acompaña.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "luto_madre",
+   "tipo": "modificador",
+   "dominio": [
+    -1,
+    10
+   ],
+   "unidad": "años",
+   "descripcion": "Años desde la muerte de la madre (-1 si vive); el simulador aplica luto() cada año.",
+   "inicio": "-1"
+  },
+  {
+   "nombre": "luto_padre",
+   "tipo": "modificador",
+   "dominio": [
+    -1,
+    10
+   ],
+   "unidad": "años",
+   "descripcion": "Años desde la muerte del padre.",
+   "inicio": "-1"
+  },
+  {
+   "nombre": "alza_extra_anual",
+   "tipo": "modificador",
+   "dominio": [
+    0,
+    0.05
+   ],
+   "unidad": "tasa",
+   "descripcion": "Se suma al alza anual del sueldo (recuperación tras titularse en recesión).",
+   "inicio": "0"
+  }
+ ]
+}

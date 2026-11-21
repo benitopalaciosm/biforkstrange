@@ -1,0 +1,485 @@
+origen,origen_nombre,destino,destino_nombre,prob,n,n_origen
+11,Management Occupations,11,Management Occupations,0.3524,4028058,11430839
+11,Management Occupations,13,Business and Financial Operations Occupations,0.116,1326313,11430839
+11,Management Occupations,15,Computer and Mathematical Occupations,0.0691,789805,11430839
+11,Management Occupations,17,Architecture and Engineering Occupations,0.0202,230400,11430839
+11,Management Occupations,19,"Life, Physical, and Social Science Occupations",0.008,91697,11430839
+11,Management Occupations,21,Community and Social Service Occupations,0.0178,203367,11430839
+11,Management Occupations,23,Legal Occupations,0.0108,123491,11430839
+11,Management Occupations,25,"Education, Training, and Library Occupations",0.0603,689496,11430839
+11,Management Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0356,406539,11430839
+11,Management Occupations,29,Healthcare Practitioners and Technical Occupations,0.0268,306390,11430839
+11,Management Occupations,31,Healthcare Support Occupations,0.0053,61033,11430839
+11,Management Occupations,33,Protective Service Occupations,0.014,159624,11430839
+11,Management Occupations,35,Food Preparation and Serving Related Occupations,0.02,228715,11430839
+11,Management Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0025,28964,11430839
+11,Management Occupations,39,Personal Care and Service Occupations,0.0102,116554,11430839
+11,Management Occupations,41,Sales and Related Occupations,0.0886,1012923,11430839
+11,Management Occupations,43,Office and Administrative Support Occupations,0.0745,851430,11430839
+11,Management Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0004,5075,11430839
+11,Management Occupations,47,Construction and Extraction Occupations,0.0056,64346,11430839
+11,Management Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0115,131152,11430839
+11,Management Occupations,51,Production Occupations,0.0169,193611,11430839
+11,Management Occupations,53,Transportation and Material Moving Occupations,0.0334,381857,11430839
+13,Business and Financial Operations Occupations,11,Management Occupations,0.3303,1455691,4407831
+13,Business and Financial Operations Occupations,13,Business and Financial Operations Occupations,0.1262,556128,4407831
+13,Business and Financial Operations Occupations,15,Computer and Mathematical Occupations,0.0839,369952,4407831
+13,Business and Financial Operations Occupations,17,Architecture and Engineering Occupations,0.0122,53877,4407831
+13,Business and Financial Operations Occupations,19,"Life, Physical, and Social Science Occupations",0.008,35143,4407831
+13,Business and Financial Operations Occupations,21,Community and Social Service Occupations,0.017,75051,4407831
+13,Business and Financial Operations Occupations,23,Legal Occupations,0.0108,47822,4407831
+13,Business and Financial Operations Occupations,25,"Education, Training, and Library Occupations",0.0622,274191,4407831
+13,Business and Financial Operations Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0396,174663,4407831
+13,Business and Financial Operations Occupations,29,Healthcare Practitioners and Technical Occupations,0.0195,86128,4407831
+13,Business and Financial Operations Occupations,31,Healthcare Support Occupations,0.005,21838,4407831
+13,Business and Financial Operations Occupations,33,Protective Service Occupations,0.0124,54579,4407831
+13,Business and Financial Operations Occupations,35,Food Preparation and Serving Related Occupations,0.015,66229,4407831
+13,Business and Financial Operations Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0014,6320,4407831
+13,Business and Financial Operations Occupations,39,Personal Care and Service Occupations,0.0106,46601,4407831
+13,Business and Financial Operations Occupations,41,Sales and Related Occupations,0.0865,381188,4407831
+13,Business and Financial Operations Occupations,43,Office and Administrative Support Occupations,0.1143,503922,4407831
+13,Business and Financial Operations Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0003,1207,4407831
+13,Business and Financial Operations Occupations,47,Construction and Extraction Occupations,0.0028,12228,4407831
+13,Business and Financial Operations Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0066,29111,4407831
+13,Business and Financial Operations Occupations,51,Production Occupations,0.011,48676,4407831
+13,Business and Financial Operations Occupations,53,Transportation and Material Moving Occupations,0.0243,107289,4407831
+15,Computer and Mathematical Occupations,11,Management Occupations,0.2231,1001777,4489924
+15,Computer and Mathematical Occupations,13,Business and Financial Operations Occupations,0.0997,447691,4489924
+15,Computer and Mathematical Occupations,15,Computer and Mathematical Occupations,0.3029,1359792,4489924
+15,Computer and Mathematical Occupations,17,Architecture and Engineering Occupations,0.043,193115,4489924
+15,Computer and Mathematical Occupations,19,"Life, Physical, and Social Science Occupations",0.0139,62439,4489924
+15,Computer and Mathematical Occupations,21,Community and Social Service Occupations,0.0089,39851,4489924
+15,Computer and Mathematical Occupations,23,Legal Occupations,0.005,22646,4489924
+15,Computer and Mathematical Occupations,25,"Education, Training, and Library Occupations",0.0656,294582,4489924
+15,Computer and Mathematical Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0394,176695,4489924
+15,Computer and Mathematical Occupations,29,Healthcare Practitioners and Technical Occupations,0.0171,76764,4489924
+15,Computer and Mathematical Occupations,31,Healthcare Support Occupations,0.003,13457,4489924
+15,Computer and Mathematical Occupations,33,Protective Service Occupations,0.0101,45485,4489924
+15,Computer and Mathematical Occupations,35,Food Preparation and Serving Related Occupations,0.0108,48695,4489924
+15,Computer and Mathematical Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.001,4648,4489924
+15,Computer and Mathematical Occupations,39,Personal Care and Service Occupations,0.0058,26086,4489924
+15,Computer and Mathematical Occupations,41,Sales and Related Occupations,0.0404,181523,4489924
+15,Computer and Mathematical Occupations,43,Office and Administrative Support Occupations,0.0536,240729,4489924
+15,Computer and Mathematical Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0003,1369,4489924
+15,Computer and Mathematical Occupations,47,Construction and Extraction Occupations,0.0032,14297,4489924
+15,Computer and Mathematical Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0165,74217,4489924
+15,Computer and Mathematical Occupations,51,Production Occupations,0.0132,59400,4489924
+15,Computer and Mathematical Occupations,53,Transportation and Material Moving Occupations,0.0233,104669,4489924
+17,Architecture and Engineering Occupations,11,Management Occupations,0.2415,260566,1079171
+17,Architecture and Engineering Occupations,13,Business and Financial Operations Occupations,0.0554,59772,1079171
+17,Architecture and Engineering Occupations,15,Computer and Mathematical Occupations,0.1556,167915,1079171
+17,Architecture and Engineering Occupations,17,Architecture and Engineering Occupations,0.1913,206457,1079171
+17,Architecture and Engineering Occupations,19,"Life, Physical, and Social Science Occupations",0.013,14009,1079171
+17,Architecture and Engineering Occupations,21,Community and Social Service Occupations,0.0047,5033,1079171
+17,Architecture and Engineering Occupations,23,Legal Occupations,0.0027,2920,1079171
+17,Architecture and Engineering Occupations,25,"Education, Training, and Library Occupations",0.0389,42033,1079171
+17,Architecture and Engineering Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0415,44772,1079171
+17,Architecture and Engineering Occupations,29,Healthcare Practitioners and Technical Occupations,0.0163,17629,1079171
+17,Architecture and Engineering Occupations,31,Healthcare Support Occupations,0.0032,3427,1079171
+17,Architecture and Engineering Occupations,33,Protective Service Occupations,0.0113,12153,1079171
+17,Architecture and Engineering Occupations,35,Food Preparation and Serving Related Occupations,0.0117,12611,1079171
+17,Architecture and Engineering Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0033,3614,1079171
+17,Architecture and Engineering Occupations,39,Personal Care and Service Occupations,0.0052,5580,1079171
+17,Architecture and Engineering Occupations,41,Sales and Related Occupations,0.0338,36454,1079171
+17,Architecture and Engineering Occupations,43,Office and Administrative Support Occupations,0.0338,36497,1079171
+17,Architecture and Engineering Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0006,595,1079171
+17,Architecture and Engineering Occupations,47,Construction and Extraction Occupations,0.0167,18022,1079171
+17,Architecture and Engineering Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0492,53054,1079171
+17,Architecture and Engineering Occupations,51,Production Occupations,0.0384,41460,1079171
+17,Architecture and Engineering Occupations,53,Transportation and Material Moving Occupations,0.0321,34598,1079171
+19,"Life, Physical, and Social Science Occupations",11,Management Occupations,0.238,104842,440509
+19,"Life, Physical, and Social Science Occupations",13,Business and Financial Operations Occupations,0.0855,37679,440509
+19,"Life, Physical, and Social Science Occupations",15,Computer and Mathematical Occupations,0.1439,63373,440509
+19,"Life, Physical, and Social Science Occupations",17,Architecture and Engineering Occupations,0.0387,17045,440509
+19,"Life, Physical, and Social Science Occupations",19,"Life, Physical, and Social Science Occupations",0.038,16759,440509
+19,"Life, Physical, and Social Science Occupations",21,Community and Social Service Occupations,0.0293,12889,440509
+19,"Life, Physical, and Social Science Occupations",23,Legal Occupations,0.0079,3464,440509
+19,"Life, Physical, and Social Science Occupations",25,"Education, Training, and Library Occupations",0.0896,39481,440509
+19,"Life, Physical, and Social Science Occupations",27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0309,13593,440509
+19,"Life, Physical, and Social Science Occupations",29,Healthcare Practitioners and Technical Occupations,0.0568,25022,440509
+19,"Life, Physical, and Social Science Occupations",31,Healthcare Support Occupations,0.008,3513,440509
+19,"Life, Physical, and Social Science Occupations",33,Protective Service Occupations,0.0149,6553,440509
+19,"Life, Physical, and Social Science Occupations",35,Food Preparation and Serving Related Occupations,0.0153,6743,440509
+19,"Life, Physical, and Social Science Occupations",37,Building and Grounds Cleaning and Maintenance Occupations,0.0024,1063,440509
+19,"Life, Physical, and Social Science Occupations",39,Personal Care and Service Occupations,0.0114,5018,440509
+19,"Life, Physical, and Social Science Occupations",41,Sales and Related Occupations,0.0419,18466,440509
+19,"Life, Physical, and Social Science Occupations",43,Office and Administrative Support Occupations,0.0748,32937,440509
+19,"Life, Physical, and Social Science Occupations",45,"Farming, Fishing, and Forestry Occupations",0.0007,330,440509
+19,"Life, Physical, and Social Science Occupations",47,Construction and Extraction Occupations,0.0056,2455,440509
+19,"Life, Physical, and Social Science Occupations",49,"Installation, Maintenance, and Repair Occupations",0.0127,5596,440509
+19,"Life, Physical, and Social Science Occupations",51,Production Occupations,0.0307,13521,440509
+19,"Life, Physical, and Social Science Occupations",53,Transportation and Material Moving Occupations,0.0231,10171,440509
+21,Community and Social Service Occupations,11,Management Occupations,0.2216,260273,1174667
+21,Community and Social Service Occupations,13,Business and Financial Operations Occupations,0.0745,87492,1174667
+21,Community and Social Service Occupations,15,Computer and Mathematical Occupations,0.035,41119,1174667
+21,Community and Social Service Occupations,17,Architecture and Engineering Occupations,0.0051,6016,1174667
+21,Community and Social Service Occupations,19,"Life, Physical, and Social Science Occupations",0.0139,16320,1174667
+21,Community and Social Service Occupations,21,Community and Social Service Occupations,0.1079,126725,1174667
+21,Community and Social Service Occupations,23,Legal Occupations,0.0085,9934,1174667
+21,Community and Social Service Occupations,25,"Education, Training, and Library Occupations",0.1378,161822,1174667
+21,Community and Social Service Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0415,48756,1174667
+21,Community and Social Service Occupations,29,Healthcare Practitioners and Technical Occupations,0.07,82218,1174667
+21,Community and Social Service Occupations,31,Healthcare Support Occupations,0.0191,22487,1174667
+21,Community and Social Service Occupations,33,Protective Service Occupations,0.0179,21056,1174667
+21,Community and Social Service Occupations,35,Food Preparation and Serving Related Occupations,0.0183,21511,1174667
+21,Community and Social Service Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0019,2200,1174667
+21,Community and Social Service Occupations,39,Personal Care and Service Occupations,0.03,35201,1174667
+21,Community and Social Service Occupations,41,Sales and Related Occupations,0.0508,59698,1174667
+21,Community and Social Service Occupations,43,Office and Administrative Support Occupations,0.1047,123011,1174667
+21,Community and Social Service Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0003,337,1174667
+21,Community and Social Service Occupations,47,Construction and Extraction Occupations,0.0018,2134,1174667
+21,Community and Social Service Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0065,7622,1174667
+21,Community and Social Service Occupations,51,Production Occupations,0.0102,11982,1174667
+21,Community and Social Service Occupations,53,Transportation and Material Moving Occupations,0.0228,26754,1174667
+23,Legal Occupations,11,Management Occupations,0.2589,113671,439099
+23,Legal Occupations,13,Business and Financial Operations Occupations,0.1063,46657,439099
+23,Legal Occupations,15,Computer and Mathematical Occupations,0.0392,17214,439099
+23,Legal Occupations,17,Architecture and Engineering Occupations,0.006,2653,439099
+23,Legal Occupations,19,"Life, Physical, and Social Science Occupations",0.0075,3284,439099
+23,Legal Occupations,21,Community and Social Service Occupations,0.0173,7607,439099
+23,Legal Occupations,23,Legal Occupations,0.1087,47728,439099
+23,Legal Occupations,25,"Education, Training, and Library Occupations",0.0814,35745,439099
+23,Legal Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0401,17604,439099
+23,Legal Occupations,29,Healthcare Practitioners and Technical Occupations,0.03,13155,439099
+23,Legal Occupations,31,Healthcare Support Occupations,0.0067,2935,439099
+23,Legal Occupations,33,Protective Service Occupations,0.0141,6175,439099
+23,Legal Occupations,35,Food Preparation and Serving Related Occupations,0.0141,6178,439099
+23,Legal Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.001,431,439099
+23,Legal Occupations,39,Personal Care and Service Occupations,0.0098,4314,439099
+23,Legal Occupations,41,Sales and Related Occupations,0.0674,29580,439099
+23,Legal Occupations,43,Office and Administrative Support Occupations,0.1403,61600,439099
+23,Legal Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0003,115,439099
+23,Legal Occupations,47,Construction and Extraction Occupations,0.0022,973,439099
+23,Legal Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0041,1787,439099
+23,Legal Occupations,51,Production Occupations,0.0129,5649,439099
+23,Legal Occupations,53,Transportation and Material Moving Occupations,0.032,14045,439099
+25,"Education, Training, and Library Occupations",11,Management Occupations,0.1931,647217,3352370
+25,"Education, Training, and Library Occupations",13,Business and Financial Operations Occupations,0.0713,238973,3352370
+25,"Education, Training, and Library Occupations",15,Computer and Mathematical Occupations,0.0742,248846,3352370
+25,"Education, Training, and Library Occupations",17,Architecture and Engineering Occupations,0.0115,38478,3352370
+25,"Education, Training, and Library Occupations",19,"Life, Physical, and Social Science Occupations",0.0107,35847,3352370
+25,"Education, Training, and Library Occupations",21,Community and Social Service Occupations,0.0414,138799,3352370
+25,"Education, Training, and Library Occupations",23,Legal Occupations,0.0098,32769,3352370
+25,"Education, Training, and Library Occupations",25,"Education, Training, and Library Occupations",0.2148,720049,3352370
+25,"Education, Training, and Library Occupations",27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0698,233839,3352370
+25,"Education, Training, and Library Occupations",29,Healthcare Practitioners and Technical Occupations,0.037,124067,3352370
+25,"Education, Training, and Library Occupations",31,Healthcare Support Occupations,0.0117,39155,3352370
+25,"Education, Training, and Library Occupations",33,Protective Service Occupations,0.0146,49092,3352370
+25,"Education, Training, and Library Occupations",35,Food Preparation and Serving Related Occupations,0.0216,72416,3352370
+25,"Education, Training, and Library Occupations",37,Building and Grounds Cleaning and Maintenance Occupations,0.0023,7733,3352370
+25,"Education, Training, and Library Occupations",39,Personal Care and Service Occupations,0.027,90680,3352370
+25,"Education, Training, and Library Occupations",41,Sales and Related Occupations,0.0547,183308,3352370
+25,"Education, Training, and Library Occupations",43,Office and Administrative Support Occupations,0.091,305226,3352370
+25,"Education, Training, and Library Occupations",45,"Farming, Fishing, and Forestry Occupations",0.0004,1464,3352370
+25,"Education, Training, and Library Occupations",47,Construction and Extraction Occupations,0.0027,8994,3352370
+25,"Education, Training, and Library Occupations",49,"Installation, Maintenance, and Repair Occupations",0.0059,19909,3352370
+25,"Education, Training, and Library Occupations",51,Production Occupations,0.0105,35307,3352370
+25,"Education, Training, and Library Occupations",53,Transportation and Material Moving Occupations,0.0239,80203,3352370
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",11,Management Occupations,0.2065,524637,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",13,Business and Financial Operations Occupations,0.077,195689,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",15,Computer and Mathematical Occupations,0.0693,176154,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",17,Architecture and Engineering Occupations,0.0197,50158,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",19,"Life, Physical, and Social Science Occupations",0.0056,14158,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",21,Community and Social Service Occupations,0.0197,50104,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",23,Legal Occupations,0.0079,20090,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",25,"Education, Training, and Library Occupations",0.1029,261415,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.1765,448413,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",29,Healthcare Practitioners and Technical Occupations,0.0155,39338,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",31,Healthcare Support Occupations,0.006,15263,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",33,Protective Service Occupations,0.0104,26334,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",35,Food Preparation and Serving Related Occupations,0.0241,61184,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",37,Building and Grounds Cleaning and Maintenance Occupations,0.0024,6008,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",39,Personal Care and Service Occupations,0.0214,54237,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",41,Sales and Related Occupations,0.0792,201210,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",43,Office and Administrative Support Occupations,0.0936,237801,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",45,"Farming, Fishing, and Forestry Occupations",0.0006,1624,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",47,Construction and Extraction Occupations,0.0041,10322,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",49,"Installation, Maintenance, and Repair Occupations",0.0089,22612,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",51,Production Occupations,0.0168,42632,2540196
+27,"Arts, Design, Entertainment, Sports, and Media Occupations",53,Transportation and Material Moving Occupations,0.0318,80812,2540196
+29,Healthcare Practitioners and Technical Occupations,11,Management Occupations,0.231,414539,1794461
+29,Healthcare Practitioners and Technical Occupations,13,Business and Financial Operations Occupations,0.0635,114018,1794461
+29,Healthcare Practitioners and Technical Occupations,15,Computer and Mathematical Occupations,0.0526,94394,1794461
+29,Healthcare Practitioners and Technical Occupations,17,Architecture and Engineering Occupations,0.0134,24086,1794461
+29,Healthcare Practitioners and Technical Occupations,19,"Life, Physical, and Social Science Occupations",0.0184,32981,1794461
+29,Healthcare Practitioners and Technical Occupations,21,Community and Social Service Occupations,0.0494,88671,1794461
+29,Healthcare Practitioners and Technical Occupations,23,Legal Occupations,0.0086,15485,1794461
+29,Healthcare Practitioners and Technical Occupations,25,"Education, Training, and Library Occupations",0.0951,170647,1794461
+29,Healthcare Practitioners and Technical Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0249,44732,1794461
+29,Healthcare Practitioners and Technical Occupations,29,Healthcare Practitioners and Technical Occupations,0.1245,223393,1794461
+29,Healthcare Practitioners and Technical Occupations,31,Healthcare Support Occupations,0.0395,70892,1794461
+29,Healthcare Practitioners and Technical Occupations,33,Protective Service Occupations,0.02,35941,1794461
+29,Healthcare Practitioners and Technical Occupations,35,Food Preparation and Serving Related Occupations,0.0192,34520,1794461
+29,Healthcare Practitioners and Technical Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0032,5733,1794461
+29,Healthcare Practitioners and Technical Occupations,39,Personal Care and Service Occupations,0.0198,35484,1794461
+29,Healthcare Practitioners and Technical Occupations,41,Sales and Related Occupations,0.0495,88790,1794461
+29,Healthcare Practitioners and Technical Occupations,43,Office and Administrative Support Occupations,0.1085,194729,1794461
+29,Healthcare Practitioners and Technical Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0005,862,1794461
+29,Healthcare Practitioners and Technical Occupations,47,Construction and Extraction Occupations,0.0042,7451,1794461
+29,Healthcare Practitioners and Technical Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0109,19579,1794461
+29,Healthcare Practitioners and Technical Occupations,51,Production Occupations,0.0164,29369,1794461
+29,Healthcare Practitioners and Technical Occupations,53,Transportation and Material Moving Occupations,0.0268,48165,1794461
+31,Healthcare Support Occupations,11,Management Occupations,0.1296,128743,993189
+31,Healthcare Support Occupations,13,Business and Financial Operations Occupations,0.0456,45316,993189
+31,Healthcare Support Occupations,15,Computer and Mathematical Occupations,0.0251,24976,993189
+31,Healthcare Support Occupations,17,Architecture and Engineering Occupations,0.0064,6379,993189
+31,Healthcare Support Occupations,19,"Life, Physical, and Social Science Occupations",0.0063,6286,993189
+31,Healthcare Support Occupations,21,Community and Social Service Occupations,0.0398,39510,993189
+31,Healthcare Support Occupations,23,Legal Occupations,0.006,5969,993189
+31,Healthcare Support Occupations,25,"Education, Training, and Library Occupations",0.0702,69720,993189
+31,Healthcare Support Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0219,21784,993189
+31,Healthcare Support Occupations,29,Healthcare Practitioners and Technical Occupations,0.1419,140962,993189
+31,Healthcare Support Occupations,31,Healthcare Support Occupations,0.0913,90703,993189
+31,Healthcare Support Occupations,33,Protective Service Occupations,0.016,15867,993189
+31,Healthcare Support Occupations,35,Food Preparation and Serving Related Occupations,0.0293,29142,993189
+31,Healthcare Support Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0084,8307,993189
+31,Healthcare Support Occupations,39,Personal Care and Service Occupations,0.0499,49516,993189
+31,Healthcare Support Occupations,41,Sales and Related Occupations,0.0649,64430,993189
+31,Healthcare Support Occupations,43,Office and Administrative Support Occupations,0.1829,181659,993189
+31,Healthcare Support Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0007,677,993189
+31,Healthcare Support Occupations,47,Construction and Extraction Occupations,0.0027,2717,993189
+31,Healthcare Support Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0083,8206,993189
+31,Healthcare Support Occupations,51,Production Occupations,0.0187,18523,993189
+31,Healthcare Support Occupations,53,Transportation and Material Moving Occupations,0.034,33795,993189
+33,Protective Service Occupations,11,Management Occupations,0.2151,220599,1025452
+33,Protective Service Occupations,13,Business and Financial Operations Occupations,0.064,65655,1025452
+33,Protective Service Occupations,15,Computer and Mathematical Occupations,0.049,50240,1025452
+33,Protective Service Occupations,17,Architecture and Engineering Occupations,0.0144,14806,1025452
+33,Protective Service Occupations,19,"Life, Physical, and Social Science Occupations",0.0076,7766,1025452
+33,Protective Service Occupations,21,Community and Social Service Occupations,0.0232,23753,1025452
+33,Protective Service Occupations,23,Legal Occupations,0.0077,7855,1025452
+33,Protective Service Occupations,25,"Education, Training, and Library Occupations",0.0692,70917,1025452
+33,Protective Service Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0256,26219,1025452
+33,Protective Service Occupations,29,Healthcare Practitioners and Technical Occupations,0.037,37950,1025452
+33,Protective Service Occupations,31,Healthcare Support Occupations,0.0109,11171,1025452
+33,Protective Service Occupations,33,Protective Service Occupations,0.1488,152619,1025452
+33,Protective Service Occupations,35,Food Preparation and Serving Related Occupations,0.0265,27215,1025452
+33,Protective Service Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0071,7266,1025452
+33,Protective Service Occupations,39,Personal Care and Service Occupations,0.0217,22258,1025452
+33,Protective Service Occupations,41,Sales and Related Occupations,0.0658,67426,1025452
+33,Protective Service Occupations,43,Office and Administrative Support Occupations,0.0917,94068,1025452
+33,Protective Service Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0007,693,1025452
+33,Protective Service Occupations,47,Construction and Extraction Occupations,0.0109,11141,1025452
+33,Protective Service Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0215,22033,1025452
+33,Protective Service Occupations,51,Production Occupations,0.0229,23513,1025452
+33,Protective Service Occupations,53,Transportation and Material Moving Occupations,0.0588,60289,1025452
+35,Food Preparation and Serving Related Occupations,11,Management Occupations,0.1809,447744,2474417
+35,Food Preparation and Serving Related Occupations,13,Business and Financial Operations Occupations,0.0499,123508,2474417
+35,Food Preparation and Serving Related Occupations,15,Computer and Mathematical Occupations,0.0367,90871,2474417
+35,Food Preparation and Serving Related Occupations,17,Architecture and Engineering Occupations,0.0102,25129,2474417
+35,Food Preparation and Serving Related Occupations,19,"Life, Physical, and Social Science Occupations",0.0049,12150,2474417
+35,Food Preparation and Serving Related Occupations,21,Community and Social Service Occupations,0.0152,37489,2474417
+35,Food Preparation and Serving Related Occupations,23,Legal Occupations,0.0052,12873,2474417
+35,Food Preparation and Serving Related Occupations,25,"Education, Training, and Library Occupations",0.0495,122449,2474417
+35,Food Preparation and Serving Related Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0351,86927,2474417
+35,Food Preparation and Serving Related Occupations,29,Healthcare Practitioners and Technical Occupations,0.0249,61568,2474417
+35,Food Preparation and Serving Related Occupations,31,Healthcare Support Occupations,0.0195,48207,2474417
+35,Food Preparation and Serving Related Occupations,33,Protective Service Occupations,0.0184,45606,2474417
+35,Food Preparation and Serving Related Occupations,35,Food Preparation and Serving Related Occupations,0.1225,303088,2474417
+35,Food Preparation and Serving Related Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0133,32929,2474417
+35,Food Preparation and Serving Related Occupations,39,Personal Care and Service Occupations,0.031,76634,2474417
+35,Food Preparation and Serving Related Occupations,41,Sales and Related Occupations,0.1251,309630,2474417
+35,Food Preparation and Serving Related Occupations,43,Office and Administrative Support Occupations,0.1611,398712,2474417
+35,Food Preparation and Serving Related Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0009,2190,2474417
+35,Food Preparation and Serving Related Occupations,47,Construction and Extraction Occupations,0.0076,18879,2474417
+35,Food Preparation and Serving Related Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0133,33007,2474417
+35,Food Preparation and Serving Related Occupations,51,Production Occupations,0.0277,68441,2474417
+35,Food Preparation and Serving Related Occupations,53,Transportation and Material Moving Occupations,0.047,116387,2474417
+37,Building and Grounds Cleaning and Maintenance Occupations,11,Management Occupations,0.168,49764,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,13,Business and Financial Operations Occupations,0.0335,9937,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,15,Computer and Mathematical Occupations,0.0227,6719,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,17,Architecture and Engineering Occupations,0.0177,5232,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,19,"Life, Physical, and Social Science Occupations",0.0058,1705,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,21,Community and Social Service Occupations,0.0107,3171,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,23,Legal Occupations,0.0025,730,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,25,"Education, Training, and Library Occupations",0.0379,11220,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0262,7775,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,29,Healthcare Practitioners and Technical Occupations,0.0225,6677,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,31,Healthcare Support Occupations,0.0236,6988,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,33,Protective Service Occupations,0.0281,8336,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,35,Food Preparation and Serving Related Occupations,0.0607,17971,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0563,16667,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,39,Personal Care and Service Occupations,0.0343,10168,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,41,Sales and Related Occupations,0.0852,25235,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,43,Office and Administrative Support Occupations,0.135,39992,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0018,524,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,47,Construction and Extraction Occupations,0.0226,6687,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0492,14585,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,51,Production Occupations,0.0494,14644,296218
+37,Building and Grounds Cleaning and Maintenance Occupations,53,Transportation and Material Moving Occupations,0.1063,31492,296218
+39,Personal Care and Service Occupations,11,Management Occupations,0.17,224473,1320230
+39,Personal Care and Service Occupations,13,Business and Financial Operations Occupations,0.056,73890,1320230
+39,Personal Care and Service Occupations,15,Computer and Mathematical Occupations,0.0311,41084,1320230
+39,Personal Care and Service Occupations,17,Architecture and Engineering Occupations,0.0075,9852,1320230
+39,Personal Care and Service Occupations,19,"Life, Physical, and Social Science Occupations",0.0061,8054,1320230
+39,Personal Care and Service Occupations,21,Community and Social Service Occupations,0.0428,56497,1320230
+39,Personal Care and Service Occupations,23,Legal Occupations,0.0057,7471,1320230
+39,Personal Care and Service Occupations,25,"Education, Training, and Library Occupations",0.1079,142425,1320230
+39,Personal Care and Service Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.054,71297,1320230
+39,Personal Care and Service Occupations,29,Healthcare Practitioners and Technical Occupations,0.0408,53818,1320230
+39,Personal Care and Service Occupations,31,Healthcare Support Occupations,0.038,50158,1320230
+39,Personal Care and Service Occupations,33,Protective Service Occupations,0.0205,27036,1320230
+39,Personal Care and Service Occupations,35,Food Preparation and Serving Related Occupations,0.0446,58857,1320230
+39,Personal Care and Service Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0097,12816,1320230
+39,Personal Care and Service Occupations,39,Personal Care and Service Occupations,0.0436,57599,1320230
+39,Personal Care and Service Occupations,41,Sales and Related Occupations,0.099,130743,1320230
+39,Personal Care and Service Occupations,43,Office and Administrative Support Occupations,0.1564,206482,1320230
+39,Personal Care and Service Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0005,654,1320230
+39,Personal Care and Service Occupations,47,Construction and Extraction Occupations,0.0043,5687,1320230
+39,Personal Care and Service Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0088,11597,1320230
+39,Personal Care and Service Occupations,51,Production Occupations,0.0163,21455,1320230
+39,Personal Care and Service Occupations,53,Transportation and Material Moving Occupations,0.0366,48284,1320230
+41,Sales and Related Occupations,11,Management Occupations,0.2527,1435411,5680469
+41,Sales and Related Occupations,13,Business and Financial Operations Occupations,0.0858,487312,5680469
+41,Sales and Related Occupations,15,Computer and Mathematical Occupations,0.0395,224162,5680469
+41,Sales and Related Occupations,17,Architecture and Engineering Occupations,0.0094,53678,5680469
+41,Sales and Related Occupations,19,"Life, Physical, and Social Science Occupations",0.0043,24425,5680469
+41,Sales and Related Occupations,21,Community and Social Service Occupations,0.0139,78932,5680469
+41,Sales and Related Occupations,23,Legal Occupations,0.0074,41996,5680469
+41,Sales and Related Occupations,25,"Education, Training, and Library Occupations",0.0454,257820,5680469
+41,Sales and Related Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0391,222079,5680469
+41,Sales and Related Occupations,29,Healthcare Practitioners and Technical Occupations,0.0207,117613,5680469
+41,Sales and Related Occupations,31,Healthcare Support Occupations,0.0133,75772,5680469
+41,Sales and Related Occupations,33,Protective Service Occupations,0.0153,86842,5680469
+41,Sales and Related Occupations,35,Food Preparation and Serving Related Occupations,0.0376,213494,5680469
+41,Sales and Related Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0061,34402,5680469
+41,Sales and Related Occupations,39,Personal Care and Service Occupations,0.021,119321,5680469
+41,Sales and Related Occupations,41,Sales and Related Occupations,0.1377,782441,5680469
+41,Sales and Related Occupations,43,Office and Administrative Support Occupations,0.1711,972097,5680469
+41,Sales and Related Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0005,2785,5680469
+41,Sales and Related Occupations,47,Construction and Extraction Occupations,0.0054,30738,5680469
+41,Sales and Related Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0123,69703,5680469
+41,Sales and Related Occupations,51,Production Occupations,0.0189,107329,5680469
+41,Sales and Related Occupations,53,Transportation and Material Moving Occupations,0.0426,242115,5680469
+43,Office and Administrative Support Occupations,11,Management Occupations,0.1801,1485994,8252223
+43,Office and Administrative Support Occupations,13,Business and Financial Operations Occupations,0.0942,777224,8252223
+43,Office and Administrative Support Occupations,15,Computer and Mathematical Occupations,0.0418,345062,8252223
+43,Office and Administrative Support Occupations,17,Architecture and Engineering Occupations,0.0074,61409,8252223
+43,Office and Administrative Support Occupations,19,"Life, Physical, and Social Science Occupations",0.0053,43907,8252223
+43,Office and Administrative Support Occupations,21,Community and Social Service Occupations,0.0227,187132,8252223
+43,Office and Administrative Support Occupations,23,Legal Occupations,0.0112,92295,8252223
+43,Office and Administrative Support Occupations,25,"Education, Training, and Library Occupations",0.0526,434206,8252223
+43,Office and Administrative Support Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0358,295250,8252223
+43,Office and Administrative Support Occupations,29,Healthcare Practitioners and Technical Occupations,0.0303,250090,8252223
+43,Office and Administrative Support Occupations,31,Healthcare Support Occupations,0.0182,150573,8252223
+43,Office and Administrative Support Occupations,33,Protective Service Occupations,0.0148,122095,8252223
+43,Office and Administrative Support Occupations,35,Food Preparation and Serving Related Occupations,0.0294,242413,8252223
+43,Office and Administrative Support Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0056,46307,8252223
+43,Office and Administrative Support Occupations,39,Personal Care and Service Occupations,0.0214,176714,8252223
+43,Office and Administrative Support Occupations,41,Sales and Related Occupations,0.1123,926604,8252223
+43,Office and Administrative Support Occupations,43,Office and Administrative Support Occupations,0.249,2055176,8252223
+43,Office and Administrative Support Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0005,3798,8252223
+43,Office and Administrative Support Occupations,47,Construction and Extraction Occupations,0.0035,28528,8252223
+43,Office and Administrative Support Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0101,83069,8252223
+43,Office and Administrative Support Occupations,51,Production Occupations,0.0167,137731,8252223
+43,Office and Administrative Support Occupations,53,Transportation and Material Moving Occupations,0.0372,306646,8252223
+45,"Farming, Fishing, and Forestry Occupations",11,Management Occupations,0.2146,8154,37993
+45,"Farming, Fishing, and Forestry Occupations",13,Business and Financial Operations Occupations,0.0458,1738,37993
+45,"Farming, Fishing, and Forestry Occupations",15,Computer and Mathematical Occupations,0.0481,1827,37993
+45,"Farming, Fishing, and Forestry Occupations",17,Architecture and Engineering Occupations,0.0273,1038,37993
+45,"Farming, Fishing, and Forestry Occupations",19,"Life, Physical, and Social Science Occupations",0.0112,426,37993
+45,"Farming, Fishing, and Forestry Occupations",21,Community and Social Service Occupations,0.0098,371,37993
+45,"Farming, Fishing, and Forestry Occupations",23,Legal Occupations,0.0092,351,37993
+45,"Farming, Fishing, and Forestry Occupations",25,"Education, Training, and Library Occupations",0.0658,2499,37993
+45,"Farming, Fishing, and Forestry Occupations",27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0533,2024,37993
+45,"Farming, Fishing, and Forestry Occupations",29,Healthcare Practitioners and Technical Occupations,0.0261,991,37993
+45,"Farming, Fishing, and Forestry Occupations",31,Healthcare Support Occupations,0.0155,589,37993
+45,"Farming, Fishing, and Forestry Occupations",33,Protective Service Occupations,0.0246,935,37993
+45,"Farming, Fishing, and Forestry Occupations",35,Food Preparation and Serving Related Occupations,0.0434,1651,37993
+45,"Farming, Fishing, and Forestry Occupations",37,Building and Grounds Cleaning and Maintenance Occupations,0.0146,553,37993
+45,"Farming, Fishing, and Forestry Occupations",39,Personal Care and Service Occupations,0.019,721,37993
+45,"Farming, Fishing, and Forestry Occupations",41,Sales and Related Occupations,0.0709,2694,37993
+45,"Farming, Fishing, and Forestry Occupations",43,Office and Administrative Support Occupations,0.0929,3531,37993
+45,"Farming, Fishing, and Forestry Occupations",45,"Farming, Fishing, and Forestry Occupations",0.0039,147,37993
+45,"Farming, Fishing, and Forestry Occupations",47,Construction and Extraction Occupations,0.0282,1072,37993
+45,"Farming, Fishing, and Forestry Occupations",49,"Installation, Maintenance, and Repair Occupations",0.0314,1192,37993
+45,"Farming, Fishing, and Forestry Occupations",51,Production Occupations,0.0426,1617,37993
+45,"Farming, Fishing, and Forestry Occupations",53,Transportation and Material Moving Occupations,0.1019,3872,37993
+47,Construction and Extraction Occupations,11,Management Occupations,0.2188,96171,439552
+47,Construction and Extraction Occupations,13,Business and Financial Operations Occupations,0.0391,17178,439552
+47,Construction and Extraction Occupations,15,Computer and Mathematical Occupations,0.04,17571,439552
+47,Construction and Extraction Occupations,17,Architecture and Engineering Occupations,0.0588,25850,439552
+47,Construction and Extraction Occupations,19,"Life, Physical, and Social Science Occupations",0.0068,3004,439552
+47,Construction and Extraction Occupations,21,Community and Social Service Occupations,0.0064,2801,439552
+47,Construction and Extraction Occupations,23,Legal Occupations,0.0033,1461,439552
+47,Construction and Extraction Occupations,25,"Education, Training, and Library Occupations",0.0296,13026,439552
+47,Construction and Extraction Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0247,10858,439552
+47,Construction and Extraction Occupations,29,Healthcare Practitioners and Technical Occupations,0.0195,8582,439552
+47,Construction and Extraction Occupations,31,Healthcare Support Occupations,0.0045,1989,439552
+47,Construction and Extraction Occupations,33,Protective Service Occupations,0.0276,12134,439552
+47,Construction and Extraction Occupations,35,Food Preparation and Serving Related Occupations,0.0266,11672,439552
+47,Construction and Extraction Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0133,5851,439552
+47,Construction and Extraction Occupations,39,Personal Care and Service Occupations,0.0104,4561,439552
+47,Construction and Extraction Occupations,41,Sales and Related Occupations,0.0601,26421,439552
+47,Construction and Extraction Occupations,43,Office and Administrative Support Occupations,0.0531,23350,439552
+47,Construction and Extraction Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0022,945,439552
+47,Construction and Extraction Occupations,47,Construction and Extraction Occupations,0.0765,33613,439552
+47,Construction and Extraction Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0891,39159,439552
+47,Construction and Extraction Occupations,51,Production Occupations,0.0691,30377,439552
+47,Construction and Extraction Occupations,53,Transportation and Material Moving Occupations,0.1205,52977,439552
+49,"Installation, Maintenance, and Repair Occupations",11,Management Occupations,0.2009,175182,871809
+49,"Installation, Maintenance, and Repair Occupations",13,Business and Financial Operations Occupations,0.0421,36713,871809
+49,"Installation, Maintenance, and Repair Occupations",15,Computer and Mathematical Occupations,0.0914,79715,871809
+49,"Installation, Maintenance, and Repair Occupations",17,Architecture and Engineering Occupations,0.076,66261,871809
+49,"Installation, Maintenance, and Repair Occupations",19,"Life, Physical, and Social Science Occupations",0.0071,6170,871809
+49,"Installation, Maintenance, and Repair Occupations",21,Community and Social Service Occupations,0.0087,7601,871809
+49,"Installation, Maintenance, and Repair Occupations",23,Legal Occupations,0.0028,2432,871809
+49,"Installation, Maintenance, and Repair Occupations",25,"Education, Training, and Library Occupations",0.0324,28230,871809
+49,"Installation, Maintenance, and Repair Occupations",27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0259,22585,871809
+49,"Installation, Maintenance, and Repair Occupations",29,Healthcare Practitioners and Technical Occupations,0.0213,18576,871809
+49,"Installation, Maintenance, and Repair Occupations",31,Healthcare Support Occupations,0.0056,4853,871809
+49,"Installation, Maintenance, and Repair Occupations",33,Protective Service Occupations,0.0238,20728,871809
+49,"Installation, Maintenance, and Repair Occupations",35,Food Preparation and Serving Related Occupations,0.0186,16214,871809
+49,"Installation, Maintenance, and Repair Occupations",37,Building and Grounds Cleaning and Maintenance Occupations,0.0111,9659,871809
+49,"Installation, Maintenance, and Repair Occupations",39,Personal Care and Service Occupations,0.0088,7682,871809
+49,"Installation, Maintenance, and Repair Occupations",41,Sales and Related Occupations,0.061,53155,871809
+49,"Installation, Maintenance, and Repair Occupations",43,Office and Administrative Support Occupations,0.0675,58845,871809
+49,"Installation, Maintenance, and Repair Occupations",45,"Farming, Fishing, and Forestry Occupations",0.001,839,871809
+49,"Installation, Maintenance, and Repair Occupations",47,Construction and Extraction Occupations,0.0371,32339,871809
+49,"Installation, Maintenance, and Repair Occupations",49,"Installation, Maintenance, and Repair Occupations",0.1225,106791,871809
+49,"Installation, Maintenance, and Repair Occupations",51,Production Occupations,0.0545,47477,871809
+49,"Installation, Maintenance, and Repair Occupations",53,Transportation and Material Moving Occupations,0.08,69760,871809
+51,Production Occupations,11,Management Occupations,0.2118,254476,1201657
+51,Production Occupations,13,Business and Financial Operations Occupations,0.0505,60644,1201657
+51,Production Occupations,15,Computer and Mathematical Occupations,0.0541,65012,1201657
+51,Production Occupations,17,Architecture and Engineering Occupations,0.0469,56376,1201657
+51,Production Occupations,19,"Life, Physical, and Social Science Occupations",0.0124,14915,1201657
+51,Production Occupations,21,Community and Social Service Occupations,0.0112,13407,1201657
+51,Production Occupations,23,Legal Occupations,0.0066,7900,1201657
+51,Production Occupations,25,"Education, Training, and Library Occupations",0.0391,46986,1201657
+51,Production Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.0375,45090,1201657
+51,Production Occupations,29,Healthcare Practitioners and Technical Occupations,0.0233,27983,1201657
+51,Production Occupations,31,Healthcare Support Occupations,0.0109,13104,1201657
+51,Production Occupations,33,Protective Service Occupations,0.0212,25456,1201657
+51,Production Occupations,35,Food Preparation and Serving Related Occupations,0.0328,39451,1201657
+51,Production Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0109,13105,1201657
+51,Production Occupations,39,Personal Care and Service Occupations,0.0129,15442,1201657
+51,Production Occupations,41,Sales and Related Occupations,0.0683,82071,1201657
+51,Production Occupations,43,Office and Administrative Support Occupations,0.0933,112102,1201657
+51,Production Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0011,1336,1201657
+51,Production Occupations,47,Construction and Extraction Occupations,0.0242,29076,1201657
+51,Production Occupations,49,"Installation, Maintenance, and Repair Occupations",0.0419,50409,1201657
+51,Production Occupations,51,Production Occupations,0.1022,122804,1201657
+51,Production Occupations,53,Transportation and Material Moving Occupations,0.087,104513,1201657
+53,Transportation and Material Moving Occupations,11,Management Occupations,0.2103,407245,1936682
+53,Transportation and Material Moving Occupations,13,Business and Financial Operations Occupations,0.0547,105962,1936682
+53,Transportation and Material Moving Occupations,15,Computer and Mathematical Occupations,0.0476,92192,1936682
+53,Transportation and Material Moving Occupations,17,Architecture and Engineering Occupations,0.021,40605,1936682
+53,Transportation and Material Moving Occupations,19,"Life, Physical, and Social Science Occupations",0.0058,11297,1936682
+53,Transportation and Material Moving Occupations,21,Community and Social Service Occupations,0.0128,24702,1936682
+53,Transportation and Material Moving Occupations,23,Legal Occupations,0.0076,14767,1936682
+53,Transportation and Material Moving Occupations,25,"Education, Training, and Library Occupations",0.0446,86374,1936682
+53,Transportation and Material Moving Occupations,27,"Arts, Design, Entertainment, Sports, and Media Occupations",0.037,71590,1936682
+53,Transportation and Material Moving Occupations,29,Healthcare Practitioners and Technical Occupations,0.0227,43968,1936682
+53,Transportation and Material Moving Occupations,31,Healthcare Support Occupations,0.0109,21031,1936682
+53,Transportation and Material Moving Occupations,33,Protective Service Occupations,0.0305,59027,1936682
+53,Transportation and Material Moving Occupations,35,Food Preparation and Serving Related Occupations,0.0331,64160,1936682
+53,Transportation and Material Moving Occupations,37,Building and Grounds Cleaning and Maintenance Occupations,0.0143,27651,1936682
+53,Transportation and Material Moving Occupations,39,Personal Care and Service Occupations,0.0166,32121,1936682
+53,Transportation and Material Moving Occupations,41,Sales and Related Occupations,0.0932,180473,1936682
+53,Transportation and Material Moving Occupations,43,Office and Administrative Support Occupations,0.1148,222335,1936682
+53,Transportation and Material Moving Occupations,45,"Farming, Fishing, and Forestry Occupations",0.0018,3428,1936682
+53,Transportation and Material Moving Occupations,47,Construction and Extraction Occupations,0.0243,47069,1936682
+53,Transportation and Material Moving Occupations,49,"Installation, Maintenance, and Repair Occupations",0.036,69804,1936682
+53,Transportation and Material Moving Occupations,51,Production Occupations,0.056,108405,1936682
+53,Transportation and Material Moving Occupations,53,Transportation and Material Moving Occupations,0.1045,202476,1936682

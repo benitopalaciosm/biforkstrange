@@ -9,13 +9,18 @@ _REGISTRY: dict[str, "Decision"] = {}
 
 
 class Decision(ABC):
-    """Una decisión transforma el estado de un año. Para agregar una nueva,
+    """Una decisión transforma el estado de un año. El motor corre antes el paso
+    laboral (empleo, cesantía, cambio de ocupación), así que `apply` ya ve quién
+    tiene empleo y quién lo perdió (`state.extra["perdio_empleo"]`). Para agregar una nueva,
     crea una subclase con `key` y `label` en catalog.py (o en otro módulo
     importado allí): se registra sola y aparece en la API."""
 
     key: ClassVar[str]
     label: ClassVar[str]
     description: ClassVar[str] = ""
+    # Cómo mueve la decisión el paso laboral del año (ver sim/labor.py)
+    riesgo_rel: ClassVar[float] = 1.0       # multiplica la prob. de caer en cesantía
+    cambio_forzado: ClassVar[bool] = False  # te cambias de empleador este año
 
     def __init_subclass__(cls, **kw):
         super().__init_subclass__(**kw)

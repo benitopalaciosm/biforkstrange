@@ -1,0 +1,622 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Eventos que pasan cada año sin que nadie decida, con su probabilidad anual.",
+ "eventos": [
+  {
+   "id": "alza_anual",
+   "nombre": "Alza anual del sueldo",
+   "categoria": "trabajo",
+   "cuando": "estado == 'empleado'",
+   "prob_anual": 1,
+   "resultados": [
+    {
+     "id": "alza",
+     "prob": 1,
+     "texto": "Tu sueldo se mueve con tu edad y tu suerte.",
+     "tono": "neutro",
+     "efectos": [
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "1 + clamp(si(anos_titulado < 4, crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - prob_ascenso * 0.075 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), -0.2, 0.25)"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "ine_esi_2025",
+    "mineduc_mifuturo",
+    "guvenen_2021"
+   ],
+   "calidad": "mixto",
+   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso esperado porque el perfil por edad ya lo incluye."
+  },
+  {
+   "id": "ascenso",
+   "nombre": "Ascenso",
+   "categoria": "trabajo",
+   "cuando": "y(estado == 'empleado', nivel < 4, antiguedad >= 1)",
+   "prob_anual": "clamp(k('ASCENSO', nivel) * si(y(edu == 'media', nivel >= 1), 0.5, 1) + (skill - 50) * 0.0006 + si(horas >= 55, k('ASCENSO_HORAS'), 0) + si(tipo_empleador == 'startup', 0.05, 0) - si(tipo_empleador == 'publico', 0.04, 0) - si(marcado, 0.06, 0), 0.01, 0.4) * si(parcial, 0.5, 1)",
+   "resultados": [
+    {
+     "id": "sube",
+     "prob": 1,
+     "texto": "Te ascienden.",
+     "tono": "bueno",
+     "efectos": [
+      {
+       "var": "nivel",
+       "op": "suma",
+       "valor": 1
+      },
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "1 + azar_uniforme(k('ALZA_ASCENSO', 0), k('ALZA_ASCENSO', 1))"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "baker_gibbs_1994"
+   ],
+   "calidad": "supuesto"
+  },
+  {
+   "id": "separacion_empleo",
+   "nombre": "Despido o fin de contrato",
+   "categoria": "trabajo",
+   "cuando": "y(estado == 'empleado', tipo_empleador != 'extranjero')",
+   "prob_anual": "k('P_SEPARACION', banda3) * k('MULT_DESPIDO_TIPO', tipo_empleador) * si(tipo_empleador == 'publico', 1, k('MULT_DESPIDO_RUBRO', rubro, 1)) * si(recesion, 1.4, 1)",
+   "resultados": [
+    {
+     "id": "reemplea",
+     "prob": "(1 - exp(-9 / k('MESES_CESANTIA', banda3))) * si(recesion, 0.85, 1)",
+     "texto": "Pierdes la pega y encuentras otra el mismo año.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "azar_uniforme(0.85, 1.02)"
+      },
+      {
+       "var": "antiguedad",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": -2
+      }
+     ],
+     "luego": "tipo_de_empleador"
+    },
+    {
+     "id": "cesante",
+     "prob": "resto",
+     "texto": "Pierdes la pega.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "estado",
+       "op": "fija",
+       "valor": "'buscando'"
+      },
+      {
+       "var": "sueldo_ref",
+       "op": "fija",
+       "valor": "sueldo"
+      },
+      {
+       "var": "sueldo",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "sueldo * min(antiguedad, 11)"
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "k('ANIMO_CESANTIA')"
+      },
+      {
+       "var": "sueldo_ref",
+       "op": "multiplica",
+       "valor": "1 - k('CAIDA_REEMPLEO')"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "eps_2024",
+    "ine_flujos",
+    "elsoc",
+    "couch_placzek_2010"
+   ],
+   "calidad": "dato",
+   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo."
+  },
+  {
+   "id": "oferta_llega",
+   "nombre": "Te llega una oferta sin buscarla",
+   "categoria": "trabajo",
+   "cuando": "estado == 'empleado'",
+   "prob_anual": "k('P_CAMBIO_EMPLEADOR', banda3) * 1.5 * (1 + red / 100)",
+   "resultados": [
+    {
+     "id": "oferta",
+     "prob": 1,
+     "texto": "Te escribe una empresa.",
+     "tono": "neutro",
+     "efectos": [],
+     "luego": "oferta_externa"
+    }
+   ],
+   "fuentes": [
+    "eps_2024",
+    "nyfed_sce"
+   ],
+   "calidad": "mixto",
+   "notas": "Llegan más ofertas de las que se aceptan; el 1,5 lo ajusta. Ver sce_ofertas para la tasa de ofertas en EE.UU."
+  },
+  {
+   "id": "recesion",
+   "nombre": "Recesión",
+   "categoria": "mundo",
+   "cuando": "1",
+   "prob_anual": "k('P_RECESION')",
+   "resultados": [
+    {
+     "id": "llega",
+     "prob": 1,
+     "texto": "El país entra en recesión: se despide más y se contrata menos.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "recesion",
+       "op": "fija",
+       "valor": 1,
+       "duracion": 1
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "equipo"
+   ],
+   "calidad": "supuesto"
+  },
+  {
+   "id": "titularse_en_recesion",
+   "nombre": "Titularte en recesión",
+   "categoria": "mundo",
+   "cuando": "y(recesion == 1, anos_titulado == 0)",
+   "prob_anual": 1,
+   "resultados": [
+    {
+     "id": "golpe",
+     "prob": 1,
+     "texto": "Sales al mercado en mal año: partes más abajo y lo recuperas en unos 10 años.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": 0.91
+      },
+      {
+       "var": "alza_extra_anual",
+       "op": "suma",
+       "valor": 0.009,
+       "duracion": 10
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "oreopoulos_2012"
+   ],
+   "calidad": "mixto"
+  },
+  {
+   "id": "cancer",
+   "nombre": "Cáncer",
+   "categoria": "salud",
+   "cuando": "1",
+   "prob_anual": "tabla('iarc_cancer_incidencia', 'p_anual', 'sexo', sexo, 'banda', banda5)",
+   "resultados": [
+    {
+     "id": "deja_trabajo",
+     "prob": "si(edu == 'media', k('P_CANCER_DEJA_TRABAJO', 'media'), k('P_CANCER_DEJA_TRABAJO', 'superior'))",
+     "texto": "Un tratamiento largo te saca del trabajo.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "salud",
+       "op": "fija",
+       "valor": "'cancer'"
+      },
+      {
+       "var": "estado",
+       "op": "fija",
+       "valor": "'buscando'"
+      },
+      {
+       "var": "sueldo",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "energia",
+       "op": "suma",
+       "valor": -30
+      },
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "-k('COPAGO_CANCER')"
+      }
+     ]
+    },
+    {
+     "id": "licencia",
+     "prob": "resto",
+     "texto": "Medio año de tratamiento y licencia.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "salud",
+       "op": "fija",
+       "valor": "'cancer'"
+      },
+      {
+       "var": "energia",
+       "op": "suma",
+       "valor": -30
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": -10
+      },
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "-k('COPAGO_CANCER')"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "iarc_ci5",
+    "heinesen_2013"
+   ],
+   "calidad": "dato"
+  },
+  {
+   "id": "muere_madre",
+   "nombre": "Muere tu mamá",
+   "categoria": "familia",
+   "cuando": "madre_edad > 0",
+   "prob_anual": "si(familiar_enfermo == 'madre', k('P_MUERE_ENFERMO'), 0.5 * q_muerte(madre_edad, 'm'))",
+   "resultados": [
+    {
+     "id": "muere",
+     "prob": 1,
+     "texto": "Muere tu mamá.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "madre_edad",
+       "op": "fija",
+       "valor": -1
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "k('LUTO_A_ANIMO') * luto('mama', 0)"
+      },
+      {
+       "var": "luto_madre",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "k('INGRESO_TRAS_MUERTE_PADRE', sexo)"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "ine_mortalidad",
+    "leopold_lechner_2015"
+   ],
+   "calidad": "dato",
+   "notas": "La mitad de q porque la otra mitad de las muertes pasa por una enfermedad previa (familiar_enfermo). luto(k, t) lee duelo_satisfaccion: min(0, base + edad·(edad-46) + hijo·[hombre])."
+  },
+  {
+   "id": "muere_padre",
+   "nombre": "Muere tu papá",
+   "categoria": "familia",
+   "cuando": "padre_edad > 0",
+   "prob_anual": "si(familiar_enfermo == 'padre', k('P_MUERE_ENFERMO'), 0.5 * q_muerte(padre_edad, 'h'))",
+   "resultados": [
+    {
+     "id": "muere",
+     "prob": 1,
+     "texto": "Muere tu papá.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "padre_edad",
+       "op": "fija",
+       "valor": -1
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "k('LUTO_A_ANIMO') * luto('papa', 0)"
+      },
+      {
+       "var": "luto_padre",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "k('INGRESO_TRAS_MUERTE_PADRE', sexo)"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "ine_mortalidad",
+    "leopold_lechner_2015"
+   ],
+   "calidad": "dato"
+  },
+  {
+   "id": "enferma_familiar",
+   "nombre": "Se enferma un familiar",
+   "categoria": "familia",
+   "cuando": "familiar_enfermo == ''",
+   "prob_anual": "si(madre_edad > 0, q_muerte(madre_edad, 'm'), 0) + si(padre_edad > 0, q_muerte(padre_edad, 'h'), 0)",
+   "resultados": [
+    {
+     "id": "enferma",
+     "prob": 1,
+     "texto": "Tu mamá o tu papá recibe un diagnóstico grave.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "familiar_enfermo",
+       "op": "fija",
+       "valor": "quien_enferma"
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": -4
+      }
+     ],
+     "luego": "cuidar_familiar"
+    }
+   ],
+   "fuentes": [
+    "ine_mortalidad",
+    "equipo"
+   ],
+   "calidad": "supuesto",
+   "notas": "Supuesto: la enfermedad grave llega con el doble del riesgo de morir sano y dura unos dos años."
+  },
+  {
+   "id": "forma_pareja",
+   "nombre": "Empiezas una relación",
+   "categoria": "familia",
+   "cuando": "y(pareja == 'no', edad >= 20)",
+   "prob_anual": "k('P_FORMAR_PAREJA', si(edad <= 35, '20-35', '36+'))",
+   "resultados": [
+    {
+     "id": "empieza",
+     "prob": 1,
+     "texto": "Empiezas una relación.",
+     "tono": "bueno",
+     "efectos": [
+      {
+       "var": "pareja",
+       "op": "fija",
+       "valor": "'pololeo'"
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "k('ANIMO_PAREJA')"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "cep_casen_pareja",
+    "elsoc"
+   ],
+   "calidad": "mixto"
+  },
+  {
+   "id": "termina_pareja",
+   "nombre": "Se termina la relación",
+   "categoria": "familia",
+   "cuando": "pareja != 'no'",
+   "prob_anual": "k('P_SEPARARSE', pareja)",
+   "resultados": [
+    {
+     "id": "termina",
+     "prob": 1,
+     "texto": "Tu relación se termina.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "pareja",
+       "op": "fija",
+       "valor": "'no'"
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": -6
+      },
+      {
+       "var": "ahorro",
+       "op": "multiplica",
+       "valor": 0.85,
+       "cuando": "pareja != 'pololeo'"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "ine_vitales",
+    "clark_georgellis_2013"
+   ],
+   "calidad": "mixto"
+  },
+  {
+   "id": "hijo_no_planificado",
+   "nombre": "Embarazo no planificado",
+   "categoria": "familia",
+   "cuando": "y(pareja != 'no', edad <= 44)",
+   "prob_anual": "tabla('ine_fecundidad_2023', 'p_hijo_anual', 'banda', banda5) * 0.3",
+   "resultados": [
+    {
+     "id": "nace",
+     "prob": 1,
+     "texto": "Viene un hijo que no estaba en los planes.",
+     "tono": "neutro",
+     "efectos": [
+      {
+       "var": "hijos",
+       "op": "suma",
+       "valor": 1
+      },
+      {
+       "var": "edad_hijo_menor",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "energia",
+       "op": "suma",
+       "valor": -15,
+       "duracion": 3
+      }
+     ],
+     "luego": "tener_hijo"
+    }
+   ],
+   "fuentes": [
+    "ine_vitales",
+    "equipo"
+   ],
+   "calidad": "mixto",
+   "notas": "Supuesto: 30% de los nacimientos no fue planificado. La decisión tener_hijo cubre el resto."
+  },
+  {
+   "id": "herencia",
+   "nombre": "Herencia o ayuda familiar",
+   "categoria": "dinero",
+   "cuando": "1",
+   "prob_anual": 0.01,
+   "resultados": [
+    {
+     "id": "recibe",
+     "prob": 1,
+     "texto": "Recibes una herencia.",
+     "tono": "bueno",
+     "efectos": [
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "azar_lognormal(2000000, 10000000, 60000000)"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "equipo"
+   ],
+   "calidad": "supuesto"
+  },
+  {
+   "id": "startup_cierra",
+   "nombre": "Tu startup cierra",
+   "categoria": "trabajo",
+   "cuando": "y(estado == 'empleado', tipo_empleador == 'startup')",
+   "prob_anual": "1 - pow(1 - k('YC_CERRADA'), 1 / 8)",
+   "resultados": [
+    {
+     "id": "cierra",
+     "prob": 1,
+     "texto": "La startup donde trabajas cierra.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "estado",
+       "op": "fija",
+       "valor": "'buscando'"
+      },
+      {
+       "var": "sueldo_ref",
+       "op": "fija",
+       "valor": "sueldo"
+      },
+      {
+       "var": "sueldo",
+       "op": "fija",
+       "valor": 0
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "yc_directorio"
+   ],
+   "calidad": "mixto",
+   "notas": "Anualiza el 29,9% de cierres en unos 8 años de las cohortes 2012-2019."
+  },
+  {
+   "id": "animo_vuelve",
+   "nombre": "Adaptación",
+   "categoria": "salud",
+   "cuando": "1",
+   "prob_anual": 1,
+   "resultados": [
+    {
+     "id": "adapta",
+     "prob": 1,
+     "texto": "El ánimo vuelve de a poco a tu nivel.",
+     "tono": "neutro",
+     "efectos": [
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "(k('ANIMO_META') + si(estado == 'buscando', -4, 0) + si(ahorro < 0, -3, 0) + si(pareja != 'no', 1, 0) - animo) * k('ANIMO_REVERSION')"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "clark_georgellis_2013",
+    "elsoc"
+   ],
+   "calidad": "mixto"
+  }
+ ]
+}

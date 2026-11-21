@@ -1,4 +1,4 @@
-"""Catálogo de decisiones. Valores de relleno: calibrar con datos reales."""
+"""Catálogo de decisiones. growth, riesgo_rel y wear son de relleno: calibrar con datos reales."""
 
 import numpy as np
 
@@ -6,44 +6,51 @@ from app.sim.decisions.base import Decision
 from app.sim.state import State
 
 
+CAIDA_SUELDO_AL_PERDER_EMPLEO = 0.6  # relleno
+
+
 class ParametricDecision(Decision):
-    """Decisión definida por (crecimiento, riesgo de desempleo, desgaste)."""
+    """Decisión definida por (crecimiento, riesgo relativo de cesantía, desgaste).
+
+    El riesgo base de perder el empleo sale de la EPS según la edad; `riesgo_rel`
+    lo multiplica (1.0 = igual que el promedio de tu edad).
+    """
 
     growth: float = 0.0
-    unemployment_risk: float = 0.05
     wear: float = 0.0
 
     def apply(self, state: State, rng: np.random.Generator) -> State:
         n = state.sueldo.shape[0]
-        # el desgaste alto sube el riesgo de caída
-        p = np.clip(self.unemployment_risk + 0.3 * np.maximum(state.desgaste - 0.6, 0), 0, 1)
-        state.desempleado = rng.random(n) < p
         shock = rng.normal(self.growth, 0.06, n)
-        state.sueldo = np.where(state.desempleado, state.sueldo * 0.6, state.sueldo * (1 + shock))
+        perdio = state.extra["perdio_empleo"]
+        # quien pierde el empleo baja su sueldo de referencia una vez; sin empleo no se mueve
+        factor = np.where(perdio, CAIDA_SUELDO_AL_PERDER_EMPLEO, np.where(state.desempleado, 1.0, 1 + shock))
+        state.sueldo = state.sueldo * factor
         state.desgaste = np.clip(state.desgaste + self.wear + rng.normal(0, 0.03, n), 0, 1)
         return state
 
 
 class Seguir(ParametricDecision):
     key, label = "seguir", "Seguir igual"
-    growth, unemployment_risk, wear = 0.03, 0.05, 0.02
+    growth, riesgo_rel, wear = 0.03, 1.0, 0.02
 
 
 class Sabatico(ParametricDecision):
     key, label = "sabatico", "Año sabático"
-    growth, unemployment_risk, wear = -0.10, 0.10, -0.15
+    growth, riesgo_rel, wear = -0.10, 2.0, -0.15
 
 
 class CambiarPega(ParametricDecision):
     key, label = "cambiar_pega", "Cambiar de pega"
-    growth, unemployment_risk, wear = 0.08, 0.08, 0.05
+    growth, riesgo_rel, wear = 0.08, 1.6, 0.05
+    cambio_forzado = True
 
 
 class TrabajarMas(ParametricDecision):
     key, label = "trabajar_mas", "Trabajar más horas"
-    growth, unemployment_risk, wear = 0.05, 0.04, 0.12
+    growth, riesgo_rel, wear = 0.05, 0.8, 0.12
 
 
 class Estudiar(ParametricDecision):
     key, label = "estudiar", "Estudiar"
-    growth, unemployment_risk, wear = -0.05, 0.03, 0.04
+    growth, riesgo_rel, wear = -0.05, 0.6, 0.04
