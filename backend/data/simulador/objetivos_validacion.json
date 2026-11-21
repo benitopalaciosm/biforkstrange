@@ -1,0 +1,373 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Lo que una cohorte simulada desde los 18 años debería reproducir. Correr con al menos 5.000 gemelos.",
+ "objetivos": [
+  {
+   "id": "ingreso_p50_18-24",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 18-24",
+   "valor": 548572,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_18-24",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 18-24",
+   "valor": 0.2191,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p50_25-29",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 25-29",
+   "valor": 650000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_25-29",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 25-29",
+   "valor": 0.1177,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p50_30-34",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 30-34",
+   "valor": 728106,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_30-34",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 30-34",
+   "valor": 0.075,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p50_35-39",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 35-39",
+   "valor": 760000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_35-39",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 35-39",
+   "valor": 0.068,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p50_40-44",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 40-44",
+   "valor": 797924,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_40-44",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 40-44",
+   "valor": 0.0579,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p50_45-49",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso mediano de ocupados, 45-49",
+   "valor": 780000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "mediana de sueldo entre años con estado empleado, independiente o fundador",
+   "nota": "Reponderado a la educación de quienes hoy tienen 30-34"
+  },
+  {
+   "id": "desocupacion_45-49",
+   "grupo": "Empleo",
+   "indicador": "Desocupación, 45-49",
+   "valor": 0.0602,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años buscando / (años ocupado + años buscando)"
+  },
+  {
+   "id": "ingreso_p25_25-29",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más bajo, 25-29",
+   "valor": 500000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 25 de sueldo de ocupados"
+  },
+  {
+   "id": "ingreso_p75_25-29",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más alto, 25-29",
+   "valor": 980414,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 75 de sueldo de ocupados"
+  },
+  {
+   "id": "publico_25-29",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Asalariados públicos entre ocupados, 25-29",
+   "valor": 0.1285,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con tipo_empleador == 'publico' / años ocupado"
+  },
+  {
+   "id": "independientes_25-29",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Empleadores y cuenta propia entre ocupados, 25-29",
+   "valor": 0.1329,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con estado independiente o fundador / años ocupado"
+  },
+  {
+   "id": "ingreso_p25_35-39",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más bajo, 35-39",
+   "valor": 527627,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 25 de sueldo de ocupados"
+  },
+  {
+   "id": "ingreso_p75_35-39",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más alto, 35-39",
+   "valor": 1200000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 75 de sueldo de ocupados"
+  },
+  {
+   "id": "publico_35-39",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Asalariados públicos entre ocupados, 35-39",
+   "valor": 0.1672,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con tipo_empleador == 'publico' / años ocupado"
+  },
+  {
+   "id": "independientes_35-39",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Empleadores y cuenta propia entre ocupados, 35-39",
+   "valor": 0.1874,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con estado independiente o fundador / años ocupado"
+  },
+  {
+   "id": "ingreso_p25_45-49",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más bajo, 45-49",
+   "valor": 518651,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 25 de sueldo de ocupados"
+  },
+  {
+   "id": "ingreso_p75_45-49",
+   "grupo": "Sueldos",
+   "indicador": "Ingreso del 25% más alto, 45-49",
+   "valor": 1400000,
+   "tolerancia_relativa": 0.15,
+   "fuente": "ine_esi_2025",
+   "medir": "percentil 75 de sueldo de ocupados"
+  },
+  {
+   "id": "publico_45-49",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Asalariados públicos entre ocupados, 45-49",
+   "valor": 0.133,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con tipo_empleador == 'publico' / años ocupado"
+  },
+  {
+   "id": "independientes_45-49",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Empleadores y cuenta propia entre ocupados, 45-49",
+   "valor": 0.2392,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años con estado independiente o fundador / años ocupado"
+  },
+  {
+   "id": "empresa_grande",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Asalariados privados en empresas de 200 o más personas",
+   "valor": 0.3994,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "años en tipo_empleador grande / años en grande, pyme o startup"
+  },
+  {
+   "id": "edu_media_30_34",
+   "grupo": "Educación",
+   "indicador": "Nivel media a los 30-34",
+   "valor": 0.5003,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "proporción de años 30-34 con ese nivel"
+  },
+  {
+   "id": "edu_universitaria_30_34",
+   "grupo": "Educación",
+   "indicador": "Nivel universitaria a los 30-34",
+   "valor": 0.3149,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "proporción de años 30-34 con ese nivel"
+  },
+  {
+   "id": "edu_tecnica_30_34",
+   "grupo": "Educación",
+   "indicador": "Nivel tecnica a los 30-34",
+   "valor": 0.1638,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "proporción de años 30-34 con ese nivel"
+  },
+  {
+   "id": "edu_postgrado_30_34",
+   "grupo": "Educación",
+   "indicador": "Nivel postgrado a los 30-34",
+   "valor": 0.0209,
+   "tolerancia": 0.03,
+   "fuente": "ine_esi_2025",
+   "medir": "proporción de años 30-34 con ese nivel"
+  },
+  {
+   "id": "separacion_18_29",
+   "grupo": "Trayectorias",
+   "indicador": "Despido o fin de contrato al año, 18-29",
+   "valor": 0.143,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "años con evento separacion_empleo / años empleado, 18-29"
+  },
+  {
+   "id": "separacion_30_44",
+   "grupo": "Trayectorias",
+   "indicador": "Despido o fin de contrato al año, 30-44",
+   "valor": 0.066,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "idem 30-44"
+  },
+  {
+   "id": "separacion_45_59",
+   "grupo": "Trayectorias",
+   "indicador": "Despido o fin de contrato al año, 45-59",
+   "valor": 0.05,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "idem 45-59"
+  },
+  {
+   "id": "cambio_18_29",
+   "grupo": "Trayectorias",
+   "indicador": "Cambio de empleador al año, 18-29",
+   "valor": 0.218,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "cambios de empleador / años empleado"
+  },
+  {
+   "id": "cambio_30_44",
+   "grupo": "Trayectorias",
+   "indicador": "Cambio de empleador al año, 30-44",
+   "valor": 0.138,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "idem"
+  },
+  {
+   "id": "cambio_45_59",
+   "grupo": "Trayectorias",
+   "indicador": "Cambio de empleador al año, 45-59",
+   "valor": 0.102,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "idem"
+  },
+  {
+   "id": "sigue_cesante_12m",
+   "grupo": "Trayectorias",
+   "indicador": "Sigue sin pega un año después de quedar cesante",
+   "valor": 0.34,
+   "tolerancia": 0.03,
+   "fuente": "eps_2024",
+   "medir": "episodios que siguen al año / episodios"
+  },
+  {
+   "id": "pareja_30_34",
+   "grupo": "Vida",
+   "indicador": "Con pareja a los 30-34",
+   "valor": 0.62,
+   "tolerancia": 0.03,
+   "fuente": "cep_casen_pareja",
+   "medir": "años con pareja != 'no' / años, 30-34"
+  },
+  {
+   "id": "cancer_18_50",
+   "grupo": "Vida",
+   "indicador": "Tuvo cáncer entre los 18 y los 50",
+   "valor": 0.027,
+   "tolerancia": 0.01,
+   "fuente": "iarc_ci5",
+   "medir": "personas con evento cancer / personas"
+  },
+  {
+   "id": "hijo_madre_sale",
+   "grupo": "Vida",
+   "indicador": "Madres que trabajaban y no trabajan 12 meses después del primer hijo",
+   "valor": 0.173,
+   "tolerancia": 0.04,
+   "fuente": "eps_2024",
+   "medir": "entre mujeres empleadas al nacer el primer hijo"
+  },
+  {
+   "id": "startup_anos",
+   "grupo": "Tipo de trabajo",
+   "indicador": "Años trabajando en una startup, entre años de asalariado",
+   "valor": 0.01,
+   "tolerancia": 0.01,
+   "fuente": "equipo",
+   "medir": "años con tipo_empleador == 'startup' / años empleado"
+  }
+ ]
+}

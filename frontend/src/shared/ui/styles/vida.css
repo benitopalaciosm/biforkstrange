@@ -310,3 +310,68 @@
   .vd-t { animation: none !important; }
   .vd-trazo { stroke-dashoffset: 0 !important; }
 }
+
+/* ───────── Campos de texto (formulario "Sobre ti") ───────── */
+.vd-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.vd-campo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.vd-campo--ancho { grid-column: 1 / -1; }
+.vd-campo > span { font: 600 11px/14px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+.vd-campo input, .vd-campo select, .vd-campo textarea {
+  width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; border: 2px solid var(--tinta); border-radius: 12px;
+  background: var(--papel); color: var(--tinta); font: 500 16px/22px var(--font); appearance: none;
+}
+.vd-campo select { background-image: linear-gradient(45deg, transparent 50%, var(--tinta) 50%), linear-gradient(135deg, var(--tinta) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 32px; }
+.vd-campo textarea { min-height: 120px; resize: vertical; }
+.vd-campo input:focus-visible, .vd-campo select:focus-visible, .vd-campo textarea:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.vd-espera { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/20px var(--font); color: var(--suave); }
+.vd-espera::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sol); animation: vd-latido 1s ease-in-out infinite; }
+@keyframes vd-latido { 50% { transform: scale(.5); opacity: .4; } }
+.vd-cv { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.vd-cv li { font: 500 14px/20px var(--font); color: var(--media); }
+.vd-cv li::before { content: "— "; color: var(--control); }
+.vd-fuente { font: 400 12px/16px var(--font); color: var(--suave); }
+.vd-fuente a { color: inherit; }
+.vd-mundos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.vd-mundo { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--niebla); font: 500 13px/18px var(--font); }
+
+/* ───────── Temporada estilo carrera: tu pega, contadores, recap ───────── */
+.vd-club { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 2px solid var(--tinta); border-radius: 16px; background: var(--papel); box-shadow: 0 4px 0 var(--tinta); }
+.vd-club-quien { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vd-club-nombre { font: 700 19px/24px var(--font); letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vd-club-cargo { font: 400 13px/18px var(--font); color: var(--suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vd-club-sueldo { flex: none; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+.vd-club-sueldo b { font: 600 20px/24px var(--mono); }
+.vd-club-sueldo span { font: 600 10px/14px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+.vd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.vd-stat { display: flex; flex-direction: column; gap: 2px; padding: 10px 8px; border-radius: 12px; background: var(--niebla); min-width: 0; }
+.vd-stat b { font: 600 18px/22px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vd-stat span { font: 600 10px/13px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--suave); }
+.vd-stat--sube b { animation: vd-pop-num .6s var(--rebote); color: var(--dinero); }
+@keyframes vd-pop-num { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.vd-recap { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 16px; background: var(--niebla); }
+.vd-recap-linea { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font: 500 15px/21px var(--font); }
+.vd-recap-linea i { font-style: normal; font-weight: 700; text-align: center; }
+.vd-recap-linea i.bueno { color: var(--dinero); }
+.vd-recap-linea i.malo { color: var(--vida); }
+.vd-recap-linea i.neutro { color: var(--control); }
+.vd-oferta-sueldo { font: 600 14px/18px var(--mono); }
+
+/* ───────── Carta de carrera ───────── */
+.vd-carta { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 22px 20px 20px; border: 2px solid #1D1E22; border-radius: 24px; background: var(--sol); color: #1D1E22; box-shadow: 0 6px 0 #1D1E22; overflow: hidden; }
+.vd-carta::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.45) 50%, transparent 65%); transform: translateX(-100%); animation: vd-brillo 2.4s 0.6s var(--ease) 1 forwards; pointer-events: none; }
+@keyframes vd-brillo { to { transform: translateX(100%); } }
+.vd-carta-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.vd-carta-media { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.vd-carta-media b { font: 700 56px/56px var(--mono); letter-spacing: -0.04em; }
+.vd-carta-media span { font: 600 11px/14px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.vd-carta-veredicto { font: 700 26px/30px var(--font); letter-spacing: -0.02em; text-align: right; text-wrap: balance; }
+.vd-carta-sub { font: 500 13px/18px var(--font); text-align: right; }
+.vd-carta-attrs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; border-top: 2px solid #1D1E22; padding-top: 12px; }
+.vd-carta-attrs div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.vd-carta-attrs b { font: 700 22px/26px var(--mono); }
+.vd-carta-attrs span { font: 600 10px/12px var(--mono); letter-spacing: .06em; }
+.vd-carta-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.vd-carta-stats div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.55); }
+.vd-carta-stats b { font: 600 16px/20px var(--mono); white-space: nowrap; }
+.vd-carta-stats span { font: 600 10px/12px var(--mono); letter-spacing: .05em; text-transform: uppercase; }

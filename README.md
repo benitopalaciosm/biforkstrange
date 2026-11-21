@@ -4,11 +4,13 @@
 
 Track: Simulations · Platanus Hack 26 Santiago, team 32
 
-Tu gemelo digital vive tus decisiones de carrera antes que tú. Eliges qué hace año a año (sabático, cambiar de pega, trabajar más, estudiar) y el simulador corre miles de futuros posibles para mostrarte el rango de resultados, no un único número.
+Tu gemelo digital vive tus decisiones de carrera antes que tú. Creas tu gemelo, eliges una decisión con dos caminos (cambiarte o quedarte, irte a una startup, emprender, un magíster), juegas 10 años de cada uno y el motor corre cientos de vidas de ambos, con la misma suerte, en cuatro mundos distintos. No te da un número: te muestra qué camino es robusto y cuál es una apuesta.
+
+Los números salen de datos chilenos (ESI 2025, EPS 2024, ELSOC, mifuturo) y cada uno muestra su fuente en el juego. Claude lee el CV y narra; nunca calcula.
 
 ## Stack
 
-- `backend/`: FastAPI + motor Monte Carlo en numpy
+- `backend/`: FastAPI + motor de microsimulación que interpreta las reglas de `backend/data/`
 - `frontend/`: Vite + React + TypeScript
 - `supabase/`: esquema y migraciones
 

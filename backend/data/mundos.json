@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "descripcion": "Cuatro mundos: ciclo económico (estable o volátil) por tecnología (sigue parecido o revolución digital). Un mundo no es un guion: cambia parámetros del paquete y agrega multiplicadores sobre probabilidades del motor. Todos los valores son supuestos del equipo.",
+  "fuentes": [
+    {"cita": "Recesiones chilenas de 1982, 1999, 2009 y 2020: cerca de una cada 10 años.", "uso": "ancla de P_RECESION"},
+    {"cita": "Brynjolfsson, Chandar y Chen (2025), Canaries in the Coal Mine: 19% menos empleo de 22 a 25 años en ocupaciones expuestas a IA.", "uso": "tamaño del efecto de la IA, extendido a todas las edades en la revolución digital"}
+  ],
+  "multiplicadores": {
+    "separacion": "Multiplica la probabilidad anual del evento separacion_empleo.",
+    "encontrar": "Multiplica la probabilidad de volver a trabajar (cesantia y reempleo en el mismo año).",
+    "alza": "Se suma al alza anual del sueldo de quien está empleado."
+  },
+  "base": "estable_parecido",
+  "mundos": [
+    {
+      "id": "estable_parecido",
+      "nombre": "Estable y parecido a hoy",
+      "ciclo": "estable",
+      "tecnologia": "parecido",
+      "descripcion": "Pocas crisis y las carreras rinden como hoy.",
+      "parametros": {"P_RECESION": 0.06},
+      "multiplicadores": {"separacion": "1", "encontrar": "1", "alza": "0"}
+    },
+    {
+      "id": "estable_digital",
+      "nombre": "Estable con revolución digital",
+      "ciclo": "estable",
+      "tecnologia": "digital",
+      "descripcion": "Pocas crisis, pero la IA cambia los rubros expuestos: quien no la usa pierde terreno.",
+      "parametros": {"P_RECESION": 0.06},
+      "multiplicadores": {
+        "separacion": "si(y(exposicion_ia >= k('IA_EXPUESTA'), no(usa_ia)), 1.5, 1)",
+        "encontrar": "si(y(exposicion_ia >= k('IA_EXPUESTA'), no(usa_ia)), k('IA_JOVEN'), 1)",
+        "alza": "si(usa_ia, 0.01, 0)"
+      }
+    },
+    {
+      "id": "volatil_parecido",
+      "nombre": "Volátil y parecido a hoy",
+      "ciclo": "volatil",
+      "tecnologia": "parecido",
+      "descripcion": "Crisis frecuentes y poco cambio tecnológico.",
+      "parametros": {"P_RECESION": 0.22},
+      "multiplicadores": {"separacion": "1", "encontrar": "1", "alza": "0"}
+    },
+    {
+      "id": "volatil_digital",
+      "nombre": "Volátil con revolución digital",
+      "ciclo": "volatil",
+      "tecnologia": "digital",
+      "descripcion": "Crisis frecuentes y automatización rápida.",
+      "parametros": {"P_RECESION": 0.22},
+      "multiplicadores": {
+        "separacion": "si(y(exposicion_ia >= k('IA_EXPUESTA'), no(usa_ia)), 1.5, 1)",
+        "encontrar": "si(y(exposicion_ia >= k('IA_EXPUESTA'), no(usa_ia)), k('IA_JOVEN'), 1)",
+        "alza": "si(usa_ia, 0.01, 0)"
+      }
+    }
+  ],
+  "referencia": {
+    "id": "referencia",
+    "nombre": "Parámetros del paquete",
+    "descripcion": "P_RECESION = 0,12 y sin efectos de IA adicionales. Se usa para calibrar, no para jugar.",
+    "parametros": {},
+    "multiplicadores": {"separacion": "1", "encontrar": "1", "alza": "0"}
+  }
+}

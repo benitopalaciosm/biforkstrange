@@ -1,0 +1,156 @@
+{
+  "version": "1.0.0",
+  "descripcion": "Qué parte del paquete data/simulador usa el juego y qué agrega el motor. Todo lo que está aquí es decisión del equipo (calidad: supuesto) salvo que diga otra cosa. El paquete no se edita: los cambios van como parches con su motivo.",
+  "horizonte_anios": 10,
+
+  "decisiones": [
+    "oferta_externa", "buscar_estando_empleado", "renunciar", "pedir_aumento", "trabajar_mas_horas", "jefatura",
+    "remoto_para_afuera", "pedir_hibrido", "media_jornada", "cambiar_de_rubro", "aprender_ia", "invertir_en_red",
+    "unirse_a_startup", "emprender", "seguir_con_tu_empresa", "emigrar", "volver_a_chile",
+    "magister", "bootcamp", "volver_a_estudiar", "cesantia", "sabatico", "licencia_salud_mental",
+    "ahorro", "comprar_vivienda", "tener_hijo", "formalizar_pareja", "separarse", "buscar_pareja",
+    "tipo_de_empleador"
+  ],
+  "eventos": [
+    "recesion", "alza_anual", "ascenso", "separacion_empleo", "oferta_llega", "titularse_en_recesion",
+    "forma_pareja", "termina_pareja", "herencia", "startup_cierra", "animo_vuelve"
+  ],
+  "excluido": [
+    {"que": "salir_del_colegio, elegir_carrera, financiar_estudios, seguir_o_desertar, trabajar_mientras_estudias, practica, intercambio, primera_pega", "motivo": "El juego parte con una persona que ya trabaja o busca trabajo."},
+    {"que": "doctorado y la opción beca de magister", "motivo": "Mueven la edad varios años de una vez y el juego avanza de a un año."},
+    {"que": "independizarse y la opción informal de cesantia", "motivo": "El paquete declara que el trabajo por cuenta propia todavía no está modelado: no hay regla para volver a emplearse."},
+    {"que": "cambiar_de_ocupacion, mudarse_de_region", "motivo": "Piden ocupación CIUO y región de destino, que el gemelo de la demo no captura."},
+    {"que": "cancer, muere_madre, muere_padre, enferma_familiar, cuidar_familiar, hijo_no_planificado", "motivo": "Fuera del alcance de una demo sobre decisiones laborales."}
+  ],
+  "opciones_excluidas": {"magister": ["beca"], "cesantia": ["informal"]},
+
+  "condiciones_extra": {
+    "bootcamp": {"cuando": "rubro != 'Información y comunicaciones'", "motivo": "Un bootcamp de programación no es una reconversión para quien ya trabaja en tecnología."}
+  },
+
+  "pesos_categoria": {
+    "familia": 0.5,
+    "dinero": 0.5,
+    "nota": "Multiplica el peso de aparición de las cartas de esa categoría para que la partida sea sobre todo laboral."
+  },
+
+  "pesos_decision": {
+    "oferta_externa": 0.5,
+    "nota": "La carta de oferta sale la mitad de lo que dice el paquete, para que la partida no se repita; las ofertas siguen llegando por el evento oferta_llega y la política de los gemelos se recalibró con este valor."
+  },
+
+  "parches": [
+    {
+      "decision": "unirse_a_startup", "opcion": "ir", "resultado": "crece",
+      "texto_al_ocurrir": "Te vas a la startup con acciones. El desenlace se sabrá con los años.",
+      "quitar_efectos": ["ahorro"],
+      "agregar_efectos": [
+        {"var": "exit_en", "op": "fija", "valor": "azar_entero(3, 5)"},
+        {"var": "destino_startup", "op": "fija", "valor": 1}
+      ],
+      "motivo": "En el paquete las acciones pagan solo si anos_en_startup >= 4 al momento de entrar, que nunca se cumple. El motor guarda el desenlace sorteado y paga la venta 3 a 5 años después si sigues ahí."
+    },
+    {
+      "decision": "unirse_a_startup", "opcion": "ir", "resultado": "cierra",
+      "texto_al_ocurrir": "Te vas a la startup con acciones. El desenlace se sabrá con los años.",
+      "agregar_efectos": [{"var": "destino_startup", "op": "fija", "valor": 1}],
+      "motivo": "El desenlace (cierra en 1 a 4 años) ya quedó sorteado; no se le suma el evento startup_cierra."
+    },
+    {
+      "decision": "unirse_a_startup", "opcion": "ir", "resultado": "sigue",
+      "texto_al_ocurrir": "Te vas a la startup con acciones. El desenlace se sabrá con los años.",
+      "agregar_efectos": [{"var": "destino_startup", "op": "fija", "valor": 1}],
+      "motivo": "Idem: el desenlace ya quedó sorteado."
+    },
+    {
+      "decision": "emprender", "opcion": "emprender", "resultado": "parte",
+      "quitar_efectos": ["sueldo_ref"],
+      "agregar_efectos": [{"var": "sueldo_ref", "op": "fija", "valor": "max(sueldo, sueldo_ref)"}],
+      "motivo": "El paquete guarda sueldo_ref = sueldo. Quien emprende estando sin pega tiene sueldo 0 y perdería su sueldo de referencia; se conserva el mayor, igual que hace el paquete en sabatico."
+    },
+    {
+      "decision": "cesantia", "opcion": "rapido", "resultado": "nada",
+      "quitar_efectos": ["ahorro"],
+      "motivo": "El costo de un año sin ingreso lo aplica el motor a todos los caminos con la misma fórmula del paquete (regla costo_sin_ingreso), no solo a esta opción."
+    }
+  ],
+
+  "reglas_motor": {
+    "nota": "Lo que el paquete deja al simulador al cerrar el año. Coeficientes del equipo.",
+    "skill_por_ano_trabajado": 2,
+    "red_por_ano_trabajado": 1,
+    "energia_base": 70,
+    "energia_reversion": 0.25,
+    "costo_sin_ingreso": "12 * sueldo_ref * (1 - k('COBERTURA_SEGURO')) * 0.5",
+    "anos_hueco": 2,
+    "anos_inactivo": 1,
+    "venta_startup": "sueldo * 12 * azar_uniforme(0.5, 3)",
+    "tope_prob_encontrar": 0.97
+  },
+
+  "indicadores": {
+    "nota": "Cuatro barras de 0 a 100. Dinero y Carrera se apoyan en la ESI; Bienestar y Vida personal son reglas simples del equipo.",
+    "dinero": {"peso_percentil_ingreso": 0.75, "peso_colchon": 0.25, "meses_colchon_lleno": 60, "nota": "Colchón = raíz de (meses de gasto que cubre tu ahorro / 60): un año de gastos llena 45% y cinco años, 100%.", "respaldo": "fuerte", "fuentes": ["ine_esi_2025", "ine_epf"]},
+    "carrera": {"peso_nivel": 0.30, "peso_skill": 0.30, "peso_red": 0.15, "peso_ocupado": 0.25, "respaldo": "medio", "fuentes": ["equipo"]},
+    "bienestar": {"peso_animo": 0.6, "peso_energia": 0.4, "respaldo": "debil", "fuentes": ["elsoc", "equipo"]},
+    "vida_personal": {"peso_tiempo": 0.65, "peso_relaciones": 0.35, "sin_pareja": 0.4, "respaldo": "debil", "fuentes": ["ine_enut_2023", "equipo"]}
+  },
+
+  "perfil_por_omision": {
+    "nota": "Variables que el CV no trae. El gemelo las fija así y se pueden corregir.",
+    "skill": "clamp(40 + 12 * nivel + antiguedad, 20, 90)",
+    "red": "clamp(20 + 2 * (edad - 22) + 5 * nivel, 10, 80)",
+    "horas": 44
+  },
+
+  "politica": {
+    "nota": "Cómo deciden los gemelos que juegan solos: probabilidad base de cada opción cuando sale la carta, inclinada por la tolerancia al riesgo del gemelo. P(opción) es proporcional a base * exp(riesgo_incl * (riesgo - 50) / 50). Es un supuesto, con tres excepciones: pedir_aumento sale de Artz 2018 (pide cerca de 70%), y oferta_externa y cesantia están calibradas para que la cohorte de app/sim/calibracion.py reproduzca el cambio de empleador (13,8% al año) y la cesantía que dura más de un año (34%) de la EPS 2024.",
+    "peso_gemelo": 0.6,
+    "nota_gemelo": "Si Claude destiló cómo decide la persona (a partir de su CV y de lo que contó de sí misma), cada opción usa (1 - peso_gemelo) * base + peso_gemelo * propensión propia. Así los gemelos que juegan solos deciden parecido a su dueño sin soltarse del todo de las frecuencias reales.",
+    "opciones": {
+      "oferta_externa": {"cambiar": [0.22, 0.6], "contraoferta": [0.15, 0], "quedarse": [0.63, -0.6]},
+      "buscar_estando_empleado": {"buscar": [0.30, 0.3], "no": [0.70, 0]},
+      "renunciar": {"renunciar": [0.40, 0.6], "aguantar": [0.60, 0]},
+      "pedir_aumento": {"pedir": [0.70, 0], "esperar": [0.30, 0]},
+      "trabajar_mas_horas": {"si": [0.35, 0], "no": [0.65, 0]},
+      "jefatura": {"aceptar": [0.70, 0], "rechazar": [0.30, 0]},
+      "remoto_para_afuera": {"postular": [0.30, 0.4], "no": [0.70, 0]},
+      "pedir_hibrido": {"pedir": [0.60, 0], "no": [0.40, 0]},
+      "media_jornada": {"pedir": [0.10, 0], "no": [0.90, 0]},
+      "cambiar_de_rubro": {"cambiar": [0.20, 0.4], "no": [0.80, 0]},
+      "aprender_ia": {"aprender": [0.60, 0], "ignorar": [0.40, 0]},
+      "invertir_en_red": {"si": [0.50, 0], "no": [0.50, 0]},
+      "unirse_a_startup": {"ir": [0.25, 0.8], "quedarse": [0.75, 0]},
+      "emprender": {"emprender": [0.08, 0.9], "lado": [0.17, 0.3], "no": [0.75, 0]},
+      "seguir_con_tu_empresa": {"seguir": [0.75, 0.3], "levantar": [0.10, 0], "vender": [0.05, 0], "cerrar": [0.10, -0.5]},
+      "emigrar": {"irse": [0.08, 0.8], "quedarse": [0.92, 0]},
+      "volver_a_chile": {"volver": [0.30, 0], "quedarse": [0.70, 0]},
+      "magister": {"vespertino": [0.15, 0], "no": [0.85, 0]},
+      "bootcamp": {"hacer": [0.10, 0.3], "no": [0.90, 0]},
+      "volver_a_estudiar": {"estudiar": [0.15, 0], "no": [0.85, 0]},
+      "cesantia": {"rapido": [0.60, -0.5], "nivel": [0.32, 0.5], "bootcamp": [0.03, 0], "emprender": [0.05, 0.8]},
+      "sabatico": {"irse": [0.10, 0.5], "no": [0.90, 0]},
+      "licencia_salud_mental": {"pedir": [0.60, 0], "seguir": [0.40, 0]},
+      "ahorro": {"mucho": [0.25, -0.3], "normal": [0.60, 0], "gastar": [0.15, 0.3]},
+      "comprar_vivienda": {"comprar": [0.30, 0], "arrendar": [0.70, 0]},
+      "tener_hijo": {"si": [0.40, 0], "esperar": [0.60, 0]},
+      "formalizar_pareja": {"convivir": [0.50, 0], "casarse": [0.15, 0], "seguir_igual": [0.35, 0]},
+      "separarse": {"terminar": [0.30, 0], "intentar": [0.70, 0]},
+      "buscar_pareja": {"si": [0.50, 0], "no": [0.50, 0]}
+    }
+  },
+
+  "bifurcaciones": [
+    {"id": "cambiarme", "decision": "oferta_externa", "a": "cambiar", "b": "quedarse", "titulo": "Me llegó una oferta: ¿me cambio o me quedo?", "premisa": "Otra empresa te ofrece trabajo."},
+    {"id": "startup", "decision": "unirse_a_startup", "a": "ir", "b": "quedarse", "titulo": "¿Me voy a una startup o me quedo donde estoy?", "premisa": "Una startup te ofrece entrar con acciones, por 10% menos de sueldo."},
+    {"id": "emprender", "decision": "emprender", "a": "emprender", "b": "no", "titulo": "¿Renuncio para emprender o sigo empleado?", "premisa": "Tienes una idea de negocio y dudas si dejar tu pega."},
+    {"id": "magister", "decision": "magister", "a": "vespertino", "b": "no", "titulo": "¿Hago un magíster de noche o no?", "premisa": "Puedes estudiar un magíster vespertino sin dejar tu trabajo."},
+    {"id": "sabatico", "decision": "sabatico", "a": "irse", "b": "no", "titulo": "¿Me tomo un año sabático o sigo?", "premisa": "Piensas tomarte un año para viajar, descansar o probar otra cosa."},
+    {"id": "emigrar", "decision": "emigrar", "a": "irse", "b": "quedarse", "titulo": "¿Me voy a trabajar a Estados Unidos o me quedo en Chile?", "premisa": "Evalúas postular a trabajos en Estados Unidos."},
+    {"id": "renunciar", "decision": "renunciar", "a": "renunciar", "b": "aguantar", "titulo": "¿Renuncio sin tener otra pega o aguanto?", "premisa": "Estás incómodo en tu trabajo y no tienes otra oferta."},
+    {"id": "remoto", "decision": "remoto_para_afuera", "a": "postular", "b": "no", "titulo": "¿Postulo a un trabajo remoto en dólares o sigo en mi pega?", "premisa": "Hay vacantes remotas para el extranjero pagadas en dólares."},
+    {"id": "bootcamp", "decision": "bootcamp", "a": "hacer", "b": "no", "titulo": "¿Me reconvierto con un bootcamp o sigo en lo mío?", "premisa": "Evalúas un bootcamp de programación o datos."},
+    {"id": "horas", "decision": "trabajar_mas_horas", "a": "si", "b": "no", "titulo": "¿Me sumo a las 55 horas del equipo o respeto mi horario?", "premisa": "Tu equipo trabaja hasta tarde."},
+    {"id": "cesante", "decision": "cesantia", "a": "rapido", "b": "nivel", "titulo": "Estoy sin pega: ¿tomo lo primero que salga o espero algo de mi nivel?", "premisa": "Llevas meses buscando trabajo."}
+  ]
+}

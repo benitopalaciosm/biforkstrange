@@ -11,7 +11,8 @@ from app.repositories.simulations import (
     SimulationRepository,
     SupabaseSimulationRepository,
 )
-from app.services.simulation_service import SimulationService
+from app.services.claude_service import ClaudeService
+from app.services.juego_service import JuegoService
 
 
 @lru_cache
@@ -23,10 +24,18 @@ def get_simulation_repo() -> SimulationRepository:
     return InMemorySimulationRepository()
 
 
-def get_simulation_service(
+def get_juego_service(
     repo: Annotated[SimulationRepository, Depends(get_simulation_repo)],
-) -> SimulationService:
-    return SimulationService(repo, get_settings().default_runs)
+) -> JuegoService:
+    return JuegoService(repo, get_settings().default_runs)
 
 
-SimulationServiceDep = Annotated[SimulationService, Depends(get_simulation_service)]
+@lru_cache
+def get_claude_service() -> ClaudeService:
+    from app.core.llm import get_llm
+
+    return ClaudeService(get_llm())
+
+
+JuegoServiceDep = Annotated[JuegoService, Depends(get_juego_service)]
+ClaudeServiceDep = Annotated[ClaudeService, Depends(get_claude_service)]

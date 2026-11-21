@@ -1,0 +1,649 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "Paquete del simulador de vida laboral",
+ "$defs": {
+  "efecto": {
+   "type": "object",
+   "required": [
+    "var",
+    "op",
+    "valor"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "var": {
+     "type": "string"
+    },
+    "op": {
+     "enum": [
+      "suma",
+      "multiplica",
+      "fija"
+     ]
+    },
+    "valor": {
+     "description": "Expresión del mini lenguaje (texto) o número",
+     "type": [
+      "string",
+      "number"
+     ]
+    },
+    "duracion": {
+     "type": "integer",
+     "minimum": 1,
+     "description": "años que dura; sin campo = permanente"
+    },
+    "cuando": {
+     "type": "string"
+    }
+   }
+  },
+  "resultado": {
+   "type": "object",
+   "required": [
+    "id",
+    "prob",
+    "texto",
+    "efectos"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "prob": {
+     "description": "número, expresión o 'resto'",
+     "type": [
+      "string",
+      "number"
+     ]
+    },
+    "texto": {
+     "type": "string"
+    },
+    "tono": {
+     "enum": [
+      "bueno",
+      "malo",
+      "neutro"
+     ]
+    },
+    "efectos": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "var",
+       "op",
+       "valor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "var": {
+        "type": "string"
+       },
+       "op": {
+        "enum": [
+         "suma",
+         "multiplica",
+         "fija"
+        ]
+       },
+       "valor": {
+        "description": "Expresión del mini lenguaje (texto) o número",
+        "type": [
+         "string",
+         "number"
+        ]
+       },
+       "duracion": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "años que dura; sin campo = permanente"
+       },
+       "cuando": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "luego": {
+     "type": "string",
+     "description": "id de decisión o evento que se dispara después"
+    }
+   }
+  },
+  "opcion": {
+   "type": "object",
+   "required": [
+    "id",
+    "nombre",
+    "resultados"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "nombre": {
+     "type": "string"
+    },
+    "detalle": {
+     "type": "string"
+    },
+    "requisito": {
+     "type": "string"
+    },
+    "costo": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "var",
+       "op",
+       "valor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "var": {
+        "type": "string"
+       },
+       "op": {
+        "enum": [
+         "suma",
+         "multiplica",
+         "fija"
+        ]
+       },
+       "valor": {
+        "description": "Expresión del mini lenguaje (texto) o número",
+        "type": [
+         "string",
+         "number"
+        ]
+       },
+       "duracion": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "años que dura; sin campo = permanente"
+       },
+       "cuando": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "resultados": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "id",
+       "prob",
+       "texto",
+       "efectos"
+      ],
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "prob": {
+        "description": "número, expresión o 'resto'",
+        "type": [
+         "string",
+         "number"
+        ]
+       },
+       "texto": {
+        "type": "string"
+       },
+       "tono": {
+        "enum": [
+         "bueno",
+         "malo",
+         "neutro"
+        ]
+       },
+       "efectos": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "required": [
+          "var",
+          "op",
+          "valor"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "var": {
+           "type": "string"
+          },
+          "op": {
+           "enum": [
+            "suma",
+            "multiplica",
+            "fija"
+           ]
+          },
+          "valor": {
+           "description": "Expresión del mini lenguaje (texto) o número",
+           "type": [
+            "string",
+            "number"
+           ]
+          },
+          "duracion": {
+           "type": "integer",
+           "minimum": 1,
+           "description": "años que dura; sin campo = permanente"
+          },
+          "cuando": {
+           "type": "string"
+          }
+         }
+        }
+       },
+       "luego": {
+        "type": "string",
+        "description": "id de decisión o evento que se dispara después"
+       }
+      }
+     },
+     "minItems": 1
+    },
+    "fuentes": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "calidad": {
+     "enum": [
+      "dato",
+      "mixto",
+      "supuesto"
+     ]
+    }
+   }
+  },
+  "decision": {
+   "type": "object",
+   "required": [
+    "id",
+    "nombre",
+    "categoria",
+    "pregunta",
+    "cuando",
+    "aparicion",
+    "opciones",
+    "evidencia",
+    "calidad"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "nombre": {
+     "type": "string"
+    },
+    "categoria": {
+     "enum": [
+      "estudios",
+      "trabajo",
+      "emprender",
+      "lugar",
+      "familia",
+      "salud",
+      "dinero"
+     ]
+    },
+    "pregunta": {
+     "type": "string"
+    },
+    "cuando": {
+     "type": "string"
+    },
+    "aparicion": {
+     "type": "object",
+     "properties": {
+      "tipo": {
+       "enum": [
+        "forzada",
+        "carta",
+        "interna"
+       ]
+      },
+      "peso": {
+       "description": "Expresión del mini lenguaje (texto) o número",
+       "type": [
+        "string",
+        "number"
+       ]
+      },
+      "proactiva": {
+       "type": "boolean"
+      }
+     }
+    },
+    "opciones": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "id",
+       "nombre",
+       "resultados"
+      ],
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "nombre": {
+        "type": "string"
+       },
+       "detalle": {
+        "type": "string"
+       },
+       "requisito": {
+        "type": "string"
+       },
+       "costo": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "required": [
+          "var",
+          "op",
+          "valor"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "var": {
+           "type": "string"
+          },
+          "op": {
+           "enum": [
+            "suma",
+            "multiplica",
+            "fija"
+           ]
+          },
+          "valor": {
+           "description": "Expresión del mini lenguaje (texto) o número",
+           "type": [
+            "string",
+            "number"
+           ]
+          },
+          "duracion": {
+           "type": "integer",
+           "minimum": 1,
+           "description": "años que dura; sin campo = permanente"
+          },
+          "cuando": {
+           "type": "string"
+          }
+         }
+        }
+       },
+       "resultados": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "required": [
+          "id",
+          "prob",
+          "texto",
+          "efectos"
+         ],
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "prob": {
+           "description": "número, expresión o 'resto'",
+           "type": [
+            "string",
+            "number"
+           ]
+          },
+          "texto": {
+           "type": "string"
+          },
+          "tono": {
+           "enum": [
+            "bueno",
+            "malo",
+            "neutro"
+           ]
+          },
+          "efectos": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "required": [
+             "var",
+             "op",
+             "valor"
+            ],
+            "additionalProperties": false,
+            "properties": {
+             "var": {
+              "type": "string"
+             },
+             "op": {
+              "enum": [
+               "suma",
+               "multiplica",
+               "fija"
+              ]
+             },
+             "valor": {
+              "description": "Expresión del mini lenguaje (texto) o número",
+              "type": [
+               "string",
+               "number"
+              ]
+             },
+             "duracion": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "años que dura; sin campo = permanente"
+             },
+             "cuando": {
+              "type": "string"
+             }
+            }
+           }
+          },
+          "luego": {
+           "type": "string",
+           "description": "id de decisión o evento que se dispara después"
+          }
+         }
+        },
+        "minItems": 1
+       },
+       "fuentes": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "calidad": {
+        "enum": [
+         "dato",
+         "mixto",
+         "supuesto"
+        ]
+       }
+      }
+     }
+    },
+    "opciones_desde_tabla": {
+     "type": "object"
+    },
+    "evidencia": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "fuente": {
+        "type": "string"
+       },
+       "cifra": {
+        "type": "string"
+       },
+       "uso": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "calidad": {
+     "enum": [
+      "dato",
+      "mixto",
+      "supuesto"
+     ]
+    },
+    "en_juego": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "creencia_vs_dato": {
+     "type": "string"
+    },
+    "notas": {
+     "type": "string"
+    }
+   }
+  },
+  "evento": {
+   "type": "object",
+   "required": [
+    "id",
+    "nombre",
+    "cuando",
+    "prob_anual",
+    "resultados",
+    "fuentes",
+    "calidad"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "nombre": {
+     "type": "string"
+    },
+    "categoria": {
+     "type": "string"
+    },
+    "cuando": {
+     "type": "string"
+    },
+    "prob_anual": {
+     "description": "Expresión del mini lenguaje (texto) o número",
+     "type": [
+      "string",
+      "number"
+     ]
+    },
+    "resultados": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "id",
+       "prob",
+       "texto",
+       "efectos"
+      ],
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "prob": {
+        "description": "número, expresión o 'resto'",
+        "type": [
+         "string",
+         "number"
+        ]
+       },
+       "texto": {
+        "type": "string"
+       },
+       "tono": {
+        "enum": [
+         "bueno",
+         "malo",
+         "neutro"
+        ]
+       },
+       "efectos": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "required": [
+          "var",
+          "op",
+          "valor"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "var": {
+           "type": "string"
+          },
+          "op": {
+           "enum": [
+            "suma",
+            "multiplica",
+            "fija"
+           ]
+          },
+          "valor": {
+           "description": "Expresión del mini lenguaje (texto) o número",
+           "type": [
+            "string",
+            "number"
+           ]
+          },
+          "duracion": {
+           "type": "integer",
+           "minimum": 1,
+           "description": "años que dura; sin campo = permanente"
+          },
+          "cuando": {
+           "type": "string"
+          }
+         }
+        }
+       },
+       "luego": {
+        "type": "string",
+        "description": "id de decisión o evento que se dispara después"
+       }
+      }
+     }
+    },
+    "fuentes": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "calidad": {
+     "enum": [
+      "dato",
+      "mixto",
+      "supuesto"
+     ]
+    },
+    "notas": {
+     "type": "string"
+    }
+   }
+  }
+ }
+}
