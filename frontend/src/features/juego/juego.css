@@ -345,3 +345,8 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 @keyframes jg-rodar { 0%, 100% { transform: rotate(-9deg) translateY(0); } 50% { transform: rotate(9deg) translateY(-10px); } }
 .jg-pensando-frase { min-height: 56px; max-width: 320px; text-align: center; font: 500 20px/28px var(--font); animation: vd-subir .35s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) { .jg-pensando-dado { animation: none; } }
+
+/* Empleador u oferta real del tipo de la opción (referencia, no la empresa de la historia) */
+.jg-ejemplo-real {
+  font-style: italic;
+}

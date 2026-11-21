@@ -167,12 +167,24 @@ export type EleccionInterna = {
   alternativas: { valor: string | number; nombre: string; prob?: number }[];
 };
 
+/** Un empleador u oferta real del tipo al que lleva la opción. Es referencia: no entra a la simulación
+ *  y no es la empresa de la historia (esa es ficticia, para no inventar hechos sobre empresas reales). */
+export type EjemploReal = {
+  tipo: string;
+  nombre: string;
+  detalle: string;
+  fuente: string;
+  cargo?: string;
+  url?: string;
+};
+
 export type OpcionPendiente = {
   opcion: string;
   nombre: string;
   detalle: string;
   calidad: Calidad;
   elecciones_internas: EleccionInterna[];
+  ejemplo_real?: EjemploReal | null;
 };
 
 export type Pendiente = {

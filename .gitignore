@@ -4,3 +4,6 @@ __pycache__/
 node_modules/
 dist/
 .DS_Store
+
+# perfiles personales para probar el juego (el repo es público)
+backend/perfiles/
