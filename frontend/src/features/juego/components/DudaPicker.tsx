@@ -71,11 +71,11 @@ export function DudaPicker({
                 <i key={i} style={cssVars({ "--jg-i": i })} />
               ))}
             </div>
-            <Cargando>Tus {GEMELOS} gemelos están viviendo 10 años con cada opción…</Cargando>
+            <Cargando>Simulando {GEMELOS} mundos: 10 años con cada opción…</Cargando>
           </>
         )}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
-          {simulando ? "Simulando…" : "Ver a mis gemelos"}
+          {simulando ? "Simulando…" : "Ver mis 500 mundos"}
         </Button>
       </div>
     </Screen>

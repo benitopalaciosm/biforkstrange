@@ -3,7 +3,8 @@ import { Button, CheckIcon, Chip, DecisionArt, DecisionList, Heading, Meta, Pane
 import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, deCada, minuscula, plata, sinSueldo } from "../textos";
 import type { ContraBase, Eleccion, OpcionComparada, OpcionPendiente, ParametrosComparar, Vista } from "../types";
 import { Abanico, BarraPartes, Info, LeyendaNube, NubeGemelos, ProgresoAnios, repartir, type Reparto } from "./graficos";
-import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, RangoSueldo } from "./piezas";
+import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
+import { GEMELOS } from "../api";
 
 type Internas = Record<string, string | number>;
 
@@ -29,7 +30,7 @@ export function contraBase(c: ContraBase, base: OpcionComparada | undefined, con
   const mas = c.gana_mas_que_base;
   const menos = c.gana_menos_que_base;
   const igual = c.igual_que_base ?? Math.max(0, 1 - mas - menos);
-  if (igual >= 0.995) return { frase: "No cambia tu sueldo: a ningún gemelo le va distinto.", magnitud: null };
+  if (igual >= 0.995) return { frase: "No cambia tu sueldo en ningún mundo.", magnitud: null };
   if (igual >= 0.9) return { frase: "Casi no cambia tu sueldo.", magnitud: null };
 
   const que = conBase ? `«${base.nombre}»` : "la otra opción";
@@ -95,7 +96,7 @@ function OpcionConGemelos({
       <span className="jg-opcion-cabeza">
         <span className="vd-opcion-titulo">{o.nombre}</span>
         {o.detalle && <span className="vd-opcion-sub">{o.detalle}</span>}
-        {supuesto && <span className="vd-opcion-sub">Tus gemelos van a: {supuesto}</span>}
+        {supuesto && <span className="vd-opcion-sub">En la simulación vas a: {supuesto}</span>}
         <span className="jg-veredicto">{veredicto}</span>
       </span>
 
@@ -132,11 +133,11 @@ function Simulacion({ comparadas, base, gemelos, edadFinal }: { comparadas: Opci
       <Stack gap={4}>
         <Meta>La simulación</Meta>
         <Heading level={3} as="h2">
-          {gemelos} gemelos tuyos vivieron {comparadas.length === 2 ? "las dos opciones" : `las ${comparadas.length} opciones`}
+          {gemelos} mundos posibles, {comparadas.length === 2 ? "dos vidas" : `${comparadas.length} vidas`} en cada uno
         </Heading>
         <Text size="sm">
-          Cada gemelo vivió hasta los {edadFinal} años una vez con cada opción, con la misma suerte en todo lo demás. Así la diferencia entre sus dos
-          sueldos se debe solo a la decisión.
+          En cada mundo la suerte es distinta: en uno hay recesión, en otro te despiden, en otro no pasa nada. Y en cada mundo tu gemelo vivió
+          hasta los {edadFinal} años una vez con cada opción. Así, cuando en un mundo gana una opción, es por la decisión y no por la suerte.
         </Text>
       </Stack>
       {otras.map((o) => {
@@ -150,9 +151,9 @@ function Simulacion({ comparadas, base, gemelos, edadFinal }: { comparadas: Opci
                 «{o.nombre}» contra «{base.nombre}»
               </span>
             )}
-            <span className="jg-chico">De cada 100 gemelos:</span>
+            <span className="jg-chico">De cada 100 mundos (cada punto son {Math.round(gemelos / 100)}):</span>
             {nubes ? (
-              <NubeGemelos reparto={reparto} etiqueta={`De cada 100 gemelos, ${mas} ganan más con «${o.nombre}», ${igual} terminan igual y ${menos} ganan más con «${base.nombre}»`} />
+              <NubeGemelos reparto={reparto} etiqueta={`De cada 100 mundos, en ${mas} ganas más con «${o.nombre}», en ${igual} terminas igual y en ${menos} ganas más con «${base.nombre}»`} />
             ) : (
               <BarraPartes
                 partes={[
@@ -184,17 +185,17 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
           <div className="jg-resultado" key={r.resultado}>
             <span className="jg-resultado-cabeza">
               <span>{r.texto || r.resultado}</span>
-              <b>{Math.round(r.prob * 100)} de 100</b>
+              <b>en {Math.round(r.prob * 100)} de 100 mundos</b>
             </span>
             <span className="jg-medidor" aria-hidden="true">
               <i style={{ width: `${Math.max(2, r.prob * 100)}%`, background: "var(--tinta)" }} />
             </span>
             {hay &&
               (igual >= 0.995 ? (
-                <span className="jg-chico">A esos gemelos les va igual que con «{base!.nombre}».</span>
+                <span className="jg-chico">En esos mundos te va igual que con «{base!.nombre}».</span>
               ) : (
                 <>
-                  <span className="jg-chico">De esos gemelos, frente a «{base!.nombre}» (de cada 100):</span>
+                  <span className="jg-chico">En esos mundos, frente a «{base!.nombre}» (de cada 100):</span>
                   <BarraPartes
                     partes={[
                       { nombre: "ganan más", prob: r.gana_mas_que_base as number, tono: "mas" },
@@ -299,9 +300,10 @@ export function Carta({
   return (
     <Screen gap={16} className={comparadas.length > 4 ? "jg-ancha jg-muy-ancha" : "jg-ancha"}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
+      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
       <ProgresoAnios actual={anio} total={vista.anios} />
       <Text size="sm">
-        <strong>Tú, hoy:</strong> {cargoYSueldo(e)}
+        <strong>Tú, en el mundo {GEMELOS + 1}:</strong> {cargoYSueldo(e)}
         {sinSueldo(e) ? ` · último sueldo ${plata(e.sueldo_ref)}` : " al mes"}
         {!sinSueldo(e) && e.tipo_empleador ? ` · ${TIPO_EMPLEADOR[e.tipo_empleador] ?? e.tipo_empleador}` : ""}
         {e.rubro ? ` · ${e.rubro}` : ""}
@@ -324,13 +326,13 @@ export function Carta({
         </Heading>
         {comparacion ? (
           <Text size="sm">
-            {comparacion.gemelos} gemelos tuyos ya vivieron cada opción hasta los {edadGemelos} años. Mira cómo les fue y toca la que eliges.
+            Simulamos {comparacion.gemelos} mundos posibles. En cada uno, tu gemelo ya vivió cada opción hasta los {edadGemelos} años. Mira cómo le fue y toca la que eliges para tu mundo, el {GEMELOS + 1}.
           </Text>
         ) : (
           <Meta>{pendiente.opciones.length} opciones · toca una para elegirla</Meta>
         )}
         <button type="button" className="jg-ayuda" onClick={onAyuda}>
-          ¿Qué son los gemelos?
+          ¿Cómo funciona la simulación?
         </button>
         {sinEfecto && <Text size="sm" className="jg-destacado">En esta decisión tu sueldo termina casi igual con cualquier opción: elige por lo que dice cada una.</Text>}
       </Stack>
@@ -362,7 +364,7 @@ export function Carta({
         </div>
       ) : (
         <Stack gap={12} className="jg-columna">
-          <Text size="sm">Esta carta tiene demasiadas opciones para simular gemelos con cada una. Aquí eliges con lo que dice cada opción.</Text>
+          <Text size="sm">Esta carta tiene demasiadas opciones para simular los mundos con cada una. Aquí eliges con lo que dice cada opción.</Text>
           {muchas && (
             <input className="jg-campo" type="search" placeholder="Filtrar opciones" aria-label="Filtrar opciones" value={filtro} onChange={(ev) => setFiltro(ev.target.value)} />
           )}
@@ -384,13 +386,13 @@ export function Carta({
 
       {comparacion && (
         <Info pregunta="¿Qué es el sueldo típico y la barra?">
-          <strong>Sueldo típico:</strong> si ordenas a los {comparacion.gemelos} gemelos de esa opción del que gana menos al que gana más, es el que
-          queda justo al medio. <strong>Mala y buena suerte:</strong> la barra va desde el sueldo que solo 1 de cada 10 gemelos no alcanza hasta el que
-          solo 1 de cada 10 supera.
+          <strong>Sueldo típico:</strong> si ordenas los {comparacion.gemelos} mundos de esa opción desde donde ganas menos hasta donde ganas más, es el que
+          queda justo al medio. <strong>Mala y buena suerte:</strong> la barra va desde el sueldo que no alcanzas solo en 1 de cada 10 mundos hasta el que
+          superas solo en 1 de cada 10.
         </Info>
       )}
 
-      {recalculando && <Cargando>Tus gemelos están viviendo ese camino…</Cargando>}
+      {recalculando && <Cargando>Simulando los mundos por ese camino…</Cargando>}
 
       {opcion && opcion.elecciones_internas.length > 0 && (
         <div ref={panelInternas} className="jg-columna">
@@ -416,8 +418,8 @@ export function Carta({
           {comparacion && (
             <Text size="sm">
               {faltan.length > 0
-                ? "Mientras no elijas, los gemelos de esta opción van a donde va más gente."
-                : "Los gemelos de esta opción ya van por el camino que elegiste."}
+                ? "Mientras no elijas, en la simulación de esta opción vas a donde va más gente."
+                : "La simulación de esta opción ya va por el camino que elegiste."}
             </Text>
           )}
         </Panel>
@@ -438,8 +440,8 @@ export function Carta({
               nombreReferencia={foco.es_base ? undefined : base?.nombre}
             />
             <Info pregunta="¿Qué muestra este gráfico?">
-              El sueldo de los gemelos que eligen «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea azul es el gemelo del medio. La
-              franja celeste contiene a 8 de cada 10 gemelos: mientras más se abre, más depende de la suerte. Toca otra opción para ver la suya.
+              Tu sueldo en los mundos donde eliges «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea azul es el mundo del medio. La
+              franja celeste contiene 8 de cada 10 mundos: mientras más se abre, más depende de la suerte. Toca otra opción para ver la suya.
             </Info>
           </section>
 
@@ -453,19 +455,19 @@ export function Carta({
                 <div className="jg-fila-opcion" key={o.opcion} data-foco={comparadas.length > 1 && o.opcion === sel}>
                   <span className="jg-fuerte">{o.nombre}</span>
                   <span className="jg-chico">
-                    Quedaron sin trabajo alguna vez: <strong>{deCada(o.paso_por_cesantia)}</strong>
+                    Quedas sin trabajo alguna vez en <strong>{deCada(o.paso_por_cesantia)}</strong> mundos
                     {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
                   </span>
                   <span className="jg-medidor" aria-hidden="true">
                     <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
                   </span>
-                  <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100):</span>
+                  <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
                   <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
                 </div>
               );
             })}
-            <Info pregunta="¿Por qué tantos pasan por cesantía?">
-              Cuenta a cualquier gemelo que haya estado al menos un mes sin trabajo en todo el período, aunque después encuentre otro: un despido, el
+            <Info pregunta="¿Por qué en tantos mundos paso por cesantía?">
+              Cuenta cualquier mundo donde estás al menos un mes sin trabajo en todo el período, aunque después encuentres otro: un despido, el
               cierre de la empresa, una renuncia o un tiempo estudiando.
             </Info>
           </section>
@@ -473,7 +475,7 @@ export function Carta({
           <details className="jg-plegable">
             <summary>¿Por qué sale así «{foco.nombre}»?</summary>
             <Stack gap={10}>
-              <Text size="sm">Lo primero que les puede pasar a los gemelos que la eligen, y cómo terminan después de cada cosa.</Text>
+              <Text size="sm">Lo primero que te puede pasar si la eliges, en cuántos mundos pasa, y cómo terminas después de cada cosa.</Text>
               <Porque o={foco} base={base} />
             </Stack>
           </details>
@@ -506,7 +508,7 @@ export function Carta({
         {cargando && <Cargando>Tirando tu dado y viviendo el año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando && <Text size="sm">Falta elegir: {faltan.map((f) => minuscula(f.pregunta)).join(" ")}</Text>}
         <Button onClick={confirmar} disabled={!opcion || faltan.length > 0 || cargando || recalculando}>
-          {cargando ? "Tirando el dado…" : opcion ? `Elegir «${opcion.nombre}» y tirar el dado` : "Toca una opción"}
+          {cargando ? "Tirando el dado…" : opcion ? `Elegir «${opcion.nombre}» y tirar mi dado` : "Toca una opción"}
         </Button>
       </div>
     </Screen>

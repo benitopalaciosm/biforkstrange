@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Avatar, Button, Tag, cx } from "@/shared/ui";
 import { CALIDAD, plata } from "../textos";
 import type { Calidad, Rango } from "../types";
@@ -80,6 +80,40 @@ export function Noticia({ titulo, texto, lado, className }: { titulo: string; te
         <span className="vd-noti-msg">{texto}</span>
       </span>
       {lado && <span className="vd-noti-hora">{lado}</span>}
+    </div>
+  );
+}
+
+const CARAS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+/** Lo que el motor sortea de verdad en un año, y un par de cosas que no (dichas como lo que son: bromas). */
+const FRASES = [
+  "Tirando tu dado…",
+  "Viendo si hay recesión este año…",
+  "Revisando si te ascienden…",
+  "Mirando si te llega una oferta…",
+  "Los robots todavía no se toman el mundo…",
+  "Preguntando por los despidos…",
+  "Aún no sabemos quién gana el Mundial…",
+  "Calculando tu sueldo nuevo…",
+];
+
+/** Pantalla de espera mientras se vive tu año: el dado rodando y lo que se está viendo en tu mundo. */
+export function Pensando({ titulo }: { titulo: string }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setN((x) => x + 1), 150);
+    return () => clearInterval(id);
+  }, []);
+  const frase = FRASES[Math.floor(n / 5) % FRASES.length];
+  return (
+    <div className="jg-pensando" role="status" aria-live="polite">
+      <span className="jg-pensando-mundo">{titulo}</span>
+      <span className="jg-pensando-dado" aria-hidden="true">
+        {CARAS[(n * 5) % CARAS.length]}
+      </span>
+      <span className="jg-pensando-frase" key={frase}>
+        {frase}
+      </span>
     </div>
   );
 }

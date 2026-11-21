@@ -96,7 +96,7 @@ export function QuePaso({ previa, vista, sueldoInicial, onSeguir }: { previa: Vi
     <Screen tone={noche ? "noche" : "dia"} gap={16} key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>
       <ScreenHeader
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
-        right={<Meta>Qué te pasó</Meta>}
+        right={<Meta>Mundo 501</Meta>}
       />
 
       {edades.length > 1 && (
@@ -111,7 +111,7 @@ export function QuePaso({ previa, vista, sueldoInicial, onSeguir }: { previa: Vi
           <Meta>Elegiste «{dado.opcion_nombre}»{hayRuleta ? " · tiramos tu dado" : ""}</Meta>
           {hayRuleta && (
             <>
-              <Text size="sm">Esto es todo lo que les pasó a tus gemelos con esa opción. La ficha amarilla eres tú:</Text>
+              <Text size="sm">Esto pasó en los 500 mundos simulados con esa opción. Tú eres el mundo 501, con tu propio dado:</Text>
               <Ruleta casillas={casillas} salio={dado.resultado} />
             </>
           )}
@@ -121,10 +121,10 @@ export function QuePaso({ previa, vista, sueldoInicial, onSeguir }: { previa: Vi
           <SlowReveal delay={espera + 0.5}>
             <Text size="sm">
               {hayRuleta
-                ? `A ${Math.round(tocada!.prob * 100)} de cada 100 de tus gemelos les tocó lo mismo.`
+                ? `En tu mundo pasó lo mismo que en ${Math.round(tocada!.prob * 100)} de cada 100 mundos simulados.`
                 : dado.prob >= 0.995
                   ? "Con esta opción, esto era seguro."
-                  : `Con esta opción, esto le pasa a ${deCada10(dado.prob)} gemelos.`}
+                  : `Con esta opción, esto pasa en ${deCada10(dado.prob)} mundos.`}
             </Text>
           </SlowReveal>
         </Stack>

@@ -36,7 +36,7 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
     <Screen gap={28}>
       <Stack gap={12}>
         <ScreenHeader left={<Pill tone="sol">Fin de la partida</Pill>} right={<Meta>{vista.anios} años · {e.edad} años</Meta>} />
-        <Heading level={1}>Diez años en la vida que elegiste.</Heading>
+        <Heading level={1}>Diez años en el mundo 501: el que viviste tú.</Heading>
       </Stack>
 
       <SunCard>
@@ -52,10 +52,10 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
           <Text>
             <strong>
               {cierre.mejor_que_gemelos >= 0.95
-                ? `Terminaste mejor que casi todos los gemelos que también eligieron «${elegida.nombre}».`
+                ? `Te fue mejor que en casi todos los mundos donde también elegiste «${elegida.nombre}».`
                 : cierre.mejor_que_gemelos < 0.05
-                  ? `Casi todos los gemelos que también eligieron «${elegida.nombre}» terminaron mejor que tú.`
-                  : `Terminaste mejor que ${deCada10(cierre.mejor_que_gemelos)} gemelos que también eligieron «${elegida.nombre}».`}
+                  ? `En casi todos los mundos donde también elegiste «${elegida.nombre}» te fue mejor que aquí.`
+                  : `Te fue mejor que en ${deCada10(cierre.mejor_que_gemelos)} mundos donde también elegiste «${elegida.nombre}».`}
             </strong>
           </Text>
         )}
@@ -65,23 +65,23 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
         <Stack as="section" gap={12}>
           <Stack gap={4}>
             <Heading level={3} as="h2">
-              Tu vida contra tus gemelos
+              Tu mundo, el 501, contra los otros 500
             </Heading>
             <Text size="sm">
-              Tu primera decisión: {primera.pregunta} Aquí va tu sueldo año a año contra el de los {primera.comparacion.gemelos} gemelos que eligieron
-              lo mismo que tú.
+              Tu primera decisión: {primera.pregunta} Aquí va tu sueldo año a año contra el de tus gemelos en los {primera.comparacion.gemelos} mundos donde
+              elegiste lo mismo.
             </Text>
           </Stack>
           <Abanico puntos={elegida.trayectoria} hoy={{ edad: edadInicial, sueldo: sueldoInicial }} tu={recorrido} alto={190} />
           <Info pregunta="¿Cómo leo este gráfico?">
-            La línea amarilla es tu sueldo en la vida que jugaste. La franja celeste contiene a 8 de cada 10 gemelos que eligieron «{elegida.nombre}» y
-            la línea azul es el gemelo del medio. Si tu línea sale de la franja, tuviste más (o menos) suerte que casi todos, o tus decisiones de
+            La línea amarilla es tu sueldo en el mundo 501, el que jugaste. La franja celeste contiene 8 de cada 10 mundos donde elegiste «{elegida.nombre}» y
+            la línea azul es el mundo del medio. Si tu línea sale de la franja, tuviste más (o menos) suerte que casi todos, o tus decisiones de
             después te llevaron por otro lado.
           </Info>
           <Text size="sm">Y el sueldo final de cada opción, lado a lado. Cada barra va de la mala suerte a la buena suerte; la raya es el sueldo típico.</Text>
           <Stack gap={6}>
             <span className="vd-camino">
-              <Tag tone="sol">Tú</Tag>
+              <Tag tone="sol">Tú · 501</Tag>
               {plata(cierre.sueldo_final)}
             </span>
             <span className="vd-camino">
@@ -109,12 +109,12 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
             ))}
           </Stack>
           <Text>
-            Ojo con la comparación: tú tomaste más decisiones en estos 10 años. Tus gemelos solo tomaron la primera y después dejaron que la vida
+            Ojo con la comparación: tú tomaste más decisiones en estos 10 años. En esos mundos tus gemelos solo tomaron la primera y después dejaron que la vida
             siguiera sin buscar más cambios.
           </Text>
         </Stack>
       )}
-      {!primera && <Text size="sm">Tu primera decisión tenía demasiadas opciones para simular gemelos, así que aquí no hay con quién compararte.</Text>}
+      {!primera && <Text size="sm">Tu primera decisión tenía demasiadas opciones para simular los mundos, así que aquí no hay con quién compararte.</Text>}
 
       <Stack as="section" gap={10}>
         <Heading level={3} as="h2">

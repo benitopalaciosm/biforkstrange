@@ -63,11 +63,15 @@ export function usePartida() {
   useEffect(() => guardar({ perfil, partida }), [perfil, partida]);
 
   /** Pide la vista de `p`; si llega (y nadie pidió otra cosa entremedio) corre `listo`. */
-  const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar) => {
+  const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0) => {
     const mio = ++turno.current;
     setError(null);
+    const inicio = Date.now();
     try {
       const v = await getVista(p, parametros);
+      // el dado se alcanza a ver aunque el motor responda al tiro
+      const falta = minimo - (Date.now() - inicio);
+      if (falta > 0) await new Promise((r) => setTimeout(r, falta));
       if (mio === turno.current) listo(v);
     } catch (e) {
       if (mio === turno.current) setError(mensaje(e));
@@ -153,7 +157,7 @@ export function usePartida() {
         setPrevia(antes);
         setVista(v);
         setFase("paso");
-      });
+      }, undefined, 2400);
     },
     [partida, vista, pedir],
   );

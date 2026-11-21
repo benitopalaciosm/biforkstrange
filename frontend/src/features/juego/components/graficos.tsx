@@ -63,9 +63,9 @@ export function LeyendaNube({ reparto, nombre, contra }: { reparto: Reparto; nom
   const [mas, igual, menos] = repartir([reparto.mas, reparto.igual, reparto.menos]);
   return (
     <span className="jg-leyenda">
-      <span><i data-tipo="mas" /><b>{mas}</b> ganan más con «{nombre}»</span>
-      <span><i data-tipo="igual" /><b>{igual}</b> terminan igual</span>
-      <span><i data-tipo="menos" /><b>{menos}</b> ganan más con «{contra}»</span>
+      <span><i data-tipo="mas" />en <b>{mas}</b> ganas más con «{nombre}»</span>
+      <span><i data-tipo="igual" />en <b>{igual}</b> terminas igual</span>
+      <span><i data-tipo="menos" />en <b>{menos}</b> ganas más con «{contra}»</span>
     </span>
   );
 }
@@ -133,7 +133,7 @@ export function Abanico({
           <path className="jg-abanico-tu" pathLength={1} d={linea(tu.map((t) => ({ edad: t.edad, v: t.sueldo })))} />
           <circle className="jg-abanico-tu-punto" cx={x(tu[tu.length - 1].edad)} cy={y(tu[tu.length - 1].sueldo)} r={5.5} />
           <text className="jg-abanico-num jg-abanico-tu-nombre" x={x(tu[tu.length - 1].edad) - 9} y={y(tu[tu.length - 1].sueldo) + (y(tu[tu.length - 1].sueldo) < 30 ? 18 : -9)} textAnchor="end">
-            tú
+            tú · 501
           </text>
         </>
       )}
@@ -241,7 +241,7 @@ export function Ruleta({ casillas, salio }: { casillas: Casilla[]; salio: string
         {tramos.map((t) => (
           <span key={t.id} className={cx(t.id === salio && "jg-ruleta-tuyo")}>
             <i data-tono={t.tono} />
-            {t.texto} <b>{Math.round(t.ancho * 100)} de 100</b>
+            {t.texto} <b>{Math.round(t.ancho * 100)} de 100 mundos</b>
           </span>
         ))}
       </div>

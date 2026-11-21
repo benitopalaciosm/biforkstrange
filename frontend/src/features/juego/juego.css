@@ -306,3 +306,42 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-abanico-tu-nombre { animation: vd-aparecer .5s ease 2.7s both; }
 .jg-como-gemelos { max-width: 300px; margin: 0 auto; }
 .jg-como-leyenda { min-height: 40px; }
+
+/* Tutorial en clave multiverso: en cada mundo, las dos vidas del mismo gemelo */
+.jg-como--vidas { padding: 14px 12px 10px; }
+.jg-vidas { display: block; width: 100%; height: auto; overflow: visible; }
+.jg-vidas-mundo { font: 700 11px var(--font); fill: var(--tinta); }
+.jg-vidas-chico { font: 500 8.5px var(--mono); fill: var(--suave); }
+.jg-vidas-riel { stroke: var(--linea); stroke-width: 1.5; stroke-linecap: round; }
+.jg-vidas-vida { stroke: var(--tinta); stroke-width: 2.5; stroke-linecap: round; }
+.jg-vidas-dado { stroke: var(--suave); stroke-width: 1; stroke-dasharray: 2 2; }
+.jg-vidas-suceso { opacity: 0; transition: opacity .4s ease; }
+.jg-vidas-suceso[data-visible="true"] { opacity: 1; }
+.jg-vidas-suceso circle { stroke: var(--tinta); stroke-width: 1.5; }
+.jg-vidas-suceso[data-tono="malo"] circle { fill: var(--tinta); }
+.jg-vidas-suceso[data-tono="bueno"] circle { fill: var(--sol); }
+.jg-vidas-final { opacity: 0; transition: opacity .6s ease; }
+.jg-vidas-final[data-visible="true"] { opacity: 1; }
+.jg-vidas-gana { font: 700 11px var(--font); fill: var(--jg-mas); }
+.jg-vidas-pierde { font: 500 10px var(--font); fill: var(--suave); }
+.jg-como-leyenda i[data-suceso] { width: 10px; height: 10px; border: 1.5px solid var(--tinta); border-radius: 50%; }
+.jg-como-leyenda i[data-suceso="malo"] { background: var(--tinta); }
+.jg-como-leyenda i[data-suceso="bueno"] { background: var(--sol); }
+.jg-como-leyenda i[data-suceso="dado"] { width: 0; height: 12px; border: 0; border-left: 1.5px dashed var(--suave); border-radius: 0; margin: 0 4px; }
+/* los puntos son mundos: sin color hasta que se cuentan (paso 4) */
+.jg-como[data-paso="2"] .jg-como-gemelos i[data-final] { background: var(--tinta); animation: none; }
+/* En teléfono la leyenda va bajo la nube: al lado no cabe */
+.jg-duelo .jg-nube { max-width: 200px; }
+.jg-duelo .jg-leyenda > span { align-items: baseline; flex-wrap: wrap; }
+.jg-duelo .jg-leyenda > span > i { align-self: center; }
+@media (max-width: 759px) {
+  .jg-duelo > .jg-nube + .jg-leyenda { grid-column: 1 / -1; }
+}
+
+/* Mientras se vive tu año: el dado rodando y lo que se está viendo en tu mundo */
+.jg-pensando { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px; background: var(--noche); color: var(--sobre-noche); animation: vd-aparecer .25s ease both; }
+.jg-pensando-mundo { font: 500 13px/16px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--noche-suave); }
+.jg-pensando-dado { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; border: 3px solid #1D1E22; border-radius: 28px; background: var(--sol); color: #1D1E22; font: 400 92px/1 var(--font); box-shadow: 0 0 0 10px color-mix(in srgb, var(--sol) 22%, transparent); animation: jg-rodar .6s ease-in-out infinite; }
+@keyframes jg-rodar { 0%, 100% { transform: rotate(-9deg) translateY(0); } 50% { transform: rotate(9deg) translateY(-10px); } }
+.jg-pensando-frase { min-height: 56px; max-width: 320px; text-align: center; font: 500 20px/28px var(--font); animation: vd-subir .35s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) { .jg-pensando-dado { animation: none; } }
