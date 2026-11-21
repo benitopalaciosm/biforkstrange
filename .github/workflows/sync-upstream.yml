@@ -1,7 +1,5 @@
 # Cada 30 min trae los cambios del repo personal (jtvaldivia/biforkstrange)
 # al repo del equipo. Solo corre en el repo de Platanus.
-# Requiere el secret PERSONAL_REPO_DEPLOY_KEY: llave privada de un deploy key
-# de solo lectura agregado al repo personal.
 name: Sync desde repo personal
 
 on:
@@ -20,14 +18,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.PERSONAL_REPO_DEPLOY_KEY }}
       - name: Merge personal/main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git remote add personal git@github.com:jtvaldivia/biforkstrange.git
+          git remote add personal https://github.com/jtvaldivia/biforkstrange.git
           git fetch personal main
           git merge --no-edit personal/main
           git push origin HEAD:main
