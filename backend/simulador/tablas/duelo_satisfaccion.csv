@@ -1,0 +1,13 @@
+fallece,periodo,base_hija_46,por_ano_de_edad,si_es_hijo_hombre
+mama,ano_0,-0.327,0.0181,0.245
+mama,ano_1,-0.142,0.0135,0.04
+mama,anos_2_3,-0.059,0.0144,0.03
+mama,anos_4_5,-0.156,0.0102,0.2
+papa,ano_0,-0.167,0.0105,0.029
+papa,ano_1,-0.095,0.0023,-0.001
+papa,anos_2_3,-0.106,-0.001,-0.028
+papa,anos_4_5,-0.011,-0.0057,-0.11
+abuela,ano_0,-0.0865,0,0
+abuela,ano_1,-0.051,0,0
+abuela,anos_2_3,-0.044,0,0
+abuela,anos_4_5,-0.0295,0,0

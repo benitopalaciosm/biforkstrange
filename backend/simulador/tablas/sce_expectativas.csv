@@ -1,0 +1,5 @@
+banda_edad,estado,n,n_p_oferta,p_oferta_4m_esperada,p_oferta_anual_esperada_aprox,n_oo1,p_sin_empleo_4m,p_otro_empleador_4m,p_independiente_4m,p_mismo_empleador_4m,p_empleado_4m,p_contraoferta,n_reserva,base_sueldo,reserva_ratio_p25,reserva_ratio_p50,reserva_ratio_p75,ola_inicio,ola_fin
+menor_62,empleado,21885,21091,0.222,0.5291,20085,0.0376,0.0932,0.0469,0.8215,,0.2626,20149,actual,1.0,1.121,1.33,2014-03,2024-11
+menor_62,desempleado,993,946,0.5506,0.9092,944,0.4386,,,,0.5549,,743,ultimo_empleo,0.833,1.0,1.467,2014-03,2024-11
+todas,empleado,24732,23796,0.2136,0.5137,22305,0.0397,0.0875,0.0493,0.8228,,0.2542,22537,actual,1.0,1.125,1.333,2014-03,2024-11
+todas,desempleado,1340,1275,0.5088,0.8815,1274,0.4858,,,,0.5066,,1011,ultimo_empleo,0.769,1.0,1.389,2014-03,2024-11

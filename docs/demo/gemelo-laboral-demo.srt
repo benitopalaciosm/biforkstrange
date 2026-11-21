@@ -1,0 +1,139 @@
+1
+00:00:01,091 --> 00:00:06,091
+¿Me cambio de pega? ¿Pido aumento? ¿Emprendo?
+Las decisiones de carrera se toman a ciegas: dependen de ti y también de la suerte.
+
+2
+00:00:06,395 --> 00:00:11,396
+Gemelo Laboral te deja vivir la decisión antes de tomarla.
+Un simulador para trabajadores en Chile: 10 años, una decisión por año.
+
+3
+00:00:12,197 --> 00:00:16,199
+Partimos de ti, hoy.
+El juego abre con un tutorial de cinco pasos que explica la idea de la simulación.
+
+4
+00:00:16,930 --> 00:00:22,432
+Hacemos 500 copias tuyas: tus gemelos.
+Misma edad, mismo sueldo, misma pega. Todos toman la misma decisión.
+
+5
+00:00:23,173 --> 00:00:30,175
+Cada gemelo vive 10 años con su propia suerte.
+Es una simulación Monte Carlo: cada año se sortea si te ascienden, te despiden, te llega una oferta o hay recesión.
+
+6
+00:00:30,481 --> 00:00:37,483
+Las probabilidades no las inventa una IA.
+Salen de encuestas a trabajadores chilenos, como las de ingresos y de empleo del INE. Donde no hay dato, usamos un supuesto y lo marcamos.
+
+7
+00:00:38,189 --> 00:00:45,690
+¿Por qué 500? Porque un solo gemelo puede tener muy buena o muy mala suerte.
+Con 500 se ve qué pasa casi siempre y qué pasa a veces. No es una predicción: es el abanico de lo posible.
+
+8
+00:00:46,413 --> 00:00:51,414
+Después te toca a ti: eliges y tiramos un dado.
+Vives uno solo de esos caminos, año a año.
+
+9
+00:00:52,959 --> 00:00:57,462
+Primero cuentas quién eres: nueve datos.
+Edad, estudios, rubro, cargo, sueldo y cuánto riesgo toleras. Con eso se arman tus gemelos.
+
+10
+00:00:58,228 --> 00:01:03,230
+También puedes pedirle a tu propio Claude que arme tu perfil.
+Copias un prompt, tu asistente responde con lo que sabe de ti y lo pegas aquí.
+
+11
+00:01:05,102 --> 00:01:09,604
+Eliges la duda que te trajo.
+Es la primera carta de tu partida. Hay dudas de estudio, de trabajo, de emprender y de plata.
+
+12
+00:01:14,056 --> 00:01:19,557
+Cada decisión llega como una situación concreta.
+El motor calcula todos los números. El texto de la historia no toca ninguna cifra.
+
+13
+00:01:20,764 --> 00:01:27,765
+Cada opción trae un veredicto en una frase y el sueldo típico de sus gemelos.
+La barra va de la mala suerte a la buena suerte: del 10% que termina peor al 10% que termina mejor.
+
+14
+00:01:28,968 --> 00:01:36,470
+La simulación va aparte: 500 gemelos vivieron todas las opciones.
+Cada punto son 5 gemelos. Verde: ganó más cambiándose. Naranjo: ganó más quedándose.
+
+15
+00:01:36,773 --> 00:01:44,776
+El truco: cada gemelo vive las opciones con la misma suerte.
+La misma recesión, los mismos golpes. Así la diferencia entre sus dos sueldos se debe solo a la decisión, no al azar.
+
+16
+00:01:45,983 --> 00:01:52,984
+El abanico muestra el sueldo año a año.
+La línea es el gemelo del medio; la franja contiene a 8 de cada 10. Mientras más se abre, más depende de la suerte.
+
+17
+00:01:54,190 --> 00:01:59,691
+No es solo plata: también cesantía y cargo.
+Cuántos gemelos pasaron por la cesantía y en qué cargo terminan.
+
+18
+00:02:00,900 --> 00:02:07,902
+Todo se puede abrir: por qué sale así y de dónde viene cada número.
+Cada decisión dice si se apoya en un dato medido, en un supuesto o en una mezcla.
+
+19
+00:02:10,055 --> 00:02:13,055
+Eliges una opción…
+Aquí, cambiarse de empresa.
+
+20
+00:02:15,602 --> 00:02:22,104
+…y tiramos tu dado.
+La barra es todo lo que les pasó a tus gemelos con esa opción. La ficha amarilla eres tú.
+
+21
+00:02:22,608 --> 00:02:28,610
+Te toca vivir uno solo de esos caminos.
+Ves qué pasó ese año, cómo cambió tu sueldo y cómo va tu línea.
+
+22
+00:02:28,915 --> 00:02:31,916
+Y así, diez años: una decisión nueva cada año.
+Las cartas las reparte el mundo según tu situación: ofertas, ascensos, estudios, cesantía.
+
+23
+00:03:14,058 --> 00:03:20,061
+Al final ves la vida que elegiste.
+Tu sueldo final y cómo te fue frente a los gemelos que tomaron tu misma primera decisión.
+
+24
+00:03:21,278 --> 00:03:29,281
+Tu línea amarilla contra el abanico de tus gemelos.
+Si sales de la franja, tuviste más o menos suerte que casi todos, o tus decisiones siguientes te llevaron por otro lado.
+
+25
+00:03:30,489 --> 00:03:35,491
+Y el resumen de tus diez años, uno por uno.
+Puedes jugar otra vida con el mismo perfil y ver qué cambia.
+
+26
+00:03:35,797 --> 00:03:42,799
+Reglas con datos de Chile, no opiniones.
+43 decisiones y 16 eventos, con sus probabilidades y efectos sacados de tablas de encuestas y registros.
+
+27
+00:03:43,104 --> 00:03:51,607
+Probamos el motor contra la realidad.
+Simulamos 5.000 vidas y las comparamos con 37 metas de Chile: 25 cuadran. Los sueldos todavía quedan bajo los reales, y lo decimos.
+
+28
+00:03:51,913 --> 00:03:56,916
+Vive tu decisión antes de tomarla.
+500 gemelos, 10 años, tu duda de hoy.

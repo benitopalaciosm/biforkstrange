@@ -1,0 +1,5192 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Decisiones que el jugador (o el gemelo jugando solo) puede tomar. Ver README para la semántica.",
+ "decisiones": [
+  {
+   "id": "salir_del_colegio",
+   "nombre": "Qué hacer al salir del colegio",
+   "categoria": "estudios",
+   "pregunta": "Terminaste cuarto medio. ¿Qué haces el próximo año?",
+   "cuando": "y(edad == 18, estado == 'estudiando', edu == 'media', carrera_id < 0)",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "universidad",
+     "nombre": "Entrar a la universidad",
+     "detalle": "Carreras de 5 a 7 años reales. 31,5% de quienes hoy tienen 30-34 terminó la universidad.",
+     "resultados": [
+      {
+       "id": "entra",
+       "prob": 1,
+       "texto": "Entras a la universidad.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_institucion",
+         "op": "fija",
+         "valor": "'U'"
+        }
+       ],
+       "luego": "elegir_carrera"
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo",
+      "ine_esi_2025"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "instituto",
+     "nombre": "Entrar a un instituto profesional",
+     "detalle": "Carreras técnicas y profesionales de 4 años.",
+     "resultados": [
+      {
+       "id": "entra",
+       "prob": 1,
+       "texto": "Entras a un instituto.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_institucion",
+         "op": "fija",
+         "valor": "'IP'"
+        }
+       ],
+       "luego": "elegir_carrera"
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "cft",
+     "nombre": "Entrar a un CFT",
+     "detalle": "Carreras técnicas de 2 a 3 años.",
+     "resultados": [
+      {
+       "id": "entra",
+       "prob": 1,
+       "texto": "Entras a un CFT.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_institucion",
+         "op": "fija",
+         "valor": "'CFT'"
+        }
+       ],
+       "luego": "elegir_carrera"
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "trabajar",
+     "nombre": "Ponerte a trabajar",
+     "detalle": "Sueldo de alguien de 18-24 con educación media. 21,9% de ese grupo está desocupado.",
+     "resultados": [
+      {
+       "id": "busca",
+       "prob": 1,
+       "texto": "Sales a buscar pega.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 1
+        }
+       ],
+       "luego": "primera_pega"
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "pausa",
+     "nombre": "Tomarte un año",
+     "detalle": "Un año para pensar, viajar o trabajar en lo que salga.",
+     "resultados": [
+      {
+       "id": "pausa",
+       "prob": 1,
+       "texto": "Te tomas el año.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'inactivo'"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 4
+        },
+        {
+         "var": "edad_decide_estudios",
+         "op": "fija",
+         "valor": "edad + 1"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Nivel a los 30-34: media 50%, técnica 16,4%, universitaria 31,5%, postgrado 2,1%",
+     "uso": "blanco para calibrar cuánto elige cada camino"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "colegio"
+  },
+  {
+   "id": "elegir_carrera",
+   "nombre": "Elegir carrera",
+   "categoria": "estudios",
+   "pregunta": "¿Qué carrera estudias?",
+   "cuando": "y(estado == 'estudiando', carrera_id < 0, tipo_institucion != '')",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [],
+   "evidencia": [
+    {
+     "fuente": "mineduc_mifuturo",
+     "cifra": "252 carreras con empleabilidad, sueldos a 1 y 5 años, duración real, retención y arancel",
+     "uso": "cada fila es una opción"
+    },
+    {
+     "fuente": "hastings_2013",
+     "cifra": "Los retornos difieren mucho por carrera y son causales en las selectivas",
+     "uso": "justifica que la carrera mueva el sueldo de entrada"
+    },
+    {
+     "fuente": "microsoft_ia",
+     "cifra": "Aplicabilidad de IA por área",
+     "uso": "riesgo de menos contratación juvenil en áreas expuestas"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "colegio",
+   "opciones_desde_tabla": {
+    "tabla": "mifuturo_carreras",
+    "filtro": "fila_tipo_institucion == tipo_institucion",
+    "id": "carrera_id",
+    "nombre": "carrera",
+    "detalle": "Empleabilidad al año {empleabilidad_ano1}, sueldo bruto al año 1 {p50_ano1} y al año 5 {p50_ano5}; dura {duracion_real_semestres} semestres en la práctica.",
+    "resultados": [
+     {
+      "id": "matricula",
+      "prob": 1,
+      "texto": "Te matriculas.",
+      "tono": "neutro",
+      "efectos": [
+       {
+        "var": "carrera_id",
+        "op": "fija",
+        "valor": "fila_carrera_id"
+       },
+       {
+        "var": "area",
+        "op": "fija",
+        "valor": "fila_area"
+       },
+       {
+        "var": "semestres_restantes",
+        "op": "fija",
+        "valor": "fila_duracion_real_semestres"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "financiar_estudios",
+   "nombre": "Cómo pagar la carrera",
+   "categoria": "dinero",
+   "pregunta": "¿Cómo financias la carrera?",
+   "cuando": "y(estado == 'estudiando', carrera_id >= 0, deuda_estudios == 0, financia == '')",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "gratuidad",
+     "nombre": "Postular a gratuidad",
+     "detalle": "Cubre al 60% de estudiantes de menores ingresos si la institución está adscrita.",
+     "resultados": [
+      {
+       "id": "aprueba",
+       "prob": "k('P_GRATUIDAD')",
+       "texto": "Tienes gratuidad.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "financia",
+         "op": "fija",
+         "valor": "'gratuidad'"
+        }
+       ]
+      },
+      {
+       "id": "no_califica",
+       "prob": "resto",
+       "texto": "No calificas. Pasas al crédito.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "financia",
+         "op": "fija",
+         "valor": "'cae'"
+        },
+        {
+         "var": "deuda_estudios",
+         "op": "suma",
+         "valor": "tabla('mifuturo_carreras', 'arancel_anual', 'carrera_id', carrera_id) * semestres_restantes / 2"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ley_21091"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "cae",
+     "nombre": "Tomar el CAE",
+     "detalle": "Crédito con aval del Estado: pagas después de titularte, hasta 10% de tu sueldo.",
+     "resultados": [
+      {
+       "id": "toma",
+       "prob": 1,
+       "texto": "Firmas el crédito.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "financia",
+         "op": "fija",
+         "valor": "'cae'"
+        },
+        {
+         "var": "deuda_estudios",
+         "op": "suma",
+         "valor": "tabla('mifuturo_carreras', 'arancel_anual', 'carrera_id', carrera_id) * semestres_restantes / 2"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "familia",
+     "nombre": "Que pague tu familia",
+     "detalle": "Sin deuda; tu familia ahorra menos.",
+     "resultados": [
+      {
+       "id": "paga",
+       "prob": 1,
+       "texto": "Tu familia paga el arancel.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "financia",
+         "op": "fija",
+         "valor": "'familia'"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ley_21091",
+     "cifra": "Gratuidad para el 60% de menores ingresos",
+     "uso": "probabilidad de calificar"
+    },
+    {
+     "fuente": "mineduc_mifuturo",
+     "cifra": "Arancel anual por carrera",
+     "uso": "tamaño de la deuda"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null,
+   "notas": "La deuda se paga con 10% del sueldo después de titularse (regla del CAE); el simulador descuenta de ahorro."
+  },
+  {
+   "id": "seguir_o_desertar",
+   "nombre": "Seguir o dejar la carrera",
+   "categoria": "estudios",
+   "pregunta": "Terminó el primer año. ¿Sigues?",
+   "cuando": "y(estado == 'estudiando', carrera_id >= 0, anos_en_carrera == 1)",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "seguir",
+     "nombre": "Seguir",
+     "detalle": "La retención al segundo año depende de la carrera.",
+     "resultados": [
+      {
+       "id": "sigue",
+       "prob": "min(0.97, tabla('mifuturo_carreras', 'retencion_ano1', 'carrera_id', carrera_id) / 0.9)",
+       "texto": "Pasas a segundo año.",
+       "tono": "bueno",
+       "efectos": []
+      },
+      {
+       "id": "reprueba",
+       "prob": "resto",
+       "texto": "Repruebas ramos clave y te atrasas un año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "semestres_restantes",
+         "op": "suma",
+         "valor": 2
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "cambiarse",
+     "nombre": "Cambiarte de carrera",
+     "detalle": "Partes de cero en otra carrera.",
+     "resultados": [
+      {
+       "id": "cambia",
+       "prob": 1,
+       "texto": "Te cambias.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "carrera_id",
+         "op": "fija",
+         "valor": -1
+        },
+        {
+         "var": "anos_en_carrera",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "elegir_carrera"
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "dejar",
+     "nombre": "Dejar de estudiar",
+     "detalle": "Sales al mercado con educación media.",
+     "resultados": [
+      {
+       "id": "deja",
+       "prob": 1,
+       "texto": "Dejas la carrera.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "carrera_id",
+         "op": "fija",
+         "valor": -1
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 1
+        }
+       ],
+       "luego": "primera_pega"
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "mineduc_mifuturo",
+     "cifra": "Retención de primer año por carrera",
+     "uso": "probabilidad de seguir"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "e_duda",
+   "notas": "retencion_ano1 / 0,9 asume que un décimo de quienes se van lo deciden; el resto es fracaso académico. Supuesto."
+  },
+  {
+   "id": "trabajar_mientras_estudias",
+   "nombre": "Trabajar mientras estudias",
+   "categoria": "estudios",
+   "pregunta": "¿Tomas una pega de media jornada?",
+   "cuando": "estado == 'estudiando'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.6,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "si",
+     "nombre": "Trabajar media jornada",
+     "detalle": "Unas 20 horas a la semana. En la ESI la hora parcial se paga casi igual que la completa.",
+     "resultados": [
+      {
+       "id": "compatible",
+       "prob": 0.75,
+       "texto": "Te las arreglas.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "12 * tabla_o(tabla('esi_jornada', 'p50_hora_parcial', 'sexo', 'todos', 'banda_edad', '18-24'), 'esi_jornada', 'p50_hora_parcial', 'sexo', sexo_txt, 'banda_edad', '18-24') * 20 * 4.33"
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -8
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 2
+        }
+       ]
+      },
+      {
+       "id": "atraso",
+       "prob": "resto",
+       "texto": "Te atrasas un semestre.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "12 * tabla_o(tabla('esi_jornada', 'p50_hora_parcial', 'sexo', 'todos', 'banda_edad', '18-24'), 'esi_jornada', 'p50_hora_parcial', 'sexo', sexo_txt, 'banda_edad', '18-24') * 20 * 4.33"
+        },
+        {
+         "var": "semestres_restantes",
+         "op": "suma",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -12
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "Solo estudiar",
+     "detalle": "Avanzas a tiempo.",
+     "resultados": [
+      {
+       "id": "estudia",
+       "prob": 1,
+       "texto": "Te concentras en la carrera.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Ingreso por hora en jornada parcial: $3.851 contra $4.108 en completa (18-54)",
+     "uso": "ingreso del trabajo parcial"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "e_parttime"
+  },
+  {
+   "id": "practica",
+   "nombre": "Hacer una práctica larga",
+   "categoria": "estudios",
+   "pregunta": "Te ofrecen una práctica de seis meses en una empresa grande.",
+   "cuando": "y(estado == 'estudiando', semestres_restantes <= 2)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.7,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "tomar",
+     "nombre": "Tomarla",
+     "detalle": "Más chance de quedar contratado al titularte.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 0.35,
+       "texto": "Te ofrecen quedarte al titularte.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "oferta_al_titularse",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": 8
+        }
+       ]
+      },
+      {
+       "id": "aprende",
+       "prob": "resto",
+       "texto": "No te ofrecen quedarte, pero sales con contactos.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": 6
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "pasar",
+     "nombre": "Pasar",
+     "detalle": "Terminas antes la carrera.",
+     "resultados": [
+      {
+       "id": "pasa",
+       "prob": 1,
+       "texto": "Sigues con tus ramos.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "arellano_bover_2024",
+     "cifra": "Un primer empleador 10% más grande sube el ingreso de toda la vida cerca de 1,2%",
+     "uso": "valor de entrar por una empresa grande"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "e_practica"
+  },
+  {
+   "id": "intercambio",
+   "nombre": "Irte de intercambio un semestre",
+   "categoria": "estudios",
+   "pregunta": "Puedes irte un semestre a otro país.",
+   "cuando": "y(estado == 'estudiando', tipo_institucion == 'U', semestres_restantes >= 3)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.3,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "ir",
+     "nombre": "Irte",
+     "detalle": "Cuesta unos $6 millones y te atrasa un semestre.",
+     "resultados": [
+      {
+       "id": "va",
+       "prob": 1,
+       "texto": "Vives un semestre afuera.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -6000000
+        },
+        {
+         "var": "semestres_restantes",
+         "op": "suma",
+         "valor": 1
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 6
+        },
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": 5
+        },
+        {
+         "var": "ingles",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte",
+     "detalle": "Terminas a tiempo.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [],
+   "calidad": "supuesto",
+   "en_juego": "e_intercambio"
+  },
+  {
+   "id": "magister",
+   "nombre": "Hacer un magíster",
+   "categoria": "estudios",
+   "pregunta": "¿Haces un magíster?",
+   "cuando": "y(en(edu, 'universitaria'), edad >= 24, edad <= 45, en(estado, 'empleado', 'buscando'))",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "beca",
+     "nombre": "Postular a beca y estudiar a tiempo completo",
+     "detalle": "Dos años sin sueldo. Los becarios ganan cerca de USD 150 más al séptimo año.",
+     "resultados": [
+      {
+       "id": "termina",
+       "prob": 0.85,
+       "texto": "Te titulas de magíster.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'postgrado'"
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "multiplica",
+         "valor": "1 + k('PREMIO_MAGISTER')"
+        },
+        {
+         "var": "edad",
+         "op": "suma",
+         "valor": 1
+        }
+       ]
+      },
+      {
+       "id": "abandona",
+       "prob": "resto",
+       "texto": "Lo dejas a la mitad.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "dipres_2026"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "vespertino",
+     "nombre": "Estudiar de noche sin dejar la pega",
+     "detalle": "Pagas unos $9 millones y duermes menos dos años.",
+     "resultados": [
+      {
+       "id": "termina",
+       "prob": 0.75,
+       "texto": "Terminas el magíster.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'postgrado'"
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -9000000
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -15
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "1 + k('PREMIO_MAGISTER')",
+         "cuando": "estado == 'empleado'"
+        }
+       ]
+      },
+      {
+       "id": "abandona",
+       "prob": "resto",
+       "texto": "No das más y lo dejas.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -4000000
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -10
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "dipres_2026",
+      "equipo"
+     ],
+     "calidad": "mixto",
+     "requisito": "estado == 'empleado'"
+    },
+    {
+     "id": "no",
+     "nombre": "No hacerlo",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues como estás.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "dipres_2026",
+     "cifra": "Prima de USD 150 mensuales al séptimo año; retorno 28,1% (becarios)",
+     "uso": "premio de sueldo"
+    },
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Postgrado gana ~70% más que universitario, sin controlar",
+     "uso": "no usar como efecto causal"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "postgrado",
+   "creencia_vs_dato": "La correlación simple dice +70%; el estudio causal de DIPRES da cerca de 10% al séptimo año."
+  },
+  {
+   "id": "doctorado",
+   "nombre": "Hacer un doctorado",
+   "categoria": "estudios",
+   "pregunta": "¿Te vas a un doctorado?",
+   "cuando": "y(en(edu, 'universitaria', 'postgrado'), edad >= 23, edad <= 35)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.15,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "ir",
+     "nombre": "Hacer el doctorado con beca",
+     "detalle": "Cuatro a cinco años con beca. Retorno mediano de 13% para becarios.",
+     "resultados": [
+      {
+       "id": "termina",
+       "prob": 0.7,
+       "texto": "Te doctoras.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'postgrado'"
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "multiplica",
+         "valor": "1 + k('RETORNO_DOCTORADO')"
+        },
+        {
+         "var": "edad",
+         "op": "suma",
+         "valor": 4
+        }
+       ]
+      },
+      {
+       "id": "abandona",
+       "prob": "resto",
+       "texto": "Lo dejas al tercer año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "edad",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "dipres_2026"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues trabajando.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "dipres_2026",
+     "cifra": "Retorno mediano de 13%; otra evaluación de 2024 no halló retornos consistentes",
+     "uso": "premio y su incertidumbre"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "postgrado"
+  },
+  {
+   "id": "bootcamp",
+   "nombre": "Reconvertirte con un bootcamp",
+   "categoria": "estudios",
+   "pregunta": "¿Haces un bootcamp de programación o datos?",
+   "cuando": "y(edad >= 20, edad <= 45, en(estado, 'buscando', 'empleado'))",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "hacer",
+     "nombre": "Hacerlo",
+     "detalle": "Tres a seis meses intensivos.",
+     "resultados": [
+      {
+       "id": "colocado",
+       "prob": "k('P_BOOTCAMP_COLOCA')",
+       "texto": "Entras como junior en tecnología.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "-k('COSTO_BOOTCAMP')"
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "'Información y comunicaciones'"
+        },
+        {
+         "var": "nivel",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "max(sueldo_ref * 0.85, k('USD') * 1375 * 0.9)"
+        }
+       ]
+      },
+      {
+       "id": "sin_pega",
+       "prob": "resto",
+       "texto": "Terminas, pero no encuentras pega todavía.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "-k('COSTO_BOOTCAMP')"
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "bootcamps",
+      "getonbrd_api"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues como estás.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "bootcamps",
+     "cifra": "Colocación declarada 75% a 85%, sin auditoría",
+     "uso": "se usa 60%"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "reconvertir"
+  },
+  {
+   "id": "volver_a_estudiar",
+   "nombre": "Volver a estudiar de adulto",
+   "categoria": "estudios",
+   "pregunta": "¿Sacas un título técnico o profesional estudiando de noche?",
+   "cuando": "y(edu == 'media', edad >= 23, edad <= 45, estado == 'empleado')",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.35,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "estudiar",
+     "nombre": "Estudiar de noche",
+     "detalle": "Tres a cuatro años, con arancel y menos tiempo libre.",
+     "resultados": [
+      {
+       "id": "titula",
+       "prob": 0.55,
+       "texto": "Te titulas.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'tecnica'"
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -6000000
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -10
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', 'tecnica', 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', 'tecnica') / tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)"
+        }
+       ]
+      },
+      {
+       "id": "deja",
+       "prob": "resto",
+       "texto": "Lo dejas en segundo año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -3000000
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -6
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues como estás.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Brecha de ingreso entre media y técnica por edad y sexo",
+     "uso": "premio del título"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "volverEstudiar"
+  },
+  {
+   "id": "primera_pega",
+   "nombre": "Tu primera pega",
+   "categoria": "trabajo",
+   "pregunta": "¿Dónde postulas a tu primer trabajo estable?",
+   "cuando": "y(estado == 'buscando', primer_empleo == 1)",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "grande",
+     "nombre": "Postular a una empresa grande",
+     "detalle": "Más formación y sueldo algo mayor. Si no quedas, puedes caer en una pyme.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": "clamp(si(carrera_id >= 0, tabla('mifuturo_carreras', 'empleabilidad_ano1', 'carrera_id', carrera_id), 0.7) * si(y(edad <= 25, exposicion_ia >= k('IA_EXPUESTA')), k('IA_JOVEN'), 1) * si(recesion, 0.85, 1), 0.05, 0.97) * 0.9",
+       "texto": "Entras a una empresa grande.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'grande'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('LIQUIDO') * si(carrera_id >= 0, tabla('mifuturo_carreras', 'p50_ano1', 'carrera_id', carrera_id), tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi) / k('LIQUIDO')) * 1.06"
+        },
+        {
+         "var": "primer_grande",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      },
+      {
+       "id": "cae_pyme",
+       "prob": "(1 - clamp(si(carrera_id >= 0, tabla('mifuturo_carreras', 'empleabilidad_ano1', 'carrera_id', carrera_id), 0.7) * si(y(edad <= 25, exposicion_ia >= k('IA_EXPUESTA')), k('IA_JOVEN'), 1) * si(recesion, 0.85, 1), 0.05, 0.97) * 0.9) * 0.65",
+       "texto": "No quedas, pero entras a una pyme.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'pyme'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('LIQUIDO') * si(carrera_id >= 0, tabla('mifuturo_carreras', 'p50_ano1', 'carrera_id', carrera_id), tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi) / k('LIQUIDO')) * 0.92"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No quedas este año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo",
+      "arellano_bover_2024",
+      "ine_esi_2025"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "pyme",
+     "nombre": "Entrar a una pyme",
+     "detalle": "Seis de cada diez asalariados privados está en empresas de menos de 200 personas.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": "clamp(clamp(si(carrera_id >= 0, tabla('mifuturo_carreras', 'empleabilidad_ano1', 'carrera_id', carrera_id), 0.7) * si(y(edad <= 25, exposicion_ia >= k('IA_EXPUESTA')), k('IA_JOVEN'), 1) * si(recesion, 0.85, 1), 0.05, 0.97) + 0.1, 0.05, 0.97)",
+       "texto": "Entras a una pyme.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'pyme'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('LIQUIDO') * si(carrera_id >= 0, tabla('mifuturo_carreras', 'p50_ano1', 'carrera_id', carrera_id), tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi) / k('LIQUIDO')) * 0.95"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No quedas este año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "mineduc_mifuturo"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "startup",
+     "nombre": "Irte a una startup",
+     "detalle": "Subes rápido, sueldo algo menor y más riesgo de recorte.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": "clamp(si(carrera_id >= 0, tabla('mifuturo_carreras', 'empleabilidad_ano1', 'carrera_id', carrera_id), 0.7) * si(y(edad <= 25, exposicion_ia >= k('IA_EXPUESTA')), k('IA_JOVEN'), 1) * si(recesion, 0.85, 1), 0.05, 0.97)",
+       "texto": "Entras a una startup.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'startup'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "'Información y comunicaciones'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('LIQUIDO') * si(carrera_id >= 0, tabla('mifuturo_carreras', 'p50_ano1', 'carrera_id', carrera_id), tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi) / k('LIQUIDO')) * 0.94"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No quedas.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "mineduc_mifuturo",
+      "yc_directorio"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "estado",
+     "nombre": "Concursar en el Estado",
+     "detalle": "Renta fija por estamento; la competencia depende del estamento.",
+     "resultados": [
+      {
+       "id": "gana",
+       "prob": "clamp(60 / tabla('estado_estamentos', 'postulantes_por_seleccionado', 'estamento', estamento), 0.05, 0.7)",
+       "texto": "Ganas el concurso.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'publico'"
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "'Administración pública'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('LIQUIDO') * tabla('estado_estamentos', 'renta_bruta_p50', 'estamento', estamento)"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No quedas en ningún concurso.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "servicio_civil"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "independiente",
+     "nombre": "Trabajar por tu cuenta",
+     "detalle": "Boletas o trabajos sueltos. A los 18-24, cuenta propia gana una mediana de $200 mil.",
+     "resultados": [
+      {
+       "id": "parte",
+       "prob": 1,
+       "texto": "Empiezas a trabajar por tu cuenta.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'independiente'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "tabla_o(tabla('esi_ingreso_categoria', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', '18-54'), 'esi_ingreso_categoria', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', banda7)"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "emprender",
+     "nombre": "Emprender altiro",
+     "detalle": "La mitad de los microemprendedores gana menos de $400 mil al mes.",
+     "resultados": [
+      {
+       "id": "parte",
+       "prob": 1,
+       "texto": "Partes tu empresa.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'fundador'"
+        },
+        {
+         "var": "primer_empleo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "empresa_anos",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "seguir_con_tu_empresa"
+      }
+     ],
+     "fuentes": [
+      "ine_eme_2025"
+     ],
+     "calidad": "dato"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "mineduc_mifuturo",
+     "cifra": "Empleabilidad al primer año por carrera",
+     "uso": "probabilidad de quedar"
+    },
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Tamaño del empleador: 40% de asalariados privados en empresas de 200+",
+     "uso": "mezcla de opciones"
+    },
+    {
+     "fuente": "servicio_civil",
+     "cifra": "Postulantes por seleccionado: 22,6 auxiliares a 165,6 profesionales",
+     "uso": "probabilidad de ganar un concurso (60 postulaciones al año: supuesto)"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "primera",
+   "notas": "estamento se deriva de edu: media → 'Administrativos', tecnica → 'Técnicos', universitaria o postgrado → 'Profesionales'."
+  },
+  {
+   "id": "cesantia",
+   "nombre": "Qué hacer estando cesante",
+   "categoria": "trabajo",
+   "pregunta": "Llevas meses buscando. ¿Cómo sigues?",
+   "cuando": "y(estado == 'buscando', primer_empleo == 0)",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "rapido",
+     "nombre": "Tomar lo primero que salga",
+     "detalle": "Más probable, y más aún mientras más llevas buscando. Sueldo menor.",
+     "resultados": [
+      {
+       "id": "encuentra",
+       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(hueco, k('PENAL_HUECO'), 1) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95) * 1.15 + 0.1 * min(3, meses_cesante / 12), 0, 0.96)",
+       "texto": "Vuelves a trabajar, por menos.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "sueldo_ref * azar_uniforme(0.78, 0.9) * si(hueco, 0.93, 1)"
+        },
+        {
+         "var": "meses_cesante",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_REEMPLEO')"
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No sale nada.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "12 * sueldo_ref * (k('COBERTURA_SEGURO') - 1) * 0.5"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "eps_2024",
+      "couch_placzek_2010",
+      "kroft_2013"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "nivel",
+     "nombre": "Esperar algo de tu nivel",
+     "detalle": "Menos probable; cuidas tu sueldo.",
+     "resultados": [
+      {
+       "id": "encuentra",
+       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(hueco, k('PENAL_HUECO'), 1) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95) * 0.8, 0, 0.9)",
+       "texto": "Encuentras algo a tu altura.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "sueldo_ref * azar_uniforme(0.93, 1.06) * si(hueco, 0.93, 1)"
+        },
+        {
+         "var": "meses_cesante",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_REEMPLEO')"
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No sale nada.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 12
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "eps_2024"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "informal",
+     "nombre": "Trabajar informal mientras buscas",
+     "detalle": "Sin contrato ni cotizaciones. El asalariado informal gana 62% del formal.",
+     "resultados": [
+      {
+       "id": "trabaja",
+       "prob": 1,
+       "texto": "Trabajas sin contrato mientras sigues postulando.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'independiente'"
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "tabla_o(tabla('esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', '18-54', 'formalidad', 'informal'), 'esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', banda7, 'formalidad', 'informal')"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "bootcamp",
+     "nombre": "Reconvertirte con un bootcamp",
+     "detalle": "Ver la decisión bootcamp.",
+     "resultados": [
+      {
+       "id": "va",
+       "prob": 1,
+       "texto": "Te inscribes.",
+       "tono": "neutro",
+       "efectos": [],
+       "luego": "bootcamp"
+      }
+     ],
+     "fuentes": [
+      "bootcamps"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "emprender",
+     "nombre": "Emprender",
+     "detalle": "Armas lo tuyo en vez de postular.",
+     "resultados": [
+      {
+       "id": "parte",
+       "prob": 1,
+       "texto": "Partes tu empresa.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'fundador'"
+        },
+        {
+         "var": "empresa_anos",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "seguir_con_tu_empresa"
+      }
+     ],
+     "fuentes": [
+      "ine_eme_2025"
+     ],
+     "calidad": "dato"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "eps_2024",
+     "cifra": "A los 12 meses sigue cesante 29,8% (18-29), 32% (30-44) y 40% (45-59)",
+     "uso": "probabilidad de encontrar en un año"
+    },
+    {
+     "fuente": "carranza_2025",
+     "cifra": "El ingreso cae 42% el primer mes tras perder el empleo",
+     "uso": "golpe inicial"
+    },
+    {
+     "fuente": "cep_788",
+     "cifra": "El seguro de cesantía repone cerca de 12,6% del ingreso perdido",
+     "uso": "colchón"
+    },
+    {
+     "fuente": "kroft_2013",
+     "cifra": "Llamados a entrevista: 7% al mes, 4% a los 8 meses",
+     "uso": "castigo por hueco"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "cesante"
+  },
+  {
+   "id": "oferta_externa",
+   "nombre": "Te llega una oferta",
+   "categoria": "trabajo",
+   "pregunta": "Otra empresa te ofrece trabajo. ¿Te cambias?",
+   "cuando": "estado == 'empleado'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "8 * k('P_CAMBIO_EMPLEADOR', banda3) * (1 + red / 100)",
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "cambiar",
+     "nombre": "Cambiarte",
+     "detalle": "En Chile 54% de los cambios mejora el sueldo y 46% no.",
+     "resultados": [
+      {
+       "id": "mejora",
+       "prob": "k('P_SUBE_CAMBIO')",
+       "texto": "El cambio te sube el sueldo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "azar_uniforme(1.05, 1.25)"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      },
+      {
+       "id": "igual_o_peor",
+       "prob": "resto",
+       "texto": "Ganas lo mismo o menos que antes.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "azar_uniforme(0.85, 1.02)"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      }
+     ],
+     "fuentes": [
+      "bcentral_2018",
+      "nyfed_sce"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "contraoferta",
+     "nombre": "Usarla para negociar",
+     "detalle": "Le cuentas a tu jefatura.",
+     "resultados": [
+      {
+       "id": "igualan",
+       "prob": "tabla('sce_expectativas', 'p_contraoferta', 'banda_edad', 'menor_62', 'estado', 'empleado')",
+       "texto": "Te igualan la oferta.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "azar_uniforme(1.05, 1.12)"
+        }
+       ]
+      },
+      {
+       "id": "no_igualan",
+       "prob": 0.5,
+       "texto": "No te igualan y te quedas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "marcado",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      },
+      {
+       "id": "te_vas",
+       "prob": "resto",
+       "texto": "No te igualan y te vas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "azar_uniforme(1.0, 1.2)"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      }
+     ],
+     "fuentes": [
+      "nyfed_sce",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte",
+     "detalle": "Cuidas tu antigüedad.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "bcentral_2018",
+     "cifra": "54% de los cambios mejora el sueldo",
+     "uso": "probabilidad de mejorar"
+    },
+    {
+     "fuente": "nyfed_sce",
+     "cifra": "La mejor oferta paga la mediana del sueldo actual (p25 0,86, p75 1,11); 34% paga más; el empleador iguala una oferta externa 26% de las veces",
+     "uso": "contraoferta y tamaño del salto"
+    },
+    {
+     "fuente": "eps_2024",
+     "cifra": "Cambio de empleador: 21,8% al año a los 18-29, 13,8% a los 30-44, 10,2% a los 45-59",
+     "uso": "frecuencia"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "oferta",
+   "creencia_vs_dato": "Se cree que cambiarse sube 10% a 20%. En Chile casi la mitad de los cambios no mejora el sueldo."
+  },
+  {
+   "id": "buscar_estando_empleado",
+   "nombre": "Buscar pega sin renunciar",
+   "categoria": "trabajo",
+   "pregunta": "¿Sales a buscar otra pega mientras trabajas?",
+   "cuando": "estado == 'empleado'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "buscar",
+     "nombre": "Buscar en serio",
+     "detalle": "Postulas, haces entrevistas, mueves contactos.",
+     "resultados": [
+      {
+       "id": "oferta",
+       "prob": "clamp(0.35 + red / 300, 0.2, 0.7)",
+       "texto": "Te llega una oferta.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ],
+       "luego": "oferta_externa"
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No sale nada este año.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "nyfed_sce",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues donde estás.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "nyfed_sce",
+     "cifra": "Probabilidad de recibir ofertas según búsqueda (EE.UU.)",
+     "uso": "ver tabla sce_ofertas"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "buscar"
+  },
+  {
+   "id": "renunciar",
+   "nombre": "Renunciar sin tener otra pega",
+   "categoria": "trabajo",
+   "pregunta": "¿Renuncias?",
+   "cuando": "estado == 'empleado'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.5 * k('P_RENUNCIA', banda3) * si(animo < 45, 3, 1)",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "renunciar",
+     "nombre": "Renunciar",
+     "detalle": "Sin finiquito por años de servicio y sin seguro de cesantía solidario.",
+     "resultados": [
+      {
+       "id": "renuncia",
+       "prob": 1,
+       "texto": "Renuncias.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "fija",
+         "valor": "sueldo"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 5
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": 10
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "eps_2024"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "aguantar",
+     "nombre": "Aguantar",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "eps_2024",
+     "cifra": "Renuncia: 11,7% al año a los 18-29, 4,8% a los 30-44",
+     "uso": "frecuencia base"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "renunciar"
+  },
+  {
+   "id": "pedir_aumento",
+   "nombre": "Pedir un aumento",
+   "categoria": "trabajo",
+   "pregunta": "¿Pides aumento?",
+   "cuando": "y(estado == 'empleado', antiguedad >= 1)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.6,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "pedir",
+     "nombre": "Pedirlo",
+     "detalle": "Las mujeres piden casi tanto como los hombres y lo consiguen menos.",
+     "resultados": [
+      {
+       "id": "si",
+       "prob": "k('P_AUMENTO_PEDIDO', sexo)",
+       "texto": "Te lo dan.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "1 + azar_uniforme(k('ALZA_AUMENTO', 0), k('ALZA_AUMENTO', 1))"
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "No te lo dan.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "artz_2018"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "esperar",
+     "nombre": "Esperar",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "espera",
+       "prob": 1,
+       "texto": "No dices nada.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "artz_2018",
+     "cifra": "Consiguió aumento negociando: 20% de los hombres y 13,1% de las mujeres; pidió 74,5% y 66%",
+     "uso": "éxito al pedir"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "aumento",
+   "creencia_vs_dato": "\"Las mujeres no piden aumento\": piden casi igual y lo obtienen menos."
+  },
+  {
+   "id": "trabajar_mas_horas",
+   "nombre": "Quedarte hasta tarde",
+   "categoria": "trabajo",
+   "pregunta": "Tu equipo trabaja hasta tarde. ¿Te sumas este año?",
+   "cuando": "y(estado == 'empleado', parcial == 0)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.8,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "si",
+     "nombre": "Sí, 55 horas o más",
+     "detalle": "Más chance de ascenso; menos tiempo con tu gente y más riesgo de salud.",
+     "resultados": [
+      {
+       "id": "ano_largo",
+       "prob": 1,
+       "texto": "Trabajas 55 horas o más todo el año.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "horas",
+         "op": "fija",
+         "valor": 55,
+         "duracion": 1
+        },
+        {
+         "var": "prob_ascenso_extra",
+         "op": "suma",
+         "valor": "k('ASCENSO_HORAS')",
+         "duracion": 1
+        },
+        {
+         "var": "tiempo_con_tu_gente",
+         "op": "multiplica",
+         "valor": "k('JUNTARSE_55H')",
+         "duracion": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -12
+        },
+        {
+         "var": "riesgo_acv",
+         "op": "multiplica",
+         "valor": "k('RIESGO_ACV_55H')",
+         "duracion": 1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_enut_2023",
+      "oms_oit_2021",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No, tu horario",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "normal",
+       "prob": 1,
+       "texto": "Te vas a tu hora.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_enut_2023",
+     "cifra": "Con 55+ horas se junta con familia o amigos el fin de semana 41,2% contra 48,7% con 30-44",
+     "uso": "tiempo con tu gente"
+    },
+    {
+     "fuente": "oms_oit_2021",
+     "cifra": "ACV +35% y cardiopatía +17% con 55+ horas",
+     "uso": "riesgo de salud"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "horas"
+  },
+  {
+   "id": "jefatura",
+   "nombre": "Aceptar una jefatura",
+   "categoria": "trabajo",
+   "pregunta": "Te ofrecen jefatura.",
+   "cuando": "y(estado == 'empleado', nivel == 2)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.5,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "aceptar",
+     "nombre": "Aceptar",
+     "detalle": "Más sueldo y más responsabilidad.",
+     "resultados": [
+      {
+       "id": "bien",
+       "prob": 0.75,
+       "texto": "Te va bien como jefatura.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "nivel",
+         "op": "fija",
+         "valor": 3
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "1 + azar_uniforme(k('ALZA_ASCENSO', 0), k('ALZA_ASCENSO', 1)) + 0.05"
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -6
+        }
+       ]
+      },
+      {
+       "id": "mal",
+       "prob": "resto",
+       "texto": "El equipo no te sigue y lo pasas mal.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "nivel",
+         "op": "fija",
+         "valor": 3
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": 1.08
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -6
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -12
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "baker_gibbs_1994",
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "rechazar",
+     "nombre": "Seguir como especialista",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "sigue",
+       "prob": 1,
+       "texto": "Sigues en lo tuyo.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "baker_gibbs_1994",
+     "cifra": "Ascender suma unos 5,7 puntos al alza normal",
+     "uso": "alza"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "jefatura"
+  },
+  {
+   "id": "remoto_para_afuera",
+   "nombre": "Trabajar remoto para una empresa de afuera",
+   "categoria": "trabajo",
+   "pregunta": "¿Postulas a trabajos remotos pagados en dólares?",
+   "cuando": "y(estado == 'empleado', en(rubro, 'Información y comunicaciones', 'Servicios profesionales'), skill >= 50, nivel >= 1)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "postular",
+     "nombre": "Postular",
+     "detalle": "Sueldos de Get on Board en USD según seniority.",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": "clamp(0.15 + (skill - 50) / 200 + si(ingles, 0.1, 0), 0.05, 0.6)",
+       "texto": "Te contratan remoto desde Chile.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'extranjero'"
+        },
+        {
+         "var": "remoto",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('USD') * tabla('getonbrd_sueldos_seniority', 'mediana_usd', 'seniority', seniority)"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No pasas la entrevista técnica.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "getonbrd_api",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues en tu pega.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "getonbrd_api",
+     "cifra": "Mediana USD 1.375 junior, 2.175 semi senior, 2.525 senior, 5.400 expert",
+     "uso": "sueldo"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "remoto",
+   "notas": "seniority se deriva de nivel: 0 Junior, 1 Semi Senior, 2 Senior, 3-4 Expert."
+  },
+  {
+   "id": "pedir_hibrido",
+   "nombre": "Pedir trabajo híbrido",
+   "categoria": "trabajo",
+   "pregunta": "¿Pides trabajar dos días desde la casa?",
+   "cuando": "y(estado == 'empleado', remoto == 0, en(rubro, 'Información y comunicaciones', 'Finanzas y seguros', 'Servicios profesionales', 'Administración pública', 'Enseñanza'))",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "pedir",
+     "nombre": "Pedirlo",
+     "detalle": "En un experimento con 1.612 empleados las renuncias bajaron un tercio sin cambios en ascensos.",
+     "resultados": [
+      {
+       "id": "si",
+       "prob": 0.6,
+       "texto": "Te lo aprueban.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "remoto",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        },
+        {
+         "var": "p_renuncia",
+         "op": "multiplica",
+         "valor": "k('HIBRIDO_RENUNCIA')"
+        },
+        {
+         "var": "aprendizaje",
+         "op": "multiplica",
+         "valor": "si(nivel <= 1, k('REMOTO_JUNIOR_APRENDE'), 1)"
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "Te dicen que no.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "bloom_2024",
+      "emanuel_2023"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues presencial.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "bloom_2024",
+     "cifra": "Renuncias de 7,2% a 4,8%, sin diferencia en ascensos a 2 años",
+     "uso": "efecto en permanencia"
+    },
+    {
+     "fuente": "emanuel_2023",
+     "cifra": "Juniors que comparten edificio reciben 22% más comentarios",
+     "uso": "costo de aprendizaje para juniors"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null
+  },
+  {
+   "id": "media_jornada",
+   "nombre": "Bajar a media jornada",
+   "categoria": "trabajo",
+   "pregunta": "¿Pides media jornada?",
+   "cuando": "y(estado == 'empleado', parcial == 0)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.2 + si(edad_hijo_menor >= 0, si(edad_hijo_menor <= 4, 0.6, 0), 0)",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "pedir",
+     "nombre": "Pedirla",
+     "detalle": "La hora parcial se paga casi igual; el sueldo baja a la mitad y el ascenso se frena.",
+     "resultados": [
+      {
+       "id": "si",
+       "prob": 0.65,
+       "texto": "Te la aprueban.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "parcial",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "horas",
+         "op": "fija",
+         "valor": 22
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "k('PARCIAL_SUELDO')"
+        },
+        {
+         "var": "prob_ascenso",
+         "op": "multiplica",
+         "valor": 0.5
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": 10
+        },
+        {
+         "var": "tiempo_con_tu_gente",
+         "op": "multiplica",
+         "valor": 1.2
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "Tu empleador no acepta.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "ine_ene",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues completa.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Jornada parcial: 20,7% de las mujeres y 11,2% de los hombres; hora parcial $3.851 contra $4.108",
+     "uso": "sueldo"
+    },
+    {
+     "fuente": "ine_ene",
+     "cifra": "Parcial involuntario por sexo y edad",
+     "uso": "cuántos querrían trabajar más"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "mediaJornada"
+  },
+  {
+   "id": "cambiar_de_rubro",
+   "nombre": "Cambiarte de rubro",
+   "categoria": "trabajo",
+   "pregunta": "¿Te cambias a un rubro que paga más?",
+   "cuando": "y(estado == 'empleado', edad <= 45)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.3,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "cambiar",
+     "nombre": "Cambiarte",
+     "detalle": "Mismo oficio en otro rubro. Partes con menos antigüedad.",
+     "resultados": [
+      {
+       "id": "entra",
+       "prob": "clamp(0.4 + red / 250, 0.2, 0.7)",
+       "texto": "Entras al nuevo rubro.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "rubro_destino"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "tabla_o(tabla('esi_ingreso_rubro_edad', 'p50', 'rubro', rubro_destino, 'banda_edad', '18-54'), 'esi_ingreso_rubro_edad', 'p50', 'rubro', rubro_destino, 'banda_edad', banda7) / tabla_o(tabla('esi_ingreso_rubro_edad', 'p50', 'rubro', rubro, 'banda_edad', '18-54'), 'esi_ingreso_rubro_edad', 'p50', 'rubro', rubro, 'banda_edad', banda7) * 0.95"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No te toman: piden experiencia en el rubro.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Te quedas en tu rubro.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Mediana por rubro: Finanzas $1,43 M, Minería e Información $1,20 M, Comercio $587 mil",
+     "uso": "premio del rubro"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null,
+   "notas": "rubro_destino lo elige el jugador. El 0,95 descuenta la falta de experiencia en el rubro: supuesto."
+  },
+  {
+   "id": "cambiar_de_ocupacion",
+   "nombre": "Cambiar de ocupación",
+   "categoria": "trabajo",
+   "pregunta": "¿Cambias de oficio?",
+   "cuando": "y(en(estado, 'empleado', 'buscando'), edad <= 45)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.25,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "cambiar",
+     "nombre": "Cambiar",
+     "detalle": "Otra ocupación, otro sueldo. La matriz de JobHop dice a qué ocupaciones se mueve la gente.",
+     "resultados": [
+      {
+       "id": "logra",
+       "prob": "clamp(tabla('jobhop_transiciones', 'prob', 'origen', ocupacion, 'destino', ocupacion_destino) * 3, 0.02, 0.6)",
+       "texto": "Logras el cambio.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "ocupacion",
+         "op": "fija",
+         "valor": "ocupacion_destino"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "tabla_o(tabla('esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', '18-54'), 'esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', banda7) * 0.9"
+        },
+        {
+         "var": "nivel",
+         "op": "fija",
+         "valor": 0
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No lo logras este año.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "jobhop",
+      "ine_esi_2025",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues en lo tuyo.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "jobhop",
+     "cifra": "Transiciones entre grupos de ocupación en CVs belgas",
+     "uso": "qué cambios son comunes"
+    },
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Ingreso por ocupación CIUO a 1 dígito",
+     "uso": "sueldo de destino"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null,
+   "notas": "El ×3 convierte la frecuencia de un destino entre quienes cambian en una probabilidad de lograrlo al intentarlo: supuesto."
+  },
+  {
+   "id": "aprender_ia",
+   "nombre": "Aprender a trabajar con IA",
+   "categoria": "trabajo",
+   "pregunta": "Tu área está cambiando con la IA. ¿Le dedicas tiempo?",
+   "cuando": "y(en(estado, 'empleado', 'buscando'), usa_ia == 0)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.3 + exposicion_ia",
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "aprender",
+     "nombre": "Aprender",
+     "detalle": "Horas de fin de semana durante seis meses.",
+     "resultados": [
+      {
+       "id": "aprende",
+       "prob": 0.8,
+       "texto": "Lo integras a tu trabajo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 6
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      },
+      {
+       "id": "a_medias",
+       "prob": "resto",
+       "texto": "Lo dejas a medias.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "ignorar",
+     "nombre": "Ignorarlo",
+     "detalle": "Si tu área está expuesta, contratarán menos gente como tú.",
+     "resultados": [
+      {
+       "id": "nada",
+       "prob": 1,
+       "texto": "Sigues igual.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "p_encontrar",
+         "op": "multiplica",
+         "valor": "si(exposicion_ia >= k('IA_EXPUESTA'), k('IA_JOVEN'), 1)",
+         "cuando": "edad <= 25"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "brynjolfsson_2025",
+      "microsoft_ia"
+     ],
+     "calidad": "mixto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "brynjolfsson_2025",
+     "cifra": "Empleo de 22-25 años 19% más bajo en ocupaciones expuestas",
+     "uso": "castigo de ignorar"
+    },
+    {
+     "fuente": "microsoft_ia",
+     "cifra": "Aplicabilidad por ocupación y área",
+     "uso": "qué tan expuesta está el área"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "ia"
+  },
+  {
+   "id": "invertir_en_red",
+   "nombre": "Invertir en tu red",
+   "categoria": "trabajo",
+   "pregunta": "¿Vas a eventos, haces cafés y cuidas tu LinkedIn este año?",
+   "cuando": "edad >= 20",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "si",
+     "nombre": "Sí",
+     "detalle": "Los conocidos lejanos ayudan más a conseguir trabajo que los cercanos.",
+     "resultados": [
+      {
+       "id": "crece",
+       "prob": 1,
+       "texto": "Tu red crece.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": 10
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -3
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -300000
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "rajkumar_2022"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Tu red se enfría un poco.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "rajkumar_2022",
+     "cifra": "Lazos débiles moderados aumentan la movilidad laboral (20 millones de usuarios)",
+     "uso": "efecto de la red en ofertas"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "red"
+  },
+  {
+   "id": "unirse_a_startup",
+   "nombre": "Irte a una startup",
+   "categoria": "emprender",
+   "pregunta": "Una startup te ofrece entrar con acciones.",
+   "cuando": "y(estado == 'empleado', tipo_empleador != 'startup', edad <= 45)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.04 + riesgo / 1500",
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "ir",
+     "nombre": "Irte",
+     "detalle": "Sueldo 10% menor y acciones. 30% de las startups de Y Combinator 2012-2019 ya cerró y 24% fue adquirida.",
+     "resultados": [
+      {
+       "id": "crece",
+       "prob": "k('YC_ADQUIRIDA')",
+       "texto": "La empresa crece y la compran. Tus acciones valen algo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'startup'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": 0.9
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "sueldo * 12 * azar_uniforme(0.5, 3)",
+         "cuando": "anos_en_startup >= 4"
+        },
+        {
+         "var": "nivel",
+         "op": "suma",
+         "valor": 1
+        }
+       ]
+      },
+      {
+       "id": "cierra",
+       "prob": "k('YC_CERRADA')",
+       "texto": "La startup cierra.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'startup'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": 0.9
+        },
+        {
+         "var": "cierra_en",
+         "op": "fija",
+         "valor": "azar_entero(1, 4)"
+        }
+       ]
+      },
+      {
+       "id": "sigue",
+       "prob": "resto",
+       "texto": "La empresa sigue, sin venta a la vista.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'startup'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": 0.9
+        },
+        {
+         "var": "skill",
+         "op": "suma",
+         "valor": 4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "yc_directorio"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "yc_directorio",
+     "cifra": "Cohortes 2012-2019: 44,9% activa, 24,2% adquirida, 29,9% cerrada",
+     "uso": "destino de la startup"
+    },
+    {
+     "fuente": "hall_woodward_2010",
+     "cifra": "Tres de cada cuatro fundadores con capital de riesgo salen con cero",
+     "uso": "las acciones casi nunca pagan"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "startupJoin",
+   "notas": "Estos son los destinos de startups que entraron a YC, que ya son una élite. Para una startup chilena cualquiera el cierre es más probable."
+  },
+  {
+   "id": "independizarse",
+   "nombre": "Trabajar por tu cuenta",
+   "categoria": "trabajo",
+   "pregunta": "¿Dejas el contrato y trabajas a honorarios o por tu cuenta?",
+   "cuando": "y(estado == 'empleado', edad >= 23)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.3,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "formal",
+     "nombre": "Independiente con boleta",
+     "detalle": "Cotizas por boleta. A los 30-34 cuenta propia formal gana una mediana de $667 mil.",
+     "resultados": [
+      {
+       "id": "funciona",
+       "prob": 0.6,
+       "texto": "Armas tu cartera de clientes.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'independiente'"
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "max(sueldo * 0.9, tabla_o(tabla('esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', '18-54', 'formalidad', 'formal'), 'esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', banda7, 'formalidad', 'formal'))"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      },
+      {
+       "id": "flojo",
+       "prob": "resto",
+       "texto": "Los clientes llegan a goteo.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'independiente'"
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "tabla_o(tabla('esi_ingreso_categoria_formalidad', 'p25', 'categoria', 'cuenta_propia', 'banda_edad', '18-54', 'formalidad', 'formal'), 'esi_ingreso_categoria_formalidad', 'p25', 'categoria', 'cuenta_propia', 'banda_edad', banda7, 'formalidad', 'formal')"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "Seguir con contrato",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Te quedas con contrato.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Cuenta propia es 16% de los ocupados a los 30-34; gana $500 mil contra $790 mil del asalariado privado",
+     "uso": "ingreso"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null,
+   "notas": "Nueva: el motor actual no modela el trabajo por cuenta propia; es la mayor brecha del benchmark (13% a 24% en Chile, 3% a 4% en el juego)."
+  },
+  {
+   "id": "emprender",
+   "nombre": "Emprender",
+   "categoria": "emprender",
+   "pregunta": "¿Dejas tu pega para armar tu empresa?",
+   "cuando": "y(en(estado, 'empleado', 'buscando'), edad >= 20)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.08 + riesgo / 500",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "emprender",
+     "nombre": "Lanzarte",
+     "detalle": "La mediana gana 35% menos que un empleado comparable a los 10 años; la mitad cierra antes de 2 años.",
+     "resultados": [
+      {
+       "id": "parte",
+       "prob": 1,
+       "texto": "Partes tu empresa.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'fundador'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "fija",
+         "valor": "sueldo"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "empresa_anos",
+         "op": "fija",
+         "valor": 0
+        }
+       ],
+       "luego": "seguir_con_tu_empresa"
+      }
+     ],
+     "fuentes": [
+      "hamilton_2000",
+      "manso_2016",
+      "ine_eme_2025"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "lado",
+     "nombre": "Probar en paralelo",
+     "detalle": "Sin renunciar, de noche y fines de semana.",
+     "resultados": [
+      {
+       "id": "tracciona",
+       "prob": 0.2,
+       "texto": "Tu proyecto tiene clientes. Puedes lanzarte con menos riesgo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -10
+        },
+        {
+         "var": "validado",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No despega y lo dejas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -8
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues como estás.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "hamilton_2000",
+     "cifra": "Mediana a 10 años 35% bajo un empleado comparable",
+     "uso": "ingreso"
+    },
+    {
+     "fuente": "manso_2016",
+     "cifra": "52% de los episodios dura menos de 2 años; volver a ser empleado no cuesta sueldo",
+     "uso": "salida"
+    },
+    {
+     "fuente": "ine_eme_2025",
+     "cifra": "Ganancia mediana del microemprendedor: $400 mil",
+     "uso": "piso"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "emprender",
+   "creencia_vs_dato": "\"Emprender paga\": la mediana gana 35% menos, aunque volver a emplearse casi no cuesta."
+  },
+  {
+   "id": "seguir_con_tu_empresa",
+   "nombre": "Seguir o cerrar tu empresa",
+   "categoria": "emprender",
+   "pregunta": "Otro año con tu empresa. ¿Sigues?",
+   "cuando": "estado == 'fundador'",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "seguir",
+     "nombre": "Seguir",
+     "detalle": "Sobrevive 80% al primer año y 43% a cinco años.",
+     "resultados": [
+      {
+       "id": "sobrevive",
+       "prob": "si(empresa_anos == 0, k('SOBREVIVE_1'), pow(k('SOBREVIVE_5') / k('SOBREVIVE_1'), 1 / 4))",
+       "texto": "Tu empresa sigue un año más.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "empresa_anos",
+         "op": "suma",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4) * (1 + empresa_anos / 4)"
+        }
+       ]
+      },
+      {
+       "id": "cierra",
+       "prob": "resto",
+       "texto": "Tu empresa cierra.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "-sueldo_ref * 3"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -8
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "multiplica",
+         "valor": "k('FUNDADOR_VUELVE_SIN_PERDIDA')"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_reue",
+      "ine_eme_2025",
+      "hamilton_2000"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "levantar",
+     "nombre": "Buscar inversionistas",
+     "detalle": "Postular a aceleradoras o ángeles.",
+     "resultados": [
+      {
+       "id": "levanta",
+       "prob": 0.1,
+       "texto": "Levantas capital.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "empresa_fondos",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "max(sueldo, sueldo_ref * 0.8)"
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "Nadie invierte este año.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "vender",
+     "nombre": "Vender la empresa",
+     "detalle": "Solo si tiene tracción.",
+     "resultados": [
+      {
+       "id": "vende",
+       "prob": "si(empresa_fondos, 0.3, 0.1)",
+       "texto": "Vendes tu empresa.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "sueldo * 12 * azar_lognormal(0.5, 3, 30)"
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "No aparece comprador.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "yc_directorio",
+      "hall_woodward_2010",
+      "equipo"
+     ],
+     "calidad": "supuesto",
+     "requisito": "empresa_anos >= 3"
+    },
+    {
+     "id": "cerrar",
+     "nombre": "Cerrarla y volver a emplearte",
+     "detalle": "Quien vuelve a ser empleado no pierde sueldo.",
+     "resultados": [
+      {
+       "id": "cierra",
+       "prob": 1,
+       "texto": "Cierras y sales a buscar pega.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "manso_2016"
+     ],
+     "calidad": "dato"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_reue",
+     "cifra": "Supervivencia 80% a 1 año y 43,2% a 5 años (fuente secundaria)",
+     "uso": "probabilidad de seguir"
+    },
+    {
+     "fuente": "ine_eme_2025",
+     "cifra": "Mediana de $400 mil al mes",
+     "uso": "ingreso del fundador"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "fundador"
+  },
+  {
+   "id": "emigrar",
+   "nombre": "Irte a trabajar afuera",
+   "categoria": "lugar",
+   "pregunta": "¿Te vas a trabajar a Estados Unidos?",
+   "cuando": "y(pais == 'chile', edad >= 22, edad <= 45, en(edu, 'tecnica', 'universitaria', 'postgrado'))",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.25,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "irse",
+     "nombre": "Irte",
+     "detalle": "Un trabajador chileno idéntico gana 3,53 veces más en EE.UU.; con selección el premio baja.",
+     "resultados": [
+      {
+       "id": "consigue",
+       "prob": "clamp(0.25 + si(ingles, 0.25, 0) + skill / 400, 0.1, 0.8)",
+       "texto": "Consigues visa y trabajo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "pais",
+         "op": "fija",
+         "valor": "'afuera'"
+        },
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'extranjero'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "k('PREMIO_EEUU')"
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -6000000
+        },
+        {
+         "var": "tiempo_con_tu_gente",
+         "op": "multiplica",
+         "valor": 0.3
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -3,
+         "duracion": 1
+        }
+       ]
+      },
+      {
+       "id": "vuelve",
+       "prob": "resto",
+       "texto": "No resulta la visa y vuelves.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -3000000
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "clemens_2008",
+      "askamanager"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas en Chile.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "clemens_2008",
+     "cifra": "3,53 veces (intervalo 2,17 a 5,76) para Chile; con corrección por selección Perú baja de 3,8 a 2,6",
+     "uso": "premio"
+    },
+    {
+     "fuente": "askamanager",
+     "cifra": "Sueldos en EE.UU. por experiencia e industria (muestra autoseleccionada)",
+     "uso": "sueldo de destino"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "emigrar"
+  },
+  {
+   "id": "mudarse_de_region",
+   "nombre": "Mudarte de región",
+   "categoria": "lugar",
+   "pregunta": "¿Te cambias de ciudad por trabajo?",
+   "cuando": "y(estado == 'empleado', edad <= 45)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.3,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "a_santiago",
+     "nombre": "Irte a Santiago",
+     "detalle": "Santiago paga 21% más; con título universitario, 18% más.",
+     "resultados": [
+      {
+       "id": "va",
+       "prob": 1,
+       "texto": "Te mudas a Santiago.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "region",
+         "op": "fija",
+         "valor": "'rm'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "tabla_o(tabla('esi_ingreso_region', 'p50', 'region', 'Metropolitana', 'educacion', 'todas'), 'esi_ingreso_region', 'p50', 'region', 'Metropolitana', 'educacion', si(edu_esi == 'postgrado', 'universitaria', edu_esi)) / tabla_o(tabla('esi_ingreso_region', 'p50', 'region', region_nombre, 'educacion', 'todas'), 'esi_ingreso_region', 'p50', 'region', region_nombre, 'educacion', si(edu_esi == 'postgrado', 'universitaria', edu_esi))"
+        },
+        {
+         "var": "tiempo_con_tu_gente",
+         "op": "multiplica",
+         "valor": 0.6,
+         "duracion": 3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025",
+      "delaroca_puga_2017"
+     ],
+     "calidad": "mixto",
+     "requisito": "region != 'rm'"
+    },
+    {
+     "id": "a_region",
+     "nombre": "Irte a regiones",
+     "detalle": "Menos sueldo, menos arriendo; Antofagasta y Magallanes pagan más que el promedio.",
+     "resultados": [
+      {
+       "id": "va",
+       "prob": 1,
+       "texto": "Te mudas a regiones.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "region",
+         "op": "fija",
+         "valor": "'otra'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "tabla_o(tabla('esi_ingreso_region', 'p50', 'region', region_destino, 'educacion', 'todas'), 'esi_ingreso_region', 'p50', 'region', region_destino, 'educacion', si(edu_esi == 'postgrado', 'universitaria', edu_esi)) / tabla_o(tabla('esi_ingreso_region', 'p50', 'region', 'Metropolitana', 'educacion', 'todas'), 'esi_ingreso_region', 'p50', 'region', 'Metropolitana', 'educacion', si(edu_esi == 'postgrado', 'universitaria', edu_esi))"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025"
+     ],
+     "calidad": "dato",
+     "requisito": "region == 'rm'"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Mediana $798 mil en Santiago contra $658 mil fuera (+21%)",
+     "uso": "premio"
+    },
+    {
+     "fuente": "delaroca_puga_2017",
+     "cifra": "+10% al llegar a la ciudad grande y 34-36% a los 10 años (España)",
+     "uso": "el premio crece con los años"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "region"
+  },
+  {
+   "id": "volver_a_chile",
+   "nombre": "Volver a Chile",
+   "categoria": "lugar",
+   "pregunta": "Llevas años afuera. ¿Vuelves?",
+   "cuando": "pais == 'afuera'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.15 + si(madre_edad > 70, 0.2, 0)",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "volver",
+     "nombre": "Volver",
+     "detalle": "Tu experiencia afuera vale algo en Chile.",
+     "resultados": [
+      {
+       "id": "vuelve",
+       "prob": 1,
+       "texto": "Vuelves a Chile.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "pais",
+         "op": "fija",
+         "valor": "'chile'"
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "1 / k('PREMIO_EEUU') * 1.15"
+        },
+        {
+         "var": "tiempo_con_tu_gente",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "quedarse",
+     "nombre": "Quedarte afuera",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "queda",
+       "prob": 1,
+       "texto": "Te quedas afuera.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [],
+   "calidad": "supuesto",
+   "en_juego": null
+  },
+  {
+   "id": "tener_hijo",
+   "nombre": "Tener un hijo",
+   "categoria": "familia",
+   "pregunta": "¿Buscan tener un hijo?",
+   "cuando": "y(en(pareja, 'convive', 'casado'), edad >= 22, edad <= 44, hijos < 4)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.3 + si(hijos == 0, 0.2, 0)",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "si",
+     "nombre": "Sí",
+     "detalle": "A 20 meses del primer hijo el ingreso de las madres cae 35% en el sector privado y 20% en el público; el de los padres no cambia.",
+     "resultados": [
+      {
+       "id": "nace",
+       "prob": "clamp(si(mujer, 1, 0.9) * (1 - max(0, edad - 34) * 0.06), 0.2, 0.9)",
+       "texto": "Nace tu hijo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "hijos",
+         "op": "suma",
+         "valor": 1
+        },
+        {
+         "var": "edad_hijo_menor",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 5
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "1 + si(tipo_empleador == 'publico', k('HIJO_INGRESO_MUJER', 'publico'), k('HIJO_INGRESO_MUJER', 'privado'))",
+         "duracion": 2,
+         "cuando": "mujer == 1"
+        },
+        {
+         "var": "deja_de_trabajar",
+         "op": "fija",
+         "valor": 1,
+         "cuando": "azar() < k('HIJO_SALE', sexo)"
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -15,
+         "duracion": 3
+        },
+        {
+         "var": "horas_cuidado_dia",
+         "op": "suma",
+         "valor": "k('HIJO_CUIDADOS_H_DIA', sexo)",
+         "duracion": 4
+        },
+        {
+         "var": "gasto_mensual",
+         "op": "suma",
+         "valor": 350000
+        }
+       ]
+      },
+      {
+       "id": "no_llega",
+       "prob": "resto",
+       "texto": "El embarazo no llega este año.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "coes_2024",
+      "eps_2024",
+      "ine_enut_2023",
+      "ine_vitales"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "esperar",
+     "nombre": "Esperar",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "espera",
+       "prob": 1,
+       "texto": "Lo dejan para más adelante.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "coes_2024",
+     "cifra": "Ingreso de la madre −35% privado y −20% público a 20 meses",
+     "uso": "sueldo"
+    },
+    {
+     "fuente": "eps_2024",
+     "cifra": "17,3% de las madres y 5% de los padres que trabajaban no trabaja 12 meses después",
+     "uso": "salida del empleo"
+    },
+    {
+     "fuente": "ine_enut_2023",
+     "cifra": "Un hijo de 0-4 años suma 5 horas diarias de cuidado a la madre y 1,8 al padre",
+     "uso": "tiempo"
+    },
+    {
+     "fuente": "ine_vitales",
+     "cifra": "Fecundidad por edad; tasa global 1,03 en 2024",
+     "uso": "probabilidad de embarazo"
+    }
+   ],
+   "calidad": "dato",
+   "en_juego": "hijo",
+   "notas": "Probabilidad de que nazca en el año: supuesto que cae 6 puntos por año sobre los 34. El gasto mensual de un hijo ($350 mil) es supuesto."
+  },
+  {
+   "id": "formalizar_pareja",
+   "nombre": "Irse a vivir juntos o casarse",
+   "categoria": "familia",
+   "pregunta": "Llevan tiempo juntos. ¿Dan el paso?",
+   "cuando": "en(pareja, 'pololeo', 'convive')",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.5,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "convivir",
+     "nombre": "Irse a vivir juntos",
+     "detalle": "Comparten gastos.",
+     "resultados": [
+      {
+       "id": "juntos",
+       "prob": 1,
+       "texto": "Se van a vivir juntos.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "pareja",
+         "op": "fija",
+         "valor": "'convive'"
+        },
+        {
+         "var": "gasto_mensual",
+         "op": "multiplica",
+         "valor": 0.75
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_PAREJA')"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "elsoc",
+      "equipo"
+     ],
+     "calidad": "mixto",
+     "requisito": "pareja == 'pololeo'"
+    },
+    {
+     "id": "casarse",
+     "nombre": "Casarse",
+     "detalle": "La edad mediana al casarse es 36 en hombres y 34 en mujeres.",
+     "resultados": [
+      {
+       "id": "casados",
+       "prob": 1,
+       "texto": "Se casan.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "pareja",
+         "op": "fija",
+         "valor": "'casado'"
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -3000000
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_vitales",
+      "clark_georgellis_2013"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "seguir_igual",
+     "nombre": "Seguir como están",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "igual",
+       "prob": 1,
+       "texto": "Siguen igual.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_vitales",
+     "cifra": "Matrimonios por edad y sexo; AUC por edad",
+     "uso": "calendario"
+    },
+    {
+     "fuente": "elsoc",
+     "cifra": "Formar pareja sube la satisfacción con la vida 0,1 puntos de 5",
+     "uso": "ánimo"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "pareja"
+  },
+  {
+   "id": "separarse",
+   "nombre": "Separarse",
+   "categoria": "familia",
+   "pregunta": "La relación está mal. ¿Terminan?",
+   "cuando": "pareja != 'no'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "si(animo < 50, 0.3, 0.05)",
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "terminar",
+     "nombre": "Terminar",
+     "detalle": "El ánimo cae y se recupera en dos o tres años. Si conviven, se reparte lo ahorrado.",
+     "resultados": [
+      {
+       "id": "termina",
+       "prob": 1,
+       "texto": "Terminan.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "pareja",
+         "op": "fija",
+         "valor": "'no'"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -6
+        },
+        {
+         "var": "ahorro",
+         "op": "multiplica",
+         "valor": 0.85,
+         "cuando": "pareja_previa != 'pololeo'"
+        },
+        {
+         "var": "gasto_mensual",
+         "op": "multiplica",
+         "valor": 1.25
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "clark_georgellis_2013",
+      "elsoc"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "intentar",
+     "nombre": "Intentarlo de nuevo",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "mejora",
+       "prob": 0.5,
+       "texto": "Mejoran las cosas.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      },
+      {
+       "id": "igual",
+       "prob": "resto",
+       "texto": "Siguen mal.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "clark_georgellis_2013",
+     "cifra": "Separación: caída de satisfacción con recuperación en pocos años",
+     "uso": "ánimo"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "pareja"
+  },
+  {
+   "id": "buscar_pareja",
+   "nombre": "Buscar pareja",
+   "categoria": "familia",
+   "pregunta": "¿Le das prioridad a conocer a alguien este año?",
+   "cuando": "pareja == 'no'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.4,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "si",
+     "nombre": "Sí",
+     "detalle": "Apps, amigos, salir más.",
+     "resultados": [
+      {
+       "id": "conoce",
+       "prob": "2 * k('P_FORMAR_PAREJA', si(edad <= 35, '20-35', '36+'))",
+       "texto": "Conoces a alguien.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "pareja",
+         "op": "fija",
+         "valor": "'pololeo'"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_PAREJA')"
+        }
+       ]
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "Nada serio este año.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -400000
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "cep_casen_pareja",
+      "elsoc",
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Te enfocas en otras cosas.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "cep_casen_pareja",
+     "cifra": "Menos de 60% de los hombres y cerca de 65% de las mujeres está en pareja a los 30",
+     "uso": "blanco"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "pareja",
+   "notas": "Buscar activamente duplica la probabilidad base de formar pareja: supuesto."
+  },
+  {
+   "id": "cuidar_familiar",
+   "nombre": "Cuidar a un familiar enfermo",
+   "categoria": "familia",
+   "pregunta": "Tu mamá, papá o abuela necesita cuidado. ¿Qué haces?",
+   "cuando": "familiar_enfermo != ''",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "dejar_pega",
+     "nombre": "Dejar de trabajar para cuidar",
+     "detalle": "Acompañas todo el proceso; tu currículum queda con un hueco elegido.",
+     "resultados": [
+      {
+       "id": "cuida",
+       "prob": 1,
+       "texto": "Dejas tu trabajo para cuidar.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'inactivo'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "fija",
+         "valor": "sueldo"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "acompana",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -10
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "weisshaar_2018",
+      "ine_enut_2023"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "reducir",
+     "nombre": "Pedir media jornada",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "si",
+       "prob": 0.6,
+       "texto": "Combinas trabajo y cuidado.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "parcial",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "multiplica",
+         "valor": "k('PARCIAL_SUELDO')"
+        },
+        {
+         "var": "acompana",
+         "op": "fija",
+         "valor": 0.6
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -12
+        }
+       ]
+      },
+      {
+       "id": "no",
+       "prob": "resto",
+       "texto": "No te la dan; haces lo que puedes.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "acompana",
+         "op": "fija",
+         "valor": 0.3
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -18
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "pagar",
+     "nombre": "Pagar cuidadora",
+     "detalle": "Unos $700 mil al mes.",
+     "resultados": [
+      {
+       "id": "paga",
+       "prob": 1,
+       "texto": "Contratas una cuidadora.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -8400000
+        },
+        {
+         "var": "acompana",
+         "op": "fija",
+         "valor": 0.3
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -5
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "weisshaar_2018",
+     "cifra": "Tras una pausa para cuidar, 5% de llamados contra 9% tras un despido",
+     "uso": "castigo al volver"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "cuidar"
+  },
+  {
+   "id": "comprar_vivienda",
+   "nombre": "Comprar vivienda",
+   "categoria": "dinero",
+   "pregunta": "¿Compras una casa o departamento con crédito hipotecario?",
+   "cuando": "y(edad >= 27, ahorro >= 15000000, estado == 'empleado')",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.3,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "comprar",
+     "nombre": "Comprar",
+     "detalle": "Pie de 20% y dividendo a 25 años.",
+     "resultados": [
+      {
+       "id": "compra",
+       "prob": 1,
+       "texto": "Compras tu vivienda.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "-ahorro * 0.8"
+        },
+        {
+         "var": "propietario",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "gasto_mensual",
+         "op": "suma",
+         "valor": "-tabla('epf_quintiles', 'arriendo_promedio', 'quintil', quintil) * 0.3"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_epf",
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "arrendar",
+     "nombre": "Seguir arrendando",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "arrienda",
+       "prob": 1,
+       "texto": "Sigues arrendando e invirtiendo el ahorro.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_epf",
+     "cifra": "Arriendo por quintil",
+     "uso": "costo de arrendar"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": null,
+   "notas": "Nueva. Falta un dato de precio de vivienda y tasa hipotecaria para dejarla en \"mixto\"."
+  },
+  {
+   "id": "sabatico",
+   "nombre": "Tomarte un año sabático",
+   "categoria": "salud",
+   "pregunta": "¿Te tomas un año para viajar, descansar o probar otra cosa?",
+   "cuando": "y(en(estado, 'empleado', 'buscando'), edad >= 23)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": "0.1 + si(energia < 35, 0.4, 0)",
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "irse",
+     "nombre": "Tomarlo",
+     "detalle": "Llamados a entrevista bajan de 7% a 4% tras 8 meses fuera; una pausa elegida pesa más que un despido.",
+     "resultados": [
+      {
+       "id": "vuelve_bien",
+       "prob": 0.6,
+       "texto": "Vuelves con energía.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "fija",
+         "valor": "max(sueldo, sueldo_ref)"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "fija",
+         "valor": 85
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 8
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -8000000
+        }
+       ]
+      },
+      {
+       "id": "cuesta_volver",
+       "prob": "resto",
+       "texto": "Lo pasas bien, pero volver cuesta más de lo pensado.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'buscando'"
+        },
+        {
+         "var": "sueldo_ref",
+         "op": "fija",
+         "valor": "max(sueldo, sueldo_ref)"
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "hueco",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "fija",
+         "valor": 80
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 4
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": -9000000
+        },
+        {
+         "var": "meses_cesante",
+         "op": "suma",
+         "valor": 6
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "kroft_2013",
+      "weisshaar_2018"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "No",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "kroft_2013",
+     "cifra": "De 7% a 4% de llamados",
+     "uso": "castigo"
+    },
+    {
+     "fuente": "weisshaar_2018",
+     "cifra": "Pausa elegida 5% contra despido 9%",
+     "uso": "castigo relativo"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "sabatico",
+   "creencia_vs_dato": "\"Un sabático no se nota\": una pausa elegida baja los llamados más que un despido."
+  },
+  {
+   "id": "licencia_salud_mental",
+   "nombre": "Pedir licencia por salud mental",
+   "categoria": "salud",
+   "pregunta": "Estás agotado. ¿Pides licencia?",
+   "cuando": "y(estado == 'empleado', energia < 30)",
+   "aparicion": {
+    "tipo": "forzada",
+    "peso": 1,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "pedir",
+     "nombre": "Pedir licencia",
+     "detalle": "Un tercio de las licencias de 2024 fue por salud mental; las isapres rechazan más.",
+     "resultados": [
+      {
+       "id": "aprobada",
+       "prob": "1 - si(isapre, k('LICENCIA_RECHAZO', 'isapre'), k('LICENCIA_RECHAZO', 'fonasa'))",
+       "texto": "Te aprueban un mes de licencia.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": 25
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 3
+        },
+        {
+         "var": "marcado",
+         "op": "fija",
+         "valor": 1,
+         "cuando": "azar() < 0.2"
+        }
+       ]
+      },
+      {
+       "id": "rechazada",
+       "prob": "resto",
+       "texto": "Te la rechazan y pierdes ese sueldo.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": 10
+        },
+        {
+         "var": "ahorro",
+         "op": "suma",
+         "valor": "-sueldo"
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "suseso_2024"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "seguir",
+     "nombre": "Seguir trabajando",
+     "detalle": "Si la energía llega a cero, el cuerpo decide.",
+     "resultados": [
+      {
+       "id": "aguanta",
+       "prob": 0.6,
+       "texto": "Aguantas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -5
+        }
+       ]
+      },
+      {
+       "id": "colapsa",
+       "prob": "resto",
+       "texto": "Colapsas y quedas tres meses con licencia.",
+       "tono": "malo",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "fija",
+         "valor": 40
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -8
+        },
+        {
+         "var": "marcado",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "suseso_2024",
+     "cifra": "33,1% de las licencias de 2024 por trastornos mentales; rechazo final 11,5% Fonasa y 27,9% isapres",
+     "uso": "probabilidad de aprobación"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "burnout"
+  },
+  {
+   "id": "ahorro",
+   "nombre": "Cuánto ahorrar",
+   "categoria": "dinero",
+   "pregunta": "¿Cuánto de tu sueldo ahorras este año?",
+   "cuando": "y(estado == 'empleado', sueldo > 0)",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.2,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "mucho",
+     "nombre": "Ahorrar 20%",
+     "detalle": "Lo que ahorra el quinto de hogares de más ingresos.",
+     "resultados": [
+      {
+       "id": "ahorra",
+       "prob": 1,
+       "texto": "Ahorras un quinto del sueldo.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tasa_ahorro",
+         "op": "fija",
+         "valor": 0.2
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_epf"
+     ],
+     "calidad": "dato"
+    },
+    {
+     "id": "normal",
+     "nombre": "Lo de siempre",
+     "detalle": "Según tu lugar en la distribución.",
+     "resultados": [
+      {
+       "id": "igual",
+       "prob": 1,
+       "texto": "Sigues igual.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tasa_ahorro",
+         "op": "fija",
+         "valor": "si(percentil >= 80, k('TASA_AHORRO', 'p80+'), si(percentil >= 50, k('TASA_AHORRO', 'p50-79'), k('TASA_AHORRO', 'p0-49')))"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_epf"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "gastar",
+     "nombre": "Darte gustos",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "gasta",
+       "prob": 1,
+       "texto": "Gastas más.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tasa_ahorro",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": 2
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_epf",
+     "cifra": "Solo el quintil más alto ahorra: 19,5% del ingreso",
+     "uso": "tasa de ahorro"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null
+  },
+  {
+   "id": "tipo_de_empleador",
+   "nombre": "A qué empleador entras",
+   "categoria": "trabajo",
+   "pregunta": "Sorteo del tipo de empleador al volver a trabajar.",
+   "cuando": "falso()",
+   "aparicion": {
+    "tipo": "interna",
+    "peso": 0,
+    "proactiva": false
+   },
+   "opciones": [
+    {
+     "id": "sorteo",
+     "nombre": "Sorteo",
+     "detalle": "Mezcla de la ESI más la chance de entrar al Estado.",
+     "resultados": [
+      {
+       "id": "publico",
+       "prob": "k('P_REEMPLEO_PUBLICO')",
+       "texto": "Entras al Estado.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'publico'"
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "'Administración pública'"
+        }
+       ]
+      },
+      {
+       "id": "grande",
+       "prob": "(1 - k('P_REEMPLEO_PUBLICO')) * k('MIX_EMPLEADOR', 'grande')",
+       "texto": "Entras a una empresa grande.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'grande'"
+        }
+       ]
+      },
+      {
+       "id": "pyme",
+       "prob": "(1 - k('P_REEMPLEO_PUBLICO')) * k('MIX_EMPLEADOR', 'pyme')",
+       "texto": "Entras a una pyme.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'pyme'"
+        }
+       ]
+      },
+      {
+       "id": "startup",
+       "prob": "resto",
+       "texto": "Entras a una startup.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "tipo_empleador",
+         "op": "fija",
+         "valor": "'startup'"
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "ine_esi_2025"
+     ],
+     "calidad": "mixto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "ine_esi_2025",
+     "cifra": "Tamaño del empleador de asalariados privados; 13% a 17% de los ocupados es asalariado público",
+     "uso": "mezcla"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": null,
+   "notas": "No es una decisión del jugador: es un sorteo que otras decisiones llaman con \"luego\"."
+  }
+ ]
+}

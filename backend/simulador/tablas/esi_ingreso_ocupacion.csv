@@ -1,0 +1,81 @@
+ciuo08_1d,ocupacion,banda_edad,n,p25,p50,p75,share_ocupados_banda
+1,Directores y gerentes,18-24,14,,,,
+2,Profesionales científicos e intelectuales,18-24,166,319379,666816,1000000,0.0826
+3,Técnicos y profesionales de nivel medio,18-24,242,498702,586667,797923,0.1037
+4,Personal de apoyo administrativo,18-24,115,360282,576542,715592,0.0578
+5,Trabajadores de servicios y vendedores,18-24,833,200000,399510,566062,0.3615
+6,Agricultores calificados,18-24,35,300869,479614,597807,0.0109
+7,"Oficiales, operarios y artesanos",18-24,221,450191,561783,700000,0.0881
+8,Operadores de instalaciones y máquinas,18-24,109,304683,548867,715534,0.0426
+9,Ocupaciones elementales,18-24,587,264685,498702,568520,0.2448
+10,Fuerzas Armadas,18-24,7,,,,
+1,Directores y gerentes,25-29,72,900380,1300270,2325668,0.0243
+2,Profesionales científicos e intelectuales,25-29,778,694781,1000000,1488968,0.2147
+3,Técnicos y profesionales de nivel medio,25-29,545,530000,700295,997405,0.1435
+4,Personal de apoyo administrativo,25-29,211,531290,700000,852098,0.0602
+5,Trabajadores de servicios y vendedores,25-29,888,398962,548573,700000,0.2549
+6,Agricultores calificados,25-29,54,400236,529587,794879,0.0085
+7,"Oficiales, operarios y artesanos",25-29,406,518383,630221,997405,0.1033
+8,Operadores de instalaciones y máquinas,25-29,196,499793,648313,833456,0.0493
+9,Ocupaciones elementales,25-29,542,430034,529000,653475,0.1378
+10,Fuerzas Armadas,25-29,9,,,,
+1,Directores y gerentes,30-34,135,1000000,1301273,2659800,0.0351
+2,Profesionales científicos e intelectuales,30-34,975,823576,1200160,1850323,0.2486
+3,Técnicos y profesionales de nivel medio,30-34,649,600000,800338,1097145,0.1416
+4,Personal de apoyo administrativo,30-34,241,590505,729673,997405,0.0573
+5,Trabajadores de servicios y vendedores,30-34,891,430078,598443,797924,0.1977
+6,Agricultores calificados,30-34,69,500189,600000,751740,0.0106
+7,"Oficiales, operarios y artesanos",30-34,506,500000,606831,888677,0.1049
+8,Operadores de instalaciones y máquinas,30-34,339,569541,742058,1000000,0.081
+9,Ocupaciones elementales,30-34,529,400000,527761,621577,0.1185
+10,Fuerzas Armadas,30-34,22,,,,
+1,Directores y gerentes,35-39,193,1220226,2000000,3087011,0.0584
+2,Profesionales científicos e intelectuales,35-39,1005,942070,1400000,2063612,0.2407
+3,Técnicos y profesionales de nivel medio,35-39,674,600253,848202,1277888,0.1518
+4,Personal de apoyo administrativo,35-39,213,599572,800000,997405,0.0537
+5,Trabajadores de servicios y vendedores,35-39,817,398962,580245,782343,0.1701
+6,Agricultores calificados,35-39,86,300442,577717,750077,0.0156
+7,"Oficiales, operarios y artesanos",35-39,519,400083,600000,900380,0.1083
+8,Operadores de instalaciones y máquinas,35-39,362,598443,802268,1020136,0.0756
+9,Ocupaciones elementales,35-39,584,398551,521527,600253,0.1196
+10,Fuerzas Armadas,35-39,36,997405,1173752,2291987,0.0057
+1,Directores y gerentes,40-44,207,1235443,2000844,3167149,0.0611
+2,Profesionales científicos e intelectuales,40-44,795,1047275,1618302,2493512,0.2151
+3,Técnicos y profesionales de nivel medio,40-44,583,650955,850359,1400000,0.1383
+4,Personal de apoyo administrativo,40-44,206,598443,868957,1146515,0.0445
+5,Trabajadores de servicios y vendedores,40-44,821,376529,568521,801704,0.1879
+6,Agricultores calificados,40-44,112,389795,550232,883352,0.0162
+7,"Oficiales, operarios y artesanos",40-44,495,398962,600000,800287,0.1115
+8,Operadores de instalaciones y máquinas,40-44,375,600253,847794,1298469,0.0854
+9,Ocupaciones elementales,40-44,661,368418,527627,630585,0.1345
+10,Fuerzas Armadas,40-44,29,,,,
+1,Directores y gerentes,45-49,230,1254585,2493512,4120350,0.0698
+2,Profesionales científicos e intelectuales,45-49,633,1000000,1500882,2292168,0.1769
+3,Técnicos y profesionales de nivel medio,45-49,566,650000,1000000,1585335,0.1386
+4,Personal de apoyo administrativo,45-49,192,600087,797924,1196886,0.0495
+5,Trabajadores de servicios y vendedores,45-49,805,359587,550000,755463,0.184
+6,Agricultores calificados,45-49,129,250106,521987,698476,0.0206
+7,"Oficiales, operarios y artesanos",45-49,467,498702,655721,854824,0.1204
+8,Operadores de instalaciones y máquinas,45-49,368,527627,702204,1000422,0.0843
+9,Ocupaciones elementales,45-49,698,300000,500000,580116,0.1512
+10,Fuerzas Armadas,45-49,20,,,,
+1,Directores y gerentes,50-54,214,1200091,2500000,3857447,0.0714
+2,Profesionales científicos e intelectuales,50-54,464,1000000,1500633,2495149,0.1257
+3,Técnicos y profesionales de nivel medio,50-54,523,648313,930830,1405124,0.122
+4,Personal de apoyo administrativo,50-54,168,648533,800782,1149770,0.041
+5,Trabajadores de servicios y vendedores,50-54,879,339118,529223,700000,0.2028
+6,Agricultores calificados,50-54,203,200610,478758,598777,0.0321
+7,"Oficiales, operarios y artesanos",50-54,554,400000,568109,797924,0.1286
+8,Operadores de instalaciones y máquinas,50-54,394,579244,793546,1000422,0.0855
+9,Ocupaciones elementales,50-54,887,300000,500000,580299,0.1889
+10,Fuerzas Armadas,50-54,6,,,,
+1,Directores y gerentes,18-54,1065,1098381,1996945,3301393,0.0493
+2,Profesionales científicos e intelectuales,18-54,4816,850000,1300000,2000000,0.1984
+3,Técnicos y profesionales de nivel medio,18-54,3782,600000,800338,1227367,0.1373
+4,Personal de apoyo administrativo,18-54,1346,579310,749109,998054,0.0518
+5,Trabajadores de servicios y vendedores,18-54,5934,349376,541676,715302,0.2103
+6,Agricultores calificados,18-54,688,300127,527627,700442,0.0163
+7,"Oficiales, operarios y artesanos",18-54,3168,450000,600000,850000,0.1104
+8,Operadores de instalaciones y máquinas,18-54,2143,550011,751737,1003604,0.0745
+9,Ocupaciones elementales,18-54,4488,330139,516249,600000,0.1473
+10,Fuerzas Armadas,18-54,129,800000,1116019,1499480,0.0035
