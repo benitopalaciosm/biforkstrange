@@ -1,5 +1,5 @@
 /**
- * Kit de UI de BiforkStrange (desde el Claude Design "Gemelo Laboral · simulador de vida").
+ * Kit de UI de Doble Vida (desde el Claude Design "Gemelo Laboral · simulador de vida").
  * Los estilos (styles/vida.css) se importan una vez en main.tsx. Usa los componentes desde "@/shared/ui".
  * Catálogo vivo en /ui (ver features/ui-kit).
  */
