@@ -1,6 +1,7 @@
 import { BigNumber, Button, Heading, Meta, Pill, RangeCompare, Screen, ScreenHeader, Stack, StationTimeline, SunCard, Tag, Text, type Range } from "@/shared/ui";
 import { aniosDe, cargoYSueldo, deCada10, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Rango, Vista } from "../types";
+import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
@@ -14,7 +15,7 @@ function resumenDelAnio(a: Anio): string {
 }
 
 /** El cierre: tu vida frente a los gemelos de tu primera decisión. Viene de "8 · Fin de la partida" del kit. */
-export function CierrePantalla({ vista, onOtraVida, onCambiarPerfil }: { vista: Vista; onOtraVida: () => void; onCambiarPerfil: () => void }) {
+export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerfil }: { vista: Vista; sueldoInicial: number; onOtraVida: () => void; onCambiarPerfil: () => void }) {
   const cierre = vista.cierre!;
   const e = cierre.estado;
   const primera = cierre.primera_decision;
@@ -26,6 +27,10 @@ export function CierrePantalla({ vista, onOtraVida, onCambiarPerfil }: { vista: 
   const aRango = (r: Rango): Range => ({ low: pos(r.p10), high: pos(r.p90), median: pos(r.p50) });
   const letra = (i: number) => String.fromCharCode(66 + i);
   const edadInicial = vista.edad_final - vista.anios;
+  const recorrido = [
+    { edad: edadInicial, sueldo: sueldoInicial },
+    ...vista.historia.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.sueldo })),
+  ];
 
   return (
     <Screen gap={28}>
@@ -46,7 +51,11 @@ export function CierrePantalla({ vista, onOtraVida, onCambiarPerfil }: { vista: 
         {cierre.mejor_que_gemelos !== undefined && elegida && (
           <Text>
             <strong>
-              Terminaste mejor que {deCada10(cierre.mejor_que_gemelos)} gemelos que también eligieron «{elegida.nombre}».
+              {cierre.mejor_que_gemelos >= 0.95
+                ? `Terminaste mejor que casi todos los gemelos que también eligieron «${elegida.nombre}».`
+                : cierre.mejor_que_gemelos < 0.05
+                  ? `Casi todos los gemelos que también eligieron «${elegida.nombre}» terminaron mejor que tú.`
+                  : `Terminaste mejor que ${deCada10(cierre.mejor_que_gemelos)} gemelos que también eligieron «${elegida.nombre}».`}
             </strong>
           </Text>
         )}
@@ -59,10 +68,17 @@ export function CierrePantalla({ vista, onOtraVida, onCambiarPerfil }: { vista: 
               Tu vida contra tus gemelos
             </Heading>
             <Text size="sm">
-              Tu primera decisión: {primera.pregunta} Sueldo a los 10 años de los {primera.comparacion.gemelos} gemelos de cada opción. Cada barra va
-              del 10% peor al 10% mejor; la raya es el gemelo del medio.
+              Tu primera decisión: {primera.pregunta} Aquí va tu sueldo año a año contra el de los {primera.comparacion.gemelos} gemelos que eligieron
+              lo mismo que tú.
             </Text>
           </Stack>
+          <Abanico puntos={elegida.trayectoria} hoy={{ edad: edadInicial, sueldo: sueldoInicial }} tu={recorrido} alto={190} />
+          <Info pregunta="¿Cómo leo este gráfico?">
+            La línea amarilla es tu sueldo en la vida que jugaste. La franja celeste contiene a 8 de cada 10 gemelos que eligieron «{elegida.nombre}» y
+            la línea azul es el gemelo del medio. Si tu línea sale de la franja, tuviste más (o menos) suerte que casi todos, o tus decisiones de
+            después te llevaron por otro lado.
+          </Info>
+          <Text size="sm">Y el sueldo final de cada opción, lado a lado. Cada barra va de la mala suerte a la buena suerte; la raya es el sueldo típico.</Text>
           <Stack gap={6}>
             <span className="vd-camino">
               <Tag tone="sol">Tú</Tag>
@@ -82,7 +98,7 @@ export function CierrePantalla({ vista, onOtraVida, onCambiarPerfil }: { vista: 
           <Stack gap={12}>
             {otras.map((o, i) => (
               <Stack gap={5} key={o.opcion}>
-                <RangeCompare indicator="dinero" label={`A contra ${letra(i)} · ${o.nombre}`} a={aRango(elegida.sueldo)} b={aRango(o.sueldo)} />
+                <RangeCompare indicator="dinero" label={`A · ${elegida.nombre} contra ${letra(i)} · ${o.nombre}`} a={aRango(elegida.sueldo)} b={aRango(o.sueldo)} />
                 <div className="vd-rangos" aria-hidden="true">
                   <em>Tú</em>
                   <span className="vd-rango-pista jg-pista-tu">

@@ -1,8 +1,9 @@
 import "./juego.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button, Heading, Screen, ScreenFooter, Stack, Text } from "@/shared/ui";
 import { Carta } from "./components/Carta";
 import { CierrePantalla } from "./components/Cierre";
+import { ComoFunciona } from "./components/ComoFunciona";
 import { DudaPicker } from "./components/DudaPicker";
 import { Inicio } from "./components/Inicio";
 import { PerfilForm } from "./components/PerfilForm";
@@ -22,13 +23,31 @@ export function JuegoPage() {
 function Juego() {
   const j = usePartida();
   const { catalogo, error: errorCatalogo } = useCatalogo();
+  /** El tutorial: "antes" de armar el perfil, o "ayuda" cuando se reabre a mitad de la partida. */
+  const [tutorial, setTutorial] = useState<"antes" | "ayuda" | null>(null);
+  const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
   // cada pantalla nueva (otra fase, otra carta) parte desde arriba
-  const punto = `${j.fase}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  const punto = `${tutorial}:${j.fase}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [punto]);
 
+  if (tutorial === "ayuda") {
+    return <ComoFunciona textoListo="Volver a mi partida" onVolver={() => setTutorial(null)} onListo={() => setTutorial(null)} />;
+  }
+  if (tutorial === "antes") {
+    return (
+      <ComoFunciona
+        onVolver={() => setTutorial(null)}
+        onListo={() => {
+          setTutorial(null);
+          j.descartar();
+          j.irAPerfil();
+        }}
+      />
+    );
+  }
   if (j.fase === "perfil") {
     return <PerfilForm inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.verDudas} />;
   }
@@ -47,11 +66,12 @@ function Juego() {
         error={j.error}
         onElegir={j.elegir}
         onComparar={j.compararCon}
+        onAyuda={() => setTutorial("ayuda")}
       />
     );
   }
-  if (j.fase === "paso" && j.vista) return <QuePaso previa={j.previa} vista={j.vista} onSeguir={j.seguir} />;
-  if (j.fase === "cierre" && j.vista?.cierre) return <CierrePantalla vista={j.vista} onOtraVida={j.jugarDeNuevo} onCambiarPerfil={j.irAPerfil} />;
+  if (j.fase === "paso" && j.vista) return <QuePaso previa={j.previa} vista={j.vista} sueldoInicial={sueldoInicial} onSeguir={j.seguir} />;
+  if (j.fase === "cierre" && j.vista?.cierre) return <CierrePantalla vista={j.vista} sueldoInicial={sueldoInicial} onOtraVida={j.jugarDeNuevo} onCambiarPerfil={j.irAPerfil} />;
   if (j.fase !== "inicio") {
     // no debería pasar: una fase sin los datos que necesita
     return (
@@ -72,10 +92,7 @@ function Juego() {
       cargando={j.cargando}
       error={j.error}
       onContinuar={j.continuar}
-      onEmpezar={() => {
-        j.descartar();
-        j.irAPerfil();
-      }}
+      onEmpezar={() => setTutorial("antes")}
     />
   );
 }

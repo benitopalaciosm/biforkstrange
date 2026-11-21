@@ -88,3 +88,221 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 
 /* La historia de la carta: quién te escribe y desde qué empresa */
 .jg-situacion { font-size: 17px; line-height: 25px; color: var(--tinta, inherit); border-left: 3px solid var(--acento); padding-left: 12px; }
+
+/* ───────── Gráficos y animaciones del juego ───────── */
+.jg-fondo { --jg-mas: var(--dinero); --jg-igual: #B9BAC0; --jg-menos: var(--bienestar); }
+
+/* Información extra que se abre al tocar */
+.jg-info { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.jg-info-boton { display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; border: 0; background: transparent; color: var(--suave); font: 500 12px/16px var(--font); text-align: left; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+.jg-info-boton i { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1.5px solid currentColor; border-radius: 50%; font: 700 10px/1 var(--mono); font-style: normal; }
+.jg-info-boton:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; border-radius: 6px; }
+.jg-info-caja { display: block; padding: 10px 12px; border-radius: 12px; background: var(--acento-suave); color: var(--tinta); font: 400 13px/19px var(--font); animation: vd-subir .35s var(--ease) both; }
+
+/* Nube de gemelos: 100 puntos, cada uno son 5 gemelos */
+.jg-nube { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; max-width: 190px; }
+.jg-nube i { aspect-ratio: 1; border-radius: 50%; background: var(--jg-igual); animation: jg-punto .45s var(--rebote) calc(var(--jg-i, 0) * 28ms + 120ms) both; }
+.jg-nube i[data-tipo="mas"], .jg-leyenda i[data-tipo="mas"] { background: var(--jg-mas); }
+.jg-nube i[data-tipo="menos"], .jg-leyenda i[data-tipo="menos"] { background: var(--jg-menos); }
+.jg-nube i[data-tipo="base"] { background: transparent; border: 1.5px solid var(--control); }
+@keyframes jg-punto { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: none; } }
+.jg-leyenda { display: flex; flex-direction: column; gap: 2px; font: 400 13px/18px var(--font); color: var(--tinta); }
+.jg-leyenda > span { display: flex; align-items: center; gap: 6px; }
+.jg-leyenda i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--jg-igual); }
+.jg-leyenda b { font: 700 14px/18px var(--font); font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+.jg-delta { align-self: flex-start; padding: 3px 8px; border-radius: 999px; font: 600 12px/16px var(--font); font-variant-numeric: tabular-nums; background: var(--niebla); color: var(--tinta); }
+.jg-delta[data-signo="mas"] { background: color-mix(in srgb, var(--jg-mas) 16%, var(--papel)); }
+.jg-delta[data-signo="menos"] { background: color-mix(in srgb, var(--jg-menos) 22%, var(--papel)); }
+.jg-opcion-num { animation: vd-subir .6s var(--ease) both; }
+
+/* Abanico: sueldo año a año */
+.jg-abanico { display: block; width: 100%; height: auto; overflow: visible; }
+.jg-abanico-eje { stroke: var(--linea); stroke-width: 1.5; }
+.jg-abanico-franja { fill: color-mix(in srgb, var(--acento) 18%, transparent); animation: jg-abrir 1s var(--ease) .1s both; transform-origin: 8px 50%; }
+@keyframes jg-abrir { from { opacity: 0; transform: scaleX(.02); } to { opacity: 1; transform: none; } }
+.jg-abanico-medio, .jg-abanico-ref, .jg-abanico-tu, .jg-abanico-tu-borde { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: jg-trazar 1.3s cubic-bezier(.6, 0, .2, 1) .25s forwards; }
+.jg-abanico-medio { stroke: var(--acento); stroke-width: 3.5; }
+.jg-abanico-ref { stroke: var(--suave); stroke-width: 2; stroke-dasharray: .018 .022; stroke-dashoffset: 0; animation: vd-aparecer .8s ease .9s both; }
+.jg-abanico-tu-borde { stroke: var(--tinta); stroke-width: 7; animation-delay: .9s; animation-duration: 1.8s; }
+.jg-abanico-tu { stroke: var(--sol); stroke-width: 4; animation-delay: .9s; animation-duration: 1.8s; }
+.jg-abanico-tu-punto { fill: var(--sol); stroke: var(--tinta); stroke-width: 2; animation: vd-pop .5s var(--rebote) 2.6s both; transform-box: fill-box; transform-origin: center; }
+.jg-abanico-hoy { fill: var(--papel); stroke: var(--tinta); stroke-width: 2.5; }
+@keyframes jg-trazar { to { stroke-dashoffset: 0; } }
+.jg-abanico-num { font: 700 11px var(--font); fill: var(--tinta); font-variant-numeric: tabular-nums; }
+.jg-abanico-sub { font: 500 9px var(--mono); fill: var(--suave); }
+.jg-abanico-etiqueta { animation: vd-aparecer .6s ease 1.2s both; }
+
+/* Barras apiladas */
+.jg-partes { display: flex; flex-direction: column; gap: 6px; }
+.jg-partes-barra { display: flex; height: 14px; border: 2px solid var(--tinta); border-radius: 999px; overflow: hidden; transform-origin: left center; animation: vd-crecer .8s var(--ease) .15s both; }
+.jg-partes-barra i { min-width: 2px; }
+.jg-partes-leyenda { display: flex; flex-wrap: wrap; gap: 2px 12px; font: 400 12px/16px var(--font); color: var(--suave); }
+.jg-partes-leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+.jg-partes-leyenda i { width: 8px; height: 8px; border-radius: 2px; }
+.jg-partes-leyenda b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+.jg-partes i[data-n="0"] { background: color-mix(in srgb, var(--acento) 18%, var(--papel)); }
+.jg-partes i[data-n="1"] { background: color-mix(in srgb, var(--acento) 45%, var(--papel)); }
+.jg-partes i[data-n="2"] { background: color-mix(in srgb, var(--acento) 75%, var(--papel)); }
+.jg-partes i[data-n="3"] { background: var(--acento); }
+.jg-partes i[data-n="4"] { background: var(--tinta); }
+.jg-partes i[data-n="mas"] { background: var(--jg-mas); }
+.jg-partes i[data-n="igual"] { background: var(--jg-igual); }
+.jg-partes i[data-n="menos"] { background: var(--jg-menos); }
+.jg-partes i[data-n="nada"] { background: var(--niebla); }
+
+/* Medidor simple: una barra que se llena */
+.jg-medidor { position: relative; display: block; height: 10px; border-radius: 999px; background: var(--niebla); overflow: hidden; }
+.jg-medidor i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--jg-menos); transform-origin: left center; animation: vd-crecer .9s var(--ease) .2s both; }
+
+/* Años de la partida */
+.jg-progreso { display: flex; gap: 5px; align-items: center; }
+.jg-progreso i { flex: 1; height: 6px; border-radius: 999px; background: var(--linea); }
+.jg-progreso i[data-estado="vivido"] { background: var(--tinta); }
+.jg-progreso i[data-estado="ahora"] { background: var(--acento); animation: jg-ahora 1.4s ease-in-out infinite alternate; }
+@keyframes jg-ahora { from { opacity: .55; } to { opacity: 1; } }
+
+/* Secciones de la carta */
+.jg-seccion { display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 1.5px solid var(--linea); border-radius: 16px; background: var(--papel); }
+.jg-fila-opcion { display: flex; flex-direction: column; gap: 5px; padding-top: 10px; border-top: 1.5px solid var(--linea); }
+.jg-fila-opcion:first-of-type { border-top: 0; padding-top: 0; }
+.jg-fila-opcion[data-foco="true"] > .jg-fuerte::after { content: " · la que tienes marcada"; font-weight: 400; color: var(--suave); }
+.jg-plegable > :not(summary) { padding: 0 14px 12px; }
+.jg-plegable > .vd-pila { padding-top: 2px; }
+.jg-resultado { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: 1.5px solid var(--linea); }
+.jg-resultado:first-child { border-top: 0; padding-top: 0; }
+.jg-resultado-cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font: 500 14px/19px var(--font); }
+.jg-resultado-cabeza b { flex: none; font: 700 14px/19px var(--font); font-variant-numeric: tabular-nums; }
+.jg-ayuda { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border: 1.5px solid var(--control); border-radius: 999px; background: var(--papel); color: var(--tinta); font: 500 13px/16px var(--font); cursor: pointer; }
+.jg-ayuda:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+
+/* El dado a la vista */
+.jg-ruleta { display: flex; flex-direction: column; gap: 10px; }
+.jg-ruleta-pista { position: relative; display: flex; height: 36px; border: 2px solid var(--tinta); border-radius: 12px; overflow: visible; }
+.jg-ruleta-tramo { display: flex; align-items: center; justify-content: center; min-width: 4px; border-left: 2px solid var(--tinta); background: var(--niebla); color: var(--tinta); font: 600 12px/1 var(--mono); }
+.jg-ruleta-tramo:first-child { border-left: 0; border-radius: 10px 0 0 10px; }
+.jg-ruleta-tramo:nth-last-child(2) { border-radius: 0 10px 10px 0; }
+.jg-ruleta-tramo[data-tono="bueno"] { background: color-mix(in srgb, var(--jg-mas) 28%, var(--papel)); }
+.jg-ruleta-tramo[data-tono="malo"] { background: color-mix(in srgb, var(--jg-menos) 34%, var(--papel)); }
+.jg-ruleta-tramo--tuyo { animation: jg-tuyo .5s ease 1.9s both; }
+@keyframes jg-tuyo { from { box-shadow: inset 0 0 0 0 var(--sol); } to { box-shadow: inset 0 0 0 4px var(--sol); } }
+.jg-ruleta-ficha { position: absolute; top: -9px; left: var(--jg-meta); width: 22px; height: 50px; margin-left: -11px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--sol); box-shadow: 0 3px 0 var(--tinta); animation: jg-ficha 1.9s cubic-bezier(.3, 0, .2, 1) both; }
+@keyframes jg-ficha { 0% { left: 2%; } 28% { left: 98%; } 52% { left: 6%; } 74% { left: 90%; } 90% { left: calc(var(--jg-meta) - 5%); } 100% { left: var(--jg-meta); } }
+.jg-ruleta-leyenda { display: flex; flex-direction: column; gap: 3px; font: 400 13px/18px var(--font); color: var(--suave); }
+.jg-ruleta-leyenda span { display: flex; align-items: baseline; gap: 6px; }
+.jg-ruleta-leyenda i { flex: none; align-self: center; width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid var(--tinta); background: var(--niebla); }
+.jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--jg-mas); }
+.jg-ruleta-leyenda i[data-tono="malo"] { background: var(--jg-menos); }
+.jg-ruleta-leyenda b { margin-left: auto; white-space: nowrap; font: 600 12px/18px var(--mono); }
+.jg-ruleta-tuyo { color: var(--tinta); font-weight: 600; animation: vd-aparecer .01s linear 1.9s both; }
+.jg-despues { animation: vd-subir .7s var(--ease) var(--jg-espera, 2s) both; }
+
+/* Cómo quedaste: el cambio de sueldo en grande */
+.jg-cambio { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; }
+.jg-cambio-num { font: 700 30px/34px var(--font); letter-spacing: -0.02em; }
+.jg-cambio-antes { font: 500 13px/18px var(--font); color: var(--suave); }
+
+/* Cómo funciona: los 500 gemelos a la vista */
+.jg-como { position: relative; height: 236px; border-radius: 20px; background: var(--niebla); overflow: hidden; }
+.jg-como-tu { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translate(-50%, -50%); transition: transform .7s var(--ease), opacity .5s ease; }
+.jg-como-tu span { width: 44px; height: 44px; border: 3px solid var(--tinta); border-radius: 50%; background: var(--sol); box-shadow: 0 0 0 10px color-mix(in srgb, var(--sol) 30%, transparent); }
+.jg-como-tu b { font: 600 13px/16px var(--mono); }
+.jg-como:not([data-paso="0"]) .jg-como-tu { transform: translate(-50%, -330%) scale(.45); opacity: 0; }
+.jg-como-gemelos { position: absolute; inset: 14px; display: grid; grid-template-columns: repeat(var(--jg-cols), minmax(0, 1fr)); gap: 3px; align-content: center; }
+.jg-como-gemelos i { aspect-ratio: 1; border-radius: 50%; background: var(--tinta); opacity: 0; transform: scale(0); transition: opacity .35s ease, transform .45s var(--rebote), background-color .5s ease; transition-delay: calc(var(--jg-i) * 22ms); }
+.jg-como:not([data-paso="0"]) .jg-como-gemelos i { opacity: 1; transform: none; }
+.jg-como[data-paso="2"] .jg-como-gemelos i, .jg-como[data-paso="3"] .jg-como-gemelos i, .jg-como[data-paso="4"] .jg-como-gemelos i { transition-delay: calc(var(--jg-i) * 34ms); }
+.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="mas"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="mas"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="mas"] { background: var(--jg-mas); }
+.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="igual"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="igual"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="igual"] { background: var(--jg-igual); }
+.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="menos"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="menos"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="menos"] { background: var(--jg-menos); }
+.jg-como[data-paso="2"] .jg-como-gemelos i { animation: jg-vivir 1.6s ease-in-out calc(var(--jg-i) * 34ms) 2; }
+@keyframes jg-vivir { 0%, 100% { transform: none; } 50% { transform: scale(.55); } }
+.jg-como[data-paso="4"] .jg-como-gemelos i { opacity: .28; }
+.jg-como-dado { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; margin: -42px 0 0 -42px; border: 3px solid var(--tinta); border-radius: 20px; background: var(--sol); box-shadow: 0 5px 0 var(--tinta); font: 400 64px/1 var(--font); color: var(--tinta); opacity: 0; transform: scale(.3) rotate(-40deg); transition: opacity .4s ease, transform .7s var(--rebote); }
+.jg-como-dado span { margin-top: -8px; }
+.jg-como[data-paso="4"] .jg-como-dado { opacity: 1; transform: none; animation: jg-dado 2.4s ease-in-out .8s infinite; }
+@keyframes jg-dado { 0%, 70%, 100% { transform: none; } 80% { transform: rotate(-12deg) translateY(-6px); } 90% { transform: rotate(10deg); } }
+.jg-como-leyenda { display: flex; flex-wrap: wrap; gap: 4px 14px; min-height: 20px; font: 400 13px/18px var(--font); color: var(--suave); opacity: 0; transition: opacity .5s ease .6s; }
+.jg-como-leyenda[data-visible="true"] { opacity: 1; }
+.jg-como-leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.jg-como-leyenda i { width: 9px; height: 9px; border-radius: 50%; }
+.jg-como-leyenda i[data-final="mas"] { background: var(--jg-mas); }
+.jg-como-leyenda i[data-final="igual"] { background: var(--jg-igual); }
+.jg-como-leyenda i[data-final="menos"] { background: var(--jg-menos); }
+.jg-como-leyenda b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+.jg-como-pasos { display: flex; justify-content: center; gap: 6px; }
+.jg-como-pasos i { width: 8px; height: 8px; border-radius: 50%; background: var(--linea); transition: background-color .3s ease, width .3s var(--ease); }
+.jg-como-pasos i[data-activo="true"] { width: 22px; border-radius: 999px; background: var(--tinta); }
+
+/* Cargando: gemelos que van viviendo */
+.jg-viviendo { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 3px; }
+.jg-viviendo i { aspect-ratio: 1; border-radius: 50%; background: var(--acento); animation: jg-viviendo 1.2s ease-in-out calc(var(--jg-i) * 45ms) infinite alternate; }
+@keyframes jg-viviendo { from { opacity: .15; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .jg-abanico-medio, .jg-abanico-tu, .jg-abanico-tu-borde { stroke-dashoffset: 0; }
+  .jg-como-gemelos i { transition: none; }
+}
+
+/* Tarjeta de opción: veredicto arriba, sueldo y nube lado a lado cuando cabe */
+.jg-veredicto { margin-top: 4px; font: 600 14px/19px var(--font); color: var(--tinta); }
+.vd-opcion.jg-opcion { container-type: inline-size; }
+.jg-opcion-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding-top: 10px; border-top: 1.5px solid var(--linea); }
+.jg-opcion-cuerpo .jg-opcion-bloque { padding-top: 0; border-top: 0; gap: 5px; }
+@container (max-width: 250px) {
+  .jg-opcion-cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .jg-opcion-cuerpo .jg-opcion-bloque + .jg-opcion-bloque { padding-top: 10px; border-top: 1.5px solid var(--linea); }
+}
+@media (max-width: 759px) {
+  /* En teléfono las opciones van una bajo la otra: ninguna queda cortada */
+  .jg-opciones, .jg-opciones[data-muchas="true"] { grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; margin-right: 0; padding-right: 8px; }
+}
+
+/* Portada: una fila de gemelos que se van coloreando */
+.jg-mini { display: grid; grid-template-columns: repeat(25, minmax(0, 1fr)); gap: 3px; }
+.jg-mini i { aspect-ratio: 1; border-radius: 50%; background: var(--tinta); animation: jg-mini 5s ease-in-out calc(var(--jg-i) * 30ms) infinite; }
+.jg-mini i[data-final="mas"] { --jg-c: var(--jg-mas); }
+.jg-mini i[data-final="igual"] { --jg-c: var(--jg-igual); }
+.jg-mini i[data-final="menos"] { --jg-c: var(--jg-menos); }
+@keyframes jg-mini { 0%, 15% { background: var(--tinta); transform: scale(.7); } 40%, 85% { background: var(--jg-c); transform: none; } 100% { background: var(--tinta); transform: scale(.7); } }
+
+/* La situación llega como un mensaje: primero "escribiendo…", después el texto */
+.jg-mensaje { position: relative; align-self: flex-start; max-width: 560px; padding: 12px 16px; border: 2px solid var(--tinta); border-radius: 18px 18px 18px 4px; background: var(--acento-suave); animation: vd-entrar .5s var(--ease) both; }
+.jg-mensaje-texto { margin: 0; font: 500 16px/24px var(--font); color: var(--tinta); animation: vd-aparecer .5s ease 1s both; }
+.jg-mensaje-escribiendo { position: absolute; left: 16px; top: 18px; display: flex; gap: 5px; animation: jg-irse .2s ease .95s both; }
+.jg-mensaje-escribiendo i { width: 8px; height: 8px; border-radius: 50%; background: var(--suave); animation: jg-escribir .6s ease-in-out infinite alternate; }
+.jg-mensaje-escribiendo i:nth-child(2) { animation-delay: .15s; }
+.jg-mensaje-escribiendo i:nth-child(3) { animation-delay: .3s; }
+@keyframes jg-escribir { from { transform: translateY(0); opacity: .4; } to { transform: translateY(-4px); opacity: 1; } }
+@keyframes jg-irse { to { opacity: 0; visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .jg-mensaje-escribiendo { display: none; } }
+.jg-como { height: auto; padding: 14px; }
+.jg-como-gemelos { position: static; inset: auto; }
+
+/* La ficha va sobre la barra, para no tapar los números */
+.jg-ruleta-pista { margin-top: 28px; }
+.jg-ruleta-ficha { top: -30px; width: 24px; height: 24px; margin-left: -12px; border-radius: 50%; box-shadow: none; }
+.jg-ruleta-ficha::after { content: ""; position: absolute; left: 50%; top: 100%; width: 3px; height: 42px; margin-left: -1.5px; background: var(--tinta); border-radius: 2px; }
+
+/* La opción base también está simulada: puntos llenos, sin color de comparación */
+.jg-nube i[data-tipo="base"] { background: var(--suave); border: 0; }
+
+/* La simulación, aparte de las opciones */
+.jg-simulacion { background: var(--niebla); border-color: transparent; }
+.jg-duelo { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1.5px solid var(--linea); }
+.jg-duelo .jg-nube { max-width: 240px; gap: 4px; }
+.jg-duelo .jg-leyenda { font-size: 14px; }
+.jg-simulacion .jg-partes-barra { background: var(--papel); }
+.jg-duelo { display: grid; grid-template-columns: minmax(110px, 200px) minmax(0, 1fr); gap: 8px 16px; align-items: center; }
+.jg-duelo > * { grid-column: 1 / -1; }
+.jg-duelo > .jg-nube { grid-column: 1; }
+.jg-duelo > .jg-nube + .jg-leyenda { grid-column: 2; }
+
+/* Ajustes de la segunda ronda de prueba */
+.jg-rango-solo .jg-extremos { display: none; }
+.jg-falta { border: 2px solid var(--tinta); background: color-mix(in srgb, var(--sol) 22%, var(--papel)); scroll-margin: 90px; }
+.jg-ruleta-ficha { top: -34px; width: 28px; height: 28px; margin-left: -14px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font: 400 24px/1 var(--font); color: var(--tinta); }
+.jg-ruleta-ficha::after { height: 6px; }
+.jg-ruleta-pista { margin-top: 34px; }
+.jg-abanico-tu-nombre { animation: vd-aparecer .5s ease 2.7s both; }
+.jg-como-gemelos { max-width: 300px; margin: 0 auto; }
+.jg-como-leyenda { min-height: 40px; }

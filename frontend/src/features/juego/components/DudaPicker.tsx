@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Text,
+  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Text, cssVars,
 } from "@/shared/ui";
 import { GEMELOS } from "../api";
 import { CALIDAD, arte } from "../textos";
@@ -64,7 +64,16 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} />}
-        {simulando && <Cargando>Tus {GEMELOS} gemelos están viviendo 10 años con cada opción…</Cargando>}
+        {simulando && (
+          <>
+            <div className="jg-viviendo" aria-hidden="true">
+              {Array.from({ length: 40 }, (_, i) => (
+                <i key={i} style={cssVars({ "--jg-i": i })} />
+              ))}
+            </div>
+            <Cargando>Tus {GEMELOS} gemelos están viviendo 10 años con cada opción…</Cargando>
+          </>
+        )}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
           {simulando ? "Simulando…" : "Ver a mis gemelos"}
         </Button>

@@ -1,4 +1,4 @@
-import { Button, Heading, LifePathHero, Meta, Pill, Row, Screen, ScreenFooter, ScreenHeader, Stack, Tag, Text } from "@/shared/ui";
+import { Button, Heading, LifePathHero, Meta, Pill, Row, Screen, ScreenFooter, ScreenHeader, Stack, Tag, Text, cssVars } from "@/shared/ui";
 import { GEMELOS } from "../api";
 import { Cargando, ErrorCaja } from "./piezas";
 
@@ -23,14 +23,19 @@ export function Inicio({
       <Stack gap={12}>
         <Heading level={1}>Vive tu decisión antes de tomarla.</Heading>
         <Text>
-          Trae la duda de trabajo que te da vueltas. Te mostramos cómo les fue en 10 años a {GEMELOS} gemelos tuyos con cada opción:
-          misma persona, misma decisión, otra suerte.
+          Trae la duda de trabajo que te da vueltas. Hacemos {GEMELOS} copias tuyas, tus gemelos, y cada una vive 10 años con esa decisión y con su
+          propia suerte. Así ves qué pasa casi siempre y qué pasa a veces, antes de jugártela tú.
         </Text>
       </Stack>
+      <div className="jg-mini" aria-hidden="true">
+        {Array.from({ length: 100 }, (_, i) => (
+          <i key={i} data-final={((i * 7919 + 104729) % 1000) / 1000 < 0.46 ? "mas" : ((i * 7919 + 104729) % 1000) / 1000 < 0.8 ? "igual" : "menos"} style={cssVars({ "--jg-i": i })} />
+        ))}
+      </div>
       <Row gap={6}>
-        <Tag>{GEMELOS} gemelos por opción</Tag>
-        <Tag>Sueldo, cargo y cesantía</Tag>
-        <Tag>Tú eliges, el dado decide</Tag>
+        <Tag>1 · Cuentas quién eres</Tag>
+        <Tag>2 · Tus gemelos prueban cada opción</Tag>
+        <Tag>3 · Eliges y tiramos el dado</Tag>
       </Row>
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}
