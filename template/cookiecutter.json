@@ -1,0 +1,7 @@
+{
+  "project_name": "BiforkStrange",
+  "project_slug": "platanus-hack-26-cl-team-32",
+  "python_version": "3.12",
+  "backend_port": "8000",
+  "_copy_without_render": ["frontend/src/*", "frontend/src/**/*"]
+}
