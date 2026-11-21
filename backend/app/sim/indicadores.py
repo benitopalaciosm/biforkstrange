@@ -26,12 +26,6 @@ def _tiempo_libre(cat: Catalogo, horas: float) -> float:
     return ocio / pq.tabla("enut_tiempo_por_horas", "ocio_h_dia", "tramo_horas", "<30")
 
 
-def fines_con_tu_gente(cat: Catalogo, horas: float, tiempo_con_tu_gente: float) -> float:
-    """Fines de semana del año en que te juntas con familia o amigos (ENUT 2023), ajustado por mudanzas y horas extra."""
-    p = cat.paquete.tabla("enut_tiempo_por_horas", "p_juntarse_finde", "tramo_horas", _tramo_enut(horas))
-    return 52 * min(1.0, p * tiempo_con_tu_gente)
-
-
 def indicadores(cat: Catalogo, e: dict) -> dict[str, float]:
     cfg = cat.juego["indicadores"]
     ocupado = e["estado"] in _OCUPADO

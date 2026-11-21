@@ -55,32 +55,3 @@ export function plantilla(a: Anio): { titulo: string; relato: string } {
     relato: visibles.length ? visibles.map(frase).join(" ") : "Seguiste en lo tuyo.",
   };
 }
-
-export const ESTADO: Record<string, string> = { empleado: "Con trabajo", buscando: "Sin pega", fundador: "Tu empresa", inactivo: "Sin trabajar", independiente: "Por tu cuenta" };
-
-export function donde(a: { estado: string; tipo_empleador: string; rubro: string; empleador: { nombre: string | null } | null }) {
-  if (a.estado !== "empleado") return ESTADO[a.estado] ?? a.estado;
-  const tipo: Record<string, string> = { grande: "Empresa grande", pyme: "Pyme", startup: "Startup", publico: "El Estado", extranjero: "Remoto" };
-  return a.empleador?.nombre ?? tipo[a.tipo_empleador] ?? "Con trabajo";
-}
-
-/** Título de la carta de un camino cuando Claude no lo escribió. */
-export const TITULO_CAMINO: Record<string, (empresa?: string | null) => string> = {
-  cambiarme: () => "Aceptar la oferta de otra empresa",
-  startup: (e) => `Irte a ${e ?? "una startup"} con acciones`,
-  emprender: () => "Renunciar para emprender",
-  magister: () => "Hacer un magíster de noche",
-  sabatico: () => "Tomarte un año sabático",
-  emigrar: () => "Irte a trabajar a Estados Unidos",
-  renunciar: () => "Renunciar sin tener otra pega",
-  remoto: () => "Postular a un remoto en dólares",
-  bootcamp: () => "Reconvertirte con un bootcamp",
-  horas: () => "Sumarte a las 55 horas del equipo",
-  cesante: () => "Tomar lo primero que salga",
-};
-
-/** Cambia los nombres de las opciones («Irte», «Quedarte») por «el camino A» / «el camino B» en una frase del backend. */
-export function conLetras(frase: string, nombres: { a: string; b: string }): string {
-  const t = frase.split(`«${nombres.a}»`).join("el camino A").split(`«${nombres.b}»`).join("el camino B");
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}

@@ -15,7 +15,7 @@
   "sii_empleadores.csv": {
    "fuente": "SII, Nómina de empresas personas jurídicas, año comercial 2024",
    "url": "https://www.sii.cl/sobre_el_sii/nominapersonasjuridicas.html",
-   "nota": "Empresas activas. Grandes: tramo de ventas 10 a 13 y 200 o más trabajadores, las 60 con más trabajadores de cada rubro. Pymes: tramo 5 a 9 y 10 a 199 trabajadores, 250 por rubro."
+   "nota": "Empresas activas. Grandes: tramo de ventas 10 a 13 y 200 o más trabajadores, las 40 con más trabajadores de cada rubro. Pymes: tramo 5 a 9 y 10 a 199 trabajadores, 100 por rubro."
   },
   "getonbrd_ofertas.csv": {
    "fuente": "Get on Board, API pública v0, avisos vigentes con sueldo publicado (21 de noviembre de 2026)",

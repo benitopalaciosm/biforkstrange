@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 
 from app.core.llm import LLM
-from app.schemas.juego import CaminosOut, EpilogoIn, EpilogoOut, GemeloLeido, HistoriaIn, HistoriaOut, Identidad
+from app.schemas.juego import EpilogoIn, EpilogoOut, GemeloLeido, HistoriaIn, HistoriaOut, Identidad
 from app.sim.catalogo import cargar_juego, catalogo
 from app.sim.paquete import paquete_base
 
@@ -52,20 +52,9 @@ Recibes quién es la persona, lo que ha pasado y dos cosas que ya calculó el mo
 Para `anio`:
 - `titulo`: de 2 a 5 palabras, como el título de un capítulo («Las noches largas.», «El año de Fintoc.»).
 - `relato`: qué pasó, con un detalle concreto del rubro o del cargo. Que se note la continuidad con lo anterior. Si un evento trae `lo_decidio_tu_gemelo`, cuéntalo como algo que tu gemelo resolvió por ti («Tu gemelo dijo que no a otra oferta»).
-- `perdido`: solo si viene `te_perdiste`. Cosas concretas de la vida personal («El asado de los cabros», «Los domingos en la casa de tus papás»), coherentes con quién es la persona.
-- `mensajes`: solo si `tono` es noche. Mensajes cotidianos de su gente que quedaron sin contestar. Que duelan por lo cotidianos.
 - `momento`: solo si viene `momento`. Tres frases que cuentan el golpe de a poco; la tercera es la que pega.
 
-Para `caso`: convierte la decisión genérica en una situación concreta para esta persona y escribe cada opción como una acción suya. Devuelve exactamente las mismas opciones, con sus mismos `id`, sin cambiar lo que cada una significa. No menciones probabilidades: la pantalla ya las muestra.
-
-"""
-    + _VOZ
-)
-
-_SISTEMA_CAMINOS = (
-    """Escribes la primera pantalla de un juego de simulación de carreras en Chile: la persona elige qué camino toma este año y después vive 10 años de ese camino.
-
-Recibes quién es la persona y los caminos posibles. Elige los 4 que más le hacen sentido a ESTA persona (por su historia, lo que le importa y cómo decide) y escribe cada uno como una acción concreta suya. Si un camino trae `contexto_real`, úsalo: es una empresa o vacante real.
+Para `caso`: es el mercado de la temporada (ofertas de empresas reales, una carta de vida y quedarse). Escribe la situación en una frase que termine en pregunta y cada opción como una acción suya. Devuelve exactamente las mismas opciones, con sus mismos `id`, sin cambiar lo que cada una significa. No menciones probabilidades: la pantalla ya las muestra.
 
 """
     + _VOZ
@@ -173,8 +162,6 @@ class ClaudeService:
                 "tono": a.get("tono"), "horas_semanales": a.get("horas"),
                 "eventos": [_suceso(x) for x in a.get("eventos", []) if not x.get("silencioso") and x.get("id") != "tipo_de_empleador"],
             }
-            if a.get("te_perdiste"):
-                datos["anio"]["te_perdiste"] = a["te_perdiste"]
             if a.get("momento"):
                 datos["anio"]["momento"] = {"que_paso": a["momento"].get("tipo"), "dato_real": f"{a['momento'].get('valor')} {a['momento'].get('unidad')} {a['momento'].get('texto')}"}
         ids: list[str] = []
@@ -195,24 +182,11 @@ class ClaudeService:
         elif out.anio is not None:
             n = out.anio
             n.titulo, n.relato = n.titulo.strip()[:60], n.relato.strip()[:300]
-            n.perdido = [x.strip()[:70] for x in n.perdido if x.strip()][:2] if body.anio.get("te_perdiste") else []
-            n.mensajes = n.mensajes[:3] if body.anio.get("tono") == "noche" else []
             n.momento = [x.strip()[:110] for x in n.momento if x.strip()][:3] if body.anio.get("momento") else []
         # La carta de Claude solo vale si trae exactamente las opciones del motor.
         if out.caso is not None and (body.pendiente is None or sorted(o.id for o in out.caso.opciones) != sorted(ids)):
             out.caso = None
         return out
-
-    def caminos(self, persona: dict, caminos: list[dict]) -> CaminosOut | None:
-        if self.llm is None:
-            return None
-        out = self.llm.pedir(sistema=_SISTEMA_CAMINOS, usuario=json.dumps({"persona": persona, "caminos": caminos}, ensure_ascii=False), esquema=CaminosOut, rapido=True, timeout=45)
-        if out is None:
-            return None
-        validos = {c["id"] for c in caminos}
-        vistos: set[str] = set()
-        out.elegidos = [c for c in out.elegidos if c.id in validos and not (c.id in vistos or vistos.add(c.id))][:4]
-        return out if out.elegidos else None
 
     def epilogo(self, body: EpilogoIn) -> EpilogoOut | None:
         if self.llm is None:

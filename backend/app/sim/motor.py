@@ -32,7 +32,7 @@ from random import Random
 from app.sim.catalogo import Catalogo, Decision, Evento, Opcion, Resultado
 from app.sim import mercado
 from app.sim.empresas import contexto as contexto_empresa
-from app.sim.indicadores import NOMBRES, felicidad, fines_con_tu_gente, indicadores
+from app.sim.indicadores import NOMBRES, felicidad, indicadores
 
 _SILENCIOSOS = {"alza_anual", "animo_vuelve"}
 _TIROS_PREVIA = 6
@@ -64,7 +64,7 @@ class Pregunta:
     anio: int
     decision: Decision
     alternativas: list[Alternativa]
-    origen: str  # bifurcacion | forzada | carta | consecuencia
+    origen: str  # mercado | forzada | carta | consecuencia
 
 
 def _flujo(semilla: int, indice: int, anio: int, clave: str) -> Random:
@@ -100,10 +100,13 @@ class Vida:
         self._edad_hueco = self.e["edad"] if self.e.get("hueco") else None
         self._anos_inactivo = 0
         self._t = 0
+        self._recesion = False
+        self._sueldo_inicio = self.e["sueldo"]
         self._derivar()
+        self._ind_inicio = indicadores(self.cat, self.e)
 
     # ------------------------------------------------------------------ ciclo
-    def correr(self, anios: int, bifurcacion: str | None = None) -> Generator[Pregunta, str, None]:
+    def correr(self, anios: int) -> Generator[Pregunta, str, None]:
         for t in range(anios):
             self._t = t
             self._bitacora = []
@@ -119,9 +122,7 @@ class Vida:
             self._recesion = bool(self.e["recesion"])
             if self._recesion and t < 3:
                 self.hechos.add("recesion_temprana")
-            if t == 0 and bifurcacion:
-                yield from self._decidir(self.cat.decisiones[bifurcacion], "bifurcacion")
-            elif self.auto is not None:
+            if self.auto is not None:
                 yield from self._temporada()
             else:
                 dec, origen = self._decision_del_anio()
@@ -396,7 +397,6 @@ class Vida:
         # Lo vivido en el año, antes de que venzan los efectos de un año (horas extra, mudanza).
         ocupado_anio = e["estado"] in _OCUPADO
         horas_anio = e["horas"] if ocupado_anio else 0
-        fines_anio = fines_con_tu_gente(cat, horas_anio, e["tiempo_con_tu_gente"])
         reglas = cat.juego["reglas_motor"]
         r = self._rng("cierre")
 
@@ -494,7 +494,7 @@ class Vida:
             "felicidad": felicidad(ind, self.prioridades),
         }
         if self.detalle:
-            registro.update(self._como_fue_el_anio(ind, horas_anio, fines_anio))
+            registro.update(self._como_fue_el_anio(ind, horas_anio))
             registro.update(
                 tipo_empleador=e["tipo_empleador"], rubro=e["rubro"], nivel=e["nivel"], edu=e["edu"], pareja=e["pareja"],
                 hijos=e["hijos"], empleador=self.empleador if e["estado"] == "empleado" else None, percentil=e["percentil"] if e["sueldo"] > 0 else None, sueldo_inicio=self._sueldo_inicio,
@@ -504,11 +504,10 @@ class Vida:
         e["edad"] += 1
 
     # ------------------------------------------------------------------ cómo se ve el año
-    def _como_fue_el_anio(self, ind: dict, horas: float, fines: float) -> dict:
-        """Lo que la pantalla necesita para contar el año: tono, escena y, si hubo, el momento duro con su cifra."""
+    def _como_fue_el_anio(self, ind: dict, horas: float) -> dict:
+        """Lo que la pantalla necesita para contar el año: el tono y, si hubo, el momento duro con su cifra."""
         e, pq = self.e, self.cat.paquete
         hechos = {(x["id"], x["resultado"]) for x in self._bitacora}
-        ids = {x["id"] for x in self._bitacora}
         malos = [x for x in self._bitacora if x["tono"] == "malo" and x["id"] in _PESADOS]
         caida = max(self._ind_inicio["bienestar"] - ind["bienestar"], self._ind_inicio["vida_personal"] - ind["vida_personal"])
 
@@ -527,30 +526,12 @@ class Vida:
             momento = {"tipo": "salud_mental", "valor": round(pq.k("LICENCIA_RECHAZO", sistema) * 100, 1), "unidad": "%",
                        "texto": f"de las licencias por salud mental se rechaza en {'las isapres' if e['isapre'] else 'Fonasa'}", "fuente": "Superintendencia de Seguridad Social 2024"}
 
-        if ("emigrar", "consigue") in hechos:
-            escena = "emigrar"
-        elif ("sabatico", "vuelve_bien") in hechos or ("sabatico", "cuesta_volver") in hechos:
-            escena = "viaje"
-        elif horas >= 55 or ("jefatura", "mal") in hechos or "licencia_salud_mental" in ids:
-            escena = "oficina"
-        else:
-            escena = None
-        normal = fines_con_tu_gente(self.cat, 44, 1)
-        perdidos = max(0, round(normal - fines))
-        te_perdiste = None
-        if perdidos >= 3:
-            te_perdiste = f"{perdidos} fines de semana con tu gente que no fueron"
-        elif ("termina_pareja", "termina") in hechos or ("separarse", "termina") in hechos:
-            te_perdiste = "la relación que tenías"
-        noche = escena != "viaje" and (bool(malos) or momento is not None or escena == "oficina" or caida >= 8 or e["estado"] in ("buscando", "inactivo"))
+        viaje = ("sabatico", "vuelve_bien") in hechos or ("sabatico", "cuesta_volver") in hechos
+        noche = not viaje and (bool(malos) or momento is not None or horas >= 55 or caida >= 8 or e["estado"] in ("buscando", "inactivo"))
         return {
             "tono": "noche" if noche else "dia",
-            "escena": escena,
             "momento": momento,
             "horas": horas,
-            "fines_con_tu_gente": round(fines),
-            "fines_perdidos": perdidos,
-            "te_perdiste": te_perdiste,
             "indicadores_inicio": self._ind_inicio,
         }
 

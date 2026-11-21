@@ -3,13 +3,12 @@
 import json
 
 from app.schemas.juego import (
-    AnioNarrado, CasoNarrado, Mensaje, EpilogoIn, EpilogoOut, GemeloLeido, HistoriaIn, HistoriaOut, Identidad, OpcionNarrada, Perfil,
+    AnioNarrado, CasoNarrado, EpilogoIn, EpilogoOut, GemeloLeido, HistoriaIn, HistoriaOut, Identidad, OpcionNarrada, Perfil,
     PerfilLeido, PrioridadesLeidas, Propension,
 )
 from app.services.claude_service import ClaudeService, politica_valida
 from app.sim.catalogo import catalogo
 from app.sim.gemelo import estado_inicial
-from app.sim.montecarlo import comparar_en_mundo
 
 
 class _LLM:
@@ -56,7 +55,6 @@ def test_la_politica_del_gemelo_cambia_como_deciden_los_que_juegan_solos(perfil)
                    for v in (vida_automatica(cat, e, pr, 3, i, 10, politica=politica) for i in range(80)))
 
     assert cambios(siempre) > cambios(None) > cambios(nunca)
-    assert comparar_en_mundo(cat, e, pr, "unirse_a_startup", "ir", "quedarse", 50, 1, 10, siempre)["a"]["n"] == 50
 
 
 def test_historia_solo_acepta_la_carta_si_trae_las_opciones_del_motor(perfil):
@@ -68,14 +66,14 @@ def test_historia_solo_acepta_la_carta_si_trae_las_opciones_del_motor(perfil):
     body = HistoriaIn(perfil=Perfil(**perfil), identidad=Identidad(gemelo_md="Eres curiosa."), anio=anio, pendiente=pendiente, historia_previa=["2027: entraste."])
 
     buena = HistoriaOut(
-        anio=AnioNarrado(titulo="El ascenso.", relato="Te ascendieron.", perdido=["El asado"], mensajes=[Mensaje(de="Mamá", mensaje="¿Vienes?", hora="21:00")], momento=["a", "b", "c"]),
+        anio=AnioNarrado(titulo="El ascenso.", relato="Te ascendieron.", momento=["a", "b", "c"]),
         caso=CasoNarrado(titulo="Fintual te llama. ¿Vas?", opciones=[OpcionNarrada(id="quedarse", titulo="Seguir", texto="Sigues."), OpcionNarrada(id="cambiar", titulo="Ir", texto="Te vas.")]),
     )
     llm = _LLM(buena)
     out = ClaudeService(llm).historia(body)
     assert out.caso is not None and out.anio.relato == "Te ascendieron."
-    # El año no traía `te_perdiste`, ni era de noche, ni tenía momento: esas partes se descartan.
-    assert out.anio.perdido == [] and out.anio.mensajes == [] and out.anio.momento == []
+    # El año no traía un momento duro: esas frases se descartan.
+    assert out.anio.momento == []
     enviado = json.loads(llm.llamadas[0]["usuario"])
     assert enviado["persona"]["quien_es"] == "Eres curiosa." and enviado["pendiente"]["contexto_real"] == {"nombre": "Fintual"}
     assert [x["que"] for x in enviado["anio"]["eventos"]] == ["Ascenso"]

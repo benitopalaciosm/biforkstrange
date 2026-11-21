@@ -6,28 +6,12 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.core.config import get_settings
-from app.repositories.simulations import (
-    InMemorySimulationRepository,
-    SimulationRepository,
-    SupabaseSimulationRepository,
-)
 from app.services.claude_service import ClaudeService
 from app.services.juego_service import JuegoService
 
 
-@lru_cache
-def get_simulation_repo() -> SimulationRepository:
-    if get_settings().supabase_enabled:
-        from app.core.supabase import get_supabase
-
-        return SupabaseSimulationRepository(get_supabase())
-    return InMemorySimulationRepository()
-
-
-def get_juego_service(
-    repo: Annotated[SimulationRepository, Depends(get_simulation_repo)],
-) -> JuegoService:
-    return JuegoService(repo, get_settings().default_runs)
+def get_juego_service() -> JuegoService:
+    return JuegoService(get_settings().default_runs)
 
 
 @lru_cache

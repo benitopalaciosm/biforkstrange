@@ -33,8 +33,8 @@ SUBTIPOS_EXCLUIDOS = {"COMUNIDADES DE EDIFICIOS", "JUNTA DE VECINOS, ORG. COMUNI
 SUFIJOS = re.compile(r"[\s,]+(S\.?\s?P\.?\s?A\.?|SPA|S\.?\s?A\.?|LIMITADA|LTDA\.?|E\.?\s?I\.?\s?R\.?\s?L\.?|Y\s+C(OMPA[NÑ]IA|IA\.?)\s+(LIMITADA|LTDA\.?)?)\.?$", re.I)
 MAYUSCULAS = {"S.A.", "SPA", "AFP", "TI", "IT", "BCI", "CCU", "CMPC", "SQM", "LATAM", "ISS", "WOM", "SMU", "UC", "II", "III"}
 CHICAS = {"de", "del", "la", "las", "los", "y", "e", "en", "el"}
-GRANDES_POR_RUBRO = 60
-PYMES_POR_RUBRO = 250
+GRANDES_POR_RUBRO = 40
+PYMES_POR_RUBRO = 100
 
 
 def nombre_corto(razon: str) -> str:

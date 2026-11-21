@@ -1,5 +1,7 @@
 # Paquete de datos del simulador de vida laboral
 
+> **Copia recortada para el juego.** Solo trae las 19 tablas que el motor lee y el evaluador de referencia en Python (`referencia/expresiones.py`, que usa el test de paridad). El paquete completo (49 tablas, validador, evaluador en JS, catálogo plano y JSON Schema) vive en `datos_laborales/simulador`.
+
 Todo lo que un simulador necesita para vivir una carrera en Chile de los 18 a los 50 años: las decisiones que se pueden tomar, lo que pasa sin que nadie decida, los parámetros con su fuente y las tablas de donde salen. No trae motor: cualquier simulador (el juego en JavaScript, un notebook en Python, un servicio) lo carga y lo ejecuta.
 
 Versión 1.0.0, 21 de noviembre de 2026.

@@ -11,7 +11,7 @@ make front   # http://localhost:5173
 make test
 ```
 
-Sin credenciales de Supabase el backend guarda las comparaciones en memoria.
+El juego no guarda nada en el servidor: una carrera es `(perfil, mundo, semilla, elecciones)` y se recalcula en cada turno. `repositories/` y `core/supabase.py` vienen de la plantilla y hoy no se usan.
 
 Claude tiene dos transportes (`backend/app/core/llm.py`). Con `ANTHROPIC_API_KEY` usa la API. Sin key, si tienes Claude Code instalado, usa `claude -p` con Sonnet y tu sesión local: sirve para desarrollar sin key, no para el deploy. Sin ninguno de los dos el juego funciona completo con plantillas. Para apagar el transporte local: `CLAUDE_CLI=false` en `backend/.env`.
 
@@ -20,10 +20,10 @@ Claude tiene dos transportes (`backend/app/core/llm.py`). Con `ANTHROPIC_API_KEY
 Tres piezas:
 
 1. **Datos** (`backend/data/simulador/`): el paquete con las reglas como datos. Decisiones, eventos, parámetros y tablas, con probabilidades y efectos escritos en un lenguaje de expresiones chico. Cada número declara su fuente y su calidad (`dato`, `mixto`, `supuesto`). Su `README.md` explica el formato. No se edita a mano: se regenera desde los microdatos.
-2. **Juego** (`backend/data/juego.json` y `mundos.json`): qué parte del paquete se usa, los parches con su motivo, las reglas que agrega el motor al cerrar el año, la fórmula de las cuatro barras, la política de los gemelos que juegan solos, las bifurcaciones y los cuatro mundos. Todo lo que está ahí es decisión del equipo.
+2. **Juego** (`backend/data/juego.json` y `mundos.json`): qué parte del paquete se usa, los parches con su motivo, las reglas que agrega el motor al cerrar el año, la fórmula de las cuatro barras, la política de los gemelos que juegan solos y los cuatro mundos. Todo lo que está ahí es decisión del equipo.
 3. **Motor** (`backend/app/sim/`): un intérprete genérico de esas reglas. Agregar una decisión es agregar un bloque JSON al paquete y su id a `juego.json`.
 
-Un año del motor: se sortea la recesión → la decisión del año (la bifurcación el primer año; después una forzada o una carta sorteada por peso) → los eventos (despido, ascenso, oferta, alza de sueldo…) → el cierre (ahorro, energía, antigüedad, efectos que vencen).
+Un año del motor: se sortea la recesión → la decisión del año (en la partida del jugador, el mercado de la temporada; en los gemelos que juegan solos, una forzada o una carta sorteada por peso) → los eventos (despido, ascenso, oferta, alza de sueldo…) → el cierre (ahorro, energía, antigüedad, efectos que vencen).
 
 El motor es determinista dada `(semilla, índice)`. Cada sorteo usa un flujo propio derivado de `(semilla, índice, año, clave)`, así que la vida 37 del camino A y la del camino B viven el mismo mundo: su diferencia viene de la decisión, no de la suerte.
 
@@ -41,7 +41,7 @@ Las cartas y la narración pueden nombrar empleadores reales (`backend/app/sim/e
 
 ## Backend (`backend/app`)
 
-Las dependencias van en una sola dirección: `api → services → (sim, repositories)`.
+Las dependencias van en una sola dirección: `api → services → sim`.
 
 | Capa | Qué contiene |
 |---|---|
@@ -51,11 +51,11 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 | `sim/gemelo.py` | Del perfil de la persona al estado inicial. |
 | `sim/empresas.py` | Empleadores y vacantes reales para el contexto de la historia. |
 | `sim/indicadores.py` | Las cuatro barras y la felicidad. |
-| `sim/montecarlo.py` | Política de los gemelos, reproducción de una partida jugada y comparación de dos caminos. |
+| `sim/montecarlo.py` | Política de los gemelos, vidas automáticas y reproducción de la partida del jugador. |
+| `sim/mercado.py` | El mercado de cada temporada: ofertas reales con su sueldo. |
 | `sim/calibracion.py` | Cohorte simulada contra los objetivos de la ESI y la EPS. |
 | `schemas/` | Modelos Pydantic de entrada de la API. |
-| `services/` | Casos de uso: `juego_service` (gemelo, turno, comparación y sus frases), `claude_service`, `transparencia`. |
-| `repositories/` | Persistencia detrás de un `Protocol`: Supabase o memoria. Guarda las comparaciones. |
+| `services/` | Casos de uso: `juego_service` (gemelo, turno, suerte) y `claude_service`. |
 | `api/` | Rutas delgadas. `deps.py` es el único lugar que elige implementaciones. |
 | `core/` | Configuración y clientes externos: Supabase y `llm.py` (Claude por API o por Claude Code local). |
 
@@ -64,18 +64,16 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 | Ruta | Qué hace |
 |---|---|
 | `GET /api/catalogo` | Opciones del formulario y mundos. |
-| `POST /api/gemelo` | Valida el perfil; devuelve "gente como tú" y las bifurcaciones que aplican. |
+| `POST /api/gemelo` | Valida el perfil. |
 | `POST /api/gemelo/leer` | Claude arma el gemelo desde el CV y un texto libre. 503 si no hay Claude. |
 | `POST /api/partidas/turno` | Recalcula la partida y devuelve la siguiente decisión, con la probabilidad de cada resultado, o el final. |
 | `POST /api/historia` | Narración del año y carta a la medida. Campos en `null` si no hay Claude. |
 | `POST /api/epilogo` | Cierre de la vida. `epilogo: null` si no hay Claude. |
-| `POST /api/comparaciones` | Los dos caminos en los cuatro mundos, con veredicto y aprendizajes. `GET /api/comparaciones/{id}` la recupera. |
+| `POST /api/suerte` | Percentil de tu carrera entre muchas vidas tuyas (mismo inicio y mundo, decidiendo como tú). |
 | `GET /api/calibracion` | Qué indicadores chilenos reproduce la cohorte simulada. |
-| `GET /api/fuentes` | Parámetros con fuente y calidad, y los supuestos del juego. |
 
 ### Cambios frecuentes
 
-- **Agregar una bifurcación:** un objeto en `bifurcaciones` de `juego.json` con la decisión y sus dos opciones.
 - **Cambiar un mundo:** `mundos.json`. `parametros` reemplaza valores de `parametros.json`; `multiplicadores` son expresiones del mismo lenguaje.
 - **Cambiar cómo deciden los gemelos:** `politica` en `juego.json`. Después corre `GET /api/calibracion`: `oferta_externa` y `cesantia` están calibradas contra la EPS.
 - **Actualizar los datos:** reemplaza `backend/data/simulador/` por el paquete regenerado y corre `make test`.

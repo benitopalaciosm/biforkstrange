@@ -332,8 +332,6 @@
 .vd-cv li::before { content: "— "; color: var(--control); }
 .vd-fuente { font: 400 12px/16px var(--font); color: var(--suave); }
 .vd-fuente a { color: inherit; }
-.vd-mundos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.vd-mundo { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--niebla); font: 500 13px/18px var(--font); }
 
 /* ───────── Temporada estilo carrera: tu pega, contadores, recap ───────── */
 .vd-club { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 2px solid var(--tinta); border-radius: 16px; background: var(--papel); box-shadow: 0 4px 0 var(--tinta); }
@@ -355,7 +353,6 @@
 .vd-recap-linea i.bueno { color: var(--dinero); }
 .vd-recap-linea i.malo { color: var(--vida); }
 .vd-recap-linea i.neutro { color: var(--control); }
-.vd-oferta-sueldo { font: 600 14px/18px var(--mono); }
 
 /* ───────── Carta de carrera ───────── */
 .vd-carta { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 22px 20px 20px; border: 2px solid #1D1E22; border-radius: 24px; background: var(--sol); color: #1D1E22; box-shadow: 0 6px 0 #1D1E22; overflow: hidden; }

@@ -83,24 +83,7 @@ class TurnoIn(BaseModel):
     identidad: Identidad = Identidad()
     mundo: str
     semilla: int = Field(ge=0, le=2**31)
-    bifurcacion: str | None = Field(None, description="Id de la bifurcación de juego.json; la primera elección es su opción.")
     elecciones: list[str] = Field(default_factory=list, max_length=60)
-
-
-class PartidaJugada(BaseModel):
-    mundo: str
-    semilla: int = Field(ge=0, le=2**31)
-    elecciones: list[str] = Field(max_length=60)
-
-
-class ComparacionIn(BaseModel):
-    perfil: Perfil
-    prioridades: Prioridades = Prioridades()
-    identidad: Identidad = Identidad()
-    bifurcacion: str
-    n: int | None = Field(None, ge=50, le=1000)
-    semilla: int = Field(2026, ge=0, le=2**31)
-    partidas: list[PartidaJugada] = Field(default_factory=list, max_length=12)
 
 
 class SuerteIn(BaseModel):
@@ -184,41 +167,15 @@ class CasoNarrado(BaseModel):
     opciones: list[OpcionNarrada]
 
 
-class Mensaje(BaseModel):
-    de: str = Field(description="Quién escribe: Mamá, Papá, tu pareja, Los cabros, una amiga. Nunca un nombre propio de persona.")
-    mensaje: str = Field(description="El mensaje, como se escribe por chat en Chile, máximo 60 caracteres.")
-    hora: str = Field(description="Hora en formato 24 h, por ejemplo 22:30.")
-
-
 class AnioNarrado(BaseModel):
     titulo: str = Field(description="Título del año, de 2 a 5 palabras y con punto final. Ej.: «Las noches largas.»")
     relato: str = Field(description="Lo que pasó, en una o dos frases. Máximo 200 caracteres.")
-    perdido: list[str] = Field(default_factory=list, description="Solo si `te_perdiste` viene en los datos: 1 o 2 cosas concretas que te perdiste, máximo 55 caracteres cada una. Si no, lista vacía.")
-    mensajes: list[Mensaje] = Field(default_factory=list, description="Solo si `tono` es noche: 2 o 3 mensajes de tu gente que no alcanzaste a contestar. Si no, lista vacía.")
     momento: list[str] = Field(default_factory=list, description="Solo si viene `momento`: tres frases cortas que cuentan ese golpe de a poco; la tercera es la que pega. Máximo 80 caracteres cada una. Si no, lista vacía.")
 
 
 class HistoriaOut(BaseModel):
     anio: AnioNarrado | None = Field(None, description="El año que cerró. null si no se entregó `anio`.")
     caso: CasoNarrado | None = Field(None, description="La decisión que viene. null si no se entregó `pendiente`.")
-
-
-class CaminosIn(BaseModel):
-    perfil: Perfil
-    prioridades: Prioridades = Prioridades()
-    identidad: Identidad = Identidad()
-    semilla: int = Field(ge=0, le=2**31)
-
-
-class CaminoNarrado(BaseModel):
-    id: str = Field(description="Id del camino, sin cambios.")
-    titulo: str = Field(description="El camino como acción concreta para esta persona, máximo 48 caracteres.")
-    texto: str = Field(description="Qué significa en su vida, una frase de máximo 80 caracteres.")
-
-
-class CaminosOut(BaseModel):
-    titulo: str = Field(description="Dónde está hoy la persona en una frase corta y la pregunta «¿Y ahora?». Máximo 80 caracteres. Ej.: «Dos años en la pyme y ganas de más. ¿Y ahora?»")
-    elegidos: list[CaminoNarrado] = Field(description="Los 4 caminos que más le hacen sentido a esta persona, del más al menos relevante.")
 
 
 class EpilogoOut(BaseModel):
