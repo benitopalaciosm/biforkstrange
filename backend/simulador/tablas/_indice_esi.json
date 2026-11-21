@@ -1,0 +1,213 @@
+[
+ {
+  "tabla": "esi_ingreso_sexo_edad_edu",
+  "archivo": "esi_ingreso_sexo_edad_edu.csv",
+  "descripcion": "Distribución del ingreso mensual por sexo, tramo de edad y nivel educacional.",
+  "columnas": {
+   "sexo": "hombre, mujer o todos",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "educacion": "nivel educacional (cine11_1d): media_o_menos, tecnica, universitaria, postgrado; todas = sin filtrar",
+   "n": "observaciones sin ponderar en la celda",
+   "p10": "percentil 10 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p90": "percentil 90 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "media": "ingreso medio, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_region",
+  "archivo": "esi_ingreso_region.csv",
+  "descripcion": "Ingreso mensual por región y nivel educacional, con el peso de cada celda en los ocupados.",
+  "columnas": {
+   "region_codigo": "código INE de región (1-16); 0 = nacional",
+   "region": "nombre de la región",
+   "educacion": "nivel educacional (cine11_1d): media_o_menos, tecnica, universitaria, postgrado; todas = sin filtrar",
+   "n": "observaciones sin ponderar en la celda (ocupados con ingreso)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share_en_region": "fracción de los ocupados de la región con ese nivel educacional (0-1)",
+   "share_nacional": "fracción de los ocupados del país que está en la celda región × educación (0-1)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1 (18 a 54 años, todas las regiones)",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_categoria",
+  "archivo": "esi_ingreso_categoria.csv",
+  "descripcion": "Ingreso mensual y peso de cada categoría de ocupación por tramo de edad.",
+  "columnas": {
+   "categoria": "categoría de ocupación: empleador, cuenta_propia, asalariado_privado, asalariado_publico, servicio_domestico (puertas afuera y adentro), familiar_no_remunerado",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "n": "observaciones sin ponderar en la celda (ocupados con ingreso)",
+   "p10": "percentil 10 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p90": "percentil 90 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share_ocupados_banda": "fracción de los ocupados de la banda en la celda (0-1, fact_cal)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_categoria_formalidad",
+  "archivo": "esi_ingreso_categoria_formalidad.csv",
+  "descripcion": "Ingreso mensual y peso de cada categoría de ocupación separada en formal e informal, por tramo de edad.",
+  "columnas": {
+   "categoria": "categoría de ocupación: empleador, cuenta_propia, asalariado_privado, asalariado_publico, servicio_domestico (puertas afuera y adentro), familiar_no_remunerado",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "formalidad": "formal o informal (ocup_form)",
+   "n": "observaciones sin ponderar en la celda (ocupados con ingreso)",
+   "p10": "percentil 10 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p90": "percentil 90 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share_ocupados_banda": "fracción de los ocupados de la banda en la celda (0-1, fact_cal)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_tamano",
+  "archivo": "esi_ingreso_tamano.csv",
+  "descripcion": "Ingreso mensual de asalariados privados por tamaño de empresa y nivel educacional.",
+  "columnas": {
+   "tamano_empresa": "personas que trabajan en la empresa (b15_1): menos_de_5, 5_a_10, 11_a_49, 50_a_199, 200_o_mas",
+   "educacion": "nivel educacional (cine11_1d): media_o_menos, tecnica, universitaria, postgrado; todas = sin filtrar",
+   "n": "observaciones sin ponderar en la celda (con ingreso)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share": "fracción de los asalariados privados de ese nivel educacional que trabaja en empresas de ese tamaño (0-1)"
+  },
+  "poblacion": "asalariados privados de 18 a 54 años con tamaño de empresa informado; ingreso con ocup_ref = 1",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_ocupacion",
+  "archivo": "esi_ingreso_ocupacion.csv",
+  "descripcion": "Ingreso mensual por gran grupo de ocupación CIUO-08 y tramo de edad.",
+  "columnas": {
+   "ciuo08_1d": "gran grupo CIUO-08 (b1); 10 = Fuerzas Armadas",
+   "ocupacion": "nombre corto del gran grupo",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "n": "observaciones sin ponderar en la celda (con ingreso)",
+   "p25": "percentil 25 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p50": "percentil 50 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share_ocupados_banda": "fracción de los ocupados de la banda en ese gran grupo (0-1)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_ingreso_rubro_edad",
+  "archivo": "esi_ingreso_rubro_edad.csv",
+  "descripcion": "Ingreso mensual por rubro (sección CAENES de la empresa donde trabaja) y tramo de edad.",
+  "columnas": {
+   "caenes_seccion": "sección CAENES Rev.4 CL (b14_rev4cl_caenes, 1-21)",
+   "rubro": "nombre corto del rubro",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "n": "observaciones sin ponderar en la celda (con ingreso)",
+   "p50": "mediana del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "p75": "percentil 75 del ingreso, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "share_ocupados_banda": "fracción de los ocupados de la banda en ese rubro (0-1)"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi para ingresos; fact_cal para shares",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_jornada",
+  "archivo": "esi_jornada.csv",
+  "descripcion": "Jornada habitual y mediana del ingreso por hora en jornada parcial y completa, por sexo y tramo de edad.",
+  "columnas": {
+   "sexo": "hombre, mujer o todos",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "n": "observaciones sin ponderar en la celda (ocupados con horas habituales > 0)",
+   "share_parcial": "fracción con menos de 30 horas habituales semanales (0-1, fact_cal)",
+   "share_tpi": "fracción en tiempo parcial involuntario según INE (tpi = 1) (0-1)",
+   "share_45_mas": "fracción con 45 o más horas habituales semanales (0-1)",
+   "share_50_mas": "fracción con 50 o más horas habituales semanales (0-1)",
+   "n_parcial": "observaciones con ingreso y menos de 30 horas",
+   "p50_hora_parcial": "mediana del ingreso por hora en jornada parcial, pesos por hora (ing_t_p / (habituales × 4,33))",
+   "n_completa": "observaciones con ingreso y 30 horas o más",
+   "p50_hora_completa": "mediana del ingreso por hora en jornada completa, pesos por hora"
+  },
+  "poblacion": "ocupados de 18 a 54 años con horas habituales > 0; ingreso por hora con ocup_ref = 1",
+  "ponderador": "fact_cal para shares; fact_cal_esi para ingreso por hora",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_informalidad",
+  "archivo": "esi_informalidad.csv",
+  "descripcion": "Tasa de ocupación informal por sexo, tramo de edad y nivel educacional.",
+  "columnas": {
+   "sexo": "hombre, mujer o todos",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "educacion": "nivel educacional (cine11_1d): media_o_menos, tecnica, universitaria, postgrado; todas = sin filtrar",
+   "n": "observaciones sin ponderar en la celda (ocupados)",
+   "share_informal": "fracción de los ocupados con ocupación informal (ocup_form = 2) (0-1, fact_cal)"
+  },
+  "poblacion": "ocupados de 18 a 54 años",
+  "ponderador": "fact_cal",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_informalidad_brecha",
+  "archivo": "esi_informalidad_brecha.csv",
+  "descripcion": "Mediana del ingreso formal e informal por categoría de ocupación y tramo de edad.",
+  "columnas": {
+   "categoria": "categoría de ocupación: empleador, cuenta_propia, asalariado_privado, asalariado_publico, servicio_domestico (puertas afuera y adentro), familiar_no_remunerado",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "n_formal": "observaciones formales con ingreso",
+   "p50_formal": "mediana del ingreso formal, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "n_informal": "observaciones informales con ingreso",
+   "p50_informal": "mediana del ingreso informal, pesos chilenos de oct-dic 2025, ingreso mensual neto de la ocupación principal (ing_t_p)",
+   "ratio_informal_formal": "p50_informal / p50_formal"
+  },
+  "poblacion": "ocupados de 18 a 54 años con ocup_ref = 1",
+  "ponderador": "fact_cal_esi",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ },
+ {
+  "tabla": "esi_desocupados",
+  "archivo": "esi_desocupados.csv",
+  "descripcion": "Tasa de desocupación y fracción de desocupados que busca su primer trabajo, por sexo, tramo de edad y educación.",
+  "columnas": {
+   "sexo": "hombre, mujer o todos",
+   "banda_edad": "tramo de edad en años; 18-54 = todas las bandas",
+   "educacion": "nivel educacional (cine11_1d): media_o_menos, tecnica, universitaria, postgrado; todas = sin filtrar",
+   "n": "observaciones sin ponderar en la celda (fuerza de trabajo: ocupados + desocupados)",
+   "tasa_desocupacion": "desocupados / fuerza de trabajo (0-1, fact_cal)",
+   "n_desocupados": "desocupados sin ponderar en la celda",
+   "share_primer_empleo": "fracción de los desocupados que busca trabajo por primera vez (cae_general = 5) (0-1); vacío si n_desocupados < 30"
+  },
+  "poblacion": "personas de 18 a 54 años en la fuerza de trabajo (trimestre oct-dic 2025)",
+  "ponderador": "fact_cal",
+  "fuente_id": "ine_esi_2025",
+  "script": "scripts/simulador/esi_extra.py"
+ }
+]

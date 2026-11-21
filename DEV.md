@@ -31,6 +31,33 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 
 **Agregar un atributo del gemelo:** sumarlo a `State` (o usar `state.extra`) y resumirlo en `metrics.py`.
 
+### Motor del juego (`backend/app/sim/motor`)
+
+El juego corre sobre el paquete de datos de `backend/simulador/` (43 decisiones, 16 eventos, 67 parámetros, 49 tablas). El motor no reescribe esas reglas: las ejecuta. Para cambiar una probabilidad o un efecto se edita el paquete, no el código.
+
+| Archivo | Qué hace |
+|---|---|
+| `paquete.py` | Carga el paquete y traduce cada fórmula a una función de Python |
+| `azar.py` | Dados con suerte compartida: cada sorteo se identifica por gemelo, año y sitio |
+| `perfil.py` | De los 9 campos del perfil a las variables iniciales |
+| `motor.py` | El año: mundo, decisión, dado del resultado, eventos, cierre |
+| `politicas.py` | Quién decide: la persona, los gemelos por inercia o la población (pesos calibrados) |
+| `gemelos.py` | 500 gemelos por opción con los mismos dados |
+| `partida.py` | La partida de la persona; no guarda nada, se vuelve a jugar en cada llamada |
+| `validacion.py` | Cohorte de 5.000 personas contra las 37 metas del paquete y el panel ELSOC |
+
+API: `GET /api/juego/catalogo`, `POST /api/juego/dudas`, `POST /api/juego/partida`. Pantalla: `frontend/src/features/juego` (ruta `/`).
+
+```bash
+make jugar DUDA=unirse_a_startup   # partida en el terminal
+make comparar DUDA=oferta_externa  # solo la tabla de gemelos de una decisión
+make validar                       # cuántas metas de Chile cuadran
+```
+
+Los supuestos que pone el motor (lo que el paquete no define) están listados en `docs/motor/TICKETS.md`; el resultado de la validación, en `docs/motor/VALIDACION.md`.
+
+El esqueleto anterior (`sim/engine.py`, `sim/decisions/`, `sim/labor.py`) sigue en `/simulacion` y en `make simular`, pero el juego ya no lo usa.
+
 ## Frontend (`frontend/src`)
 
 - `app/`: shell de la app.

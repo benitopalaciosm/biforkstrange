@@ -1,0 +1,822 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Parámetros escalares o por clave. rango = [bajo, alto] para análisis de sensibilidad.",
+ "parametros": [
+  {
+   "id": "LIQUIDO",
+   "valor": 0.82,
+   "unidad": "fracción",
+   "descripcion": "Líquido sobre bruto para un asalariado formal.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.78,
+    0.86
+   ]
+  },
+  {
+   "id": "USD",
+   "valor": 950,
+   "unidad": "CLP por USD",
+   "descripcion": "Tipo de cambio.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    850,
+    1050
+   ]
+  },
+  {
+   "id": "P_RECESION",
+   "valor": 0.12,
+   "unidad": "probabilidad anual",
+   "descripcion": "Probabilidad de que un año sea de recesión.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.08,
+    0.15
+   ]
+  },
+  {
+   "id": "RETORNO_REAL",
+   "valor": 0.03,
+   "unidad": "tasa anual",
+   "descripcion": "Retorno real del ahorro.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.0,
+    0.05
+   ]
+  },
+  {
+   "id": "REAJUSTE_REAL",
+   "valor": 0.0173,
+   "unidad": "tasa anual",
+   "descripcion": "Crecimiento real del sueldo de toda la economía. Úsalo solo si el simulador muestra pesos del futuro.",
+   "fuente": "ine_ir",
+   "calidad": "dato",
+   "rango": [
+    0.0037,
+    0.0309
+   ]
+  },
+  {
+   "id": "P_DESPIDO",
+   "valor": {
+    "18-29": 0.0529,
+    "30-44": 0.0333,
+    "45-59": 0.0274
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Despido, cierre o fuerza mayor.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_FIN_CONTRATO",
+   "valor": {
+    "18-29": 0.0904,
+    "30-44": 0.0329,
+    "45-59": 0.0221
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Fin de contrato a plazo u obra.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_SEPARACION",
+   "valor": {
+    "18-29": 0.143,
+    "30-44": 0.066,
+    "45-59": 0.05
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Despido, cierre o fin de contrato: P_DESPIDO + P_FIN_CONTRATO.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_RENUNCIA",
+   "valor": {
+    "18-29": 0.1166,
+    "30-44": 0.0478,
+    "45-59": 0.0237
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Renuncia voluntaria.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_CAMBIO_EMPLEADOR",
+   "valor": {
+    "18-29": 0.2178,
+    "30-44": 0.1377,
+    "45-59": 0.1019
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Pasar a otro empleador sin cesantía entremedio.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "MESES_CESANTIA",
+   "valor": {
+    "18-29": 9.9,
+    "30-44": 10.5,
+    "45-59": 13.2
+   },
+   "unidad": "meses",
+   "descripcion": "Media de una exponencial que reproduce cuántos siguen cesantes a los 12 meses.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "MULT_DESPIDO_TIPO",
+   "valor": {
+    "grande": 0.89,
+    "pyme": 1.12,
+    "startup": 1.5,
+    "publico": 0.5,
+    "extranjero": 0.9
+   },
+   "unidad": "multiplicador",
+   "descripcion": "Riesgo de separación según tipo de empleador. Startup y extranjero: supuesto.",
+   "fuente": "ine_flujos",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "MULT_DESPIDO_RUBRO",
+   "valor": {
+    "Construcción": 1.67,
+    "Servicios administrativos": 1.47,
+    "Agricultura y pesca": 1.38,
+    "Hoteles y restaurantes": 1.21,
+    "Servicios profesionales": 1.04,
+    "Comercio": 0.96,
+    "Transporte": 0.96,
+    "Información y comunicaciones": 0.93,
+    "Industria manufacturera": 0.9,
+    "Finanzas y seguros": 0.67,
+    "Salud": 0.61,
+    "Enseñanza": 0.6,
+    "Minería": 0.57
+   },
+   "unidad": "multiplicador",
+   "descripcion": "Rotación del rubro sobre el total.",
+   "fuente": "ine_flujos",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "MIX_EMPLEADOR",
+   "valor": {
+    "grande": 0.4,
+    "pyme": 0.59,
+    "startup": 0.01
+   },
+   "unidad": "proporción",
+   "descripcion": "De dónde vienen las ofertas del sector privado: 40% de los asalariados privados está en empresas de 200 o más personas.",
+   "fuente": "ine_esi_2025",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "P_REEMPLEO_PUBLICO",
+   "valor": 0.12,
+   "unidad": "probabilidad",
+   "descripcion": "Al volver a trabajar, chance de entrar al Estado (13% a 17% de los ocupados son asalariados públicos).",
+   "fuente": "ine_esi_2025",
+   "calidad": "mixto",
+   "rango": [
+    0.08,
+    0.16
+   ]
+  },
+  {
+   "id": "P_SUBE_CAMBIO",
+   "valor": 0.54,
+   "unidad": "probabilidad",
+   "descripcion": "Un cambio de empleador mejora el sueldo.",
+   "fuente": "bcentral_2018",
+   "calidad": "dato",
+   "rango": [
+    0.46,
+    0.6
+   ]
+  },
+  {
+   "id": "COBERTURA_SEGURO",
+   "valor": 0.126,
+   "unidad": "fracción",
+   "descripcion": "Parte del ingreso perdido que repone el Seguro de Cesantía.",
+   "fuente": "cep_788",
+   "calidad": "dato",
+   "rango": [
+    0.1,
+    0.2
+   ]
+  },
+  {
+   "id": "CAIDA_REEMPLEO",
+   "valor": 0.15,
+   "unidad": "fracción",
+   "descripcion": "Pérdida de sueldo al volver a trabajar tras un despido, en años siguientes.",
+   "fuente": "couch_placzek_2010",
+   "calidad": "mixto",
+   "rango": [
+    0.08,
+    0.25
+   ]
+  },
+  {
+   "id": "PENAL_HUECO",
+   "valor": 0.571,
+   "unidad": "multiplicador",
+   "descripcion": "Llamados a entrevista tras 8 meses sin trabajo: 4% contra 7%.",
+   "fuente": "kroft_2013",
+   "calidad": "dato",
+   "rango": [
+    0.5,
+    0.75
+   ]
+  },
+  {
+   "id": "PENAL_PAUSA_ELEGIDA",
+   "valor": 0.556,
+   "unidad": "multiplicador",
+   "descripcion": "Llamados tras una pausa para cuidar: 5% contra 9% tras un despido.",
+   "fuente": "weisshaar_2018",
+   "calidad": "mixto",
+   "rango": [
+    0.45,
+    0.75
+   ]
+  },
+  {
+   "id": "ASCENSO",
+   "valor": {
+    "0": 0.1,
+    "1": 0.08,
+    "2": 0.05,
+    "3": 0.025,
+    "4": 0
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Ascenso según nivel actual.",
+   "fuente": "baker_gibbs_1994",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "ALZA_ASCENSO",
+   "valor": [
+    0.05,
+    0.1
+   ],
+   "unidad": "fracción",
+   "descripcion": "Alza de sueldo al ascender, rango uniforme.",
+   "fuente": "baker_gibbs_1994",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "P_GOLPE_INGRESO",
+   "valor": 0.1,
+   "unidad": "probabilidad anual",
+   "descripcion": "Año con golpe negativo de ingreso (mezcla que reproduce la cola gruesa).",
+   "fuente": "guvenen_2021",
+   "calidad": "mixto",
+   "rango": [
+    0.05,
+    0.15
+   ]
+  },
+  {
+   "id": "P_AUMENTO_PEDIDO",
+   "valor": {
+    "h": 0.27,
+    "m": 0.2
+   },
+   "unidad": "probabilidad",
+   "descripcion": "Conseguir aumento si lo pides: 20% y 13,1% lo logró sobre 74,5% y 66% que pidió.",
+   "fuente": "artz_2018",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "ALZA_AUMENTO",
+   "valor": [
+    0.04,
+    0.1
+   ],
+   "unidad": "fracción",
+   "descripcion": "Tamaño del aumento negociado.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "PARCIAL_SUELDO",
+   "valor": 0.485,
+   "unidad": "fracción",
+   "descripcion": "Sueldo en media jornada respecto de jornada completa.",
+   "fuente": "ine_esi_2025",
+   "calidad": "dato",
+   "rango": [
+    0.45,
+    0.55
+   ]
+  },
+  {
+   "id": "RIESGO_ACV_55H",
+   "valor": 1.35,
+   "unidad": "riesgo relativo",
+   "descripcion": "ACV con 55 horas o más contra 35-40.",
+   "fuente": "oms_oit_2021",
+   "calidad": "dato",
+   "rango": [
+    1.13,
+    1.62
+   ]
+  },
+  {
+   "id": "JUNTARSE_55H",
+   "valor": 0.85,
+   "unidad": "multiplicador",
+   "descripcion": "Con 55 horas o más te juntas 15% menos con tu gente el fin de semana.",
+   "fuente": "ine_enut_2023",
+   "calidad": "dato",
+   "rango": [
+    0.8,
+    0.95
+   ]
+  },
+  {
+   "id": "ASCENSO_HORAS",
+   "valor": 0.07,
+   "unidad": "puntos de probabilidad",
+   "descripcion": "Ascenso extra por trabajar hasta tarde.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.0,
+    0.1
+   ]
+  },
+  {
+   "id": "HIBRIDO_RENUNCIA",
+   "valor": 0.667,
+   "unidad": "multiplicador",
+   "descripcion": "Renuncias con trabajo híbrido: 4,8% contra 7,2%.",
+   "fuente": "bloom_2024",
+   "calidad": "dato",
+   "rango": [
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "REMOTO_JUNIOR_APRENDE",
+   "valor": 0.78,
+   "unidad": "multiplicador",
+   "descripcion": "Comentarios a juniors remotos: 22% menos.",
+   "fuente": "emanuel_2023",
+   "calidad": "mixto",
+   "rango": [
+    0.7,
+    0.9
+   ]
+  },
+  {
+   "id": "IA_JOVEN",
+   "valor": 0.81,
+   "unidad": "multiplicador",
+   "descripcion": "Empleo de 22-25 años en ocupaciones expuestas a IA respecto de las menos expuestas.",
+   "fuente": "brynjolfsson_2025",
+   "calidad": "mixto",
+   "rango": [
+    0.75,
+    0.9
+   ]
+  },
+  {
+   "id": "IA_EXPUESTA",
+   "valor": 0.25,
+   "unidad": "puntaje",
+   "descripcion": "Umbral de aplicabilidad de IA desde el que un área cuenta como expuesta.",
+   "fuente": "microsoft_ia",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "P_GRATUIDAD",
+   "valor": 0.6,
+   "unidad": "probabilidad",
+   "descripcion": "Estudiante en el 60% de menores ingresos (gratuidad si la institución está adscrita).",
+   "fuente": "ley_21091",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "PREMIO_MAGISTER",
+   "valor": 0.1,
+   "unidad": "fracción",
+   "descripcion": "Alza de sueldo al séptimo año tras un magíster (USD 150 sobre un sueldo profesional).",
+   "fuente": "dipres_2026",
+   "calidad": "mixto",
+   "rango": [
+    0.04,
+    0.2
+   ]
+  },
+  {
+   "id": "RETORNO_DOCTORADO",
+   "valor": 0.13,
+   "unidad": "tasa",
+   "descripcion": "Retorno mediano del doctorado para becarios.",
+   "fuente": "dipres_2026",
+   "calidad": "dato",
+   "rango": [
+    0.0,
+    0.2
+   ]
+  },
+  {
+   "id": "P_BOOTCAMP_COLOCA",
+   "valor": 0.6,
+   "unidad": "probabilidad",
+   "descripcion": "Colocación tras un bootcamp. Las escuelas declaran 75% a 85% sin auditoría; se descuenta.",
+   "fuente": "bootcamps",
+   "calidad": "supuesto",
+   "rango": [
+    0.4,
+    0.8
+   ]
+  },
+  {
+   "id": "COSTO_BOOTCAMP",
+   "valor": 1500000,
+   "unidad": "CLP",
+   "descripcion": "Precio de un bootcamp.",
+   "fuente": "bootcamps",
+   "calidad": "mixto",
+   "rango": [
+    800000,
+    3000000
+   ]
+  },
+  {
+   "id": "MICRO_MEDIANA",
+   "valor": 400000,
+   "unidad": "CLP al mes",
+   "descripcion": "Ganancia mediana de un microemprendedor.",
+   "fuente": "ine_eme_2025",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "FUNDADOR_MEDIANA",
+   "valor": 0.65,
+   "unidad": "fracción",
+   "descripcion": "Ganancia mediana del emprendedor a 10 años respecto de un empleado comparable.",
+   "fuente": "hamilton_2000",
+   "calidad": "mixto",
+   "rango": [
+    0.55,
+    0.8
+   ]
+  },
+  {
+   "id": "SOBREVIVE_1",
+   "valor": 0.8,
+   "unidad": "probabilidad",
+   "descripcion": "Empresa nueva que sigue al año.",
+   "fuente": "ine_reue",
+   "calidad": "mixto",
+   "rango": [
+    0.7,
+    0.85
+   ]
+  },
+  {
+   "id": "SOBREVIVE_5",
+   "valor": 0.432,
+   "unidad": "probabilidad",
+   "descripcion": "Empresa nueva que sigue a 5 años.",
+   "fuente": "ine_reue",
+   "calidad": "mixto",
+   "rango": [
+    0.35,
+    0.5
+   ]
+  },
+  {
+   "id": "FUNDADOR_VUELVE_SIN_PERDIDA",
+   "valor": 1.0,
+   "unidad": "multiplicador",
+   "descripcion": "Sueldo al volver a ser empleado respecto de antes de emprender.",
+   "fuente": "manso_2016",
+   "calidad": "mixto",
+   "rango": [
+    0.9,
+    1.0
+   ]
+  },
+  {
+   "id": "VC_FUNDADOR_CERO",
+   "valor": 0.75,
+   "unidad": "proporción",
+   "descripcion": "Fundadores con capital de riesgo que salen con cero.",
+   "fuente": "hall_woodward_2010",
+   "calidad": "mixto",
+   "rango": [
+    0.65,
+    0.8
+   ]
+  },
+  {
+   "id": "YC_ADQUIRIDA",
+   "valor": 0.242,
+   "unidad": "proporción",
+   "descripcion": "Startups YC 2012-2019 adquiridas a 2026.",
+   "fuente": "yc_directorio",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "YC_CERRADA",
+   "valor": 0.299,
+   "unidad": "proporción",
+   "descripcion": "Startups YC 2012-2019 cerradas a 2026.",
+   "fuente": "yc_directorio",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "PREMIO_EEUU",
+   "valor": 2.4,
+   "unidad": "multiplicador",
+   "descripcion": "Sueldo en EE.UU. de un trabajador chileno idéntico, con descuento por selección (3,53 sin descuento).",
+   "fuente": "clemens_2008",
+   "calidad": "mixto",
+   "rango": [
+    1.8,
+    3.53
+   ]
+  },
+  {
+   "id": "PREMIO_CIUDAD_GRANDE",
+   "valor": [
+    0.1,
+    0.35
+   ],
+   "unidad": "fracción",
+   "descripcion": "Alza al llegar a la ciudad grande y a 10 años.",
+   "fuente": "delaroca_puga_2017",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "HIJO_INGRESO_MUJER",
+   "valor": {
+    "privado": -0.35,
+    "publico": -0.2
+   },
+   "unidad": "fracción",
+   "descripcion": "Ingreso laboral de la madre a 20 meses del primer hijo.",
+   "fuente": "coes_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "HIJO_SALE",
+   "valor": {
+    "m": 0.173,
+    "h": 0.05
+   },
+   "unidad": "probabilidad",
+   "descripcion": "Quien trabajaba y no trabaja 12 meses después del primer hijo.",
+   "fuente": "eps_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "HIJO_CUIDADOS_H_DIA",
+   "valor": {
+    "m": 5.01,
+    "h": 1.82
+   },
+   "unidad": "horas por día",
+   "descripcion": "Horas extra de cuidado con un hijo de 0 a 4 años.",
+   "fuente": "ine_enut_2023",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_FORMAR_PAREJA",
+   "valor": {
+    "20-35": 0.11,
+    "36+": 0.05
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Empezar una relación si estás sin pareja. Calibrado para llegar a 62% en pareja a los 30-34.",
+   "fuente": "cep_casen_pareja",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "P_SEPARARSE",
+   "valor": {
+    "casado": 0.016,
+    "convive": 0.032,
+    "pololeo": 0.04
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Terminar la relación.",
+   "fuente": "ine_vitales",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "MORT_GOMPERTZ",
+   "valor": {
+    "h": [
+     -10.2053,
+     0.09016
+    ],
+    "m": [
+     -11.4101,
+     0.10043
+    ]
+   },
+   "unidad": "a, b",
+   "descripcion": "q(x) = exp(a + b·x), ajustada entre 50 y 95 años.",
+   "fuente": "ine_mortalidad",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_MUERE_ENFERMO",
+   "valor": 0.134,
+   "unidad": "probabilidad anual",
+   "descripcion": "Morir el año siguiente si un familiar tiene una enfermedad grave.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.08,
+    0.25
+   ]
+  },
+  {
+   "id": "EDAD_MADRE",
+   "valor": 28.5,
+   "unidad": "años",
+   "descripcion": "Edad media de la madre al tener al gemelo (27,7 en 2002; 30,1 en 2022).",
+   "fuente": "ine_vitales",
+   "calidad": "dato",
+   "rango": [
+    26,
+    31
+   ]
+  },
+  {
+   "id": "LUTO_A_ANIMO",
+   "valor": 10,
+   "unidad": "puntos por punto",
+   "descripcion": "Un punto de satisfacción 0-10 equivale a 10 puntos de ánimo.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "INGRESO_TRAS_MUERTE_PADRE",
+   "valor": {
+    "h": 0.97,
+    "m": 0.98
+   },
+   "unidad": "multiplicador",
+   "descripcion": "Ingreso tras la muerte de un padre o madre.",
+   "fuente": "equipo",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "ANIMO_CESANTIA",
+   "valor": -3.7,
+   "unidad": "puntos",
+   "descripcion": "Ánimo al quedar cesante (sin adaptación).",
+   "fuente": "elsoc",
+   "calidad": "dato",
+   "rango": [
+    -6,
+    -1.7
+   ]
+  },
+  {
+   "id": "ANIMO_REEMPLEO",
+   "valor": 6.0,
+   "unidad": "puntos",
+   "descripcion": "Ánimo al volver a trabajar.",
+   "fuente": "elsoc",
+   "calidad": "dato",
+   "rango": [
+    2.6,
+    9.4
+   ]
+  },
+  {
+   "id": "ANIMO_PAREJA",
+   "valor": 2.4,
+   "unidad": "puntos",
+   "descripcion": "Ánimo al formar pareja.",
+   "fuente": "elsoc",
+   "calidad": "dato",
+   "rango": [
+    1.0,
+    3.8
+   ]
+  },
+  {
+   "id": "ANIMO_META",
+   "valor": 64,
+   "unidad": "puntos",
+   "descripcion": "Nivel al que vuelve el ánimo.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "ANIMO_REVERSION",
+   "valor": 0.2,
+   "unidad": "fracción anual",
+   "descripcion": "Cuánto se acerca el ánimo a su nivel cada año (adaptación).",
+   "fuente": "clark_georgellis_2013",
+   "calidad": "mixto",
+   "rango": [
+    0.1,
+    0.35
+   ]
+  },
+  {
+   "id": "LICENCIA_RECHAZO",
+   "valor": {
+    "fonasa": 0.115,
+    "isapre": 0.279
+   },
+   "unidad": "probabilidad",
+   "descripcion": "Rechazo en última instancia de una licencia por salud mental.",
+   "fuente": "suseso_2024",
+   "calidad": "dato",
+   "rango": null
+  },
+  {
+   "id": "P_CANCER_DEJA_TRABAJO",
+   "valor": {
+    "media": 0.1,
+    "superior": 0.07
+   },
+   "unidad": "probabilidad",
+   "descripcion": "Tras un cáncer, deja de trabajar.",
+   "fuente": "heinesen_2013",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "COPAGO_CANCER",
+   "valor": 3000000,
+   "unidad": "CLP",
+   "descripcion": "Copago de un tratamiento.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    1000000,
+    8000000
+   ]
+  },
+  {
+   "id": "TASA_AHORRO",
+   "valor": {
+    "p80+": 0.195,
+    "p50-79": 0.08,
+    "p0-49": 0.03
+   },
+   "unidad": "fracción del ingreso",
+   "descripcion": "Ahorro según percentil. Solo el quintil alto tiene dato.",
+   "fuente": "ine_epf",
+   "calidad": "mixto",
+   "rango": null
+  }
+ ]
+}

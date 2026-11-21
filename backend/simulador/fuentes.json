@@ -1,0 +1,455 @@
+{
+ "version": "1.0.0",
+ "fecha": "2026-11-21",
+ "descripcion": "Fuentes citadas por parámetros, tablas, decisiones y eventos.",
+ "fuentes": [
+  {
+   "id": "ine_esi_2025",
+   "cita": "INE, Encuesta Suplementaria de Ingresos 2025, microdatos",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/ingresos-y-gastos/encuesta-suplementaria-de-ingresos",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_ene",
+   "cita": "INE, Encuesta Nacional de Empleo, octubre-diciembre 2025, microdatos",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/mercado-laboral/ocupacion-y-desocupacion",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_enut_2023",
+   "cita": "INE, II Encuesta Nacional de Uso del Tiempo 2023, microdatos",
+   "url": "https://www.ine.gob.cl/enut",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_epf",
+   "cita": "INE, IX Encuesta de Presupuestos Familiares 2021-2022",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/ingresos-y-gastos/encuesta-de-presupuestos-familiares",
+   "pais": "Chile",
+   "tipo": "tabulado",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_vitales",
+   "cita": "INE, Anuario de estadísticas vitales 2023 y 2024p",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/demografia-y-vitales/nacimientos-matrimonios-y-defunciones",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_mortalidad",
+   "cita": "INE, Tablas de mortalidad de Chile 1992-2070, base 2024",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/demografia-y-vitales/proyecciones-de-poblacion",
+   "pais": "Chile",
+   "tipo": "tabulado",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_flujos",
+   "cita": "INE, Estadísticas de flujos laborales con registros del Seguro de Cesantía, 2025",
+   "url": "https://www.ine.gob.cl/estadisticas/sociales/mercado-laboral/estadisticas-de-flujos-laborales",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_ir",
+   "cita": "INE, Índice Real de Remuneraciones 2016-2026",
+   "url": "https://www.ine.gob.cl/estadisticas/economia/indices-de-precio-e-inflacion/indice-de-remuneraciones-y-costo-de-mano-de-obra",
+   "pais": "Chile",
+   "tipo": "índice",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "ine_eme_2025",
+   "cita": "INE, Encuesta de Microemprendimiento 2025",
+   "url": "https://www.ine.gob.cl/estadisticas/economia/comercio-servicios-y-turismo/microemprendimiento",
+   "pais": "Chile",
+   "tipo": "tabulado",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "ine_reue",
+   "cita": "INE, Registro Estadístico de Empresas 2025, citado en prensa",
+   "url": "",
+   "pais": "Chile",
+   "tipo": "prensa",
+   "verificacion": "por confirmar"
+  },
+  {
+   "id": "mineduc_mifuturo",
+   "cita": "Mineduc SIES, Buscador de empleabilidad e ingresos y estadísticas por carrera, 2025-2026",
+   "url": "https://www.mifuturo.cl",
+   "pais": "Chile",
+   "tipo": "tabulado",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "servicio_civil",
+   "cita": "Servicio Civil, convocatorias de empleospublicos.cl 2025-2026",
+   "url": "https://www.empleospublicos.cl",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "eps_2024",
+   "cita": "Subsecretaría de Previsión Social, Encuesta de Protección Social VIII ronda 2023-2024, historia laboral",
+   "url": "https://www.previsionsocial.gob.cl/sps/biblioteca/encuesta-de-proteccion-social/",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "elsoc",
+   "cita": "COES, Estudio Longitudinal Social de Chile 2016-2022",
+   "url": "https://coes.cl/encuesta-panel/",
+   "pais": "Chile",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "coes_2024",
+   "cita": "Contreras, Muñoz y Otero 2024, penalidad por maternidad con registros de AFC y Registro Civil (COES)",
+   "url": "https://bidat.gob.cl/contenido-web/recurso/solicitudes-de-colaboracion/ID62_informe_final_v1.pdf/si",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "dipres_2026",
+   "cita": "DIPRES, evaluación de becas de magíster y doctorado, marzo 2026",
+   "url": "https://www.dipres.gob.cl/598/articles-406754_doc_pdf.pdf",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "suseso_2024",
+   "cita": "SUSESO, Estadísticas de licencias médicas 2024, cuadros 6, 8 y 9",
+   "url": "https://www.suseso.cl/605/w3-article-748285.html",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "cep_788",
+   "cita": "CEP, Puntos de Referencia 788 (2026), microsimulación del Seguro de Cesantía",
+   "url": "https://www.cepchile.cl",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "carranza_2025",
+   "cita": "Carranza, Prieto y Sehnbruch 2025, pérdida de empleo y desigualdad en Chile",
+   "url": "https://www.uc.cl/noticias/investigacion-revela-que-la-perdida-de-empleo-refuerza-la-desigualdad-de-ingresos-en-chile/",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "bcentral_2018",
+   "cita": "Banco Central de Chile, IPoM diciembre 2018, recuadro de mercado laboral",
+   "url": "https://www.bcentral.cl/documents/33528/133297/mercado_laboraldic2018.pdf",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "por confirmar"
+  },
+  {
+   "id": "cep_casen_pareja",
+   "cita": "CEP con CASEN 2022, proporción en pareja por edad",
+   "url": "https://www.cepchile.cl",
+   "pais": "Chile",
+   "tipo": "resumen",
+   "verificacion": "por confirmar"
+  },
+  {
+   "id": "dt_2024",
+   "cita": "Dirección del Trabajo, despidos 2024 (0,69% mensual)",
+   "url": "https://www.dt.gob.cl",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "ley_21091",
+   "cita": "Ley 21.091 de Educación Superior: gratuidad para estudiantes del 60% de menores ingresos",
+   "url": "https://www.bcn.cl/leychile/navegar?idNorma=1118991",
+   "pais": "Chile",
+   "tipo": "ley",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "iarc_ci5",
+   "cita": "IARC, Cancer Incidence in Five Continents, registro de Valdivia 1993-2008",
+   "url": "https://ci5.iarc.fr",
+   "pais": "Chile",
+   "tipo": "registro",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "hastings_2013",
+   "cita": "Hastings, Neilson y Zimmerman 2013, retornos de la carrera en Chile",
+   "url": "https://www.nber.org/papers/w19241",
+   "pais": "Chile",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "clark_georgellis_2013",
+   "cita": "Clark y Georgellis 2013, adaptación a eventos de vida en el BHPS",
+   "url": "https://doi.org/10.1111/ecca.12007",
+   "pais": "Reino Unido",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "leopold_lechner_2015",
+   "cita": "Leopold y Lechner 2015, muerte de los padres y bienestar de hijos adultos (SOEP)",
+   "url": "https://doi.org/10.1111/jomf.12204",
+   "pais": "Alemania",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "kroft_2013",
+   "cita": "Kroft, Lange y Notowidigdo 2013, duración del desempleo y llamados a entrevista",
+   "url": "https://www.nber.org/papers/w18387",
+   "pais": "EE.UU.",
+   "tipo": "experimento",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "weisshaar_2018",
+   "cita": "Weisshaar 2018, pausas voluntarias y llamados a entrevista",
+   "url": "https://doi.org/10.1177/0003122417752355",
+   "pais": "EE.UU.",
+   "tipo": "experimento",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "artz_2018",
+   "cita": "Artz, Goodall y Oswald 2018, ¿piden menos aumento las mujeres?",
+   "url": "https://openaccess.city.ac.uk/id/eprint/19223/",
+   "pais": "Australia",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "hamilton_2000",
+   "cita": "Hamilton 2000, retornos del autoempleo",
+   "url": "https://doi.org/10.1086/262131",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "manso_2016",
+   "cita": "Manso 2016, experimentación y retorno del emprendimiento",
+   "url": "https://faculty.haas.berkeley.edu/manso/ee.pdf",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "hall_woodward_2010",
+   "cita": "Hall y Woodward 2010, el peso del capital de riesgo para el emprendedor",
+   "url": "https://www.aeaweb.org/articles?id=10.1257/aer.100.3.1163",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "clemens_2008",
+   "cita": "Clemens, Montenegro y Pritchett 2008, el premio de lugar",
+   "url": "https://www.cgdev.org/sites/default/files/16352_file_CMP_place_premium_148.pdf",
+   "pais": "Internacional",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "delaroca_puga_2017",
+   "cita": "De la Roca y Puga 2017, aprender trabajando en ciudades grandes",
+   "url": "https://diegopuga.org/papers/DeLaRoca_Puga_REStud_2017.pdf",
+   "pais": "España",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "arellano_bover_2024",
+   "cita": "Arellano-Bover 2024, tamaño del primer empleador e ingreso de por vida",
+   "url": "https://www.econstor.eu/bitstream/10419/215365/1/dp12969.pdf",
+   "pais": "España",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "oms_oit_2021",
+   "cita": "OMS y OIT 2021, jornadas largas, ACV y cardiopatía",
+   "url": "https://www.who.int/news/item/17-05-2021-long-working-hours-increasing-deaths-from-heart-disease-and-stroke-who-ilo",
+   "pais": "Internacional",
+   "tipo": "meta-análisis",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "bloom_2024",
+   "cita": "Bloom, Han y Liang 2024, trabajo híbrido en Trip.com",
+   "url": "https://www.nature.com/articles/s41586-024-07500-2",
+   "pais": "China",
+   "tipo": "experimento",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "emanuel_2023",
+   "cita": "Emanuel, Harrington y Pallais 2023, el poder de la proximidad",
+   "url": "https://www.nber.org/papers/w31880",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "brynjolfsson_2025",
+   "cita": "Brynjolfsson, Chandar y Chen, Canaries in the coal mine, versión de agosto 2026",
+   "url": "https://digitaleconomy.stanford.edu/publications/canaries-in-the-coal-mine/",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "microsoft_ia",
+   "cita": "Microsoft Research, Working with AI: aplicabilidad de IA generativa por ocupación",
+   "url": "https://github.com/microsoft/working-with-ai",
+   "pais": "EE.UU.",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "rajkumar_2022",
+   "cita": "Rajkumar et al. 2022, experimento causal sobre lazos débiles en LinkedIn",
+   "url": "https://www.science.org/doi/10.1126/science.abl4476",
+   "pais": "Internacional",
+   "tipo": "experimento",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "couch_placzek_2010",
+   "cita": "Couch y Placzek 2010, pérdidas de ingreso de trabajadores desplazados",
+   "url": "https://www.aeaweb.org/articles?id=10.1257/aer.100.1.572",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "oreopoulos_2012",
+   "cita": "Oreopoulos, von Wachter y Heisz 2012, titularse en recesión",
+   "url": "https://www.aeaweb.org/articles?id=10.1257/app.4.1.1",
+   "pais": "Canadá",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "guvenen_2021",
+   "cita": "Guvenen, Karahan, Ozkan y Song 2021, qué dicen los datos sobre los cambios de ingreso",
+   "url": "https://onlinelibrary.wiley.com/doi/10.3982/ECTA14603",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "baker_gibbs_1994",
+   "cita": "Baker, Gibbs y Holmstrom 1994, la economía interna de la firma",
+   "url": "https://doi.org/10.2307/2118475",
+   "pais": "EE.UU.",
+   "tipo": "paper",
+   "verificacion": "leído en la fuente"
+  },
+  {
+   "id": "heinesen_2013",
+   "cita": "Heinesen y Kolodziejczyk 2013, efectos del cáncer en el empleo",
+   "url": "https://doi.org/10.1016/j.jhealeco.2013.09.004",
+   "pais": "Dinamarca",
+   "tipo": "paper",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "census_j2j",
+   "cita": "US Census Bureau, Job-to-Job Flows 2017-2023",
+   "url": "https://lehd.ces.census.gov/data/j2j_beta.html",
+   "pais": "EE.UU.",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "yc_directorio",
+   "cita": "Directorio público de Y Combinator (copia yc-oss)",
+   "url": "https://github.com/yc-oss/api",
+   "pais": "Internacional",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "nyfed_sce",
+   "cita": "NY Fed, Survey of Consumer Expectations, Labor Market Survey, microdatos",
+   "url": "https://www.newyorkfed.org/microeconomics/sce/labor",
+   "pais": "EE.UU.",
+   "tipo": "microdatos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "jobhop",
+   "cita": "JobHop, trayectorias laborales anonimizadas de CVs (Bélgica), Hugging Face",
+   "url": "https://huggingface.co/datasets/aida-ugent/JobHop",
+   "pais": "Bélgica",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "getonbrd_api",
+   "cita": "API pública de Get on Board, vacantes con Chile, noviembre 2026",
+   "url": "https://www.getonbrd.com",
+   "pais": "Chile",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "askamanager",
+   "cita": "Ask a Manager, encuesta abierta de sueldos 2021 y 2024",
+   "url": "https://www.askamanager.org",
+   "pais": "EE.UU.",
+   "tipo": "encuesta abierta",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "occ_transitions",
+   "cita": "Schubert, Stansbury y Taska, transiciones de ocupación en CVs de EE.UU., 2021",
+   "url": "https://www.openicpsr.org",
+   "pais": "EE.UU.",
+   "tipo": "datos",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "bootcamps",
+   "cita": "Cifras de colocación declaradas por Desafío Latam y Laboratoria, sin auditoría",
+   "url": "",
+   "pais": "Chile",
+   "tipo": "declaración",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "equipo",
+   "cita": "Supuesto del equipo, sin fuente",
+   "url": "",
+   "pais": "",
+   "tipo": "supuesto",
+   "verificacion": "supuesto"
+  }
+ ]
+}
