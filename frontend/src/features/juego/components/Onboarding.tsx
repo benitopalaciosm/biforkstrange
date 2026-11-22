@@ -183,9 +183,6 @@ export function Onboarding({
             ) : (
               <Pill>Tu gemelo</Pill>
             )}
-            <button type="button" className="ob-saltar" onClick={saltarTodo} disabled={cargando}>
-              Saltar
-            </button>
           </Row>
         }
       />
@@ -205,6 +202,7 @@ export function Onboarding({
             setPaso("tu");
           }}
           claude={panelClaude}
+          onSaltar={saltarTodo}
         />
       )}
 
@@ -326,14 +324,14 @@ export function Onboarding({
           <Button onClick={siguiente} disabled={!catalogo || cargando || faltaElegir}>
             {ultimo ? (sugeridas.length ? "Ver mis dudas" : "Elegir mi duda") : "Siguiente"}
           </Button>
-          <Row gap={4} style={{ justifyContent: "center" }}>
-            <button type="button" className="ob-link" onClick={saltarEsta} disabled={cargando}>
-              Saltar esta pregunta
-            </button>
+          <Button variant="white" onClick={saltarEsta} disabled={cargando}>
+            Saltar
+          </Button>
+          {ultimo && (
             <button type="button" className="ob-link" onClick={() => setCompleto(true)}>
               Revisar todos mis datos
             </button>
-          </Row>
+          )}
         </ScreenFooter>
       )}
     </Screen>
@@ -341,7 +339,9 @@ export function Onboarding({
 }
 
 /** Pantalla 1: el atajo del CV (con la animación de LinkedIn) o las tarjetas. */
-function Entrada({ error, onPdf, onManual, claude }: { error: string | null; onPdf: (pdf: string) => void; onManual: () => void; claude: React.ReactNode }) {
+function Entrada({
+  error, onPdf, onManual, claude, onSaltar,
+}: { error: string | null; onPdf: (pdf: string) => void; onManual: () => void; claude: React.ReactNode; onSaltar: () => void }) {
   const entrada = useRef<HTMLInputElement>(null);
   const [encima, setEncima] = useState(false);
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
@@ -402,9 +402,14 @@ function Entrada({ error, onPdf, onManual, claude }: { error: string | null; onP
 
       {claude}
 
-      <button type="button" className="ob-link ob-entra" onClick={onManual}>
-        Prefiero contestar unas pocas preguntas
-      </button>
+      <div className="ob-otras ob-entra">
+        <Button variant="white" onClick={onManual}>
+          Contestar preguntas
+        </Button>
+        <Button variant="white" onClick={onSaltar}>
+          Jugar sin datos
+        </Button>
+      </div>
     </>
   );
 }
