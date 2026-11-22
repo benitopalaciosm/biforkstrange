@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { sinMovimiento } from "../components/graficos";
-import { getDudas, getMundo, getNarracion, getVista, textoError } from "../api";
+import { comoErrorApi, getDudas, getMundo, getNarracion, getVista, textoError } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
 import { borradorInicial, useBorrador, type Borrador, type Fuente } from "./useBorrador";
 
@@ -18,7 +18,12 @@ export const PERFIL_INICIAL: Perfil = {
   riesgo: 5,
 };
 
-const CLAVE = "gemelo-laboral:juego:v1";
+/**
+ * La clave lleva la versión de lo que se guarda: si cambia su forma, se sube y lo de antes no se lee
+ * (v2: el borrador del onboarding, las fuentes y el retrato van con la partida).
+ */
+const CLAVE = "gemelo-laboral:juego:v2";
+const CLAVES_VIEJAS = ["gemelo-laboral:juego:v1"];
 
 /** `fuentes`: de dónde salió cada dato de `perfil` (lo que falta es supuesto); null en partidas de antes. */
 type Guardado = {
@@ -36,6 +41,7 @@ const RETRATO_VIEJO = "gemelo-laboral:retrato:v1";
 function leer(): Guardado | null {
   try {
     window.localStorage.removeItem(RETRATO_VIEJO);
+    for (const vieja of CLAVES_VIEJAS) window.localStorage.removeItem(vieja);
     const crudo = window.localStorage.getItem(CLAVE);
     if (!crudo) return null;
     const g = JSON.parse(crudo) as Guardado;
@@ -74,6 +80,8 @@ export function usePartida() {
   const [cargando, setCargando] = useState(false);
   const [recalculando, setRecalculando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Un aviso para la portada (no un error): por ejemplo, que la partida guardada ya no se puede seguir. */
+  const [aviso, setAviso] = useState<string | null>(null);
   const turno = useRef(0);
   /** Lo elegido dentro de las opciones de la carta actual: los mundos se ven con eso mismo. */
   const parametrosCarta = useRef<ParametrosComparar>({});
@@ -209,16 +217,40 @@ export function usePartida() {
     [perfil, pedir],
   );
 
-  /** Retoma la partida guardada (al recargar la página). */
-  const continuar = useCallback(() => {
+  /**
+   * Retoma la partida guardada (al recargar la página). Si el motor cambió desde que se guardó y ya no la
+   * acepta (422: una decisión u opción que ya no existe), se descarta y se avisa en la portada: reintentar
+   * no la arreglaría.
+   */
+  const continuar = useCallback(async () => {
     if (!partida) return;
+    const mio = ++turno.current;
+    reintento.current = null;
+    setAviso(null);
+    setError(null);
     setCargando(true);
-    void pedir(partida, (v) => {
+    try {
+      const v = await getVista(partida);
+      if (mio !== turno.current) return;
       setPrevia(null);
       setVista(v);
       setFase(v.terminada ? "cierre" : "carta");
-    });
-  }, [partida, pedir]);
+    } catch (e) {
+      if (mio !== turno.current) return;
+      if (comoErrorApi(e).status === 422) {
+        setPartida(null);
+        setVista(null);
+        setPrevia(null);
+        setFase("inicio");
+        setAviso("Tu partida guardada es de una versión anterior del simulador y ya no se puede seguir. Empieza una nueva.");
+      } else {
+        setError(mensaje(e));
+        reintento.current = () => void continuar();
+      }
+    } finally {
+      if (mio === turno.current) setCargando(false);
+    }
+  }, [partida]);
 
   const elegir = useCallback(
     (eleccion: Eleccion) => {
@@ -293,6 +325,7 @@ export function usePartida() {
     setPerfil(PERFIL_INICIAL);
     setFuentes({});
     setRetrato(null);
+    setAviso(null);
     onboarding.reiniciar(PERFIL_INICIAL);
     setCargando(false);
     setError(null);
@@ -300,7 +333,7 @@ export function usePartida() {
   }, [onboarding.reiniciar]);
 
   return {
-    fuentes, retrato, origenSugeridas, empezarDeCero, reintentarDudas, reintentar,
+    aviso, fuentes, retrato, origenSugeridas, empezarDeCero, reintentarDudas, reintentar,
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };

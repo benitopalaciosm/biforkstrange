@@ -7,6 +7,7 @@ export function Inicio({
   hayPartida,
   cargando,
   error,
+  aviso = null,
   onEmpezar,
   onContinuar,
   onComoFunciona,
@@ -14,6 +15,8 @@ export function Inicio({
   hayPartida: boolean;
   cargando: boolean;
   error: string | null;
+  /** Algo que la persona tiene que saber antes de seguir (su partida guardada ya no sirve). */
+  aviso?: string | null;
   onEmpezar: () => void;
   onContinuar: () => void;
   onComoFunciona: () => void;
@@ -40,6 +43,11 @@ export function Inicio({
         <Tag>3 · Eliges y vives el mundo {GEMELOS + 1}</Tag>
       </Row>
       <ScreenFooter>
+        {aviso && (
+          <div className="jg-error" role="status">
+            {aviso}
+          </div>
+        )}
         {error && <ErrorCaja error={error} onReintentar={hayPartida ? onContinuar : undefined} />}
         {cargando && <Cargando>Retomando tu partida…</Cargando>}
         {hayPartida && (

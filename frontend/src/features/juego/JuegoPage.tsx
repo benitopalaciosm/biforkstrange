@@ -135,7 +135,8 @@ function Fase({
       hayPartida={j.partida !== null}
       cargando={j.cargando}
       error={j.error}
-      onContinuar={j.continuar}
+      aviso={j.aviso}
+      onContinuar={() => void j.continuar()}
       onEmpezar={j.empezarDeCero}
       onComoFunciona={() => setTutorial("antes")}
     />
