@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getDudas, getMundo, getNarracion, getVista } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
-import { borradorInicial, useBorrador, type Borrador } from "./useBorrador";
+import { borradorInicial, useBorrador, type Borrador, type Fuente } from "./useBorrador";
 
 export type Fase = "inicio" | "perfil" | "duda" | "carta" | "paso" | "cierre";
 
@@ -19,7 +19,8 @@ export const PERFIL_INICIAL: Perfil = {
 
 const CLAVE = "gemelo-laboral:juego:v1";
 
-type Guardado = { perfil: Perfil; partida: Partida | null; borrador?: Borrador };
+/** `fuentes`: de dónde salió cada dato de `perfil` (lo que falta es supuesto); null en partidas de antes. */
+type Guardado = { perfil: Perfil; partida: Partida | null; borrador?: Borrador; fuentes?: Record<string, Fuente> | null };
 
 function leer(): Guardado | null {
   try {
@@ -29,7 +30,7 @@ function leer(): Guardado | null {
     if (!g || typeof g.perfil !== "object" || g.perfil === null) return null;
     const borrador = g.borrador && typeof g.borrador === "object" ? { ...borradorInicial(PERFIL_INICIAL), ...g.borrador } : undefined;
     if (borrador) borrador.perfil = { ...PERFIL_INICIAL, ...borrador.perfil };
-    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null, borrador };
+    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null, borrador, fuentes: g.fuentes ?? null };
   } catch {
     return null;
   }
@@ -67,8 +68,12 @@ export function usePartida() {
   /** El onboarding a medio armar: sobrevive a ir y volver de las dudas. */
   const onboarding = useBorrador(guardado?.borrador ?? borradorInicial(guardado?.perfil ?? PERFIL_INICIAL));
   const borrador = onboarding.borrador;
+  const borradorActual = useRef(borrador);
+  borradorActual.current = borrador;
+  /** De dónde salió cada dato del perfil con que se juega: lo que no está quedó como supuesto. */
+  const [fuentes, setFuentes] = useState<Record<string, Fuente> | null>(guardado?.fuentes ?? null);
 
-  useEffect(() => guardar({ perfil, partida, borrador }), [perfil, partida, borrador]);
+  useEffect(() => guardar({ perfil, partida, borrador, fuentes }), [perfil, partida, borrador, fuentes]);
 
   /** Pide la vista de `p`; si llega (y nadie pidió otra cosa entremedio) corre `listo`. */
   const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0) => {
@@ -112,6 +117,7 @@ export function usePartida() {
     const mio = ++turno.current;
     setDudasSugeridas(sugeridas);
     setPerfil(p);
+    setFuentes(borradorActual.current.fuentes);
     setPartida(null);
     setVista(null);
     setPrevia(null);
@@ -134,6 +140,7 @@ export function usePartida() {
     (p: Perfil) => {
       turno.current++;
       setPerfil(p);
+      setFuentes(borradorActual.current.fuentes);
       setDudasSugeridas([]);
       setVista(null);
       setPrevia(null);
@@ -235,7 +242,27 @@ export function usePartida() {
     setError(null);
   }, []);
 
+  /**
+   * "Empezar": una persona nueva parte de cero. Ni el perfil, ni lo que leyó Claude, ni las dudas sugeridas
+   * de quien jugó antes en este navegador.
+   */
+  const empezarDeCero = useCallback(() => {
+    turno.current++;
+    setPartida(null);
+    setVista(null);
+    setPrevia(null);
+    setDudas(null);
+    setDudasSugeridas([]);
+    setPerfil(PERFIL_INICIAL);
+    setFuentes({});
+    onboarding.reiniciar(PERFIL_INICIAL);
+    setCargando(false);
+    setError(null);
+    setFase("perfil");
+  }, [onboarding.reiniciar]);
+
   return {
+    fuentes, empezarDeCero,
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };

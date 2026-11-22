@@ -5,7 +5,7 @@ import {
 import { GEMELOS, getEnJuego } from "../api";
 import { CALIDAD, arte, plata } from "../textos";
 import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
-import { Cargando, ErrorCaja } from "./piezas";
+import { AvisoPerfil, Cargando, ErrorCaja } from "./piezas";
 
 const VISIBLES = 4;
 /** Las dudas más comunes van primero; el resto sigue en el orden del paquete. */
@@ -38,6 +38,7 @@ function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugerid
 }
 
 export function DudaPicker({
+  fuentes = null,
   perfil,
   dudas,
   sugeridas = [],
@@ -46,6 +47,8 @@ export function DudaPicker({
   onVolver,
   onElegir,
 }: {
+  /** De dónde salió cada dato del perfil: lo que falta es supuesto. */
+  fuentes?: Record<string, string> | null;
   /** Con el perfil se mide cuál de las dudas sugeridas tiene más en juego para esta persona. */
   perfil?: Perfil;
   dudas: Duda[] | null;
@@ -87,6 +90,7 @@ export function DudaPicker({
             : "Elige la que más se parece. Es la primera carta de tu partida."}
         </Text>
         {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
+        <AvisoPerfil fuentes={fuentes} />
       </Stack>
       {enJuego && (
         <div className="jg-en-juego" role="note">

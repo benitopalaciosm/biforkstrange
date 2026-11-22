@@ -6,7 +6,7 @@ import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
-import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
 import { ApuestaAntesDeMirar } from "./Apuesta";
 
@@ -531,10 +531,12 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
+  /** De dónde salió cada dato del perfil: sin datos es un perfil de ejemplo. */
+  fuentes?: Record<string, string> | null;
   onNarrar?: Narrar;
   onAyuda: () => void;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
@@ -631,6 +633,7 @@ export function Carta({
         {!sinSueldo(e) && e.tipo_empleador ? ` · ${TIPO_EMPLEADOR[e.tipo_empleador] ?? e.tipo_empleador}` : ""}
         {e.rubro ? ` · ${e.rubro}` : ""}
       </Text>
+      <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>
         <Meta>{pendiente.nombre}</Meta>

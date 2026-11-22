@@ -42,8 +42,7 @@ function Juego() {
         onVolver={() => setTutorial(null)}
         onListo={() => {
           setTutorial(null);
-          j.descartar();
-          j.irAPerfil();
+          j.empezarDeCero();
         }}
       />
     );
@@ -53,7 +52,7 @@ function Juego() {
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
+      <DudaPicker fuentes={j.fuentes} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
@@ -61,6 +60,7 @@ function Juego() {
       <Carta
         vista={j.vista}
         partida={j.partida}
+        fuentes={j.fuentes}
         riesgo={j.perfil.riesgo}
         cargando={j.cargando}
         recalculando={j.recalculando}
@@ -104,10 +104,7 @@ function Juego() {
       cargando={j.cargando}
       error={j.error}
       onContinuar={j.continuar}
-      onEmpezar={() => {
-        j.descartar();
-        j.irAPerfil();
-      }}
+      onEmpezar={j.empezarDeCero}
       onComoFunciona={() => setTutorial("antes")}
     />
   );

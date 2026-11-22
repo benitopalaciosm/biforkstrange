@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Avatar, Button, Tag, cx } from "@/shared/ui";
-import { CALIDAD, plata } from "../textos";
+import { CALIDAD, CAMPOS_PERFIL, enLista, plata } from "../textos";
 import type { Calidad, Rango } from "../types";
 
 /** Calidad del dato, discreta: dato / mixto / supuesto. */
@@ -66,6 +66,27 @@ export function ErrorCaja({ error, onReintentar }: { error: string; onReintentar
           Reintentar
         </Button>
       )}
+    </div>
+  );
+}
+
+/**
+ * Si el perfil no es del todo tuyo, se dice: sin datos es un perfil de ejemplo; si saltaste preguntas, esas quedan
+ * como supuesto. `fuentes` son los campos que sí se saben; null si no se sabe (una partida guardada de antes).
+ */
+export function AvisoPerfil({ fuentes }: { fuentes: Record<string, string> | null }) {
+  if (!fuentes) return null;
+  const supuestos = Object.keys(CAMPOS_PERFIL).filter((k) => !(k in fuentes));
+  if (supuestos.length === 0) return null;
+  const ejemplo = supuestos.length === Object.keys(CAMPOS_PERFIL).length;
+  return (
+    <div className="jg-aviso-perfil" role="note">
+      <Tag tone="sol">{ejemplo ? "Perfil de ejemplo" : "Con supuestos"}</Tag>
+      <span className="jg-chico">
+        {ejemplo
+          ? "Jugaste sin datos: estos mundos son de una persona de ejemplo, no los tuyos."
+          : `No nos dijiste tu ${enLista(supuestos.map((k) => CAMPOS_PERFIL[k]))}: ahí usamos un supuesto.`}
+      </span>
     </div>
   );
 }
