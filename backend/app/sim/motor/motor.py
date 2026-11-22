@@ -32,7 +32,7 @@ EVENTO_MUNDO = "recesion"
 ALZAS = frozenset({"alza_anual"})
 SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
 # Decisiones cuya historia nombra a la empresa que te ofrece trabajo
-DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar"})
+DECISIONES_CON_OFERTA = empresas.DECISIONES_CON_OFERTA
 
 # La suerte en la pega (ascenso, despido, oferta, alza) va con el trabajo: dos vidas de un mismo mundo
 # la comparten mientras están en la misma pega, y deja de ser la misma cuando una se cambia.
@@ -388,10 +388,13 @@ class Vida:
         if decision_id in DECISIONES_CON_OFERTA:
             contexto["oferta"] = self.oferta_de(decision_id, ocurrencia)
             self._oferta_fija = contexto["oferta"]  # la historia nombra esta empresa y este cargo: son los que vives
+        elif decision_id != "tipo_de_empleador":
+            # cada opción trae su empresa (la cesantía): si la carta la mostró, es la que vives
+            self._oferta_fija = self.oferta_de(decision_id, ocurrencia, opcion_id)
         if decision_id == "tipo_de_empleador":
             self._nuevo_empleador = True  # cambiarse de empresa aunque sea al mismo tipo
         else:
-            self._origen = empresas.origen_decision(decision_id, ocurrencia)
+            self._origen = empresas.origen_decision(decision_id, ocurrencia, opcion_id)
         if opcion.costo:
             self._aplicar(opcion.costo, sitio + ":costo", opcion.fila)
         resultado, prob = self._sortear(opcion.resultados, sitio, decision_id)
@@ -450,9 +453,11 @@ class Vida:
         return {"empresa_id": e.get("empresa_id", -1), "cargo_id": e.get("cargo_id", -1),
                 "empresa": self._nombre_empresa(), "rol": self._nombre_cargo(), "universidad_id": e.get("universidad_id", "")}
 
-    def oferta_de(self, decision_id: str, ocurrencia: int) -> dict | None:
-        """La empresa y el cargo que trae la decisión (la misma que muestra la carta)."""
+    def oferta_de(self, decision_id: str, ocurrencia: int, opcion_id: str | None = None) -> dict | None:
+        """La empresa y el cargo que trae la decisión, o esa opción (la misma que muestra la carta)."""
         for o in self.opciones(decision_id):
+            if opcion_id is not None and o.id != opcion_id:
+                continue
             ficha = empresas.oferta(self, decision_id, o.id, ocurrencia)
             if ficha is not None:
                 return {k: ficha[k] for k in ("empresa_id", "cargo_id", "nombre", "cargo", "tipo", "rubro", "pais")}
@@ -552,8 +557,10 @@ class Vida:
             e["empresa_id"] = -1
             e["empresa_inicial"], e["cargo_inicial"] = "", ""
             return
-        if not e["tipo_empleador"] and ("decision", "tipo_de_empleador", "luego") not in self.cola[:1]:
-            # reglas como bootcamp/colocado emplean sin decir en qué tipo de empresa: se sortea
+        if not e["tipo_empleador"] and not self._espera_tipo and ("decision", "tipo_de_empleador", "luego") not in self.cola[:1]:
+            # reglas como bootcamp/colocado emplean sin decir en qué tipo de empresa: se sortea. Si el resultado
+            # ya sigue en tipo_de_empleador (`_espera_tipo`), no se encola otro: el segundo sorteo cambiaba
+            # la empresa que mostró la carta
             self.cola.insert(0, ("decision", "tipo_de_empleador", "luego"))
             self._espera_tipo = True
         if antes is not None:
