@@ -221,7 +221,7 @@ function OpcionConGemelos({
           {ganadas !== null && (
             <span className="jg-marcador" data-lider={lider}>
               <span className="jg-marcador-num">
-                <b>{ganadas}</b> de {de} mundos es la mejor
+                {ganadas === 0 ? "En ningún mundo es la mejor" : <><b>{ganadas}</b> de {de} mundos es la mejor</>}
               </span>
               <MiniMundos ganadas={ganadas} total={de} color={color} />
             </span>
@@ -797,13 +797,14 @@ function Simulacion({
           {comparadas.map((o) => (
             <span key={o.opcion}>
               <i style={{ background: colores[o.opcion] }} />
-              {o.nombre} gana en <b>{cuenta.get(o.opcion) ?? 0}</b> mundos
+              {/* el número primero, para que encolumne; el nombre entre comillas, para que «No» no se lea como negación */}
+              <b>{cuenta.get(o.opcion) ?? 0}</b> mundos: gana «{o.nombre}»
             </span>
           ))}
           {empates > 0 && (
             <span>
               <i data-tipo="igual" />
-              Empate en <b>{empates}</b> mundos
+              <b>{empates}</b> mundos: empate
             </span>
           )}
         </span>
