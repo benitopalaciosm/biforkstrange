@@ -36,6 +36,25 @@ export type Perfil = {
   empresa_fondos?: 0 | 1;
   /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
   anos_por_empleo?: number | null;
+  /** Si estudia: semestres que le faltan y años que lleva en la carrera. Sin dato, se suponen por su edad. */
+  semestres_restantes?: number | null;
+  anos_en_carrera?: number | null;
+  /** Cómo salió de sus cesantías (1 = sí): sus gemelos responden igual si quedan cesantes. */
+  volvio_a_su_nivel?: 0 | 1;
+  freelance_entre_pegas?: 0 | 1;
+  emprendio_antes?: 0 | 1;
+  /** Si trabaja por su cuenta: hace cuántos años. Con 5 o más, sus gemelos vuelven menos a un empleo. */
+  anos_independiente?: number | null;
+  /** Si estudia o busca su primera pega: dónde hizo la práctica. Grande o Estado pesa en su primera pega. */
+  practica?: "" | "grande" | "pyme" | "startup" | "publico";
+  /** Si todos sus empleos fueron en el Estado o en startups: al cambiar de pega, sus gemelos vuelven ahí más seguido. */
+  toda_su_carrera_en?: "" | "publico" | "startup";
+  /** Ascensos dentro de una misma empresa por año de experiencia. Si es más rápido que lo típico, asciende más. */
+  ascensos_por_ano?: number | null;
+  /** Empresas propias que ya cerró: si sus gemelos tienen empresa, la cierran más seguido. */
+  empresas_cerradas?: number;
+  /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
+  rubro_sonado?: string | null;
   /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
   relato?: string;
   /** Su gemelo digital (/gemelo): sus rasgos afinados mueven qué cartas le salen. */
@@ -59,6 +78,11 @@ export type PerfilLeido = {
   dudas_sugeridas?: DudaSugerida[];
   /** Su empleador actual, si está en la nómina del SII. */
   empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
+  /** Lo que contó su Claude (solo por el prompt): temas que le apasionan y su proyecto paralelo. */
+  intereses?: string[];
+  proyecto?: string | null;
+  /** Campos del perfil que el texto dijo de verdad (el resto son valores por defecto). */
+  dados?: string[];
   /** Lo que su gemelo sabe de ella, en una línea. */
   retrato?: string | null;
   /** "documento" si venía en el formato del prompt; "api" o "comando" si Claude leyó un texto libre. */
@@ -281,3 +305,64 @@ export type Vista = {
 
 /** Lo que se elige dentro de cada opción para comparar: {opción: {variable: valor}}. */
 export type ParametrosComparar = Record<string, Record<string, string | number>>;
+
+/** Una opción de la duda con un dato del CV y sin él, con los mismos dados. */
+export type PesoOpcion = {
+  opcion: string;
+  nombre: string;
+  /** Fracción de mundos donde esa opción termina ganando más. */
+  gana_con: number;
+  gana_sin: number;
+  /** Sueldo típico (p50) al final. */
+  sueldo_con: number;
+  sueldo_sin: number;
+};
+
+export type CampoCv = "ingles" | "skill" | "red" | "usa_ia" | "remoto" | "anos_por_empleo" | "nivel" | "edu" | "parcial" | "empresa_fondos";
+
+/** Una línea del CV: cuánto mueve la duda. `mueve` dice qué cambia más, y `opcion` es la que más cambia. */
+export type PesoDato = {
+  campo: CampoCv;
+  tuyo: string | number;
+  neutro: string | number | null;
+  mueve: "gana" | "sueldo";
+  opcion: string;
+  cambio: number;
+  opciones: PesoOpcion[];
+};
+
+/** Respuesta de `POST /api/juego/peso-cv`: las líneas del CV que más mueven la duda (hasta 4). */
+export type PesoCv = {
+  decision: string;
+  nombre: string;
+  pregunta: string;
+  gemelos: number;
+  semilla: number;
+  base: string;
+  datos: PesoDato[];
+  /** Datos del CV que no cambian esta duda. */
+  sin_efecto: CampoCv[];
+  /** Datos que la mueven, pero menos que los que se muestran. */
+  otros: CampoCv[];
+};
+
+/** Cuánto se juega la persona en una duda: el rango que abre entre la mala y la buena suerte. */
+export type DudaEnJuego = {
+  decision: string;
+  nombre: string;
+  pregunta: string;
+  /** Peor sueldo de mala suerte (p10) entre todas las opciones. */
+  mala: number;
+  /** Mejor sueldo de buena suerte (p90) entre todas las opciones. */
+  buena: number;
+  /** Sueldo típico (p50) si te quedas como estás. */
+  tipico: number;
+  /** (buena − mala) / típico: lo que ordena. */
+  dispersion: number;
+  /** Distancia entre el sueldo típico de la mejor y la peor opción, sobre la peor. */
+  entre_opciones: number;
+};
+
+/** Respuesta de `POST /api/juego/dudas-en-juego`. `mas_en_juego` es null si hay menos de dos dudas. */
+export type EnJuego = { gemelos: number; semilla: number; mas_en_juego: string | null; dudas: DudaEnJuego[] };
+
