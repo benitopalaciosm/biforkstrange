@@ -44,6 +44,20 @@ def test_bootcamp_desde_la_cesantia_no_revienta_el_anio():
     assert v.e["estado"] == "empleado" and v.e["tipo_empleador"] != ""
 
 
+@pytest.mark.parametrize("estado", ["fundador", "independiente", "buscando"])
+def test_emigrar_es_para_quien_se_va_con_trabajo(estado):
+    """Corregido. emigrar no pedía estar empleado: a un fundador "irse" le multiplicaba por 3,5 el sueldo y lo
+    dejaba fundador en EE.UU.; a un cesante, buscando afuera con sueldo 0. El premio de Clemens es sobre el
+    sueldo de un trabajador idéntico: la carta ahora pide estado == 'empleado' (decisiones.json)."""
+    v = vida(Perfil(edad=30, estado=estado, sueldo=1_400_000, ingles=1))
+    assert not v.aplica("emigrar") and "emigrar" not in dict(v.cartas_posibles())
+    assert "emigrar" not in [d["decision"] for d in partida.dudas_posibles(Perfil(edad=30, estado=estado, ingles=1))]
+    empleada = vida(Perfil(edad=30, ingles=1), DadosGuion({"dec:emigrar:irse": 0.0}))
+    assert empleada.aplica("emigrar")
+    empleada.vivir_anio(Guion({"emigrar": "irse", **QUIETA}), carta="emigrar")
+    assert (empleada.e["estado"], empleada.e["pais"], empleada.e["tipo_empleador"]) == ("empleado", "afuera", "extranjero")
+
+
 def test_dos_ofertas_en_el_mismo_anio_se_sortean_por_separado():
     pares = []
     for g in range(400):

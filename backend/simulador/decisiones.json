@@ -3750,7 +3750,7 @@
    "nombre": "Irte a trabajar afuera",
    "categoria": "lugar",
    "pregunta": "¿Te vas a trabajar a Estados Unidos?",
-   "cuando": "y(pais == 'chile', edad >= 22, edad <= 45, en(edu, 'tecnica', 'universitaria', 'postgrado'))",
+   "cuando": "y(pais == 'chile', estado == 'empleado', edad >= 22, edad <= 45, en(edu, 'tecnica', 'universitaria', 'postgrado'))",
    "aparicion": {
     "tipo": "carta",
     "peso": 0.25,
