@@ -410,6 +410,8 @@ class Vida:
             "texto": resultado["texto"] if resultado else "", "tono": (resultado or {}).get("tono", "neutro"),
             "prob": prob, "ocurrencia": ocurrencia, "contexto": contexto,
         })
+        if decision_id == "tipo_de_empleador" and self._oferta_fija:
+            del self.registro["decisiones"][-1]  # la oferta ya dijo a qué empresa entras: el sorteo no es noticia
         if decision_id == TRANQUILO:
             del self.registro["decisiones"][-1]["contexto"]  # no tiene historia que narrar
             if opcion.id != "seguir":

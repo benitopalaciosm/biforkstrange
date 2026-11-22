@@ -1961,7 +1961,7 @@
     {
      "id": "cambiar",
      "nombre": "Cambiarte",
-     "detalle": "En Chile 54% de los cambios mejora el sueldo y 46% no.",
+     "detalle": "La oferta trae su sueldo: lo ves antes de decidir. De los cambios que la gente hace, 54% sube el sueldo (Banco Central); de las ofertas que llegan, menos, porque las que pagan menos se rechazan más.",
      "resultados": [
       {
        "id": "mejora",

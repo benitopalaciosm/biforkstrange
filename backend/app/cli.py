@@ -459,7 +459,8 @@ def _texto_resultado_decision(d: dict, elegida: bool) -> list[str]:
         lineas += _envolver(f"Elegiste: {d['opcion_nombre']}.", "  ")
     if d["texto"]:
         marca = TONO.get(d["tono"], "•")
-        prob = f" (pasaba en {_de_cada_cien(d['prob'])} mundos)" if d["prob"] < 1 else ""
+        # tu probabilidad en tu mundo (con su recesión y tu situación), no la frecuencia entre las copias de la tabla
+        prob = f" (para ti, este año: {_de_cada_cien(d['prob'])})" if d["prob"] < 1 else ""
         lineas += _envolver(f"{marca} El dado: {d['texto']}{prob}", "    ", "  ")
     return lineas
 
