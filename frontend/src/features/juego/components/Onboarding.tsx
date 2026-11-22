@@ -673,7 +673,7 @@ function gemeloGuardado(): string | null {
 function UsarGemelo({ gemeloId, onGemelo }: { gemeloId: string | null; onGemelo: (id: string | null) => void }) {
   const guardado = gemeloGuardado();
   return (
-    <div className="ob-gemelo ob-entra">
+    <div className="ob-usar-gemelo ob-entra">
       {guardado ? (
         <label>
           <input type="checkbox" checked={gemeloId === guardado} onChange={(e) => onGemelo(e.target.checked ? guardado : null)} />
