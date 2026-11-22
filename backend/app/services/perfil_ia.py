@@ -550,11 +550,12 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
             if datos["tipo_empleador"] is None:
                 supuestos.remove("tipo_empleador")
-            perfil["tipo_empleador"] = empresa["tamano"]
+            perfil["tipo_empleador"] = empresa["tipo_empleador"]
         if datos["rubro"] is None and empresa["rubro"] in rubros:
             supuestos.remove("rubro")
             perfil["rubro"] = empresa["rubro"]
-        inferido.append(f"{empresa['nombre']}: {empresa['tamano']}, {empresa['rubro']}, "
+        tipo = "organismo del Estado" if empresa["tipo_empleador"] == "publico" else empresa["tamano"]
+        inferido.append(f"{empresa['nombre']}: {tipo}, {empresa['rubro']}, "
                         f"{empresa['trabajadores']} trabajadores según el SII.")
     final = PerfilIn(**perfil).model_dump()
     return {
@@ -703,6 +704,9 @@ def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str |
             f"tus gemelos estudian {plazo} (supuesto del equipo)."]
 
 
+RUBRO_ESTADO = "Administración pública"
+
+
 def _empresa_sii(nombre: str | None) -> dict | None:
     """La empresa actual en la nómina del SII (grandes y pymes): su tamaño y su rubro son dato, no adivinanza."""
     if not nombre or len(nombre.strip()) < 3:
@@ -713,7 +717,11 @@ def _empresa_sii(nombre: str | None) -> dict | None:
     buscado = _normal(nombre).replace(" ", "")
     for f in _filas("sii_empleadores.csv"):
         if buscado in (_normal(f["nombre"]).replace(" ", ""), _normal(f["razon_social"]).replace(" ", "")):
+            # una municipalidad o un servicio público es el Estado, no una empresa "grande": en el motor
+            # cambian el despido, el reempleo y los sueldos
+            publico = f["rubro"] == RUBRO_ESTADO
             return {"nombre": f["nombre"], "tamano": f["tamano"], "rubro": f["rubro"],
+                    "tipo_empleador": "publico" if publico else f["tamano"],
                     "trabajadores": int(f["trabajadores"]), "fuente": "SII, nómina de empresas 2024"}
     return None
 

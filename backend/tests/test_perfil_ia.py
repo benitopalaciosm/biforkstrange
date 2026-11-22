@@ -197,10 +197,23 @@ def test_ingles_experiencia_y_empresa_del_sii():
     r = perfil_ia.completar(leido)
     p = r["perfil"]
     assert (p["ingles"], p["skill"], p["red"]) == (1, 55, 35)
-    # la empresa está en el SII: tamaño y rubro son dato, no supuesto
-    assert r["empresa"]["tamano"] == "grande" and p["tipo_empleador"] == "grande"
-    assert p["rubro"] == "Administración pública"
+    # la empresa está en el SII: tipo y rubro son dato, no supuesto. Una municipalidad es el Estado,
+    # aunque el SII la cuente como grande por su tamaño
+    assert r["empresa"]["tamano"] == "grande" and r["empresa"]["tipo_empleador"] == "publico"
+    assert p["tipo_empleador"] == "publico" and p["rubro"] == "Administración pública"
+    assert any("organismo del Estado" in f for f in r["inferido"])
     assert not {"tipo_empleador", "rubro", "ingles"} & {s["campo"] for s in r["supuestos"]}
+
+
+def test_una_empresa_privada_del_sii_queda_con_su_tamano():
+    from app.sim.motor.empresas import _filas
+
+    privada = next(f for f in _filas("sii_empleadores.csv") if f["tamano"] == "grande" and f["rubro"] == "Minería")
+    r = perfil_ia.completar(LEIDO.model_copy(update={"tipo_empleador": None, "empresa_actual": privada["nombre"]}))
+    assert r["empresa"]["tipo_empleador"] == "grande" and r["perfil"]["tipo_empleador"] == "grande"
+    # si Claude leyó que es del Estado y el SII dice otra cosa de tamaño, igual queda en el Estado
+    estado = LEIDO.model_copy(update={"tipo_empleador": "publico", "empresa_actual": "I. Municipalidad de Curicó"})
+    assert perfil_ia.completar(estado)["perfil"]["tipo_empleador"] == "publico"
 
 
 def test_sin_datos_nuevos_el_motor_usa_los_supuestos_de_siempre():
