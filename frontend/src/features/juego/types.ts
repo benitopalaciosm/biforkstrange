@@ -311,6 +311,12 @@ export type CierreIA = {
   voces: (ConFuente & { quien: string; tipo: string; dice: string })[];
   fuera_del_juego: string;
   por_ritmo: IAPorRitmo | null;
+  /** Qué dice cada tipo de cargo (escenarios_ia.json) y el tipo del tuyo al final. */
+  tipos?: Record<TipoIA, ConFuente & { nombre: string; carta: string | null }>;
+  tipo?: TipoIA | null;
+  /** Los pesos de cada ritmo (P_RITMO_IA, pronóstico del FRI) y desde cuántos mundos se muestra un ritmo. */
+  pesos?: Record<Ritmo, number>;
+  min_mundos?: number;
 };
 
 export type Suceso = { tipo: "decision" | "evento"; nombre: string; opcion?: string; texto: string; tono: Tono };

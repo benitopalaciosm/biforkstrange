@@ -163,8 +163,10 @@ def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dic
                                       "contra": _contra_la_otra(comparacion, elegida, por_mundo)}
     if ia.activa():
         # el ritmo de la IA de tu mundo (lo fuiste leyendo en los titulares), qué es cada ritmo y quién dice qué
+        # los pesos de cada ritmo (pronóstico del FRI) y desde cuántos mundos se muestra el sueldo con un ritmo
         cierre["ia"] = {"ritmo": partida.vida.e.get("ia_ritmo"), **ia.escenarios(),
-                        "por_ritmo": (comparacion or {}).get("ia")}
+                        "por_ritmo": (comparacion or {}).get("ia"), "pesos": pq.k("P_RITMO_IA"),
+                        "min_mundos": pq.k("IA_MIN_MUNDOS_RITMO"), "tipo": partida.vida.e.get("ia_tipo")}
     return cierre
 
 

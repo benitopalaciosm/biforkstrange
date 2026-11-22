@@ -806,6 +806,15 @@
    "rango": null
   },
   {
+   "id": "IA_MIN_MUNDOS_RITMO",
+   "valor": 10,
+   "unidad": "mundos",
+   "descripcion": "Desde cuántos mundos de un ritmo de la IA el cierre muestra el sueldo típico de tu opción con ese ritmo. Con 50 mundos, la IA rápida sale en unos 6 y su mediana cambia mucho de una partida a otra; bajo este umbral el cierre no la muestra. Supuesto del equipo.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
    "id": "IA_INTENSIDAD",
    "valor": {
     "lento": 1,
