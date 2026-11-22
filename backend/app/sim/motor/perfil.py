@@ -15,6 +15,8 @@ OCUPACION_POR_EDU = {"media": 5, "tecnica": 3, "universitaria": 2, "postgrado": 
 RUBROS_DESTINO = "Comercio"
 TRABAJA = ("empleado", "independiente", "fundador")
 EDAD_INGRESO_CARRERA = 18  # supuesto: sin dato del CV, entró a la carrera al salir del colegio
+# Rasgos de su historia que pasan tal cual al estado para que los lea `politicas.pesos_personales`
+HISTORIA = ("anos_por_empleo", "volvio_a_su_nivel", "freelance_entre_pegas", "emprendio_antes")
 
 
 def skill_por_experiencia(anios: int) -> int:
@@ -56,6 +58,10 @@ class Perfil:
     # Sin dato, se suponen por su edad y la duración real de la carrera (ver `avance_en_carrera`).
     semestres_restantes: int | None = None
     anos_en_carrera: int | None = None
+    # Cómo salió de sus cesantías, según el CV (1 = sí): sus gemelos responden igual (politicas.pesos_personales)
+    volvio_a_su_nivel: int = 0            # tras un hueco de más de 6 meses, volvió a un cargo igual o mayor
+    freelance_entre_pegas: int = 0        # trabajó por su cuenta entre una pega y otra
+    emprendio_antes: int = 0              # ya tuvo una empresa propia antes de la de hoy
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -138,8 +144,10 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         ocupacion_destino=2, quien_enferma="madre",
         universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
     )
-    if perfil.anos_por_empleo is not None:
-        e["anos_por_empleo"] = perfil.anos_por_empleo  # no es del paquete: lo lee la política de los gemelos
+    # su historia no es del paquete: la lee la política de los gemelos, y solo si el CV la trae
+    for rasgo in HISTORIA:
+        if getattr(perfil, rasgo):
+            e[rasgo] = getattr(perfil, rasgo)
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)
         e["tipo_institucion"] = pq.tabla("mifuturo_carreras", "tipo_institucion", "carrera_id", perfil.carrera_id)

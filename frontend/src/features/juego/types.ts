@@ -39,6 +39,10 @@ export type Perfil = {
   /** Si estudia: semestres que le faltan y años que lleva en la carrera. Sin dato, se suponen por su edad. */
   semestres_restantes?: number | null;
   anos_en_carrera?: number | null;
+  /** Cómo salió de sus cesantías (1 = sí): sus gemelos responden igual si quedan cesantes. */
+  volvio_a_su_nivel?: 0 | 1;
+  freelance_entre_pegas?: 0 | 1;
+  emprendio_antes?: 0 | 1;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

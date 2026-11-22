@@ -107,6 +107,13 @@ class PerfilLeido(BaseModel):
         None, description="Si hoy estudia: el año en que espera titularse, solo si el texto lo dice (\"egreso esperado 2028\").")
     anio_que_cursa: int | None = Field(
         None, description="Si hoy estudia: qué año de la carrera está cursando (\"cursando 3er año\" es 3).")
+    volvio_a_su_nivel: bool | None = Field(
+        None, description="Si en su historia hay más de 6 meses sin trabajo entre dos pegas: true si la pega siguiente "
+                          "fue de igual o mayor cargo que la anterior, false si fue de menor cargo.")
+    freelance_entre_pegas: bool | None = Field(
+        None, description="true si entre dos empleos trabajó por su cuenta (freelance, consultorías, boletas).")
+    emprendio_antes: bool | None = Field(
+        None, description="true si antes de su situación de hoy tuvo una empresa o emprendimiento propio.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -157,6 +164,14 @@ hay otro, está buscando (o estudiando, si cursa algo). Freelance, consultor ind
 - anio_egreso_esperado y anio_que_cursa: solo si hoy estudia una carrera y el texto lo dice ("egreso \
 esperado 2028", "titulación 2027", "cursando 3er año", "alumno de cuarto año"). Copia el año o el número tal \
 cual; no los calcules desde la edad ni desde el año de ingreso.
+- Los campos de su historia miran los trabajos ANTERIORES, con las fechas de la sección de experiencia. \
+Si el texto no trae fechas o no menciona ese tipo de trabajo, null; nunca false por no saber:
+  - volvio_a_su_nivel: busca un periodo de más de 6 meses entre el fin de una pega y el inicio de la \
+siguiente. Si lo hay, compara los dos cargos con la escala de CARGOS: true si el siguiente es igual o mayor, \
+false si es menor. Sin un hueco así, null.
+  - freelance_entre_pegas: true si entre dos empleos aparece trabajo por su cuenta (freelance, \
+consultor independiente, boletas).
+  - emprendio_antes: true si tuvo una empresa o emprendimiento propio que ya no es su situación de hoy.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -287,7 +302,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     perfil, supuestos = dict(base), []
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
-              "anio_egreso_esperado", "anio_que_cursa"}
+              "anio_egreso_esperado", "anio_que_cursa", *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -344,6 +359,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         inferido.append(f"Te cambias de pega cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
                         f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
     inferido += _avance_en_carrera(leido, perfil, pq, hoy)
+    inferido += _historia(leido, perfil)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -365,6 +381,32 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         "dudas_sugeridas": _sugeridas_posibles(leido.dudas_sugeridas, final, pq),
         "retrato": (leido.retrato or "").strip() or None,
     }
+
+
+# Lo que Claude lee de los trabajos anteriores y cómo se lo contamos a la persona: (campo, efecto en simple).
+# El campo se llama igual en PerfilLeido y en el perfil; el efecto sale de politicas.pesos_personales.
+HISTORIA_LEIDA = {
+    "volvio_a_su_nivel": ("cesantia", "nivel", "Ya pasaste por una cesantía larga y volviste a tu nivel: si quedan "
+                          "cesantes, tus gemelos esperan un cargo como el tuyo"),
+    "freelance_entre_pegas": ("cesantia", "informal", "Entre una pega y otra trabajaste por tu cuenta: si quedan "
+                              "cesantes, tus gemelos hacen boletas"),
+    "emprendio_antes": ("cesantia", "emprender", "Ya tuviste una empresa propia: si quedan cesantes, tus gemelos "
+                        "emprenden"),
+}
+
+
+def _historia(leido: PerfilLeido, perfil: dict) -> list[str]:
+    """Su historia laboral pasa al perfil tal cual; la frase dice en simple qué cambia en sus gemelos."""
+    from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
+
+    frases = []
+    for campo, (decision, opcion, frase) in HISTORIA_LEIDA.items():
+        if getattr(leido, campo):
+            perfil[campo] = 1
+            suyo = pesos_personales({campo: 1})[decision][opcion]
+            frases.append(f"{frase} {round(suyo * 100)}% de las veces (la gente, "
+                          f"{round(PESOS_FORZADAS[decision][opcion] * 100)}%; supuesto del equipo).")
+    return frases
 
 
 def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:

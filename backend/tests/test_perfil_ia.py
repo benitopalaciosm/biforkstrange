@@ -122,12 +122,15 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
     monkeypatch.setattr(perfil_ia, "leer", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no debe llamar al modelo")))
     r = perfil_ia.perfil_desde_texto(EJEMPLO, "2026-11-21")
     assert r["via"] == "documento" and r["duda"] == "emprender" and r["avisos"] == [] and r["supuestos"] == []
-    assert r["perfil"] | {"ahorro": None} == {
+    from app.schemas.juego import PerfilIn
+
+    # lo que el documento no trae (su historia del CV, cuánto le falta si estudia) queda en el valor por defecto
+    assert r["perfil"] | {"ahorro": None} == PerfilIn().model_dump() | {
         "edad": 33, "sexo": "m", "edu": "universitaria", "carrera_id": 166, "rubro": "Finanzas y seguros",
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
         "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35,
         "estado": "empleado", "meses_cesante": 0, "parcial": 0, "remoto": 0, "usa_ia": 0, "empresa_anos": 0,
-        "empresa_fondos": 0, "anos_por_empleo": 3.0, "semestres_restantes": None, "anos_en_carrera": None}
+        "empresa_fondos": 0, "anos_por_empleo": 3.0}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -253,6 +256,26 @@ def test_cuanto_le_falta_a_quien_estudia():
     # quien trabaja no recibe estos campos ni la frase, aunque el texto diga un año de egreso
     r = perfil_ia.completar(LEIDO.model_copy(update={"anio_egreso_esperado": 2028}), hoy="2026-11-21")
     assert r["perfil"]["semestres_restantes"] is None and not any("titular" in f for f in r["inferido"])
+
+
+@pytest.mark.parametrize(("rasgo", "opcion"), [("volvio_a_su_nivel", "nivel"), ("freelance_entre_pegas", "informal"),
+                                              ("emprendio_antes", "emprender")])
+def test_en_la_cesantia_tus_gemelos_salen_como_saliste_tu(rasgo, opcion):
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+    from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
+
+    # sin el dato: ni el estado ni los pesos cambian
+    sin = estado_inicial(Perfil(), paquete())
+    assert rasgo not in sin and pesos_personales(sin) == {}
+    con = estado_inicial(Perfil(**{rasgo: 1}), paquete())
+    pesos = pesos_personales(con)
+    assert set(pesos) == {"cesantia"} and sum(pesos["cesantia"].values()) == pytest.approx(1, abs=1e-3)
+    assert pesos["cesantia"][opcion] > PESOS_FORZADAS["cesantia"][opcion]
+    r = perfil_ia.completar(LEIDO.model_copy(update={rasgo: True}))
+    assert r["perfil"][rasgo] == 1 and any("si quedan cesantes" in f for f in r["inferido"])
+    r = perfil_ia.completar(LEIDO.model_copy(update={rasgo: False}))
+    assert r["perfil"][rasgo] == 0 and not any("si quedan cesantes" in f for f in r["inferido"])
 
 
 def test_los_gemelos_se_cambian_como_tu():

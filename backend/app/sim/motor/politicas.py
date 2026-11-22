@@ -60,19 +60,45 @@ PESOS_CARTAS: dict[str, dict[str, float]] = {
 ANOS_POR_EMPLEO_TIPICO = 3.0
 
 
-def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
-    """Los gemelos se parecen a ti: si tu CV muestra que te cambias seguido, aceptan más ofertas.
+# Cuánto peso suma cada rasgo de tu historia a la opción que se le parece cuando quedas cesante
+# (supuestos del equipo, sin dato detrás: la dirección sale del CV, el tamaño es nuestro).
+CESANTIA_POR_HISTORIA = {
+    "volvio_a_su_nivel": ("nivel", 0.15),      # ya esperó más de 6 meses y volvió a un cargo igual o mayor
+    "freelance_entre_pegas": ("informal", 0.12),  # ya hizo boletas entre una pega y otra
+    "emprendio_antes": ("emprender", 0.06),    # ya tuvo una empresa propia
+}
 
-    Sin historia (`anos_por_empleo` ausente) quedan los pesos de la población. Supuesto del equipo:
-    la probabilidad de cambiarse escala con 3 años / tus años por pega, entre la mitad y 1,8 veces.
+
+def _mover(pesos: dict[str, float], opcion: str, cuanto: float) -> dict[str, float]:
+    """Suma `cuanto` a una opción y se lo quita a las demás en proporción a su peso (siguen sumando 1)."""
+    resto = sum(p for o, p in pesos.items() if o != opcion)
+    cuanto = min(cuanto, resto)
+    return {o: round(p + cuanto if o == opcion else p * (1 - cuanto / resto), 4) for o, p in pesos.items()}
+
+
+def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
+    """Los gemelos se parecen a ti: responden a lo que la vida les pone delante como tú ya respondiste.
+
+    Cada rasgo viene del CV y pasa por el estado (`perfil.HISTORIA`); sin él quedan los pesos de la
+    población, exactamente. Supuestos del equipo:
+    - oferta_externa: la probabilidad de cambiarse escala con 3 años / tus años por pega, entre la mitad
+      y 1,8 veces.
+    - cesantia: cada rasgo de `CESANTIA_POR_HISTORIA` suma peso a la opción que se le parece.
     """
+    salida: dict[str, dict[str, float]] = {}
     anos = e.get("anos_por_empleo")
-    if not anos:
-        return {}
-    base = PESOS_FORZADAS["oferta_externa"]
-    cambiar = min(0.65, max(0.15, base["cambiar"] * min(1.8, max(0.5, ANOS_POR_EMPLEO_TIPICO / anos))))
-    return {"oferta_externa": {"cambiar": round(cambiar, 3), "contraoferta": base["contraoferta"],
-                               "quedarse": round(1 - cambiar - base["contraoferta"], 3)}}
+    if anos:
+        base = PESOS_FORZADAS["oferta_externa"]
+        cambiar = min(0.65, max(0.15, base["cambiar"] * min(1.8, max(0.5, ANOS_POR_EMPLEO_TIPICO / anos))))
+        salida["oferta_externa"] = {"cambiar": round(cambiar, 3), "contraoferta": base["contraoferta"],
+                                    "quedarse": round(1 - cambiar - base["contraoferta"], 3)}
+    cesantia = PESOS_FORZADAS["cesantia"]
+    for rasgo, (opcion, cuanto) in CESANTIA_POR_HISTORIA.items():
+        if e.get(rasgo):
+            cesantia = _mover(cesantia, opcion, cuanto)
+    if cesantia is not PESOS_FORZADAS["cesantia"]:
+        salida["cesantia"] = cesantia
+    return salida
 
 
 # Opción que equivale a no hacer nada, donde no es la última de la lista
