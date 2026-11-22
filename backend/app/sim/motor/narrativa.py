@@ -199,8 +199,6 @@ def narrar(decision: str, contexto: dict, semilla: int, anio: int, ocurrencia: i
     elif decision == "cesantia":
         texto = (f"Llevas meses mandando currículums. {s.uno('ces', ['Te llamaron de dos lados y en ninguno quedaste', 'Te ofrecieron algo, pero pagan menos que antes', 'Un conocido te ofrece trabajar con él sin contrato'])}. "
                  f"Los ahorros se van achicando.")
-    elif decision == "ahorro":
-        texto = f"Te llega el sueldo y {s.uno('ah', ['te dan ganas de cambiar el auto', 'tus amigos arman un viaje', 'ves que no has ahorrado nada este año'])}. ¿Cómo manejas tu plata?"
     else:
         return None
     return {"situacion": texto}

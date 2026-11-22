@@ -10,7 +10,7 @@ import math
 from collections import Counter
 
 import pytest
-from _motor_util import (CARTAS_PERFIL_BASE, DECISIONES_PERSONALES, EVENTOS_PERSONALES, NADA, DadosGuion, Guion,
+from _motor_util import (CARTAS_PERFIL_BASE, EVENTOS_PERSONALES, NADA, DadosGuion, Guion,
                          fabrica, foto, n, pq, vida, z_binomial)
 
 from app.sim.motor.azar import Dados
@@ -27,7 +27,7 @@ def test_cartas_posibles_y_sus_pesos_son_los_del_paquete():
     v = vida(Perfil())
     assert dict(v.cartas_posibles()) == pytest.approx(CARTAS_PERFIL_BASE)
     completo = dict(vida(Perfil(), alcance="completo").cartas_posibles())
-    assert completo == pytest.approx({**CARTAS_PERFIL_BASE, "buscar_pareja": 0.4})
+    assert completo == pytest.approx(CARTAS_PERFIL_BASE)  # el alcance solo apaga eventos
 
 
 def test_el_peso_de_renunciar_se_multiplica_por_p_renuncia_y_por_el_animo():
@@ -98,24 +98,21 @@ def test_varias_forzadas_en_el_mismo_anio_y_la_segunda_se_revalida():
 
 
 def test_una_forzada_que_deja_de_aplicar_por_la_anterior_no_se_pregunta():
-    """Alcance completo: con un familiar enfermo y sin energía tocan cuidar_familiar y la licencia.
-    Si deja el trabajo para cuidar, la licencia (que es de empleadas) ya no se pregunta."""
-    estado = dict(familiar_enfermo="madre", energia=20)
-    v = vida(A_LOS_35, DadosGuion(), alcance="completo", **estado)
-    assert v._forzadas() == ["cuidar_familiar", "licencia_salud_mental"]
-    reg = v.vivir_anio(Guion({"cuidar_familiar": "dejar_pega"}))
-    assert [d["decision"] for d in reg["decisiones"]] == ["cuidar_familiar"] and v.e["estado"] == "inactivo"
-    v = vida(A_LOS_35, DadosGuion(), alcance="completo", **estado)
-    reg = v.vivir_anio(Guion({"cuidar_familiar": "pagar", "licencia_salud_mental": "pedir", **QUIETA}))
-    assert [d["decision"] for d in reg["decisiones"]] == ["cuidar_familiar", "licencia_salud_mental"]
+    """A los 18, saliendo del colegio con el tipo de institución ya puesto, tocan salir_del_colegio y
+    elegir_carrera. Si se toma una pausa, elegir_carrera (que es de quien estudia) ya no se pregunta."""
+    v = vida(Perfil.a_los_18(), DadosGuion(), tipo_institucion="U")
+    assert v._forzadas() == ["salir_del_colegio", "elegir_carrera"]
+    reg = v.vivir_anio(Guion({"salir_del_colegio": "pausa"}))
+    assert [d["decision"] for d in reg["decisiones"]] == ["salir_del_colegio"]
+    assert v.e["estado"] != "estudiando" and v.e["carrera_id"] < 0
 
 
 def test_la_carta_se_sortea_con_su_propio_dado_en_el_orden_del_paquete():
-    """Con el dado de la carta en 0 sale la primera del paquete que aplica (magíster, peso 0,4 de 8,0023);
+    """Con el dado de la carta en 0 sale la primera del paquete que aplica (magíster, peso 0,4 de 7,8023);
     apenas pasado su tramo, la segunda (doctorado). Ninguna de las tres llega sola: el año es tranquilo y la
     sorteada queda de sugerencia."""
     total = sum(CARTAS_PERFIL_BASE.values())
-    for u, esperada in ((0.0, "magister"), (0.4 / total + 1e-6, "doctorado"), (0.999999, "ahorro")):
+    for u, esperada in ((0.0, "magister"), (0.4 / total + 1e-6, "doctorado"), (0.999999, "sabatico")):
         d = DadosGuion({"carta": u}, defecto=0.5)
         v = vida(Perfil(), d)
         with pytest.raises(FaltaEleccion) as falta:
@@ -227,51 +224,30 @@ def test_luego_evento_a_decision_en_el_mismo_anio():
     assert v.e["antiguedad"] == 1  # cambió de empleador este año
 
 
-def test_luego_no_cruza_el_alcance_laboral():
-    """En alcance laboral, `enferma_familiar` (personal) no ocurre; y si algo personal quedara
-    encadenado, tampoco se pregunta."""
-    for alcance, esperado in (("laboral", []), ("completo", ["cuidar_familiar"])):
-        d = DadosGuion({"evento:enferma_familiar": 0.0})
-        v = vida(A_LOS_35, d, alcance=alcance)
-        reg = v.vivir_anio(Guion({"cuidar_familiar": "pagar", **QUIETA}))
-        assert [x["decision"] for x in reg["decisiones"]] == esperado
-
-
 # ------------------------------------------------------------------ alcance
-def test_alcance_laboral_excluye_las_6_decisiones_y_los_8_eventos_personales():
-    assert len(DECISIONES_PERSONALES) == 6 and len(EVENTOS_PERSONALES) == 8
-    assert DECISIONES_PERSONALES <= set(pq().decisiones) and EVENTOS_PERSONALES <= set(pq().eventos)
-    # una vida con todo lo personal a punto de pasar: en pareja, con un familiar enfermo y plata para una casa
-    estado = dict(pareja="convive", familiar_enfermo="madre", ahorro=40_000_000.0, animo=40)
-    laboral, completo = vida(A_LOS_35, alcance="laboral", **estado), vida(A_LOS_35, alcance="completo", **estado)
-    assert not {c for c, _ in laboral.cartas_posibles()} & DECISIONES_PERSONALES
-    assert {c for c, _ in completo.cartas_posibles()} & DECISIONES_PERSONALES == {
-        "tener_hijo", "formalizar_pareja", "separarse", "comprar_vivienda"}
-    assert laboral._forzadas() == [] and completo._forzadas() == ["cuidar_familiar"]
+def test_alcance_laboral_excluye_el_cancer():
+    assert EVENTOS_PERSONALES <= set(pq().eventos)
+    laboral, completo = vida(A_LOS_35, alcance="laboral"), vida(A_LOS_35, alcance="completo")
+    assert laboral.cartas_posibles() == completo.cartas_posibles() and laboral._forzadas() == completo._forzadas() == []
     # con dados que hacen ocurrir todo lo que puede ocurrir
     todo_pasa = {"evento:separacion_empleo": NADA, "evento:startup_cierra": NADA}
     eventos = {}
     for alcance in ("laboral", "completo"):
-        v = vida(A_LOS_35, DadosGuion(todo_pasa, defecto=0.0), alcance=alcance, **estado)
-        guion = Guion({"cuidar_familiar": "pagar", "tener_hijo": "esperar", "oferta_externa": "quedarse"})
-        reg = v.vivir_anio(guion)
+        v = vida(A_LOS_35, DadosGuion(todo_pasa, defecto=0.0), alcance=alcance)
+        reg = v.vivir_anio(Guion({"oferta_externa": "quedarse"}))
         eventos[alcance] = {x["evento"] for x in reg["eventos"]}
-        if alcance == "laboral":
-            assert not set(guion.vistas) & DECISIONES_PERSONALES
     assert not eventos["laboral"] & EVENTOS_PERSONALES
     assert eventos["laboral"] == {"recesion", "alza_anual", "ascenso", "oferta_llega", "animo_vuelve"}
-    assert eventos["completo"] - eventos["laboral"] == {
-        "cancer", "muere_madre", "muere_padre", "termina_pareja", "herencia"}  # sin pareja ya no hay embarazo
+    assert eventos["completo"] - eventos["laboral"] == {"cancer"}
 
 
 def test_poblacion_en_alcance_laboral_nunca_toca_lo_personal():
     for g in range(n(40)):
-        v = vida(Perfil(edad=24, sexo="hm"[g % 2]), Dados(8, g), pareja="convive")
+        v = vida(Perfil(edad=24, sexo="hm"[g % 2]), Dados(8, g))
         v.vivir(Poblacion(), 12)
         for reg in v.historia:
-            assert not {d["decision"] for d in reg["decisiones"]} & DECISIONES_PERSONALES
             assert not {x["evento"] for x in reg["eventos"]} & EVENTOS_PERSONALES
-        assert (v.e["pareja"], v.e["hijos"], v.e["salud"], v.e["madre_edad"]) == ("convive", 0, "bien", 24 + 28)
+        assert v.e["salud"] == "bien"
 
 
 # ------------------------------------------------------------------ orden del año
@@ -636,11 +612,12 @@ def test_frecuencia_de_resultados_de_una_decision_con_dados_reales():
 
 
 # ------------------------------------------------------------------ suerte compartida
-def _vidas_del_mismo_gemelo(g, opcion_a, opcion_b, decision, alcance="laboral", anios=10, perfil=A_LOS_35):
+def _vidas_del_mismo_gemelo(g, opcion_a, opcion_b, decision, alcance="laboral", anios=10, perfil=A_LOS_35,
+                            despues=None):
     vidas = []
     for opcion in (opcion_a, opcion_b):
         v = vida(perfil, Dados(4, g), alcance=alcance)
-        decisor = Fija(decision, opcion)
+        decisor = Fija(decision, opcion, despues=despues() if despues else None)
         v.vivir_anio(decisor, carta=decision)
         v.vivir(decisor, anios - 1)
         vidas.append(v)
@@ -648,28 +625,33 @@ def _vidas_del_mismo_gemelo(g, opcion_a, opcion_b, decision, alcance="laboral", 
 
 
 def test_suerte_compartida_una_decision_que_no_toca_el_trabajo_deja_la_carrera_identica():
-    """Ahorrar mucho o gastar todo no cambia nada del trabajo: las dos vidas del mismo gemelo
-    tienen que tener exactamente la misma recesión, los mismos eventos y el mismo sueldo."""
+    """Invertir o no en tu red no cambia tu pega: las dos vidas del mismo gemelo tienen que tener
+    exactamente la misma recesión, los mismos eventos y el mismo sueldo. La única diferencia permitida
+    es la oferta que llega (su probabilidad sube con la red): las dos vidas la rechazan."""
     distintos = set()
+    sin_oferta = lambda r, clave, quitar: [  # noqa: E731
+        tuple(x[c] for c in clave) for x in r if x[clave[0]] != quitar]
     for g in range(n(120)):
-        a, b = _vidas_del_mismo_gemelo(g, "mucho", "gastar", "ahorro")
-        assert a.historia[0]["decisiones"][0]["opcion"] == "mucho" and b.historia[0]["decisiones"][0]["opcion"] == "gastar"
+        a, b = _vidas_del_mismo_gemelo(g, "si", "no", "invertir_en_red",
+                                       despues=lambda: Guion(QUIETA, resto=Inercia()))
+        assert a.historia[0]["decisiones"][0]["opcion"] == "si" and b.historia[0]["decisiones"][0]["opcion"] == "no"
         for ra, rb in zip(a.historia, b.historia, strict=True):
             assert ra["recesion"] == rb["recesion"]
-            assert [(x["evento"], x["resultado"], x["prob"]) for x in ra["eventos"]] == \
-                   [(x["evento"], x["resultado"], x["prob"]) for x in rb["eventos"]]
-            assert [(d["decision"], d["opcion"], d["resultado"]) for d in ra["decisiones"][1:]] == \
-                   [(d["decision"], d["opcion"], d["resultado"]) for d in rb["decisiones"][1:]]
+            evento = ("evento", "resultado", "prob")
+            assert sin_oferta(ra["eventos"], evento, "oferta_llega") == sin_oferta(rb["eventos"], evento, "oferta_llega")
+            decision = ("decision", "opcion", "resultado")
+            assert sin_oferta(ra["decisiones"][1:], decision, "oferta_externa") == \
+                   sin_oferta(rb["decisiones"][1:], decision, "oferta_externa")
             for k in ("estado", "sueldo", "sueldo_ref", "nivel", "tipo_empleador", "rubro", "antiguedad"):
                 assert ra["fin"][k] == rb["fin"][k]
-        assert a.e["ahorro"] > b.e["ahorro"] or a.e["sueldo"] == 0
+        assert a.e["red"] > b.e["red"]
         distintos.add(tuple(r["fin"]["sueldo"] for r in a.historia))
     assert len(distintos) > n(120) * 0.9  # y cada gemelo tiene su propia suerte
 
 
 def test_suerte_compartida_lo_que_no_depende_de_la_decision_es_igual_en_las_dos_vidas():
-    """Irse a una startup cambia la carrera, pero no la recesión ni la vida personal:
-    la herencia, el cáncer, la muerte de los padres y la pareja caen igual en las dos vidas."""
+    """Irse a una startup cambia la carrera, pero no la recesión ni la salud: el cáncer cae igual
+    en las dos vidas."""
     ajenos = EVENTOS_PERSONALES | {"recesion"}
     vistos = Counter()
     difieren_en_el_trabajo = 0
@@ -682,10 +664,9 @@ def test_suerte_compartida_lo_que_no_depende_de_la_decision_es_igual_en_las_dos_
             assert ea == eb
             assert ra["recesion"] == rb["recesion"]
             vistos.update(e for e, _ in ea)
-        assert (a.e["pareja"], a.e["hijos"], a.e["madre_edad"], a.e["padre_edad"], a.e["salud"]) == \
-               (b.e["pareja"], b.e["hijos"], b.e["madre_edad"], b.e["padre_edad"], b.e["salud"])
+        assert a.e["salud"] == b.e["salud"]
         difieren_en_el_trabajo += a.e["tipo_empleador"] != b.e["tipo_empleador"] or a.e["sueldo"] != b.e["sueldo"]
-    assert vistos["recesion"] > 0 and vistos["forma_pareja"] > 0 and vistos["herencia"] + vistos["muere_padre"] > 0
+    assert vistos["recesion"] > 0 and vistos["cancer"] > 0
     assert difieren_en_el_trabajo > n(150) * 0.9
 
 

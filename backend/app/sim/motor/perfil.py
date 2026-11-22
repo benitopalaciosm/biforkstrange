@@ -253,13 +253,11 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         skill=perfil.skill if perfil.skill is not None
         else skill_por_experiencia(max(0, perfil.edad - EDAD_TITULO[perfil.edu])) if trabaja else 50,
         ambicion=50, ingles=perfil.ingles,
-        pareja="no", hijos=0, edad_hijo_menor=-1, isapre=0, propietario=0,
-        madre_edad=perfil.edad + round(pq.k("EDAD_MADRE")),
-        padre_edad=perfil.edad + round(pq.k("EDAD_MADRE")) + 2,
+        isapre=0,
         area="", tipo_institucion="", semestres_restantes=0,
         # variables que elige el jugador dentro de una opción
         rubro_destino=perfil.rubro or RUBROS_DESTINO, rubro_emprendimiento=perfil.rubro or RUBROS_DESTINO, region_destino="Valparaíso",
-        ocupacion_destino=2, quien_enferma="madre",
+        ocupacion_destino=2,
         universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
         institucion_destino=_institucion_por_defecto(pq), universidad_id=perfil.universidad_id or "",
         # nombres de su empleo de hoy (no son variables del paquete: el motor los borra al dejar ese empleo)
@@ -304,7 +302,6 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
     d = pq.derivar(e)
     tramo = "p80+" if d["percentil"] >= 80 else "p50-79" if d["percentil"] >= 50 else "p0-49"
     e["tasa_ahorro"] = pq.k("TASA_AHORRO", tramo)
-    e["gasto_mensual"] = pq.tabla("epf_quintiles", "gasto_hogar", "quintil", d["quintil"])
     e["ahorro"] = float(perfil.ahorro) if perfil.ahorro is not None else 2.0 * e["sueldo"]  # supuesto: dos sueldos
     faltan = [n for n, v in pq.variables.items() if v["inicio"] != "deriva" and n not in e]
     if faltan:

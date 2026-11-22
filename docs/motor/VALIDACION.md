@@ -32,7 +32,7 @@ Reproducir, desde `backend/`: `python -m app.sim.motor.validacion [n] [semilla]`
 
 ## Cómo se midió
 
-5.000 personas, mitad hombres y mitad mujeres, desde los 18 años (`Perfil.a_los_18`) hasta los 50, decidiendo como la población (`Poblacion`), solo lo laboral. Las 3 metas del grupo "Vida" quedan fuera: quedan 37.
+5.000 personas, mitad hombres y mitad mujeres, desde los 18 años (`Perfil.a_los_18`) hasta los 50, decidiendo como la población (`Poblacion`), solo lo laboral. La meta del grupo "Vida" (el cáncer) queda fuera: quedan 37.
 
 - Un año-persona es un año vivido. Su edad es la que la persona tenía al empezarlo; su estado, sueldo y empleador son los del cierre.
 - El tipo de empleador solo se lee en años cerrados como empleado. El motor no lo borra cuando alguien se independiza.

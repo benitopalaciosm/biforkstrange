@@ -14,7 +14,6 @@ import re
 import unicodedata
 from functools import lru_cache
 
-from app.sim.motor.motor import DECISIONES_PERSONALES
 from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import NIVELES
 
@@ -38,8 +37,7 @@ def _normal(texto: str) -> str:
 
 
 def _dudas_laborales(pq: Paquete) -> list[dict]:
-    return [d for id_, d in pq.decisiones.items()
-            if d["aparicion"]["tipo"] == "carta" and id_ not in DECISIONES_PERSONALES]
+    return [d for d in pq.decisiones.values() if d["aparicion"]["tipo"] == "carta"]
 
 
 SITUACIONES = {"empleado": "empleado", "empleada": "empleado", "independiente": "independiente", "freelance": "independiente",

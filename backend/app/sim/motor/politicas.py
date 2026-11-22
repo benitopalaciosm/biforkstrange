@@ -54,7 +54,6 @@ PESOS_CARTAS: dict[str, dict[str, float]] = {
     "mudarse_de_region": {"a_santiago": 0.08, "a_region": 0.05},
     "volver_a_chile": {"volver": 0.15},
     "sabatico": {"irse": 0.05},
-    "ahorro": {"mucho": 0.20, "gastar": 0.20},
 }
 # Cuántos años dura una pega en Chile, en la mediana (supuesto del equipo, en línea con la EPS)
 ANOS_POR_EMPLEO_TIPICO = 3.0
@@ -115,7 +114,7 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
 
 
 # Opción que equivale a no hacer nada, donde no es la última de la lista
-STATU_QUO = {"oferta_externa": "quedarse", "ahorro": "normal"}
+STATU_QUO = {"oferta_externa": "quedarse"}
 # Respuesta a una decisión que llega encadenada (`luego`) desde una opción que ya la eligió: quien,
 # cesante, elige "reconvertirte con un bootcamp" se inscribe ("Te inscribes"); no vuelve a dudar. Sin esto
 # los gemelos respondían la carta bootcamp con su peso de carta (Inercia: siempre "no").

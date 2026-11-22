@@ -76,8 +76,6 @@ def _catalogo_evaluable(v) -> list[str]:
     """Desde este estado, todo lo que el año siguiente podría evaluar da números válidos."""
     p, e, malas = pq(), v.e, []
     for id_, d in p.decisiones.items():
-        if not v._decision_en_alcance(id_):
-            continue
         try:
             aplica = d["aparicion"]["tipo"] != "interna" and p.evaluar(d["cuando"], e)
             peso = p.evaluar(d["aparicion"]["peso"], e)

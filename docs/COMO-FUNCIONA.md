@@ -103,7 +103,7 @@ Regla del producto: **los números salen de los datos; la IA hace todo lo demás
 | Algo que pasa solo (despido, recesión) | `backend/simulador/eventos.json` |
 | Un número y su fuente | `backend/simulador/parametros.json` y `fuentes.json` |
 | Cómo responde la población a una decisión | `backend/app/sim/motor/politicas.py` |
-| Qué decisiones y eventos entran al juego (solo trabajo) | `DECISIONES_PERSONALES` y `EVENTOS_PERSONALES` en `motor.py` |
+| Qué eventos quedan fuera del juego (solo trabajo: hoy, el cáncer) | `EVENTOS_PERSONALES` en `motor.py` |
 | Del perfil a las variables de la copia | `backend/app/sim/motor/perfil.py` |
 | Leer el perfil desde un texto o con tu Claude | `services/perfil_ia.py` y `services/perfil_doc.py` |
 | La historia que cuenta cada decisión | `backend/app/sim/motor/narrativa.py` |
