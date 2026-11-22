@@ -277,3 +277,17 @@ export type Vista = {
 
 /** Lo que se elige dentro de cada opción para comparar: {opción: {variable: valor}}. */
 export type ParametrosComparar = Record<string, Record<string, string | number>>;
+
+/** Un dato real de chilenos como tú (`/api/juego/gente-como-tu`): una celda de la ESI o la EPS, con su fuente. */
+export type DatoReal = {
+  clave: "sueldo" | "cambio_de_pega" | "cesantia";
+  titulo: string;
+  frase: string;
+  cifra: number;
+  unidad: string;
+  /** Observaciones o personas detrás del dato. */
+  n: number;
+  tabla: string;
+  fuente: string;
+  fuente_url: string | null;
+};

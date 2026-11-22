@@ -1,10 +1,11 @@
 import { BigNumber, Button, Heading, Meta, Pill, RangeCompare, Screen, ScreenHeader, Stack, StationTimeline, SunCard, Tag, Text, type Range } from "@/shared/ui";
 import { aniosDe, cargoYSueldo, deCada10, plata, sinSueldo, situacion } from "../textos";
-import type { Anio, Rango, Vista } from "../types";
+import type { Anio, Perfil, Rango, Vista } from "../types";
 import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
 import { IntuicionResumen } from "./Apuesta";
+import { GenteComoTu } from "./GenteComoTu";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
 function resumenDelAnio(a: Anio): string {
@@ -17,7 +18,16 @@ function resumenDelAnio(a: Anio): string {
 }
 
 /** El cierre: tu vida frente a los gemelos de tu primera decisión. Viene de "8 · Fin de la partida" del kit. */
-export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerfil }: { vista: Vista; sueldoInicial: number; onOtraVida: () => void; onCambiarPerfil: () => void }) {
+export function CierrePantalla({
+  vista, sueldoInicial, onOtraVida, onCambiarPerfil, perfil,
+}: {
+  vista: Vista;
+  sueldoInicial: number;
+  onOtraVida: () => void;
+  onCambiarPerfil: () => void;
+  /** El perfil con que se jugó: filtra los datos de "gente como tú". */
+  perfil?: Perfil;
+}) {
   const cierre = vista.cierre!;
   const e = cierre.estado;
   const primera = cierre.primera_decision;
@@ -119,6 +129,8 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
         </Stack>
       )}
       {!primera && <Text size="sm">Tu primera decisión tenía demasiadas opciones para simular los mundos, así que aquí no hay con quién compararte.</Text>}
+
+      {perfil && <GenteComoTu perfil={perfil} elegida={elegida} sueldoInicial={sueldoInicial} anios={primera?.comparacion.anios ?? vista.anios} />}
 
       <Stack as="section" gap={10}>
         <Heading level={3} as="h2">

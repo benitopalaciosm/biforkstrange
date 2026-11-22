@@ -13,3 +13,12 @@
 .jg-apuesta-pista i[data-tipo="real"] { animation-delay: .35s; }
 @keyframes jg-revelar { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes jg-llenar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ── Gente como tú ──────────────────────────────────────────────────────── */
+.jg-gente { display: grid; gap: 10px; }
+.jg-gente-dato { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1.5px solid var(--linea); border-radius: 14px; background: var(--papel); animation: jg-revelar .45s var(--ease) both; }
+.jg-gente-dato:nth-child(2) { animation-delay: .1s; }
+.jg-gente-dato:nth-child(3) { animation-delay: .2s; }
+.jg-gente-gemelos { display: flex; gap: 8px; align-items: baseline; padding: 8px 10px; border-radius: 10px; background: var(--acento-suave); color: var(--tinta); font: 500 13px/18px var(--font); }
+.jg-gente-fuente { color: var(--suave, #6B6C73); font: 400 12px/16px var(--font); }
+.jg-gente-fuente a { color: inherit; }

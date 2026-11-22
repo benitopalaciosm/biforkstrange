@@ -1,5 +1,5 @@
 import { http } from "@/shared/lib/http";
-import type { Catalogo, Duda, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, Vista } from "./types";
+import type { Catalogo, DatoReal, Duda, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, Vista } from "./types";
 
 export const GEMELOS = 100;
 
@@ -60,3 +60,7 @@ export async function leerPerfil(entrada: string | { pdf: string }): Promise<Per
     throw comoErrorApi(e);
   }
 }
+
+/** Hasta 3 datos reales de chilenos como tú (ESI, EPS), cada uno con su fuente. No simula nada. */
+export const getGenteComoTu = (perfil: Perfil) =>
+  http<{ datos: DatoReal[] }>("/api/juego/gente-como-tu", { method: "POST", body: JSON.stringify({ perfil }) });
