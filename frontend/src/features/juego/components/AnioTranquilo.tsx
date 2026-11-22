@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
 import { deCien } from "../textos";
-import type { Eleccion, Vista } from "../types";
-import { Noticia, Salir } from "./piezas";
+import type { Eleccion, SinNovedad, Vista } from "../types";
+import { FranjaSinNovedad, Noticia, Salir } from "./piezas";
 
 /**
  * Un año en que no te llegó nada. No te obliga a decidir ni te pone una lista: te hace una propuesta,
  * la que más se le plantea a gente como tú, con un dato real. Dices sí o sigues igual.
  * Quien quiere hacer otra cosa puede abrir la lista completa.
  */
-export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir }: {
+export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir, sinNovedad }: {
   vista: Vista;
+  sinNovedad?: SinNovedad | null;
   cargando: boolean;
   error: string | null;
   onElegir: (e: Eleccion) => void;
@@ -28,6 +29,7 @@ export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir }: {
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
+      <FranjaSinNovedad s={sinNovedad} />
       <Stack gap={8} className="vd-subir">
         <Meta>{eventos.length > 0 ? "Sin propuestas" : "Un año tranquilo"}</Meta>
         <Heading level={2} as="h1">

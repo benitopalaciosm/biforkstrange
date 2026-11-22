@@ -89,10 +89,10 @@ function Fase({
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente?.decision === "anio_tranquilo") {
-    return <AnioTranquilo vista={j.vista} cargando={j.cargando} error={j.error} onElegir={j.elegir} onSalir={j.irAInicio} />;
+    return <AnioTranquilo vista={j.vista} cargando={j.cargando} error={j.error} onElegir={j.elegir} onSalir={j.irAInicio} sinNovedad={j.sinNovedad} />;
   }
   if (j.fase === "carta" && j.vista?.pendiente?.decision === "oferta_externa" && j.vista.pendiente.por_que?.tipo === "llega" && mirada !== llaveCarta) {
-    return <OfertaLiviana vista={j.vista} cargando={j.cargando} error={j.error} onMirar={() => setMirada(llaveCarta)} onElegir={j.elegir} onSalir={j.irAInicio} />;
+    return <OfertaLiviana vista={j.vista} cargando={j.cargando} error={j.error} onMirar={() => setMirada(llaveCarta)} onElegir={j.elegir} onSalir={j.irAInicio} sinNovedad={j.sinNovedad} />;
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
     return (
@@ -110,6 +110,7 @@ function Fase({
         onVerMundo={j.verMundo}
         onSalir={j.irAInicio}
         onNarrar={j.narrar}
+        sinNovedad={j.sinNovedad}
       />
     );
   }

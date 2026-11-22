@@ -520,3 +520,6 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 
 /* El gráfico de un mundo se abre a pedido: las líneas se trazan rápido para que no parezca vacío */
 .jg-duelo-mundo .jg-abanico-medio { animation-duration: .5s; animation-delay: 0s; }
+
+/* Un año que pasó sin nada: una franja arriba del año siguiente, en vez de una pantalla entera */
+.jg-sin-novedad { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 12px; background: var(--niebla); font: 400 13px/18px var(--font); color: var(--tinta); animation: vd-subir .4s var(--ease) both; }
