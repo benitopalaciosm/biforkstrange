@@ -32,6 +32,9 @@ import {
   Narrative,
 } from "@/shared/ui";
 import { SCREENS, SCREEN_COMPONENTS, type ScreenId } from "./screens";
+import { Espera, type Variante } from "@/features/juego/components/Apuesta";
+
+const VARIANTES_ESPERA: Variante[] = ["ruleta", "tragamonedas", "caballos", "dado", "naipes"];
 
 /** Catálogo vivo del kit de UI: componentes sueltos y las 8 pantallas del diseño. */
 export function UiKitPage() {
@@ -210,6 +213,14 @@ function ComponentsGallery() {
             </span>
           ))}
         </Row>
+      </Section>
+
+      <Section title="Esperas" note="Espera (features/juego): una apuesta distinta en cada espera larga">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+          {VARIANTES_ESPERA.map((v) => (
+            <Espera key={v} variante={v} texto={v} />
+          ))}
+        </div>
       </Section>
 
       <Section title="Superficies" note="Panel, SunCard, NightBand">
