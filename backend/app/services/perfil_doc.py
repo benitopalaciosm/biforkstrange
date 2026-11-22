@@ -188,8 +188,8 @@ def leer_documento(texto: str, pq: Paquete | None = None) -> dict | None:
     if "cargo" in c and leido.get("nivel") is None:  # también acepta el nombre del cargo
         por_nombre = {_normal(n): i for i, n in enumerate(NIVELES)}
         leido["nivel"] = por_nombre.get(_normal(c["cargo"]))
-        if leido["nivel"] is not None:
-            avisos.pop()
+        if leido["nivel"] is not None:  # el aviso de "no es un número" ya no aplica
+            avisos[:] = [a for a in avisos if not a.startswith("cargo:")]
     if "rubro" in c:
         rubros = {_normal(r): r for r in pq.variables["rubro"]["dominio"] if r}
         leido["rubro"] = rubros.get(_normal(c["rubro"])) or next(

@@ -7,6 +7,14 @@ import { CALIDAD, arte } from "../textos";
 import type { Duda } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 
+const VISIBLES = 4;
+/** Las dudas más comunes van primero; el resto sigue en el orden del paquete. */
+const DESTACADAS = ["oferta_externa", "unirse_a_startup", "magister", "emprender", "pedir_aumento", "emigrar", "cambiar_de_rubro", "aprender_ia"];
+const prioridad = (id: string) => {
+  const i = DESTACADAS.indexOf(id);
+  return i < 0 ? DESTACADAS.length : i;
+};
+
 /** Tu duda: la decisión que te trajo. Viene de la lista de caminos de "3 · Decisión del año" del kit. */
 export function DudaPicker({
   dudas,
@@ -25,7 +33,10 @@ export function DudaPicker({
   onElegir: (decision: string) => void;
 }) {
   const [sel, setSel] = useState<string | null>(sugerida);
-  const orden = dudas && sugerida ? [...dudas].sort((a, b) => Number(b.decision === sugerida) - Number(a.decision === sugerida)) : dudas;
+  const [todas, setTodas] = useState(false);
+  const orden = dudas
+    ? [...dudas].sort((a, b) => Number(b.decision === sugerida) - Number(a.decision === sugerida) || prioridad(a.decision) - prioridad(b.decision))
+    : dudas;
   const simulando = cargando && dudas !== null;
   return (
     <Screen gap={16}>
@@ -53,7 +64,7 @@ export function DudaPicker({
           label="Dudas posibles"
           value={sel}
           onChange={setSel}
-          options={(orden ?? dudas).map((d) => ({
+          options={(orden ?? dudas).slice(0, todas ? undefined : VISIBLES).map((d) => ({
             id: d.decision,
             art: <DecisionArt kind={arte(d.categoria)} />,
             title: d.nombre,
@@ -61,6 +72,11 @@ export function DudaPicker({
             tags: [...(d.decision === sugerida ? [{ label: "La eligió tu Claude", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
           }))}
         />
+      )}
+      {dudas && !todas && dudas.length > VISIBLES && (
+        <Button variant="quiet" onClick={() => setTodas(true)}>
+          Ver las otras {dudas.length - VISIBLES}
+        </Button>
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} />}

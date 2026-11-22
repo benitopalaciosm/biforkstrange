@@ -105,6 +105,19 @@ def test_documento_con_valores_libres_o_malos():
     assert r["duda"] is None
 
 
+def test_cargo_por_nombre_no_borra_el_aviso_de_otro_campo():
+    r = perfil_doc.leer_documento("```gemelo-laboral\ncargo: Senior\nantiguedad: tres\n```")
+    assert r["perfil"]["nivel"] == 2
+    assert not any(a.startswith("cargo:") for a in r["avisos"])
+    assert any(a.startswith("antigüedad:") for a in r["avisos"])
+
+
+def test_catalogo_trae_la_referencia_de_sueldos(client):
+    ref = client.get("/api/juego/catalogo").json()["sueldos_ref"]
+    fila = next(f for f in ref if f["educacion"] == "universitaria" and f["banda"] == "30-34")
+    assert fila["p25"] < fila["p50"] < fila["p75"] and fila["p50"] % 10_000 == 0
+
+
 def test_carrera_parecida_se_avisa_y_desconocida_queda_sin_carrera():
     pq = perfil_ia.paquete()
     cid, nota = perfil_doc._carrera("Ing. Civil Industrial", "U", pq)

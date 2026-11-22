@@ -93,7 +93,11 @@ function Juego() {
       cargando={j.cargando}
       error={j.error}
       onContinuar={j.continuar}
-      onEmpezar={() => setTutorial("antes")}
+      onEmpezar={() => {
+        j.descartar();
+        j.irAPerfil();
+      }}
+      onComoFunciona={() => setTutorial("antes")}
     />
   );
 }

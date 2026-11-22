@@ -47,6 +47,8 @@ export type Catalogo = {
   educacion: Educacion[];
   ocupaciones: { grupo: number; nombre: string }[];
   carreras: Carrera[];
+  /** Sueldo líquido por estudios y banda de edad (ESI 2025): la referencia del sueldo. */
+  sueldos_ref: { educacion: Educacion; banda: string; p25: number; p50: number; p75: number }[];
 };
 
 export type Duda = { decision: string; nombre: string; pregunta: string; categoria: string; calidad: Calidad };
