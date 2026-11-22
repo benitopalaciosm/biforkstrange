@@ -219,6 +219,12 @@ function OpcionConGemelos({
               <MiniMundos ganadas={ganadas} total={de} color={color} />
             </span>
           )}
+          {/* lo típico a la vista sin abrirla, para comparar las opciones de un vistazo; abierta, va en el detalle */}
+          {!selected && (
+            <span className="jg-tipico">
+              Lo típico a los {edadFinal}: <b>{plata(o.sueldo.p50)}</b>
+            </span>
+          )}
         </span>
       }
       subtitle={fraseCorta(o, o.detalle)}
@@ -1192,6 +1198,17 @@ export function Carta({
 
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
+        {/* elegir desde cualquier parte de la carta: no hay que volver arriba después de mirar los 100 mundos */}
+        {comparacion && comparadas.length >= 2 && comparadas.length <= 3 && !cargando && (
+          <div className="jg-pie-opciones" role="group" aria-label="Elegir una opción">
+            {comparadas.map((o) => (
+              <button key={o.opcion} type="button" className="vd-chip jg-pie-opcion" aria-pressed={sel === o.opcion} onClick={() => elegirOpcion(o.opcion)} disabled={recalculando}>
+                <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
+                {o.nombre}
+              </button>
+            ))}
+          </div>
+        )}
         {cargando && <Cargando>Sorteando y viviendo tu año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando ? (
           <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>
