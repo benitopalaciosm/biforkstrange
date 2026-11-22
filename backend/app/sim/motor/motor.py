@@ -416,6 +416,35 @@ class Vida:
             self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
 
+    def resultado_previsto(self, decision_id: str, opcion_id: str) -> str | None:
+        """El resultado que saldría si elige esa opción ahora: los dados ya están echados (mismo sitio que `_decidir`)."""
+        opcion = next((o for o in self.opciones(decision_id) if o.id == opcion_id), None)
+        if opcion is None:
+            return None
+        ocurrencia = sum(1 for x in (self.registro or {}).get("decisiones", []) if x["decision"] == decision_id)
+        sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
+        resultado, _ = self._sortear(opcion.resultados, sitio, decision_id)
+        return resultado["id"] if resultado else None
+
+    def sueldo_si_elige(self, decision_id: str, opcion_id: str) -> float | None:
+        """El sueldo con que quedaría si elige esa opción ahora, con la empresa nueva incluida.
+
+        Se vive la decisión en una copia de la vida (mismos dados y mismo paquete), así que es exactamente lo
+        que pasará si la elige: sirve para mostrar el sueldo de una oferta antes de aceptarla.
+        """
+        if not self.cola or self.cola[0][:2] != ("decision", decision_id):
+            return None
+        copia = copy.deepcopy(self, memo={id(self.pq): self.pq, id(self.dados): self.dados})
+
+        class _Elige:
+            def elegir(self_, vida, decision, opciones):
+                return opcion_id, {}
+
+        copia._decidir(decision_id, copia.cola[0][2], _Elige())
+        while copia.cola and copia.cola[0][:2] == ("decision", "tipo_de_empleador"):
+            copia._decidir("tipo_de_empleador", copia.cola[0][2], _Elige())
+        return float(copia.e["sueldo"])
+
     def contexto_empleo(self) -> dict:
         """Empresa, cargo e institución de hoy, para contar la historia con nombres."""
         e = self.e

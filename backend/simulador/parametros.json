@@ -897,6 +897,18 @@
     0.0,
     0.12
    ]
+  },
+  {
+   "id": "ACEPTA_SI_PAGA_MAS",
+   "valor": 2,
+   "unidad": "veces",
+   "descripcion": "Cuántas veces más seguido se acepta una oferta que sube el sueldo que una que no. Con eso, la chance de que una oferta pague más se despeja de P_SUBE_CAMBIO: de las ofertas, pagan más P/(P + r(1-P)); de los cambios que la gente hace, 54% sube el sueldo, como mide el Banco Central.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    1.5,
+    3
+   ]
   }
  ]
 }

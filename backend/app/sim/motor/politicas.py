@@ -288,6 +288,16 @@ class _PorPesos:
         else:
             tabla = next((t for t in (self.pesos, *self.tablas) if id_ in t), {})
             pesos = _pesos(decision, opciones, {id_: tabla.get(id_, {})})
+        if id_ == "oferta_externa":
+            # la gente ve el sueldo de la oferta antes de decidir: acepta más seguido la que paga más
+            # la chance de aceptar sube exactamente ACEPTA_SI_PAGA_MAS veces (no el peso, que compite con las demás)
+            for i, o in enumerate(opciones):
+                if o.id == "cambiar" and vida.resultado_previsto(id_, "cambiar") == "mejora":
+                    total = sum(pesos)
+                    a = pesos[i] / total if total > 0 else 0.0
+                    q = min(0.95, a * vida.pq.k("ACEPTA_SI_PAGA_MAS"))
+                    if 0 < a < 1:
+                        pesos[i] = q * (total - pesos[i]) / (1 - q)
         opcion = opciones[vida.dados.elegir(vida.anio, sitio, pesos)]
         return opcion.id, parametros_al_azar(vida, opcion, sitio)
 

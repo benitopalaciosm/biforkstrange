@@ -1935,7 +1935,7 @@
      "resultados": [
       {
        "id": "mejora",
-       "prob": "k('P_SUBE_CAMBIO')",
+       "prob": "k('P_SUBE_CAMBIO') / (k('P_SUBE_CAMBIO') + k('ACEPTA_SI_PAGA_MAS') * (1 - k('P_SUBE_CAMBIO')))",
        "texto": "El cambio te sube el sueldo.",
        "tono": "bueno",
        "efectos": [

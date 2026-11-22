@@ -181,6 +181,9 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
                       "empresa": ofertas[o.id], "respaldo": respaldo(vida.pq, o)}
                      for o in falta.opciones],
         "comparacion": comparar_pendiente(partida, semilla, n_gemelos, parametros),
+        # una oferta llega con su sueldo, como en la vida: el que tendrías si la aceptas (empresa incluida)
+        "oferta_sueldo": ({"hoy": vida.e["sueldo"], "si_aceptas": vida.sueldo_si_elige(d["id"], "cambiar")}
+                          if d["id"] == "oferta_externa" else None),
     }
     return salida
 

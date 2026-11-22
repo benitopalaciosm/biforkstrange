@@ -342,6 +342,8 @@ export type Pendiente = {
   creencia_vs_dato: string | null;
   evidencia: { fuente: string; cifra: string; uso: string }[];
   opciones: OpcionPendiente[];
+  /** Una oferta llega con su sueldo: el de hoy y el que tendrías si la aceptas, con la empresa nueva incluida. */
+  oferta_sueldo?: { hoy: number; si_aceptas: number | null } | null;
   /** null cuando la decisión tiene demasiadas opciones para simular gemelos, o en un año tranquilo. */
   comparacion: Comparacion | null;
   /** En un año tranquilo: algo que gente como tú se plantea este año. */
