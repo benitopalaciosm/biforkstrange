@@ -73,7 +73,16 @@ function Juego() {
     );
   }
   if (j.fase === "paso" && j.vista) return <QuePaso previa={j.previa} vista={j.vista} sueldoInicial={sueldoInicial} onSeguir={j.seguir} />;
-  if (j.fase === "cierre" && j.vista?.cierre) return <CierrePantalla vista={j.vista} sueldoInicial={sueldoInicial} onOtraVida={j.jugarDeNuevo} onCambiarPerfil={j.irAPerfil} />;
+  if (j.fase === "cierre" && j.vista?.cierre)
+    return (
+      <CierrePantalla
+        vista={j.vista}
+        sueldoInicial={sueldoInicial}
+        perfil={j.partida?.perfil ?? j.perfil}
+        onOtraVida={j.jugarDeNuevo}
+        onCambiarPerfil={j.irAPerfil}
+      />
+    );
   if (j.fase !== "inicio") {
     // no debería pasar: una fase sin los datos que necesita
     return (

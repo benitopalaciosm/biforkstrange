@@ -1,5 +1,6 @@
 import { http } from "@/shared/lib/http";
-import type { Catalogo, Duda, EnJuego, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
+import { guardarRetrato } from "./retrato";
+import type { Catalogo, DatoReal, Duda, EnJuego, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
 
 export const GEMELOS = 100;
 
@@ -69,8 +70,14 @@ function comoErrorApi(e: unknown): ErrorApi {
 export async function leerPerfil(entrada: string | { pdf: string }): Promise<PerfilLeido> {
   const cuerpo = typeof entrada === "string" ? { texto: entrada } : entrada;
   try {
-    return await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
+    const leido = await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
+    guardarRetrato(leido); // para la tarjeta que se comparte al final
+    return leido;
   } catch (e) {
     throw comoErrorApi(e);
   }
 }
+
+/** Hasta 3 datos reales de chilenos como tú (ESI, EPS), cada uno con su fuente. No simula nada. */
+export const getGenteComoTu = (perfil: Perfil) =>
+  http<{ datos: DatoReal[] }>("/api/juego/gente-como-tu", { method: "POST", body: JSON.stringify({ perfil }) });

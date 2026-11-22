@@ -6,6 +6,7 @@ import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./grafi
 import { PesoDelCv } from "./PesoDelCv";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
+import { ApuestaAntesDeMirar } from "./Apuesta";
 
 type Internas = Record<string, string | number>;
 
@@ -560,6 +561,9 @@ export function Carta({
   const ganadores = comparacion?.ganador_por_mundo ?? null;
   const hoy = { edad: e.edad, sueldo: sinSueldo(e) ? 0 : e.sueldo };
   const sinEfecto = comparadas.length > 1 && comparadas.every((o) => o.es_base || (o.igual_que_base ?? 0) >= 0.9);
+  // los mundos se muestran después de apostar (o saltarse la apuesta) en esta carta
+  const [vistoEn, setVistoEn] = useState<string | null>(null);
+  const revelado = !ganadores || vistoEn === llave;
 
   return (
     <Screen gap={16} className={comparadas.length > 4 ? "jg-ancha jg-muy-ancha" : "jg-ancha"}>
@@ -628,7 +632,7 @@ export function Carta({
               supuesto={supuestoDe(o)}
               edadFinal={edadGemelos}
               color={colores[o.opcion]}
-              ganadas={ganadores ? ganadores.filter((g) => g === o.opcion).length : null}
+              ganadas={ganadores && revelado ? ganadores.filter((g) => g === o.opcion).length : null}
               total={ganadores?.length ?? 0}
               ejemplo={pendiente.opciones.find((x) => x.opcion === o.opcion)?.ejemplo_real}
             />
@@ -701,14 +705,25 @@ export function Carta({
       {comparacion && foco && (
         <Stack gap={12} className="jg-columna">
           {ganadores && (
-            <Simulacion
-              comparadas={comparadas}
+            <ApuestaAntesDeMirar
+              key={llave}
+              opcion={foco}
               ganadores={ganadores}
               gemelos={comparacion.gemelos}
-              colores={colores}
-              anioInicial={anio}
-              onVerMundo={onVerMundo}
-            />
+              color={colores[foco.opcion]}
+              revelado={revelado}
+              onVer={() => setVistoEn(llave)}
+              creencia={pendiente.creencia_vs_dato}
+            >
+              <Simulacion
+                comparadas={comparadas}
+                ganadores={ganadores}
+                gemelos={comparacion.gemelos}
+                colores={colores}
+                anioInicial={anio}
+                onVerMundo={onVerMundo}
+              />
+            </ApuestaAntesDeMirar>
           )}
           {partida && pendiente.por_que?.tipo === "elegida" && (
             <PesoDelCv perfil={partida.perfil} duda={pendiente.decision} semilla={partida.semilla} />
