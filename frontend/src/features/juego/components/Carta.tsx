@@ -88,7 +88,7 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
   return (
     <span className="jg-empresa">
       <span className="jg-empresa-cabeza">
-        <Logo carpeta="empresas" id={empresa.empresa_id} nombre={empresa.nombre} grupo={empresa.rubro} hay={empresa.logo} />
+        <Logo carpeta="empresas" id={empresa.empresa_id} nombre={empresa.nombre} grupo={empresa.rubro} hay={empresa.logo} tamano={44} />
         <span className="jg-empresa-texto">
           <span className="jg-fuerte">{texto ?? ofertaTexto(empresa)}</span>
           <span className="jg-chico">
@@ -659,7 +659,7 @@ export function Carta({
         {pendiente.narrativa && listo && (
           <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
             {quienEscribe && (
-              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={36} />
+              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={40} />
             )}
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />
