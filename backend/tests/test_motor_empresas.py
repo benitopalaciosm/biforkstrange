@@ -366,3 +366,11 @@ def test_los_aranceles_de_pregrado_estan_en_pesos():
     assert chilenas
     assert all(500_000 < float(f["arancel_anual_pregrado"]) < 20_000_000 for f in chilenas), [
         (f["nombre"], f["arancel_anual_pregrado"]) for f in chilenas if not 500_000 < float(f["arancel_anual_pregrado"]) < 20_000_000]
+
+
+def test_la_universidad_del_magister_dice_que_su_numero_es_el_arancel():
+    """Al lado de los sueldos, "$8.546.030 al año" se leía como sueldo: el selector dice arancel y en millones."""
+    v = partida.vista(Perfil(edad=30), 2, "magister", [], 0)
+    opcion = next(o for o in v["pendiente"]["opciones"] if o["opcion"] == "vespertino")
+    nombres = {a["valor"]: a["nombre"] for i in opcion["elecciones_internas"] for a in i["alternativas"]}
+    assert nombres["23"] == "UAI · arancel $8,5 M al año · selectiva"
