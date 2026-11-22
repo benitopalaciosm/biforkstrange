@@ -151,15 +151,12 @@ export function QuePaso({
           <SlowReveal delay={espera}>
             <Narrative strong>{dado.texto}</Narrative>
           </SlowReveal>
-          <SlowReveal delay={espera + 0.1}>
-            <Text size="sm">
-              {hayRuleta
-                ? `Pasó en ${deCien(tocada!.prob)} mundos.`
-                : dado.prob >= 0.995
-                  ? "Con esta opción, era seguro."
-                  : `Pasa en ${deCien(dado.prob)} mundos.`}
-            </Text>
-          </SlowReveal>
+          {/* sin dado (el resultado era seguro) no hay nada que contar: "era seguro" se leía como "esta opción es segura" */}
+          {(hayRuleta || dado.prob < 0.995) && (
+            <SlowReveal delay={espera + 0.1}>
+              <Text size="sm">{hayRuleta ? `Pasó en ${deCien(tocada!.prob)} mundos.` : `Pasa en ${deCien(dado.prob)} mundos.`}</Text>
+            </SlowReveal>
+          )}
         </Stack>
       )}
 
