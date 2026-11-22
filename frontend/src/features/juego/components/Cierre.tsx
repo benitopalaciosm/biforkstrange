@@ -1,5 +1,5 @@
 import { BigNumber, Button, Heading, Meta, Pill, Screen, ScreenHeader, Stack, StationTimeline, SunCard, Text } from "@/shared/ui";
-import { aniosDe, cargoYSueldo, deCien, plata, sinSueldo, situacion } from "../textos";
+import { aniosDe, cargoYSueldo, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Vista } from "../types";
 import type { VidaAnterior } from "../hooks/usePartida";
 import { GEMELOS } from "../api";
