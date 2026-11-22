@@ -28,7 +28,6 @@ Las opciones de trabajo traen empleadores u ofertas reales como ejemplo (SII, Ge
 
 - `backend/`: FastAPI y un motor Monte Carlo en numpy que lee el paquete de reglas de `backend/simulador/`
 - `frontend/`: Vite, React y TypeScript
-- `supabase/`: esquema y migraciones
 
 ## Correr local
 
