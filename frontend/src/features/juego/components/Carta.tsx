@@ -510,7 +510,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
@@ -519,7 +519,6 @@ export function Carta({
   /** Repite lo que falló (tirar el dado o volver a simular una opción). */
   onReintentar?: () => void;
   onNarrar?: Narrar;
-  onAyuda: () => void;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
   vista: Vista;
   riesgo: number;
@@ -676,12 +675,6 @@ export function Carta({
         <Heading level={2} as="h1">
           {pendiente.pregunta}
         </Heading>
-        <Row gap={8} style={{ alignItems: "center", flexWrap: "wrap" }}>
-          <Meta>{comparacion ? `${comparacion.gemelos} mundos simulados` : `${pendiente.opciones.length} opciones · sin simular`}</Meta>
-          <button type="button" className="jg-ayuda" onClick={onAyuda}>
-            ¿Cómo funciona?
-          </button>
-        </Row>
         {sinEfecto && <Text size="sm" className="jg-destacado">Tu sueldo termina casi igual con cualquier opción.</Text>}
       </Stack>
 
