@@ -188,8 +188,13 @@ def _dudas(pq: Paquete) -> list[dict]:
 
 
 def _por_api(texto: str, hoy: str, pq: Paquete, pdf: bytes | None = None) -> PerfilLeido:
-    cliente = anthropic.Anthropic(timeout=ESPERA_MAX, max_retries=1)
-    respuesta = cliente.messages.parse(
+    cliente = anthropic.Anthropic(api_key=_llave(), timeout=ESPERA_MAX, max_retries=1)
+    # el esquema tiene demasiados campos opcionales para structured outputs (límites de la API):
+    # se pide el JSON en el mensaje y se valida con Pydantic
+    from app.core.llm import extract_json
+
+    esquema = json.dumps(PerfilLeido.model_json_schema(), ensure_ascii=False)
+    respuesta = cliente.messages.create(
         model=MODELO,
         max_tokens=4000,
         thinking={"type": "disabled"},
@@ -205,12 +210,17 @@ def _por_api(texto: str, hoy: str, pq: Paquete, pdf: bytes | None = None) -> Per
                                                "data": base64.standard_b64encode(pdf).decode()}}] if pdf else []),
             {"type": "text", "text": f"Fecha de hoy: {hoy}\n\n<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>"
              if texto else f"Fecha de hoy: {hoy}\n\nEl documento adjunto es el CV o el perfil de LinkedIn de la persona."},
+            {"type": "text", "text": "Responde SOLO con un objeto JSON que cumpla este esquema (null en lo que no sepas):\n"
+             + esquema},
         ]}],
-        output_format=PerfilLeido,
     )
-    if respuesta.stop_reason == "refusal" or respuesta.parsed_output is None:
+    texto_json = "".join(b.text for b in respuesta.content if b.type == "text")
+    if respuesta.stop_reason == "refusal" or not texto_json:
         raise ModeloNoDisponible("Claude no pudo leer el texto.")
-    return respuesta.parsed_output
+    try:
+        return PerfilLeido.model_validate_json(extract_json(texto_json))
+    except (ValidationError, ValueError) as error:
+        raise ModeloNoDisponible("Claude devolvió un perfil incompleto; prueba de nuevo.") from error
 
 
 def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
@@ -221,7 +231,7 @@ def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
         salida = subprocess.run(
             ["claude", "-p", "--model", MODELO, "--effort", "low", "--output-format", "json",
              "--json-schema", json.dumps(PerfilLeido.model_json_schema())],
-            input=prompt, capture_output=True, text=True, timeout=90, check=True,
+            input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=90, check=True,
         )
         cuerpo = json.loads(salida.stdout)
         datos = cuerpo.get("structured_output")
@@ -259,9 +269,16 @@ def leer(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = No
         "No hay credenciales para llamar a Claude. Define ANTHROPIC_API_KEY o llena el perfil a mano.")
 
 
+def _llave() -> str | None:
+    """La llave de backend/.env (la config la lee aunque no esté exportada en el entorno)."""
+    from app.core.config import get_settings
+
+    return get_settings().anthropic_api_key or None
+
+
 def _hay_credenciales() -> bool:
     """Las mismas fuentes que resuelve el SDK: variables de entorno o un perfil de `ant auth login`."""
-    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
+    return bool(_llave() or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
                 or (Path.home() / ".config" / "anthropic").is_dir())
 
 

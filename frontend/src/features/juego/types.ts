@@ -36,6 +36,10 @@ export type Perfil = {
   empresa_fondos?: 0 | 1;
   /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
   anos_por_empleo?: number | null;
+  /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
+  relato?: string;
+  /** Su gemelo digital (/gemelo): sus rasgos afinados mueven qué cartas le salen. */
+  gemelo_id?: string | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

@@ -32,6 +32,9 @@ class PerfilIn(BaseModel):
     empresa_anos: int = Field(0, ge=0, le=30)
     empresa_fondos: int = Field(0, ge=0, le=1)
     anos_por_empleo: float | None = Field(None, gt=0, le=40)
+    # lo abierto: cómo te describes con tus palabras y tu gemelo digital (sus rasgos afinados)
+    relato: str = Field("", max_length=20000, exclude=True)  # fuera de model_dump: no es campo del motor
+    gemelo_id: str | None = Field(None, max_length=64, exclude=True)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())

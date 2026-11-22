@@ -1,5 +1,6 @@
 import { JuegoPage } from "@/features/juego";
 import { SimulationPage } from "@/features/simulation";
+import { TwinPage } from "@/features/twin";
 import { UiKitPage } from "@/features/ui-kit";
 
 export default function App() {
@@ -7,6 +8,9 @@ export default function App() {
 
   // Catálogo del kit de UI en /ui (sin router por ahora)
   if (ruta.startsWith("/ui")) return <UiKitPage />;
+
+  // Tu gemelo: tu contexto de IA, encuesta adaptativa y examen a ciegas
+  if (ruta.startsWith("/gemelo")) return <TwinPage />;
 
   // La simulación del esqueleto, que antes era la pantalla principal
   if (ruta.startsWith("/simulacion")) {

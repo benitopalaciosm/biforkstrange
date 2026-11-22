@@ -6,8 +6,8 @@ from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.juego import DudasIn, MundoIn, PartidaIn, TextoPerfilIn
-from app.services import perfil_ia
+from app.schemas.juego import DudasIn, MundoIn, PartidaIn, PerfilIn, TextoPerfilIn
+from app.services import juego_personal, perfil_ia
 from app.sim.motor import partida, supuestos, validacion
 from app.sim.motor.paquete import paquete
 from app.sim.motor.perfil import NIVELES
@@ -62,32 +62,55 @@ def validacion_contra_chile(n: int = Query(1000, ge=200, le=5000), semilla: int 
     return _validacion(n, semilla)
 
 
+def _personal(perfil: PerfilIn):
+    """Tu relato (lo usa el narrador) y tu gemelo (solo decide qué cartas te salen)."""
+    gemelo = None
+    if perfil.gemelo_id:
+        from app.api.deps import get_twin_repo
+
+        gemelo = get_twin_repo().get(perfil.gemelo_id)  # si ya no existe (reinicio), se juega sin él
+    personal = juego_personal.desde(perfil.relato, gemelo)
+    return perfil.a_perfil(), personal
+
+
 @router.post("/dudas")
 def dudas(body: DudasIn):
     """Decisiones del banco que esta persona puede elegir como su duda inicial."""
-    return partida.dudas_posibles(body.perfil.a_perfil())
+    p, personal = _personal(body.perfil)
+    with partida.con_afinidad(personal.afinidad if personal else {}):
+        return partida.dudas_posibles(p)
 
 
 @router.post("/partida")
 def jugar(body: PartidaIn):
-    """Estado de la partida: historia, decisión pendiente con lo que vivieron los gemelos, o el cierre."""
+    """Estado de la partida: historia, decisión pendiente con lo que vivieron los gemelos, o el cierre.
+
+    Con relato o gemelo, las cartas pesan según tus rasgos y Claude las cuenta a tu medida."""
+    p, personal = _personal(body.perfil)
     try:
-        return partida.vista(
-            body.perfil.a_perfil(), body.semilla, body.duda,
-            [e.model_dump() for e in body.elecciones], body.gemelos, body.parametros,
-        )
+        with partida.con_afinidad(personal.afinidad if personal else {}):
+            salida = partida.vista(
+                p, body.semilla, body.duda,
+                [e.model_dump() for e in body.elecciones], body.gemelos, body.parametros,
+            )
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error
+    if personal and personal.texto:
+        juego_personal.historia_personal(salida, personal, body.semilla)
+        juego_personal.narrar_pendiente(salida, personal, body.semilla)
+    return salida
 
 
 @router.post("/mundo")
 def ver_mundo(body: MundoIn):
     """Un mundo de la comparación de la decisión pendiente: lo que te pasa en él con cada opción, año por año."""
+    p, personal = _personal(body.perfil)
     try:
-        return partida.mundo_pendiente(
-            body.perfil.a_perfil(), body.semilla, body.duda,
-            [e.model_dump() for e in body.elecciones], body.mundo, body.parametros,
-        )
+        with partida.con_afinidad(personal.afinidad if personal else {}):
+            return partida.mundo_pendiente(
+                p, body.semilla, body.duda,
+                [e.model_dump() for e in body.elecciones], body.mundo, body.parametros,
+            )
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error
 
