@@ -451,3 +451,6 @@ export type DudaEnJuego = {
 /** Respuesta de `POST /api/juego/dudas-en-juego`. `mas_en_juego` es null si hay menos de dos dudas. */
 export type EnJuego = { gemelos: number; semilla: number; mas_en_juego: string | null; dudas: DudaEnJuego[] };
 
+
+/** Un año en que seguiste igual y no pasó nada: no se muestra "qué te pasó", solo esta franja en el año siguiente. */
+export type SinNovedad = { anio: number; sueldo: number; delta: number };

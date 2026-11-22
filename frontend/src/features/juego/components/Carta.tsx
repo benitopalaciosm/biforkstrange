@@ -3,13 +3,13 @@ import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
 import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, plata, primeraFrase, sinSueldo, situacion } from "../textos";
-import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, Suceso, Vista } from "../types";
+import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { BarraPartes, Info, ProgresoAnios, sinMovimiento, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Hoy, Pensando, RangoSueldo, Salir } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Pensando, RangoSueldo, Salir } from "./piezas";
 import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -892,8 +892,10 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar, sinNovedad,
 }: {
+  /** El año anterior, si pasó sin novedades: va como franja arriba. */
+  sinNovedad?: SinNovedad | null;
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
   /** De dónde salió cada dato del perfil: sin datos es un perfil de ejemplo. */
@@ -1030,6 +1032,7 @@ export function Carta({
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
+      <FranjaSinNovedad s={sinNovedad} />
       <Hoy e={e} />
       <AvisoPerfil fuentes={fuentes} />
 
