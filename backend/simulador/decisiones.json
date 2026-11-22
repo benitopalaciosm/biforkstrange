@@ -2313,7 +2313,7 @@
     {
      "id": "pedir",
      "nombre": "Pedirlo",
-     "detalle": "Las mujeres piden casi tanto como los hombres y lo consiguen menos.",
+     "detalle": "Pedirlo no garantiza nada. A las mujeres se lo dan menos que a los hombres, aunque lo piden casi igual de seguido.",
      "resultados": [
       {
        "id": "si",
@@ -3010,8 +3010,8 @@
       {
        "id": "logra",
        "prob": "clamp(tabla('jobhop_transiciones', 'prob', 'origen', ocupacion, 'destino', ocupacion_destino) * 3, 0.02, 0.6)",
-       "texto": "Logras el cambio.",
-       "tono": "bueno",
+       "texto": "Logras el cambio: partes de cero en tu nuevo oficio, con el sueldo de quien empieza en él.",
+       "tono": "neutro",
        "efectos": [
         {
          "var": "ocupacion",

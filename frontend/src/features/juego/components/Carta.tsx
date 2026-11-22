@@ -248,7 +248,7 @@ function OpcionConGemelos({
               <b>{plata(o.sueldo.p10)}</b>
             </span>
             <span role="listitem">
-              <span>Pasas por la cesantía</span>
+              <span>Cierras algún año buscando trabajo</span>
               <b>{cesantia === 0 ? "en ningún mundo" : `en ${cesantia} de 100`}</b>
             </span>
           </span>

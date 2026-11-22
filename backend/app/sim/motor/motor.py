@@ -390,7 +390,7 @@ class Vida:
         # la segunda vez que sale la misma decisión en un año (carta y evento oferta_llega) tira dados nuevos
         ocurrencia = sum(1 for x in self.registro["decisiones"] if x["decision"] == decision_id)
         sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
-        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo")}
+        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion")}
         contexto.update(self.contexto_empleo())
         if decision_id != "tipo_de_empleador":
             self._oferta_fija = None
@@ -608,6 +608,7 @@ class Vida:
             self._revisar_cargo()
             return
         e["empresa_inicial"], e["cargo_inicial"] = "", ""
+        e["antiguedad"] = 0  # empleador nuevo: la antigüedad parte de cero (la startup no la fijaba)
         if e["tipo_empleador"] == "publico":
             rubro = empresas.rubro_publico(self.pq, antes)  # el sector del Estado según dónde venía
         else:
