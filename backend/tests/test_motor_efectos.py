@@ -259,7 +259,8 @@ def test_separacion_cesante_lee_sueldo_y_antiguedad_de_antes(antiguedad, sueldos
     y `sueldo_ref` queda en el sueldo de antes (la baja la traen las ofertas). El despido va primero en el
     año, así que el sueldo de antes es el del año pasado, sin el alza."""
     gemela, _ = _despedida(antiguedad, cesante=False)   # misma suerte, sin despido
-    assert gemela.e["sueldo"] != 1_000_000  # a ella sí le tocó el alza del año
+    # a ella sí le tocó el alza del año, si ya llevaba un año en la pega (quien entró este año no tiene alza)
+    assert (gemela.e["sueldo"] != 1_000_000) == (antiguedad >= 1)
     v, registro = _despedida(antiguedad, cesante=True)
     assert [x["resultado"] for x in registro["eventos"] if x["evento"] == "separacion_empleo"] == ["cesante"]
     assert v.e["estado"] == "buscando" and v.e["sueldo"] == 0 and v.e["meses_cesante"] == 12

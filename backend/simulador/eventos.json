@@ -58,7 +58,7 @@
    "id": "alza_anual",
    "nombre": "Alza anual del sueldo",
    "categoria": "trabajo",
-   "cuando": "estado == 'empleado'",
+   "cuando": "y(estado == 'empleado', antiguedad >= 1)",
    "prob_anual": 1,
    "resultados": [
     {
@@ -81,7 +81,7 @@
     "guvenen_2021"
    ],
    "calidad": "mixto",
-   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso promedio de la población (ASCENSO_POBLACION por el alza media de un ascenso), porque el perfil por edad ya lo incluye; el ascenso de cada persona lo paga el evento ascenso. Así quien asciende más que el promedio gana más y, en promedio, el ascenso no se cuenta dos veces."
+   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso promedio de la población (ASCENSO_POBLACION por el alza media de un ascenso), porque el perfil por edad ya lo incluye; el ascenso de cada persona lo paga el evento ascenso. Así quien asciende más que el promedio gana más y, en promedio, el ascenso no se cuenta dos veces. Solo para quien ya llevaba al menos un año en esa pega (antiguedad >= 1): quien entró este año (una oferta, un recontrato tras un despido, su primera pega) gana lo que dijo su oferta, sin alza encima."
   },
   {
    "id": "alza_independiente",

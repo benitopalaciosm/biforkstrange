@@ -36,6 +36,8 @@ CUADRAN = [
     "ingreso_p75_25-29",
     # desde que el alza anual no baja el sueldo de quien sigue en su pega, los sueldos medianos cuadran
     "ingreso_p50_30-34", "ingreso_p50_35-39", "ingreso_p50_40-44", "ingreso_p75_45-49",
+    # volvió a cuadrar desde que el alza anual es solo de quien ya llevaba un año en su pega
+    "ingreso_p50_45-49",
 ]
 
 # Dejaron de cuadrar con la cesantía mes a mes (c93e6ea): quien trabaja informal sigue postulando y
@@ -45,7 +47,7 @@ CUADRAN = [
 RECALIBRAR = "dejó de cuadrar con la cesantía mes a mes; falta recalibrar el motor con datos"
 POR_RECALIBRAR = [
     pytest.param(id_, marks=pytest.mark.xfail(strict=True, reason=RECALIBRAR))
-    for id_ in ("independientes_45-49", "ingreso_p50_45-49")
+    for id_ in ("independientes_45-49",)
 ]
 
 
