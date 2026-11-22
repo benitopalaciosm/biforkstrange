@@ -676,6 +676,32 @@ export function Carta({
         {sinEfecto && <Text size="sm" className="jg-destacado">En esta decisión tu sueldo termina casi igual con cualquier opción: elige por lo que dice cada una.</Text>}
       </Stack>
 
+      {/* la apuesta va apenas se lee la pregunta, antes del detalle de las opciones: es lo primero que se juega */}
+      {comparacion && foco && ganadores && (
+        <div className="jg-columna">
+          <ApuestaAntesDeMirar
+            key={llave}
+            opcion={foco}
+            ganadores={ganadores}
+            gemelos={comparacion.gemelos}
+            color={colores[foco.opcion]}
+            revelado={revelado}
+            onVer={() => setVistoEn(llave)}
+            creencia={pendiente.creencia_vs_dato}
+          >
+            <Simulacion
+              comparadas={comparadas}
+              ganadores={ganadores}
+              gemelos={comparacion.gemelos}
+              colores={colores}
+              anioInicial={anio}
+              onVerMundo={onVerMundo}
+              onNarrar={onNarrar}
+            />
+          </ApuestaAntesDeMirar>
+        </div>
+      )}
+
       {comparacion ? (
         <div
           className="jg-opciones"
@@ -770,89 +796,67 @@ export function Carta({
 
       {comparacion && foco && (
         <Stack gap={12} className="jg-columna">
-          {ganadores && (
-            <ApuestaAntesDeMirar
-              key={llave}
-              opcion={foco}
-              ganadores={ganadores}
-              gemelos={comparacion.gemelos}
-              color={colores[foco.opcion]}
-              revelado={revelado}
-              onVer={() => setVistoEn(llave)}
-              creencia={pendiente.creencia_vs_dato}
-            >
-              <Simulacion
-                comparadas={comparadas}
-                ganadores={ganadores}
-                gemelos={comparacion.gemelos}
-                colores={colores}
-                anioInicial={anio}
-                onVerMundo={onVerMundo}
-                onNarrar={onNarrar}
-              />
-            </ApuestaAntesDeMirar>
-          )}
           {partida && pendiente.por_que?.tipo === "elegida" && revelado && conFuentes && (
             <PesoDelCv perfil={partida.perfil} duda={pendiente.decision} semilla={partida.semilla} />
           )}
-          <section className="jg-seccion" key={`abanico:${foco.opcion}`}>
-            <Heading level={3} as="h2">
-              «{foco.nombre}», año a año
-            </Heading>
-            <Abanico
-              color={colores[foco.opcion]}
-              colorReferencia={base ? colores[base.opcion] : undefined}
-              puntos={foco.trayectoria}
-              hoy={hoy}
-              referencia={foco.es_base ? undefined : base?.trayectoria}
-              nombreReferencia={foco.es_base ? undefined : base?.nombre}
-            />
-            <Info pregunta="¿Qué muestra este gráfico?">
-              Tu sueldo en los mundos donde eliges «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea de color es el mundo del medio. La
-              franja celeste contiene 8 de cada 10 mundos: mientras más se abre, más depende de la suerte. Toca otra opción para ver la suya.
-            </Info>
-          </section>
+          <details className="jg-plegable" key={`abanico:${foco.opcion}`}>
+            <summary>«{foco.nombre}», año a año</summary>
+            <Stack gap={10}>
+              <Abanico
+                color={colores[foco.opcion]}
+                colorReferencia={base ? colores[base.opcion] : undefined}
+                puntos={foco.trayectoria}
+                hoy={hoy}
+                referencia={foco.es_base ? undefined : base?.trayectoria}
+                nombreReferencia={foco.es_base ? undefined : base?.nombre}
+              />
+              <Info pregunta="¿Qué muestra este gráfico?">
+                Tu sueldo en los mundos donde eliges «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea de color es el mundo del medio. La
+                franja celeste contiene 8 de cada 10 mundos: mientras más se abre, más depende de la suerte. Toca otra opción para ver la suya.
+              </Info>
+            </Stack>
+          </details>
 
-          <section className="jg-seccion">
-            <Heading level={3} as="h2">
-              Además del sueldo
-            </Heading>
-            {(() => {
-              const firma = (o: OpcionComparada) =>
-                `${Math.round(o.paso_por_cesantia * 100)}|${Math.round(o.meses_sin_trabajo)}|${o.cargos.map((c) => `${c.cargo}:${Math.round(c.prob * 100)}`).join(",")}`;
-              const iguales = comparadas.every((o) => firma(o) === firma(comparadas[0]));
-              return (iguales ? comparadas.slice(0, 1) : comparadas).map((o) => {
-                const meses = Math.round(o.meses_sin_trabajo);
-                return (
-                  <div className="jg-fila-opcion" key={o.opcion} data-foco={!iguales && comparadas.length > 1 && o.opcion === sel}>
-                    <span className="jg-fuerte">
-                      {iguales ? (
-                        "Igual con todas las opciones"
-                      ) : (
-                        <>
-                          <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
-                          {o.nombre}
-                        </>
-                      )}
-                    </span>
-                    <span className="jg-chico">
-                      Quedas sin trabajo alguna vez en <strong>{Math.round(o.paso_por_cesantia * 100)} de 100</strong> mundos
-                      {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
-                    </span>
-                    <span className="jg-medidor" aria-hidden="true">
-                      <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
-                    </span>
-                    <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
-                    <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
-                  </div>
-                );
-              });
-            })()}
-            <Info pregunta="¿Por qué en tantos mundos paso por cesantía?">
-              Cuenta cualquier mundo donde estás al menos un mes sin trabajo en todo el período, aunque después encuentres otro: un despido, el
-              cierre de la empresa, una renuncia o un tiempo estudiando.
-            </Info>
-          </section>
+          <details className="jg-plegable">
+            <summary>Además del sueldo</summary>
+            <Stack gap={10}>
+              {(() => {
+                const firma = (o: OpcionComparada) =>
+                  `${Math.round(o.paso_por_cesantia * 100)}|${Math.round(o.meses_sin_trabajo)}|${o.cargos.map((c) => `${c.cargo}:${Math.round(c.prob * 100)}`).join(",")}`;
+                const iguales = comparadas.every((o) => firma(o) === firma(comparadas[0]));
+                return (iguales ? comparadas.slice(0, 1) : comparadas).map((o) => {
+                  const meses = Math.round(o.meses_sin_trabajo);
+                  return (
+                    <div className="jg-fila-opcion" key={o.opcion} data-foco={!iguales && comparadas.length > 1 && o.opcion === sel}>
+                      <span className="jg-fuerte">
+                        {iguales ? (
+                          "Igual con todas las opciones"
+                        ) : (
+                          <>
+                            <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
+                            {o.nombre}
+                          </>
+                        )}
+                      </span>
+                      <span className="jg-chico">
+                        Quedas sin trabajo alguna vez en <strong>{Math.round(o.paso_por_cesantia * 100)} de 100</strong> mundos
+                        {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
+                      </span>
+                      <span className="jg-medidor" aria-hidden="true">
+                        <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
+                      </span>
+                      <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
+                      <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
+                    </div>
+                  );
+                });
+              })()}
+              <Info pregunta="¿Por qué en tantos mundos paso por cesantía?">
+                Cuenta cualquier mundo donde estás al menos un mes sin trabajo en todo el período, aunque después encuentres otro: un despido, el
+                cierre de la empresa, una renuncia o un tiempo estudiando.
+              </Info>
+            </Stack>
+          </details>
 
           <details className="jg-plegable">
             <summary>¿Por qué sale así «{foco.nombre}»?</summary>
