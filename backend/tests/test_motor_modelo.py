@@ -2,6 +2,7 @@
 
 1. El alza anual descuenta el ascenso promedio de la población, no el de la persona: ascender más paga.
 2. Al fundador que ya tenía empresa se le respeta su sueldo declarado; MICRO_MEDIANA es para quien recién emprende.
+3. El ingreso del independiente crece (o cae) como el de la cuenta propia de su edad en la ESI.
 """
 
 import math
@@ -108,3 +109,35 @@ def test_quien_recien_emprende_gana_como_un_microemprendedor_aunque_ya_haya_teni
         assert v.e["estado"] == "fundador" and v.e["base_empresa"] == 0
         sueldos.append(v.e["sueldo"])
     assert sueldos[0] == sueldos[1] > 0
+
+
+# ------------------------------------------------------------------ 3. el ingreso del independiente
+# p50 de cuenta propia en tablas/esi_ingreso_categoria_formalidad.csv
+CUENTA_PROPIA_FORMAL = {"30-34": 667416, "35-39": 629303, "40-44": 798872}
+CUENTA_PROPIA_INFORMAL = {"18-24": 199496, "25-29": 300127}
+
+
+@pytest.mark.parametrize("edad, formal, esperado", [
+    (32, 1, (CUENTA_PROPIA_FORMAL["35-39"] / CUENTA_PROPIA_FORMAL["30-34"]) ** (1 / 5) - 1),  # cae: −1,2%
+    (37, 1, (CUENTA_PROPIA_FORMAL["40-44"] / CUENTA_PROPIA_FORMAL["35-39"]) ** (1 / 5) - 1),  # sube: +4,9%
+    (20, 0, 0.06),  # informal de 18-24 a 25-29 sube 8,5% al año: queda en el tope
+    (52, 1, 0.0),   # 50-54 es la última banda de la tabla
+])
+def test_el_crecimiento_por_cuenta_propia_sale_de_la_esi_por_edad(edad, formal, esperado):
+    e = vida(Perfil(edad=edad, estado="independiente", sueldo=700_000, tipo_empleador=""), formal=formal).e
+    assert e["crecimiento_cuenta_propia"] == pytest.approx(esperado)
+
+
+def test_el_independiente_recibe_el_alza_de_su_edad_cada_anio():
+    """Antes su ingreso quedaba igual diez años."""
+    v = vida(Perfil(edad=37, estado="independiente", sueldo=700_000, tipo_empleador=""), DadosGuion())
+    crecimiento = (CUENTA_PROPIA_FORMAL["40-44"] / CUENTA_PROPIA_FORMAL["35-39"]) ** (1 / 5) - 1
+    reg = v.vivir_anio(Guion())
+    assert v.e["estado"] == "independiente"
+    assert "alza_independiente" in {x["evento"] for x in reg["eventos"]}
+    assert v.e["sueldo"] == pytest.approx(700_000 * (1 + crecimiento))
+
+
+def test_el_alza_por_cuenta_propia_no_le_llega_al_empleado():
+    reg = vida(Perfil(edad=37), DadosGuion()).vivir_anio(Guion())
+    assert "alza_independiente" not in {x["evento"] for x in reg["eventos"]}

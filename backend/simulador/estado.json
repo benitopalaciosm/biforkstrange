@@ -716,6 +716,17 @@
    "inicio": "deriva"
   },
   {
+   "nombre": "crecimiento_cuenta_propia",
+   "tipo": "numero",
+   "dominio": [
+    -0.06,
+    0.06
+   ],
+   "unidad": "tasa",
+   "descripcion": "Deriva: alza anual del ingreso por cuenta propia según su edad (esi_ingreso_categoria_formalidad, categoría cuenta_propia, formal o informal según formal): mediana de la banda siguiente sobre la actual, anualizada. Puede ser negativa.",
+   "inicio": "deriva"
+  },
+  {
    "nombre": "prima_personal",
    "tipo": "numero",
    "dominio": [

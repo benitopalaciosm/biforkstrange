@@ -299,21 +299,22 @@ def test_vivir_se_detiene_a_los_60():
 
 # ------------------------------------------------------------------ cierre
 def _independiente(**estado):
-    """Trabaja por cuenta propia: ningún evento le mueve el sueldo, así el cierre se ve limpio."""
+    """Trabaja por cuenta propia a los 50: ningún evento le mueve el sueldo (50-54 es la última banda de la ESI,
+    así que el alza por cuenta propia es 0), y el cierre se ve limpio."""
     base = dict(tasa_ahorro=0.08, ahorro=1_000_000.0, skill=50)
-    return vida(Perfil(edad=35, estado="independiente", sueldo=1_000_000), DadosGuion(), **{**base, **estado})
+    return vida(Perfil(edad=50, estado="independiente", sueldo=1_000_000), DadosGuion(), **{**base, **estado})
 
 
 def test_cierre_edad_ahorro_y_oficio():
     v = _independiente()
     v.vivir_anio(Guion())
-    assert v.e["edad"] == 36 and v.anio == 1
+    assert v.e["edad"] == 51 and v.anio == 1
     # ahorro: lo que había + 8% de 12 sueldos, y sobre eso el retorno real de 3%
     assert v.e["ahorro"] == pytest.approx((1_000_000 + 12 * 1_000_000 * 0.08) * 1.03)
     assert v.e["skill"] == pytest.approx(51.5)       # +1,5 de oficio por año trabajado
     assert v.ingreso_total == pytest.approx(12_000_000)
     assert v.e["antiguedad"] == 0                     # la antigüedad es del empleo dependiente
-    assert v.e["anos_titulado"] == 12                 # 35 - 24, más el año
+    assert v.e["anos_titulado"] == 27                 # 50 - 24, más el año
     v.vivir_anio(Guion())
     assert v.e["ahorro"] == pytest.approx(((1_000_000 + 960_000) * 1.03 + 960_000) * 1.03)
     assert v.ingreso_total == pytest.approx(24_000_000) and v.e["skill"] == pytest.approx(53)
