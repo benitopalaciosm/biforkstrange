@@ -295,7 +295,9 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
         nombres["ingles"] = "inglés"
     # Fórmulas del equipo (supuesto): skill y red están centradas en 50 y 30 en el paquete
     if leido.anios_experiencia is not None:
-        perfil["skill"] = max(20, min(90, 35 + round(2.5 * leido.anios_experiencia)))
+        from app.sim.motor.perfil import skill_por_experiencia
+
+        perfil["skill"] = skill_por_experiencia(leido.anios_experiencia)
         inferido.append(f"Habilidad {perfil['skill']} de 100 por {leido.anios_experiencia} años de experiencia "
                         "(fórmula del equipo).")
     if leido.empleadores is not None:

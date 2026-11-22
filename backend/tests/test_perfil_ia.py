@@ -206,3 +206,14 @@ def test_sin_datos_nuevos_el_motor_usa_los_supuestos_de_siempre():
     assert (e["ingles"], e["skill"], e["red"]) == (0, 50, 30)
     e = estado_inicial(Perfil(ingles=1, skill=70, red=50), paquete())
     assert (e["ingles"], e["skill"], e["red"]) == (1, 70, 50)
+
+
+def test_sin_cv_la_habilidad_se_estima_por_los_anios_desde_el_titulo():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    pq = paquete()
+    assert estado_inicial(Perfil(edad=24, edu="universitaria"), pq)["skill"] == 35  # recién titulado
+    assert estado_inicial(Perfil(edad=45, edu="universitaria"), pq)["skill"] == 87
+    assert estado_inicial(Perfil(edad=45, skill=40), pq)["skill"] == 40  # el dato del CV manda
+    assert estado_inicial(Perfil.a_los_18(), pq)["skill"] == 50  # la cohorte de validación no cambia

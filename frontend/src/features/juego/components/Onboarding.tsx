@@ -12,8 +12,10 @@ import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, banda } from "./PerfilF
 type Paso = "entrada" | "leyendo" | "tu" | "pega" | "plata";
 /** Los pasos de cada camino: con CV se salta lo que el CV ya contestó. */
 const MANUAL: Paso[] = ["tu", "pega", "plata"];
-/** Lo que confirma cada tarjeta al pasar a la siguiente, aunque la persona deje el valor que venía. */
-const CAMPOS: Record<string, (keyof Perfil)[]> = { tu: ["edad", "edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["sueldo", "ingles"] };
+/** Las elecciones de cada tarjeta: parten vacías y hay que tocarlas para seguir. */
+const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["ingles"] };
+/** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
+const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
 const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
 
 /**
@@ -48,6 +50,7 @@ export function Onboarding({
   const [leido, setLeido] = useState<PerfilLeido | null>(null);
   const [errorLectura, setErrorLectura] = useState<string | null>(null);
   const [completo, setCompleto] = useState(false);
+  const [otroRubro, setOtroRubro] = useState(false);
   const pedido = useRef(0);
   useEffect(() => () => void pedido.current++, []);
 
@@ -100,10 +103,12 @@ export function Onboarding({
   const ultimo = i === faltan.length - 1;
   const atras = () => (i > 0 ? setPaso(faltan[i - 1]) : (setPaso("entrada"), setFaltan(MANUAL)));
   const siguiente = () => {
-    setSabidos((s) => new Set([...s, ...(CAMPOS[paso] ?? [])]));
+    setSabidos((s) => new Set([...s, ...(DESLIZAR[paso] ?? [])]));
     if (ultimo) onElegirDuda(p, leido?.dudas_sugeridas ?? []);
     else setPaso(faltan[i + 1]);
   };
+  const elegido = (k: keyof Perfil) => sabidos.has(k);
+  const faltaElegir = (ELEGIR[paso] ?? []).some((k) => !elegido(k));
   const ref = catalogo?.sueldos_ref?.find((f) => f.educacion === p.edu && f.banda === banda(p.edad));
 
   return (
@@ -151,7 +156,7 @@ export function Onboarding({
             <span className="jg-etiqueta">Estudios terminados</span>
             <Row>
               {catalogo.educacion.map((e) => (
-                <Chip key={e} pressed={p.edu === e} onToggle={() => set("edu", e)}>
+                <Chip key={e} pressed={elegido("edu") && p.edu === e} onToggle={() => set("edu", e)}>
                   {EDUCACION[e] ?? e}
                 </Chip>
               ))}
@@ -164,7 +169,7 @@ export function Onboarding({
         <Tarjeta key="pega" titulo="¿Dónde trabajas hoy?">
           <Row>
             {catalogo.tipos_empleador.map((t) => (
-              <Chip key={t} pressed={p.tipo_empleador === t} onToggle={() => set("tipo_empleador", t)}>
+              <Chip key={t} pressed={elegido("tipo_empleador") && p.tipo_empleador === t} onToggle={() => set("tipo_empleador", t)}>
                 {TIPO_EMPLEADOR[t] ?? t}
               </Chip>
             ))}
@@ -173,7 +178,7 @@ export function Onboarding({
             <span className="jg-etiqueta">Tu cargo</span>
             <Row>
               {catalogo.niveles.map((n) => (
-                <Chip key={n.nivel} pressed={p.nivel === n.nivel} onToggle={() => set("nivel", n.nivel)}>
+                <Chip key={n.nivel} pressed={elegido("nivel") && p.nivel === n.nivel} onToggle={() => set("nivel", n.nivel)}>
                   {n.nombre}
                 </Chip>
               ))}
@@ -183,11 +188,40 @@ export function Onboarding({
             <span className="jg-etiqueta">Rubro</span>
             <Row>
               {RUBROS_TOP.filter((r) => catalogo.rubros.includes(r)).map((r) => (
-                <Chip key={r} pressed={p.rubro === r} onToggle={() => set("rubro", r)}>
+                <Chip
+                  key={r}
+                  pressed={elegido("rubro") && p.rubro === r}
+                  onToggle={() => {
+                    set("rubro", r);
+                    setOtroRubro(false);
+                  }}
+                >
                   {r}
                 </Chip>
               ))}
+              <Chip pressed={otroRubro} onToggle={() => setOtroRubro(true)}>
+                Otro
+              </Chip>
             </Row>
+            {otroRubro && (
+              <select
+                className="jg-campo"
+                aria-label="Otro rubro"
+                value={elegido("rubro") && !RUBROS_TOP.includes(p.rubro) ? p.rubro : ""}
+                onChange={(e) => set("rubro", e.target.value)}
+              >
+                <option value="" disabled>
+                  Elige tu rubro
+                </option>
+                {catalogo.rubros
+                  .filter((r) => !RUBROS_TOP.includes(r))
+                  .map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+              </select>
+            )}
           </Stack>
         </Tarjeta>
       )}
@@ -213,7 +247,7 @@ export function Onboarding({
             <span className="jg-etiqueta">¿Podrías trabajar en inglés?</span>
             <Segmented<string>
               label="Inglés"
-              value={String(p.ingles ?? 0)}
+              value={elegido("ingles") ? String(p.ingles ?? 0) : ""}
               onChange={(v) => set("ingles", v === "1" ? 1 : 0)}
               options={[
                 { value: "0", label: "No" },
@@ -227,7 +261,7 @@ export function Onboarding({
       {i >= 0 && (
         <ScreenFooter>
           {error && <ErrorCaja error={error} />}
-          <Button onClick={siguiente} disabled={!catalogo || cargando}>
+          <Button onClick={siguiente} disabled={!catalogo || cargando || faltaElegir}>
             {ultimo ? (leido?.dudas_sugeridas?.length ? "Ver mis dudas" : "Elegir mi duda") : "Siguiente"}
           </Button>
           <button type="button" className="ob-link" onClick={() => setCompleto(true)}>
@@ -281,7 +315,7 @@ function Entrada({ error, onPdf, onManual }: { error: string | null; onPdf: (pdf
       >
         <LinkedinAPdf />
         <strong>Sube el PDF de tu LinkedIn o tu CV</strong>
-        <span className="ob-chico">En LinkedIn: tu perfil → Más → Guardar como PDF</span>
+        <span className="ob-chico">En LinkedIn, desde el computador: tu perfil → Recursos → Guardar como PDF</span>
       </button>
       <input
         ref={entrada}

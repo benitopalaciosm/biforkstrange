@@ -13,6 +13,12 @@ NIVELES = ("Junior", "Semi senior", "Senior", "Jefatura", "Gerencia")
 EDAD_TITULO = {"media": 18, "tecnica": 21, "universitaria": 24, "postgrado": 26}  # supuesto
 OCUPACION_POR_EDU = {"media": 5, "tecnica": 3, "universitaria": 2, "postgrado": 2}  # supuesto
 RUBROS_DESTINO = "Comercio"
+TRABAJA = ("empleado", "independiente", "fundador")
+
+
+def skill_por_experiencia(anios: int) -> int:
+    """Supuesto del equipo: habilidad 35 al empezar y +2,5 por año, entre 20 y 90 (50 a los 6 años)."""
+    return max(20, min(90, 35 + round(2.5 * anios)))
 
 
 @dataclass(frozen=True)
@@ -66,7 +72,7 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         valor = _literal(str(v["inicio"]))
         if valor is not None:
             e[nombre] = valor
-    trabaja = perfil.estado in ("empleado", "independiente", "fundador")
+    trabaja = perfil.estado in TRABAJA
     e.update(
         edad=perfil.edad, sexo=perfil.sexo, edu=perfil.edu, estado=perfil.estado,
         carrera_id=perfil.carrera_id, rubro=perfil.rubro if trabaja else "",
@@ -79,7 +85,10 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         ocupacion=perfil.ocupacion if perfil.ocupacion is not None
         else (1 if perfil.nivel >= 3 else OCUPACION_POR_EDU[perfil.edu]),
         # supuestos neutros: las fórmulas del paquete están centradas en estos valores
-        red=30 if perfil.red is None else perfil.red, skill=50 if perfil.skill is None else perfil.skill,
+        red=30 if perfil.red is None else perfil.red,
+        # sin dato del CV: la experiencia se estima como los años desde que se tituló (supuesto)
+        skill=perfil.skill if perfil.skill is not None
+        else skill_por_experiencia(max(0, perfil.edad - EDAD_TITULO[perfil.edu])) if trabaja else 50,
         ambicion=50, ingles=perfil.ingles,
         pareja="no", hijos=0, edad_hijo_menor=-1, isapre=0, propietario=0,
         madre_edad=perfil.edad + round(pq.k("EDAD_MADRE")),
