@@ -6,6 +6,7 @@ los dados dan lo mismo, así que el resultado es idéntico. Cuando faltan
 elecciones, la partida queda detenida en la decisión pendiente.
 """
 
+import re
 from dataclasses import dataclass
 
 from app.sim.motor import empresas, gemelos
@@ -177,7 +178,7 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
         "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"), "evidencia": d.get("evidencia", []),
         "opciones": [{**opcion_a_dict(o), "elecciones_internas": elecciones_internas(vida, o),
-                      "empresa": ofertas[o.id]}
+                      "empresa": ofertas[o.id], "respaldo": respaldo(vida.pq, o)}
                      for o in falta.opciones],
         "comparacion": comparar_pendiente(partida, semilla, n_gemelos, parametros),
     }
@@ -233,3 +234,47 @@ def _narrar_historia(salida: dict, semilla: int) -> None:
 
 def opcion_a_dict(o: Opcion) -> dict:
     return {"opcion": o.id, "nombre": o.nombre, "detalle": o.detalle, "calidad": o.calidad}
+
+
+def respaldo(pq: Paquete, o: Opcion) -> list[dict]:
+    """De dónde sale la probabilidad de cada resultado de la opción, para explicarla en pantalla.
+
+    Si la probabilidad usa parámetros del paquete (`k('YC_CERRADA')`), van su fuente y su calidad. Si es
+    "resto", es lo que queda después de los otros. Si es un número fijo o una fórmula sin parámetros, queda
+    con la calidad de la opción.
+    """
+    salida = []
+    for r in o.resultados:
+        prob = str(r.get("prob", ""))
+        nombres = list(dict.fromkeys(re.findall(r"k\('([A-Z0-9_]+)'", prob)))
+        fuentes, calidades = [], []
+        for n in nombres:
+            p = pq.parametros.get(n)
+            if not p:
+                continue
+            fid = p.get("fuente", "")
+            cita = "Supuesto del equipo" if fid == "equipo" else pq.fuentes.get(fid, {}).get("cita", fid)
+            if cita and cita not in fuentes:
+                fuentes.append(cita)
+            calidades.append(p.get("calidad", ""))
+        peor = next((c for c in ("supuesto", "mixto", "dato") if c in calidades), None)
+        solo = re.fullmatch(r"k\('([A-Z0-9_]+)'\)", prob.strip())
+        valor = pq.parametros.get(solo.group(1), {}).get("valor") if solo else None
+        try:
+            valor = float(prob) if valor is None and prob not in ("", "resto") else valor
+        except ValueError:
+            valor = None  # una fórmula: depende de tu situación
+        salida.append({"resultado": r["id"], "texto": r.get("texto", ""), "fuentes": fuentes,
+                       "calidad": peor or o.calidad, "es_resto": prob == "resto",
+                       "valor": valor if isinstance(valor, (int, float)) else None})
+    conocidos = [x["valor"] for x in salida if not x["es_resto"]]
+    if all(v is not None for v in conocidos):
+        otros = [x for x in salida if not x["es_resto"]]
+        for x in salida:
+            if x["es_resto"]:
+                # lo que queda hereda el respaldo de los demás: sale de la misma cuenta
+                x["valor"] = max(0.0, 1 - sum(conocidos))
+                x["fuentes"] = list(dict.fromkeys(f for y in otros for f in y["fuentes"])) or x["fuentes"]
+                cal = [y["calidad"] for y in otros if y["fuentes"]]
+                x["calidad"] = next((c for c in ("supuesto", "mixto", "dato") if c in cal), x["calidad"])
+    return salida

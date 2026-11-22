@@ -308,6 +308,18 @@ export type OpcionPendiente = {
   calidad: Calidad;
   elecciones_internas: EleccionInterna[];
   empresa?: EmpresaOferta | null;
+  /** De dónde sale la probabilidad de cada resultado: fuente, calidad y su valor si no depende de tu situación. */
+  respaldo?: Respaldo[];
+};
+
+export type Respaldo = {
+  resultado: string;
+  texto: string;
+  fuentes: string[];
+  calidad: Calidad;
+  es_resto: boolean;
+  /** Probabilidad del paquete; null si es una fórmula que depende de tu situación. */
+  valor: number | null;
 };
 
 /** Por qué te tocó esta decisión. */
