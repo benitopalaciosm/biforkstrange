@@ -422,3 +422,14 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 /* La duda que tu CV esconde: encabezado sobre la lista de dudas */
 .jg-en-juego { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 14px; border: 1.5px solid var(--acento); border-radius: 14px; background: var(--acento-suave); animation: jg-peso-entra .5s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) { .jg-en-juego { animation: none; } }
+
+/* Lo que se elige dentro de una opción: una hoja que sube desde abajo, una pregunta a la vez */
+.jg-hoja-fondo { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgb(20 21 26 / .45); animation: vd-aparecer .2s ease both; }
+.jg-hoja { width: 100%; max-width: 430px; max-height: 85dvh; display: flex; flex-direction: column; gap: 12px; padding: 16px 20px 24px; border: 2px solid var(--tinta); border-bottom: 0; border-radius: 22px 22px 0 0; background: var(--papel); color: var(--tinta); font-family: var(--font); animation: vd-subir .3s var(--ease) both; }
+.jg-hoja:focus { outline: none; }
+.jg-hoja-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.jg-hoja-lista { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; }
+.jg-hoja-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1.5px solid var(--control); border-radius: 14px; background: var(--papel); color: var(--tinta); font: 500 15px/20px var(--font); text-align: left; cursor: pointer; }
+.jg-hoja-item[aria-pressed="true"] { background: var(--sol); border-color: var(--tinta); font-weight: 600; }
+.jg-hoja-item:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.jg-hoja-item small { flex: none; font: 600 11px/1 var(--mono); letter-spacing: .02em; color: var(--suave); }

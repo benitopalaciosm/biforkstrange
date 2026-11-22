@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Button, Chip, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
+  Button, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
 import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, minuscula, plata, primeraFrase, sinSueldo } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
@@ -8,6 +8,7 @@ import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
+import { HojaEleccion } from "./HojaEleccion";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
 
@@ -170,8 +171,10 @@ function fraseCorta(o: OpcionComparada, detalle: string): string | undefined {
  * el sueldo (10% · mediana · 90%) y lo que puede pasar el primer año. La simulación va aparte, más abajo.
  */
 function OpcionConGemelos({
-  o, decision, categoria, base, tope, riesgo, selected, onSelect, supuesto, edadFinal, color, ganadas, total, lider, empresa, textoEmpresa,
+  o, decision, categoria, base, tope, riesgo, selected, onSelect, supuesto, cambiable, edadFinal, color, ganadas, total, lider, empresa, textoEmpresa,
 }: {
+  /** Tiene algo que elegir dentro (rubro, región): tocarla de nuevo abre la hoja. */
+  cambiable: boolean;
   o: OpcionComparada;
   empresa?: EmpresaOferta | null;
   textoEmpresa?: string;
@@ -221,7 +224,7 @@ function OpcionConGemelos({
           <RangoSueldo rango={o.sueldo} tope={tope} color={color} />
           <Probabilidades o={o} />
           {nota && <span className="jg-destacado">{nota}</span>}
-          {supuesto && <span className="vd-opcion-sub">En la simulación vas a: {supuesto}</span>}
+          {supuesto && <span className="vd-opcion-sub">{cambiable ? <>Vas a: <strong>{supuesto}</strong> · toca para cambiar</> : <>En la simulación vas a: {supuesto}</>}</span>}
           {empresa && <EmpresaLinea empresa={empresa} texto={textoEmpresa} />}
         </>
       }
@@ -581,6 +584,7 @@ export function Carta({
     setSel(null);
     setInternas({});
     setFiltro("");
+    setHoja(null);
   }, [llave]);
 
   const e = vista.estado;
@@ -593,23 +597,51 @@ export function Carta({
   const faltan = opcion ? opcion.elecciones_internas.filter((i) => internas[i.variable] === undefined) : [];
   const foco = comparadas.find((o) => o.opcion === sel) ?? comparadas.find((o) => !o.es_base) ?? comparadas[0];
 
-  const panelInternas = useRef<HTMLDivElement>(null);
+  /** La pregunta abierta en la hoja de abajo (a qué rubro, a qué región), o null si está cerrada. */
+  const [hoja, setHoja] = useState<number | null>(null);
+  const primeraFaltante = (o: OpcionPendiente, valores: Internas) =>
+    Math.max(0, o.elecciones_internas.findIndex((i) => valores[i.variable] === undefined));
+
   const elegirOpcion = (id: string) => {
-    if (id === sel) return;
+    const o = pendiente.opciones.find((x) => x.opcion === id);
+    const pide = (o?.elecciones_internas.length ?? 0) > 0;
+    // tocar de nuevo la elegida reabre lo que falta (o lo ya elegido, para cambiarlo)
+    if (id === sel) {
+      if (o && pide) setHoja(primeraFaltante(o, internas));
+      return;
+    }
     setSel(id);
     setInternas({});
-    // si la opción pide algo más (a qué rubro, a qué región), se lleva la vista hasta esa pregunta
-    if ((pendiente.opciones.find((o) => o.opcion === id)?.elecciones_internas.length ?? 0) > 0) {
-      setTimeout(() => panelInternas.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 80);
-    }
+    setHoja(pide ? 0 : null);
+  };
+
+  /** Lo que la simulación usa si no eliges: lo que ya trae la comparación, o lo más común. */
+  const porDefecto = (variable: string) => {
+    if (!opcion) return undefined;
+    const simulado = comparadas.find((c) => c.opcion === opcion.opcion)?.parametros?.[variable];
+    if (simulado !== undefined) return simulado;
+    const alts = opcion.elecciones_internas.find((i) => i.variable === variable)?.alternativas ?? [];
+    return [...alts].sort((a, b) => (b.prob ?? 0) - (a.prob ?? 0))[0]?.valor;
   };
 
   const elegirInterna = (variable: string, valor: string | number) => {
     if (!opcion) return;
     const nuevas = { ...internas, [variable]: valor };
     setInternas(nuevas);
+    const siguiente = opcion.elecciones_internas.findIndex((i) => nuevas[i.variable] === undefined);
+    setHoja(siguiente >= 0 ? siguiente : null);
     // con todo elegido, los gemelos de esta opción se vuelven a simular por ese camino
-    if (comparacion && opcion.elecciones_internas.every((i) => nuevas[i.variable] !== undefined)) onComparar({ [opcion.opcion]: nuevas });
+    if (comparacion && siguiente < 0) onComparar({ [opcion.opcion]: nuevas });
+  };
+
+  const usarPorDefecto = () => {
+    if (!opcion) return;
+    const nuevas = { ...internas };
+    for (const i of opcion.elecciones_internas) if (nuevas[i.variable] === undefined) nuevas[i.variable] = porDefecto(i.variable) as string | number;
+    setInternas(nuevas);
+    setHoja(null);
+    // si ya había algo elegido distinto de lo simulado, se vuelve a simular con la mezcla
+    if (comparacion && Object.keys(internas).length > 0) onComparar({ [opcion.opcion]: nuevas });
   };
 
   const confirmar = () => {
@@ -704,6 +736,7 @@ export function Carta({
               selected={sel === o.opcion}
               onSelect={() => elegirOpcion(o.opcion)}
               supuesto={supuestoDe(o)}
+              cambiable={(pendiente.opciones.find((x) => x.opcion === o.opcion)?.elecciones_internas.length ?? 0) > 0}
               edadFinal={edadGemelos}
               color={colores[o.opcion]}
               ganadas={ganadores ? ganadas(o.opcion) : null}
@@ -750,36 +783,17 @@ export function Carta({
 
       {recalculando && <Cargando>Simulando los mundos por ese camino…</Cargando>}
 
-      {opcion && opcion.elecciones_internas.length > 0 && (
-        <div ref={panelInternas} className="jg-columna">
-        <Panel className="jg-falta">
-          <Meta>Falta un detalle de «{opcion.nombre}»</Meta>
-          {opcion.elecciones_internas.map((i) => (
-            <Stack key={i.variable} gap={8}>
-              <Heading level={3} as="h2">
-                {i.pregunta}
-              </Heading>
-              <Row>
-                {i.alternativas.map((a) => (
-                  <Chip key={String(a.valor)} pressed={internas[i.variable] === a.valor} onToggle={() => elegirInterna(i.variable, a.valor)}>
-                    {a.nombre}
-                    {comparadas.find((c) => c.opcion === opcion.opcion)?.parametros?.[i.variable] === a.valor && internas[i.variable] === undefined
-                      ? " · lo más común"
-                      : ""}
-                  </Chip>
-                ))}
-              </Row>
-            </Stack>
-          ))}
-          {comparacion && (
-            <Text size="sm">
-              {faltan.length > 0
-                ? "Mientras no elijas, en la simulación de esta opción vas a donde va más gente."
-                : "La simulación de esta opción ya va por el camino que elegiste."}
-            </Text>
-          )}
-        </Panel>
-        </div>
+      {opcion && hoja !== null && opcion.elecciones_internas.length > 0 && (
+        <HojaEleccion
+          titulo={opcion.nombre}
+          preguntas={opcion.elecciones_internas}
+          paso={hoja}
+          valores={internas}
+          porDefecto={porDefecto}
+          onElegir={elegirInterna}
+          onPorDefecto={usarPorDefecto}
+          onCerrar={() => setHoja(null)}
+        />
       )}
 
       {comparacion && foco && (
@@ -803,47 +817,6 @@ export function Carta({
               Tu sueldo en los mundos donde eliges {minuscula(foco.nombre)}, desde hoy hasta los {edadGemelos} años. La línea de color es la mediana; la
               punteada, lo que pasaría si eligieras {base ? minuscula(base.nombre) : "la otra opción"}. La franja va del 10% al 90% de los mundos: mientras
               más se abre, más depende de la suerte. Toca otra opción para ver la suya.
-            </Info>
-          </section>
-
-          <section className="jg-seccion">
-            <Heading level={3} as="h2">
-              Además del sueldo
-            </Heading>
-            {(() => {
-              const firma = (o: OpcionComparada) =>
-                `${Math.round(o.paso_por_cesantia * 100)}|${Math.round(o.meses_sin_trabajo)}|${o.cargos.map((c) => `${c.cargo}:${Math.round(c.prob * 100)}`).join(",")}`;
-              const iguales = comparadas.every((o) => firma(o) === firma(comparadas[0]));
-              return (iguales ? comparadas.slice(0, 1) : comparadas).map((o) => {
-                const meses = Math.round(o.meses_sin_trabajo);
-                return (
-                  <div className="jg-fila-opcion" key={o.opcion} data-foco={!iguales && comparadas.length > 1 && o.opcion === sel}>
-                    <span className="jg-fuerte">
-                      {iguales ? (
-                        "Igual con todas las opciones"
-                      ) : (
-                        <>
-                          <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
-                          {o.nombre}
-                        </>
-                      )}
-                    </span>
-                    <span className="jg-chico">
-                      Quedas sin trabajo alguna vez en <strong>{Math.round(o.paso_por_cesantia * 100)} de 100</strong> mundos
-                      {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin trabajo en todo el período` : ""}
-                    </span>
-                    <span className="jg-medidor" aria-hidden="true">
-                      <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
-                    </span>
-                    <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
-                    <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
-                  </div>
-                );
-              });
-            })()}
-            <Info pregunta="¿Por qué en tantos mundos paso por cesantía?">
-              Cuenta cualquier mundo donde estás al menos un mes sin trabajo en todo el período, aunque después encuentres otro: un despido, el
-              cierre de la empresa, una renuncia o un tiempo estudiando.
             </Info>
           </section>
 
@@ -881,10 +854,15 @@ export function Carta({
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} />}
         {cargando && <Cargando>Tirando tu dado y viviendo el año…</Cargando>}
-        {opcion && faltan.length > 0 && !cargando && <Text size="sm">Falta elegir: {faltan.map((f) => minuscula(f.pregunta)).join(" ")}</Text>}
-        <Button onClick={confirmar} disabled={!opcion || faltan.length > 0 || cargando || recalculando}>
-          {cargando ? "Tirando el dado…" : opcion ? "Confirmar" : "Toca una opción"}
-        </Button>
+        {opcion && faltan.length > 0 && !cargando ? (
+          <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>
+            Elegir el detalle
+          </Button>
+        ) : (
+          <Button onClick={confirmar} disabled={!opcion || cargando || recalculando}>
+            {cargando ? "Tirando el dado…" : opcion ? "Confirmar" : "Toca una opción"}
+          </Button>
+        )}
       </div>
     </Screen>
   );
