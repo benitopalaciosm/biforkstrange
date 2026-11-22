@@ -5,15 +5,20 @@ import type { Calidad, Estado, Rango, SinNovedad } from "../types";
 import { Espera } from "./Apuesta";
 import { Logo } from "./Logo";
 
-/** "Año 2 sin novedades · $657 mil  +$4 mil al mes": lo único que cambió en un año que pasó sin nada. */
+/**
+ * "Año 2 sin novedades · $657 mil": lo único que cambió en un año que pasó sin nada. Si el alza anual movió el
+ * sueldo más de 2%, se dice eso: "sin novedades" junto a +$124 mil se contradecía.
+ */
 export function FranjaSinNovedad({ s }: { s?: SinNovedad | null }) {
   if (!s) return null;
+  const antes = s.sueldo - s.delta;
+  const casiIgual = antes > 0 ? Math.abs(s.delta) < 0.02 * antes : Math.abs(s.delta) < 1000;
   return (
     <div className="jg-sin-novedad" role="status">
       <span>
-        Año {s.anio} sin novedades · <b>{plata(s.sueldo)}</b>
+        {casiIgual ? `Año ${s.anio} sin novedades` : `Año ${s.anio}: solo el alza anual`} · <b>{plata(s.sueldo)}</b>
       </span>
-      {Math.abs(s.delta) >= 1000 && (
+      {!casiIgual && (
         <span className="jg-delta" data-signo={s.delta > 0 ? "mas" : "menos"}>
           {conSigno(s.delta)} al mes
         </span>
@@ -97,7 +102,7 @@ export function Cargando({ children, texto, frases, cada = 2400 }: { children?: 
 export function ErrorCaja({ error, onReintentar }: { error: string; onReintentar?: () => void }) {
   return (
     <div className="vd-pila" style={{ gap: 10 }} role="alert">
-      <div className="jg-error">No pudimos hablar con el simulador. {error}</div>
+      <div className="jg-error">No pudimos conectar con el simulador. {error}</div>
       {onReintentar && (
         <Button variant="white" onClick={onReintentar}>
           Reintentar
