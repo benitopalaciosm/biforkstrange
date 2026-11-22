@@ -18,6 +18,7 @@ export { StationTimeline, YearTicker } from "./components/Timeline";
 export { LinesChart, RangeCompare, VisitsTimeline, type Range } from "./components/Charts";
 export { ChevronLeftIcon, CheckIcon, PhoneIcon, SunIcon, MoonIcon } from "./components/Icon";
 export { ThemeToggle } from "./components/ThemeToggle";
+export { BifurcaMark, BifurcaLogo } from "./components/Brand";
 
 export { LifePathHero } from "./illustrations/LifePathHero";
 export { DecisionArt, DECISION_ART_KINDS, type DecisionArtKind } from "./illustrations/DecisionArt";

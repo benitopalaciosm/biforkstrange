@@ -20,7 +20,8 @@ import copy
 import re
 from dataclasses import dataclass, field
 
-from app.sim.motor import empresas
+from app.sim.motor import empresas, ia
+from app.sim.motor.narrativa import titular_ia
 from app.sim.motor.azar import Dados
 from app.sim.motor.paquete import Paquete
 from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_de
@@ -31,6 +32,9 @@ EVENTOS_PERSONALES = frozenset({"cancer"})
 EVENTO_MUNDO = "recesion"
 ALZAS = frozenset({"alza_anual"})
 SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
+# Lo del mundo se sortea al inicio del año, antes de la decisión, para que el año entero ya lo vea. La burbuja y
+# el auge del cobre solo pasan con la incertidumbre de IA prendida (su `cuando` lee ia_v2).
+EVENTOS_MUNDO = (EVENTO_MUNDO, "burbuja_ia", "auge_cobre")
 # Decisiones cuya historia nombra a la empresa que te ofrece trabajo
 DECISIONES_CON_OFERTA = empresas.DECISIONES_CON_OFERTA
 # Cesante, quien elige buscar vive el resto del año mes a mes: cada mes pueden pasar los eventos con
@@ -43,14 +47,15 @@ MES_BUSCANDO = "mes_buscando"
 # la comparten mientras están en la misma pega, y deja de ser la misma cuando una se cambia.
 # La recesión (EVENTO_MUNDO) siempre es igual para todas. Ver docs/DECISIONES.md, decisión 3.
 SUERTE_POR_PEGA = True
-EVENTOS_DE_LA_PEGA = frozenset({"alza_anual", "ascenso", "separacion_empleo", "oferta_llega", "startup_cierra"})
+EVENTOS_DE_LA_PEGA = frozenset({"alza_anual", "ascenso", "separacion_empleo", "oferta_llega", "startup_cierra",
+                                "ia_empresa_adopta", "ia_reestructura"})
 
 # Cada año: si la vida te obliga, decides eso. Si no, a veces te llega algo (LLEGAN). Si lo que sale es algo
 # que la gente busca por su cuenta, el año es tranquilo: la persona puede buscar lo que quiera o seguir igual,
 # y el gemelo considera lo que salió y responde como la gente real. Ver docs/DECISIONES.md, decisión 13.
 TRANQUILO = "anio_tranquilo"
 LLEGAN = frozenset({"oferta_externa", "unirse_a_startup", "jefatura", "remoto_para_afuera", "practica",
-                    "intercambio", "volver_a_chile"})
+                    "intercambio", "volver_a_chile", "liderar_adopcion_ia"})
 _DECISION_TRANQUILO = {
     "id": TRANQUILO, "nombre": "Año tranquilo", "categoria": "trabajo", "calidad": "supuesto",
     "pregunta": "Este año no te llegó ninguna propuesta. ¿Quieres mover algo tú?",
@@ -168,13 +173,22 @@ class Vida:
 
     def _sortear_ia(self) -> None:
         """Qué tan rápido llega la IA en este mundo: se sortea una vez por gemelo, al nacer o al clonarlo
-        con otros dados. Recorre el rango con fuente de IA_JOVEN (Brynjolfsson 2025): 0,9 lento, 0,75 rápido."""
+        con otros dados.
+
+        Con la incertidumbre de IA prendida (ia.py), el sorteo da el ritmo con los pesos del FRI (P_RITMO_IA) y el
+        golpe a los jóvenes lo lleva ia_encontrar, así que ia_castigo_joven queda neutro. Apagada, recorre el rango
+        con fuente de IA_JOVEN (Brynjolfsson 2025): 0,9 lento, 0,75 rápido, y el ritmo es el tercil."""
         if "ia_adopcion" not in self.e:
             return  # estado sin las variables del escenario (paquete viejo)
         u = self.dados.u(0, SITIO_IA)
-        bajo, alto = self.pq.parametros["IA_JOVEN"].get("rango") or (self.pq.k("IA_JOVEN"),) * 2
         self.e["ia_adopcion"] = u
+        if ia.activa():
+            self.e["ia_ritmo"] = ia.ritmo(self.pq, u)
+            self.e["ia_castigo_joven"] = 1.0
+            return
+        bajo, alto = self.pq.parametros["IA_JOVEN"].get("rango") or (self.pq.k("IA_JOVEN"),) * 2
         self.e["ia_castigo_joven"] = alto - (alto - bajo) * u
+        self.e["ia_ritmo"] = "lento" if u < 1 / 3 else "medio" if u < 2 / 3 else "rapido"
 
     # ------------------------------------------------------------------ alcance
     def _evento_en_alcance(self, id_: str) -> bool:
@@ -185,9 +199,21 @@ class Vida:
         self.e = self.pq.derivar(self.e)
         self.e["prima_personal"] = self._prima_personal()
         self._exposicion_del_puesto()
+        self._derivar_ia()
         ascenso = self.pq.eventos["ascenso"]
         aplica = self.pq.evaluar(ascenso["cuando"], self.e)
         self.e["prob_ascenso"] = self.pq.evaluar(ascenso["prob_anual"], self.e) if aplica else 0.0
+
+    def _derivar_ia(self) -> None:
+        """Lo que la incertidumbre de IA necesita cada año (ver ia.py). Con la flag apagada todo queda neutro."""
+        e = self.e
+        e["ia_v2"] = 1 if ia.activa() else 0
+        e.setdefault("ia_ritmo", "medio")
+        e["ia_anios"] = self.anio
+        e["ia_rampa"] = min(1.0, self.anio / self.pq.k("IA_RAMPA_ANIOS")) if e["ia_v2"] else 0.0
+        e["ia_tipo"] = ia.tipo(self.pq, e)
+        e["adaptabilidad"] = ia.adaptabilidad(self.pq, e)
+        e["ia_encontrar"] = ia.encontrar(self.pq, e)
 
     def _prima_personal(self) -> float:
         """Cuánto gana la persona sobre la mediana de su edad y educación. Las reglas que fijan
@@ -233,12 +259,19 @@ class Vida:
         self.registro = {"anio": self.anio + 1, "edad": self.e["edad"], "recesion": False,
                          "decisiones": [], "eventos": [],
                          "sueldo_inicio": round(self.e["sueldo"]), "ahorro_inicio": round(self.e["ahorro"])}
+        if ia.activa():
+            self.registro["ia"] = {"ritmo": self.e.get("ia_ritmo", "medio"),
+                                   "titular": titular_ia(self.e.get("ia_ritmo", "medio"), self.anio + 1)}
         self.mes, self._meses_buscando_anio, self._antes_del_despido = None, 0, (0, 0.0)
         self.reparto = None  # cómo se sorteó la carta de este año, si hubo sorteo
         self.sugerida = None
         self._derivar()
-        self._evento(EVENTO_MUNDO)
+        for id_ in EVENTOS_MUNDO:
+            if id_ in self.pq.eventos:
+                self._evento(id_)
         self.registro["recesion"] = bool(self.e["recesion"])
+        if "ia" in self.registro:
+            self.registro["ia"].update(burbuja=bool(self.e.get("ia_burbuja")), auge_cobre=bool(self.e.get("auge_cobre")))
         decisiones = self._forzadas()
         if carta is not None:
             # la duda va primero (es la carta que la persona eligió), pero no tapa las forzadas: quien está
@@ -271,7 +304,7 @@ class Vida:
             else:
                 self.e["busca_mientras_informal"] = 0  # ya no está en lo informal (volvió a buscar, emprendió...)
         self.cola += [("evento", id_) for id_, ev in self.pq.eventos.items()
-                      if id_ != EVENTO_MUNDO and ev.get("paso", "año") != "mes" and self._evento_en_alcance(id_)]
+                      if id_ not in EVENTOS_MUNDO and ev.get("paso", "año") != "mes" and self._evento_en_alcance(id_)]
         self.cola.append(("cierre",))
 
     def avanzar(self, decisor) -> dict | None:
@@ -532,7 +565,7 @@ class Vida:
                 continue
             p = float(self.pq.evaluar(r["prob"], self.e))
             if i == 0 and decision_id in BUSQUEDAS:
-                p *= self.e["p_encontrar"]
+                p *= self.e["p_encontrar"] * self.e.get("ia_encontrar", 1.0)
             probs.append(min(max(p, 0.0), 1.0))
         if resto is not None:
             probs[resto] = max(0.0, 1.0 - sum(probs))
@@ -580,6 +613,8 @@ class Vida:
                 var == "antiguedad" and ef["op"] == "fija" and self.e[var] == 0 and previo != 0
             ) or (var == "tipo_empleador" and self.e[var] != previo):
                 self.pega += 1  # trabajo nuevo: desde aquí, su suerte en la pega es otra
+                if "ia_empresa" in self.e:
+                    self.e["ia_empresa"] = 0  # la empresa nueva todavía no adopta IA
             if ef.get("duracion"):
                 self.temporales.append({"quedan": ef["duracion"], "var": var, "op": ef["op"],
                                         "valor": valor, "previo": previo})
@@ -734,7 +769,7 @@ class Vida:
                 return
             prob = min(max(float(self.pq.evaluar(ev["prob_mensual" if mensual else "prob_anual"], self.e)), 0.0), 1.0)
             if id_ == OFERTA_MES:
-                prob *= self.e["p_encontrar"]
+                prob *= self.e["p_encontrar"] * self.e.get("ia_encontrar", 1.0)
             if self.dados.u(self.anio, sitio) >= prob:
                 return
         resultado, prob_resultado = self._sortear(ev["resultados"], f"{sitio}:res")
@@ -893,6 +928,8 @@ class Vida:
             "primer_empleo": e["primer_empleo"],
             "empresa_id": e.get("empresa_id", -1), "empresa": self._nombre_empresa(), "rol": self._nombre_cargo(),
             "ia_adopcion": round(e.get("ia_adopcion", 0.5), 3),
+            "ia_ritmo": e.get("ia_ritmo", "medio"), "ia_tipo": e.get("ia_tipo", "no_afectado"),
+            "adaptabilidad": e.get("adaptabilidad", 0.5), "usa_ia": e.get("usa_ia", 0),
         }
 
     def _nombre_empresa(self) -> str | None:

@@ -1881,12 +1881,17 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "azar_uniforme(1.05, 1.25)"
+         "valor": "azar_uniforme(1.05, 1.25) * (1 + si(y(ia_v2, ia_reconvertido, ia_prima_cobrada == 0), k('IA_PRIMA_SKILL') * si(tipo_empleador == 'publico', k('IA_PRIMA_PUBLICO'), 1), 0))"
         },
         {
          "var": "antiguedad",
          "op": "fija",
          "valor": 0
+        },
+        {
+         "var": "ia_prima_cobrada",
+         "op": "fija",
+         "valor": "si(y(ia_v2, ia_reconvertido), 1, ia_prima_cobrada)"
         }
        ],
        "luego": "tipo_de_empleador"
@@ -1900,12 +1905,17 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "azar_uniforme(0.85, 1.02)"
+         "valor": "azar_uniforme(0.85, 1.02) * (1 + si(y(ia_v2, ia_reconvertido, ia_prima_cobrada == 0), k('IA_PRIMA_SKILL') * si(tipo_empleador == 'publico', k('IA_PRIMA_PUBLICO'), 1), 0))"
         },
         {
          "var": "antiguedad",
          "op": "fija",
          "valor": 0
+        },
+        {
+         "var": "ia_prima_cobrada",
+         "op": "fija",
+         "valor": "si(y(ia_v2, ia_reconvertido), 1, ia_prima_cobrada)"
         }
        ],
        "luego": "tipo_de_empleador"
@@ -1962,12 +1972,17 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "azar_uniforme(1.0, 1.2)"
+         "valor": "azar_uniforme(1.0, 1.2) * (1 + si(y(ia_v2, ia_reconvertido, ia_prima_cobrada == 0), k('IA_PRIMA_SKILL') * si(tipo_empleador == 'publico', k('IA_PRIMA_PUBLICO'), 1), 0))"
         },
         {
          "var": "antiguedad",
          "op": "fija",
          "valor": 0
+        },
+        {
+         "var": "ia_prima_cobrada",
+         "op": "fija",
+         "valor": "si(y(ia_v2, ia_reconvertido), 1, ia_prima_cobrada)"
         }
        ],
        "luego": "tipo_de_empleador"
@@ -3051,7 +3066,8 @@
      "fuentes": [
       "equipo"
      ],
-     "calidad": "supuesto"
+     "calidad": "supuesto",
+     "requisito": "no(ia_v2)"
     },
     {
      "id": "ignorar",
@@ -3077,6 +3093,121 @@
       "brynjolfsson_2025",
       "microsoft_ia"
      ],
+     "calidad": "mixto",
+     "requisito": "no(ia_v2)"
+    },
+    {
+     "id": "curso_corto",
+     "nombre": "Un curso corto",
+     "requisito": "ia_v2",
+     "detalle": "Unas 20 horas, como la mayoría de los cursos SENCE. Aprendes a usarla, pero un curso corto no mueve el sueldo.",
+     "resultados": [
+      {
+       "id": "la_usa",
+       "prob": "k('IA_CURSO_CORTO_USA')",
+       "texto": "Empiezas a usar IA en tu trabajo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      },
+      {
+       "id": "no_prende",
+       "prob": "resto",
+       "texto": "Haces el curso, pero no cambia cómo trabajas.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -1
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "sence_comision_2011",
+      "stephany_teutloff_2024"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "programa_largo",
+     "nombre": "Un programa largo",
+     "requisito": "ia_v2",
+     "detalle": "Más de 140 horas en el año: en Chile, el único tipo de curso que mueve el sueldo. Tu trabajo pasa a ser con la IA, no contra ella, y al cambiarte de pega cobras la prima de saber IA.",
+     "resultados": [
+      {
+       "id": "termina",
+       "prob": "k('IA_PROGRAMA_TERMINA')",
+       "texto": "Terminas el programa y cambias cómo trabajas.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "ia_reconvertido",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -6
+        }
+       ]
+      },
+      {
+       "id": "abandona",
+       "prob": "resto",
+       "texto": "Lo dejas a medio camino.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "sence_comision_2011",
+      "card_kluve_weber_2018",
+      "fmi_movilidad_2024"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "no_por_ahora",
+     "nombre": "No por ahora",
+     "requisito": "ia_v2",
+     "detalle": "Sigues como estás. Cuánto te afecta depende de qué tan rápido llegue la IA en este mundo y de si tu trabajo es de los que la IA reemplaza.",
+     "resultados": [
+      {
+       "id": "nada",
+       "prob": 1,
+       "texto": "Sigues igual.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "canaries_2026",
+      "oit_genai_2025"
+     ],
      "calidad": "mixto"
     }
    ],
@@ -3090,10 +3221,21 @@
      "fuente": "microsoft_ia",
      "cifra": "Aplicabilidad por ocupación y área",
      "uso": "qué tan expuesta está el área"
+    },
+    {
+     "fuente": "sence_comision_2011",
+     "cifra": "Los cursos cortos de la franquicia SENCE no mueven sueldo ni empleo; solo los de más de 140 horas",
+     "uso": "curso corto contra programa largo"
+    },
+    {
+     "fuente": "stephany_teutloff_2024",
+     "cifra": "Saber IA paga 21% más al cambiarte (freelancers)",
+     "uso": "prima al cambiarte tras un programa largo o liderar la adopción"
     }
    ],
    "calidad": "mixto",
-   "en_juego": "ia"
+   "en_juego": "ia",
+   "creencia_vs_dato": "\"Un curso de IA y listo\": en Chile, los cursos cortos no mueven el sueldo; los de más de 140 horas sí, y pagan recién a los 2 o 3 años."
   },
   {
    "id": "invertir_en_red",
@@ -4805,6 +4947,177 @@
    "calidad": "mixto",
    "en_juego": "cesante",
    "notas": "La dispara oferta_cesante (vía tipo_de_oferta) en el mismo mes. Gemelos y vidas simuladas eligen con regla fija: aceptar si oferta_sueldo >= GEMELO_UMBRAL_OFERTA * sueldo_ref o si meses_cesante + 1 >= GEMELO_MES_ACEPTA_TODO; si no, rechazar. También le llega a quien trabaja informal mientras busca (busca_mientras_informal); al aceptar vuelve a un empleo con contrato."
+  },
+  {
+   "id": "liderar_adopcion_ia",
+   "nombre": "Tu empresa adopta IA",
+   "categoria": "trabajo",
+   "pregunta": "Tu empresa va a meter IA en el trabajo de tu equipo. ¿Qué haces?",
+   "cuando": "y(ia_v2, estado == 'empleado')",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0,
+    "proactiva": false,
+    "solo_por_evento": true
+   },
+   "opciones": [
+    {
+     "id": "liderar",
+     "nombre": "Liderar la adopción",
+     "detalle": "Te ofreces a llevar la IA a tu equipo: más visibilidad, más trabajo.",
+     "resultados": [
+      {
+       "id": "resulta",
+       "prob": "k('IA_LIDERAR_EXITO')",
+       "texto": "Funciona: tu equipo trabaja distinto y se nota que fuiste tú.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "prob_ascenso_extra",
+         "op": "suma",
+         "valor": "k('IA_LIDERAR_ASCENSO')"
+        },
+        {
+         "var": "red",
+         "op": "suma",
+         "valor": 5
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        },
+        {
+         "var": "ia_reconvertido",
+         "op": "fija",
+         "valor": 1
+        }
+       ]
+      },
+      {
+       "id": "no_resulta",
+       "prob": "resto",
+       "texto": "El piloto no prende, pero aprendes a usarla.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -5
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "equipo",
+      "stephany_teutloff_2024"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "aprender",
+     "nombre": "Aprender a usarla",
+     "detalle": "Haces lo que te piden y aprendes la herramienta.",
+     "resultados": [
+      {
+       "id": "aprende",
+       "prob": "k('IA_APRENDE_PROB')",
+       "texto": "La integras a tu trabajo.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "usa_ia",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -2
+        }
+       ]
+      },
+      {
+       "id": "a_medias",
+       "prob": "resto",
+       "texto": "La usas a medias.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "seguir",
+     "nombre": "Seguir igual",
+     "detalle": "Trabajas como siempre mientras se pueda.",
+     "resultados": [
+      {
+       "id": "nada",
+       "prob": 1,
+       "texto": "Sigues igual.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    },
+    {
+     "id": "buscar",
+     "nombre": "Buscar otra pega",
+     "detalle": "Si tu trabajo es de los que la IA reemplaza, quizás conviene moverse antes.",
+     "resultados": [
+      {
+       "id": "busca",
+       "prob": 1,
+       "texto": "Empiezas a buscar.",
+       "tono": "neutro",
+       "efectos": [],
+       "luego": "buscar_estando_empleado"
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "census_btos_2026",
+     "cifra": "22% de las empresas de EE.UU. usa IA (agosto 2026)",
+     "uso": "frecuencia"
+    },
+    {
+     "fuente": "nyfed_ia_2026",
+     "cifra": "15% de las empresas de servicios contrató menos por la IA; 4% despidió",
+     "uso": "qué hacen las empresas"
+    },
+    {
+     "fuente": "hosseini_lichtinger_2026",
+     "cifra": "Las empresas que adoptan IA contratan 22% menos juniors; los seniors no cambian",
+     "uso": "a quién le pega"
+    }
+   ],
+   "calidad": "supuesto",
+   "en_juego": "ia",
+   "creencia_vs_dato": "\"La IA despide gente\": hasta ahora, las empresas que la adoptan contratan menos juniors, pero casi no despiden."
   }
  ]
 }

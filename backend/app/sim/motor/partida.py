@@ -13,7 +13,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from threading import Lock
 
-from app.sim.motor import empresas, gemelos
+from app.sim.motor import empresas, gemelos, ia
 from app.sim.motor.azar import Dados
 from app.sim.motor.motor import LLEGAN, REPETIR_CARTA, TRANQUILO, FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import Paquete, paquete
@@ -142,6 +142,10 @@ def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dic
                 cierre["mejor_que_gemelos"] = sum(1 for x in sueldos if x < hoy) / len(sueldos)
         cierre["primera_decision"] = {"decision": comparacion["decision"], "pregunta": comparacion["pregunta"],
                                       "elegida": elegida, "comparacion": comparacion}
+    if ia.activa():
+        # el ritmo de la IA de tu mundo (lo fuiste leyendo en los titulares), qué es cada ritmo y quién dice qué
+        cierre["ia"] = {"ritmo": partida.vida.e.get("ia_ritmo"), **ia.escenarios(),
+                        "por_ritmo": (comparacion or {}).get("ia")}
     return cierre
 
 

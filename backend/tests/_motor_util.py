@@ -210,7 +210,10 @@ def estado_al_azar(R: random.Random) -> dict:
         "institucion_destino": R.choice([f["universidad_id"] for f in p.filas("universidades") if f["tipo_institucion"] != "EXT"]),
         "empresa_id": R.choice([-1, R.randint(0, len(p.filas("empresas_catalogo")) - 1)]),
         "cargo_id": R.choice([-1, R.randint(0, len(p.filas("cargos_catalogo")) - 1)]),
-        "ia_adopcion": R.random(), "ia_castigo_joven": R.uniform(0.75, 0.9),
+        "ia_adopcion": R.random(), "ia_castigo_joven": R.uniform(0.75, 0.9), "ia_v2": R.randint(0, 1), "ia_ritmo": R.choice(["lento", "medio", "rapido"]),
+         "ia_tipo": R.choice(["automatiza", "aumenta", "incognita", "no_afectado"]), "ia_anios": R.randint(0, 10),
+         "ia_rampa": R.random(), "adaptabilidad": R.random(), "ia_encontrar": R.uniform(0.5, 1), "ia_empresa": R.randint(0, 1),
+         "ia_reconvertido": R.randint(0, 1), "ia_prima_cobrada": R.randint(0, 1), "ia_burbuja": 1 if R.random() < 0.1 else 0, "auge_cobre": 1 if R.random() < 0.1 else 0,
     }
     for v in p.variables.values():
         if v["tipo"] == "modificador":
