@@ -7,7 +7,7 @@ import { ErrorApi, getPrompt, leerPerfil } from "../api";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, PerfilLeido } from "../types";
 import { ErrorCaja } from "./piezas";
-import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, banda } from "./PerfilForm";
+import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, TuPega, banda } from "./PerfilForm";
 
 type Paso = "entrada" | "leyendo" | "tu" | "pega" | "plata";
 /** Los pasos de cada camino: con CV se salta lo que el CV ya contestó. */
@@ -100,7 +100,8 @@ export function Onboarding({
     try {
       const r = await leerPerfil(texto);
       const supuestos = new Set(r.supuestos.map((x) => x.campo));
-      const dados = r.dados ?? Object.keys(r.perfil).filter((k) => !supuestos.has(k));
+      // un nombre vacío (el texto no traía empresa o cargo) no borra el que ya sabíamos
+      const dados = (r.dados ?? Object.keys(r.perfil).filter((k) => !supuestos.has(k))).filter((k) => r.perfil[k as keyof Perfil] !== "");
       const nuevos = Object.fromEntries(dados.map((k) => [k, r.perfil[k as keyof Perfil]])) as Partial<Perfil>;
       const perfil = { ...p, ...nuevos };
       const ahora = new Set([...sabidos, ...dados]);
@@ -227,6 +228,7 @@ export function Onboarding({
 
       {catalogo && paso === "pega" && (
         <Tarjeta key="pega" titulo="¿Dónde trabajas hoy?">
+          <TuPega p={p} set={set} />
           <Row>
             {catalogo.tipos_empleador.map((t) => (
               <Chip key={t} pressed={elegido("tipo_empleador") && p.tipo_empleador === t} onToggle={() => set("tipo_empleador", t)}>
@@ -235,7 +237,7 @@ export function Onboarding({
             ))}
           </Row>
           <Stack gap={8}>
-            <span className="jg-etiqueta">Tu cargo</span>
+            <span className="jg-etiqueta">Nivel de tu cargo</span>
             <Row>
               {catalogo.niveles.map((n) => (
                 <Chip key={n.nivel} pressed={elegido("nivel") && p.nivel === n.nivel} onToggle={() => set("nivel", n.nivel)}>
@@ -501,6 +503,8 @@ function Ficha({
   const datos: [string, string | undefined][] = [
     ["edad", `${p.edad} años`],
     ["edu", EDUCACION[p.edu] ?? p.edu],
+    ["cargo_nombre", p.cargo_nombre?.trim() || undefined],
+    ["empresa_nombre", p.empresa_nombre?.trim() ? `En ${p.empresa_nombre.trim()}` : undefined],
     ["nivel", nivel],
     ["tipo_empleador", TIPO_EMPLEADOR[p.tipo_empleador] ?? p.tipo_empleador],
     ["rubro", p.rubro],

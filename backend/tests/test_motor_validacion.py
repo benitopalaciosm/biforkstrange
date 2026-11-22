@@ -9,8 +9,8 @@ está en `docs/motor/VALIDACION.md`. Aquí se fija lo que no debe romperse:
   arregló el motor o el paquete), el test avisa y hay que actualizar el informe.
 
 Metas que quedan al borde de la tolerancia y cambian con la semilla no se fijan en ningún
-sentido: `ingreso_p50_18-24`, `ingreso_p50_25-29`, `ingreso_p75_35-39`, `publico_45-49`,
-`cambio_45_59`.
+sentido: `ingreso_p50_18-24`, `ingreso_p50_25-29`, `ingreso_p75_35-39`, `ingreso_p25_45-49`,
+`publico_45-49`, `cambio_45_59`.
 """
 
 import pytest
@@ -32,17 +32,12 @@ CUADRAN = [
     "separacion_18_29", "separacion_30_44", "separacion_45_59",
     "cambio_18_29", "cambio_30_44", "sigue_cesante_12m",
     "ingreso_p75_25-29",
+    # desde que el alza anual no baja el sueldo de quien sigue en su pega, los sueldos medianos cuadran
+    "ingreso_p50_30-34", "ingreso_p50_35-39", "ingreso_p50_40-44", "ingreso_p50_45-49", "ingreso_p75_45-49",
 ]
 BRECHAS = {
-    # ingreso_p50_30-34 quedó fuera: tras corregir los sueldos en cero está al borde de la tolerancia
-    # (con 5.000 personas falla por 3 puntos; con la cohorte chica de este test a veces cuadra)
-    "ingreso_p50_35-39": "sueldos: quien no estudió no recibe alza sus primeros 4 años y cada cesantía baja el sueldo para siempre",
-    "ingreso_p50_40-44": "ídem",
-    "ingreso_p50_45-49": "ídem",
     "ingreso_p25_25-29": "todos los independientes ganan la mediana informal (300 mil), sin dispersión ni alza",
     "ingreso_p25_35-39": "ídem",
-    "ingreso_p25_45-49": "ídem",
-    "ingreso_p75_45-49": "los sueldos altos dejan de crecer después de los 35",
     "publico_35-39": "P_REEMPLEO_PUBLICO = 0,12 fija el empleo público en 12% de los asalariados a toda edad",
 }
 

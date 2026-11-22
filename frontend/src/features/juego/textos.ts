@@ -72,8 +72,11 @@ export const situacion = (estado: string) => SITUACION[estado] ?? estado;
 export const sinSueldo = (e: Estado) => e.sueldo <= 0;
 
 /** "Semi senior · $1.688.202" o, sin sueldo, "Sin trabajo, buscando". */
+/** "Analista de riesgo en BancoEstado · $1.400.000": el nombre del cargo y la empresa si se saben; si no, el nivel. */
 export const cargoYSueldo = (e: Estado, corto = false) =>
-  sinSueldo(e) ? situacion(e.estado) : `${e.cargo} · ${corto ? plata(e.sueldo) : pesos(e.sueldo)}`;
+  sinSueldo(e)
+    ? situacion(e.estado)
+    : `${e.rol || e.cargo}${!corto && e.empresa ? ` en ${e.empresa}` : ""} · ${corto ? plata(e.sueldo) : pesos(e.sueldo)}`;
 
 export function riesgoEnPalabras(r: number): string {
   if (r <= 3) return "prefiero lo seguro";

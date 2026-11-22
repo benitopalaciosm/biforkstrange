@@ -52,6 +52,8 @@ class PerfilIn(BaseModel):
     ascensos_por_ano: float | None = Field(None, ge=0, le=2)
     empresas_cerradas: int = Field(0, ge=0, le=10)
     universidad_id: str = Field("", max_length=40)
+    empresa_nombre: str = Field("", max_length=120)
+    cargo_nombre: str = Field("", max_length=120)
 
     @field_validator("universidad_id")
     @classmethod

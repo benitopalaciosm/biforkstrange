@@ -422,6 +422,7 @@ class Vida:
             # se suelta la empresa; el cargo y el factor del último empleo se guardan: la próxima oferta sigue
             # en su línea de trabajo y su sueldo parte de lo que ganaba
             e["empresa_id"] = -1
+            e["empresa_inicial"], e["cargo_inicial"] = "", ""
             return
         if not e["tipo_empleador"] and ("decision", "tipo_de_empleador", "luego") not in self.cola[:1]:
             # reglas como bootcamp/colocado emplean sin decir en qué tipo de empresa: se sortea
@@ -446,8 +447,11 @@ class Vida:
                   or (antes.get("rubro") and antes.get("rubro") != e["rubro"]))
         self._nuevo_empleador = False
         if not cambio:
+            if antes.get("nivel") != e["nivel"]:
+                e["cargo_inicial"] = ""  # con un ascenso, el nombre del cargo que tenía ya no es el suyo
             self._revisar_cargo()
             return
+        e["empresa_inicial"], e["cargo_inicial"] = "", ""
         if e["tipo_empleador"] == "publico":
             rubro = empresas.rubro_publico(self.pq, antes)  # el sector del Estado según dónde venía
         else:
@@ -643,11 +647,12 @@ class Vida:
         }
 
     def _nombre_empresa(self) -> str | None:
+        """La empresa del catálogo o, mientras siga en el empleo con que partió, la que contó la persona."""
         emp = empresas.empresa(self.pq, self.e.get("empresa_id", -1))
-        return emp["nombre"] if emp else None
+        return emp["nombre"] if emp else self.e.get("empresa_inicial") or None
 
     def _nombre_cargo(self) -> str | None:
         if self.e.get("estado") != "empleado":
             return None
         car = empresas.cargo(self.pq, self.e.get("cargo_id", -1))
-        return car["nombre"] if car else None
+        return car["nombre"] if car else self.e.get("cargo_inicial") or None
