@@ -4,7 +4,7 @@
 
 Track: Simulations · Platanus Hack 26 Santiago, team 32
 
-Tu gemelo digital vive tus decisiones de carrera antes que tú. Eliges qué hace año a año (sabático, cambiar de pega, trabajar más, estudiar) y el simulador corre miles de futuros posibles para mostrarte el rango de resultados, no un único número.
+Tu gemelo digital vive tus decisiones de carrera antes que tú. Eliges qué hace año a año (sabático, cambiar de pega, trabajar más, estudiar) y el simulador corre miles de futuros posibles para mostrarte el rango de resultados, no un único número
 
 ## Stack
 
