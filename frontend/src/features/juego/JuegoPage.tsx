@@ -1,5 +1,5 @@
 import "./juego.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Heading, Screen, ScreenFooter, Stack, Text } from "@/shared/ui";
 import { Carta } from "./components/Carta";
 import { CierrePantalla } from "./components/Cierre";
@@ -25,13 +25,44 @@ function Juego() {
   const { catalogo, error: errorCatalogo, reintentar: reintentarCatalogo } = useCatalogo();
   /** El tutorial: "antes" de armar el perfil, o "ayuda" cuando se reabre a mitad de la partida. */
   const [tutorial, setTutorial] = useState<"antes" | "ayuda" | null>(null);
-  const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
-  // cada pantalla nueva (otra fase, otra carta) parte desde arriba
-  const punto = `${tutorial}:${j.fase}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  // cada pantalla nueva (otra fase, otra carta, otra tarjeta del onboarding) parte desde arriba
+  const { paso, completo } = j.onboarding.borrador;
+  const enOnboarding = j.fase === "perfil" ? `${paso}:${completo}` : "";
+  const punto = `${tutorial}:${j.fase}:${enOnboarding}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  const pantalla = useRef<HTMLDivElement>(null);
+  const primera = useRef(true);
   useEffect(() => {
     window.scrollTo(0, 0);
+    // y el foco va a su título, para que un lector de pantalla (o el teclado) siga desde ahí y no desde un botón que ya no existe
+    if (primera.current) {
+      primera.current = false;
+      return;
+    }
+    const titulo = pantalla.current?.querySelector<HTMLElement>("h1") ?? pantalla.current?.querySelector<HTMLElement>("h2");
+    if (!titulo) return;
+    if (!titulo.hasAttribute("tabindex")) titulo.setAttribute("tabindex", "-1");
+    titulo.focus({ preventScroll: true });
   }, [punto]);
+
+  return (
+    <div ref={pantalla} className="jg-pantalla">
+      <Fase j={j} tutorial={tutorial} setTutorial={setTutorial} catalogo={catalogo} errorCatalogo={errorCatalogo} reintentarCatalogo={reintentarCatalogo} />
+    </div>
+  );
+}
+
+function Fase({
+  j, tutorial, setTutorial, catalogo, errorCatalogo, reintentarCatalogo,
+}: {
+  j: ReturnType<typeof usePartida>;
+  tutorial: "antes" | "ayuda" | null;
+  setTutorial: (t: "antes" | "ayuda" | null) => void;
+  catalogo: ReturnType<typeof useCatalogo>["catalogo"];
+  errorCatalogo: string | null;
+  reintentarCatalogo: () => void;
+}) {
+  const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
   if (tutorial === "ayuda") {
     return <ComoFunciona textoListo="Volver a mi partida" onVolver={() => setTutorial(null)} onListo={() => setTutorial(null)} />;

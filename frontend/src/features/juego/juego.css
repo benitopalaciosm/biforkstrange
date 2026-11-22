@@ -83,6 +83,8 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-plegable summary { padding: 10px 14px; font: 600 14px/20px var(--font); cursor: pointer; }
 .jg-plegable summary:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; border-radius: 12px; }
 .jg-plegable ul { margin: 0; padding: 0 14px 12px 32px; display: flex; flex-direction: column; gap: 6px; font: 400 14px/20px var(--font); color: var(--media); }
+/* el título recibe el foco al cambiar de pantalla (para lectores de pantalla): sin el anillo del teclado */
+.jg-pantalla h1[tabindex="-1"]:focus, .jg-pantalla h2[tabindex="-1"]:focus { outline: none; }
 .jg-aviso-perfil { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 .jg-revisa { align-self: flex-start; white-space: normal; height: auto; min-height: 22px; padding-top: 3px; padding-bottom: 3px; line-height: 1.3; }
 .jg-marcado { padding: 10px 12px; margin: 0 -12px; border-radius: 14px; background: color-mix(in srgb, var(--sol) 22%, transparent); }

@@ -132,7 +132,15 @@ export function Onboarding({
         right={
           <Row gap={10} style={{ alignItems: "center" }}>
             {i >= 0 ? (
-              <div className="ob-puntos" aria-label={`Paso ${i + 1} de ${faltan.length}`}>
+              <div
+                className="ob-puntos"
+                role="progressbar"
+                aria-label="Preguntas"
+                aria-valuemin={1}
+                aria-valuemax={faltan.length}
+                aria-valuenow={i + 1}
+                aria-valuetext={`Pregunta ${i + 1} de ${faltan.length}`}
+              >
                 {faltan.map((f, k) => (
                   <i key={f} data-hecho={k <= i || undefined} />
                 ))}

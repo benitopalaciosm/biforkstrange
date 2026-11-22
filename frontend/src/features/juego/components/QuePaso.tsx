@@ -3,7 +3,7 @@ import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, peso
 import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
-import { Contador, LineaSueldo, Ruleta, type Casilla } from "./graficos";
+import { Contador, LineaSueldo, Ruleta, sinMovimiento, type Casilla } from "./graficos";
 import { Noticia } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
@@ -92,7 +92,8 @@ export function QuePaso({
   const casillas: Casilla[] = (elegida?.por_resultado ?? []).map((r) => ({ id: r.resultado, texto: r.texto || r.resultado, prob: r.prob, tono: r.tono }));
   const tocada = dado ? casillas.find((c) => c.id === dado.resultado) : undefined;
   const hayRuleta = casillas.length > 1 && tocada !== undefined;
-  const espera = hayRuleta ? 2.1 : 0.15;
+  // con menos movimiento no se espera a que la ficha recorra el dado: el texto sale de una
+  const espera = sinMovimiento() ? 0 : hayRuleta ? 2.1 : 0.15;
   const recorrido = [
     { edad: edadInicial, sueldo: sueldoInicial },
     ...vista.historia.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.sueldo })),
@@ -110,6 +111,7 @@ export function QuePaso({
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
         right={<Meta>Mundo {GEMELOS + 1}</Meta>}
       />
+      <h1 className="vd-sr">{dado ? `Qué te pasó al elegir «${dado.opcion_nombre}»` : "Qué te pasó"}</h1>
 
       {edades.length > 1 && (
         <Stack gap={6}>

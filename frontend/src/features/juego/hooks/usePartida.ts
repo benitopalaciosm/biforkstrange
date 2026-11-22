@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { sinMovimiento } from "../components/graficos";
 import { getDudas, getMundo, getNarracion, getVista, textoError } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
 import { borradorInicial, useBorrador, type Borrador, type Fuente } from "./useBorrador";
@@ -231,7 +232,7 @@ export function usePartida() {
         setPrevia(antes);
         setVista(v);
         setFase("paso");
-      }, undefined, 2400);
+      }, undefined, sinMovimiento() ? 0 : 2400); // sin animaciones, no se espera al dado
     },
     [partida, vista, pedir],
   );
