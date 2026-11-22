@@ -89,6 +89,7 @@ class Vida:
         self.ingreso_total = 0.0
         self._anios_con_hueco = 0
         self._derivar(inicio=True)
+        self.reparto: dict | None = None
 
     # ------------------------------------------------------------------ copia
     def clonar(self, dados: Dados | None = None) -> "Vida":
@@ -129,6 +130,7 @@ class Vida:
             raise RuntimeError("el año en curso no ha terminado")
         self.registro = {"anio": self.anio + 1, "edad": self.e["edad"], "recesion": False,
                          "decisiones": [], "eventos": []}
+        self.reparto = None  # cómo se sorteó la carta de este año, si hubo sorteo
         self._derivar(inicio=True)
         self._evento(EVENTO_MUNDO)
         self.registro["recesion"] = bool(self.e["recesion"])
@@ -201,7 +203,10 @@ class Vida:
         cartas = self.cartas_posibles()
         if not cartas:
             return None
-        return cartas[self.dados.elegir(self.anio, "carta", [p for _, p in cartas])][0]
+        elegida = cartas[self.dados.elegir(self.anio, "carta", [p for _, p in cartas])][0]
+        total = sum(p for _, p in cartas)
+        self.reparto = {"carta": elegida, "prob": dict(cartas)[elegida] / total, "posibles": len(cartas)}
+        return elegida
 
     def opciones(self, decision_id: str) -> list[Opcion]:
         d = self.pq.decisiones[decision_id]

@@ -15,7 +15,7 @@ const ORDENADOS = [...FINALES].sort((a, b) => "mas igual menos".indexOf(a) - "ma
 const PASOS = [
   {
     titulo: "Este eres tú, hoy.",
-    texto: "Tienes una duda de trabajo: ¿me cambio?, ¿pido aumento?, ¿emprendo? Nadie puede decirte cómo va a salir, porque depende de la decisión y también de la suerte.",
+    texto: "Cada año te toca una decisión de trabajo: ¿me cambio?, ¿pido aumento?, ¿emprendo? Nadie puede decirte cómo va a salir, porque depende de la decisión y también de la suerte.",
   },
   {
     titulo: `Imaginamos ${GEMELOS} mundos posibles.`,
@@ -31,7 +31,7 @@ const PASOS = [
   },
   {
     titulo: `Y tú eres el mundo ${GEMELOS + 1}.`,
-    texto: `Los ${GEMELOS} mundos son para mirar antes de decidir. El tuyo es uno más, con su propio dado, y es el único que se vive de verdad. Eliges una opción, tiramos tu dado y avanzas: 10 años, con decisiones nuevas cada año. Al final comparas tu mundo con los otros ${GEMELOS}.`,
+    texto: `Los ${GEMELOS} mundos son para mirar antes de decidir. El tuyo es uno más, con su propio dado, y es el único que se vive de verdad. Cada año te sale una carta al azar, entre las decisiones que calzan con tu situación. Cada opción tiene sus probabilidades: eliges una, tiramos tu dado y avanzas, durante 10 años. Al final comparas tu mundo con los otros ${GEMELOS}.`,
   },
 ];
 

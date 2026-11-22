@@ -207,7 +207,15 @@ export type OpcionPendiente = {
   ejemplo_real?: EjemploReal | null;
 };
 
+/** Por qué te tocó esta decisión. */
+export type PorQue =
+  | { tipo: "sorteo"; prob: number; posibles: number }
+  | { tipo: "obligada" }
+  | { tipo: "consecuencia" }
+  | { tipo: "elegida" };
+
 export type Pendiente = {
+  por_que?: PorQue;
   decision: string;
   nombre: string;
   pregunta: string;
