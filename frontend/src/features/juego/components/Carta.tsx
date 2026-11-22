@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, plata, primeraFrase, sinSueldo } from "../textos";
+import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, conSigno, plata, primeraFrase, sinSueldo, situacion } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
@@ -105,7 +105,6 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
         <span>Exposición a IA {nivelIA(c.exposicion_ia)}</span>
         <span>{c.horas} h</span>
       </span>
-      <span className="jg-chico jg-empresa-nota">Cifras simuladas a partir de su rubro y tamaño: no son datos de la empresa.</span>
     </span>
   );
 }
@@ -511,7 +510,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
@@ -520,7 +519,6 @@ export function Carta({
   /** Repite lo que falló (tirar el dado o volver a simular una opción). */
   onReintentar?: () => void;
   onNarrar?: Narrar;
-  onAyuda: () => void;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
   vista: Vista;
   riesgo: number;
@@ -539,13 +537,6 @@ export function Carta({
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
   // la situación y las ofertas que escribe Claude se muestran cuando llegan, nunca antes la plantilla
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
-  // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
-  const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
-  const quienEscribe = oferta
-    ? { id: oferta.empresa_id, nombre: oferta.nombre, rubro: oferta.rubro, logo: oferta.logo }
-    : vista.estado.empresa && (vista.estado.empresa_id ?? -1) >= 0
-      ? { id: vista.estado.empresa_id!, nombre: vista.estado.empresa, rubro: vista.estado.rubro, logo: true }
-      : null;
 
   useEffect(() => {
     setSel(null);
@@ -656,8 +647,24 @@ export function Carta({
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
       <Text size="sm">
-        <strong>Hoy:</strong> {cargoYSueldo(e, true)}
-        {sinSueldo(e) ? ` · antes ${plata(e.sueldo_ref)}` : "/mes"}
+        <strong>Hoy:</strong>{" "}
+        {sinSueldo(e) ? (
+          `${situacion(e.estado)} · antes ${plata(e.sueldo_ref)}`
+        ) : (
+          <>
+            {e.rol || e.cargo}
+            {e.empresa && (
+              <>
+                {" en "}
+                {e.empresa}{" "}
+                <span className="jg-hoy-logo">
+                  <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
+                </span>
+              </>
+            )}
+            {` · ${plata(e.sueldo)}/mes`}
+          </>
+        )}
       </Text>
       <AvisoPerfil fuentes={fuentes} />
 
@@ -667,10 +674,7 @@ export function Carta({
           {porQueCorto(pendiente.por_que) && ` · ${porQueCorto(pendiente.por_que)}`}
         </Meta>
         {pendiente.narrativa && listo && (
-          <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
-            {quienEscribe && (
-              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={40} />
-            )}
+          <div className="jg-mensaje" key={llave}>
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />
               <i />
@@ -682,12 +686,6 @@ export function Carta({
         <Heading level={2} as="h1">
           {pendiente.pregunta}
         </Heading>
-        <Row gap={8} style={{ alignItems: "center", flexWrap: "wrap" }}>
-          <Meta>{comparacion ? `${comparacion.gemelos} mundos simulados` : `${pendiente.opciones.length} opciones · sin simular`}</Meta>
-          <button type="button" className="jg-ayuda" onClick={onAyuda}>
-            ¿Cómo funciona?
-          </button>
-        </Row>
         {sinEfecto && <Text size="sm" className="jg-destacado">Tu sueldo termina casi igual con cualquier opción.</Text>}
       </Stack>
 

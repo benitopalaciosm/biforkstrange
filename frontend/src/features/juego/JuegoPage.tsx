@@ -23,8 +23,8 @@ export function JuegoPage() {
 function Juego() {
   const j = usePartida();
   const { catalogo, error: errorCatalogo, reintentar: reintentarCatalogo } = useCatalogo();
-  /** El tutorial: "antes" de armar el perfil, o "ayuda" cuando se reabre a mitad de la partida. */
-  const [tutorial, setTutorial] = useState<"antes" | "ayuda" | null>(null);
+  /** El tutorial, que se abre desde el inicio antes de armar el perfil. */
+  const [tutorial, setTutorial] = useState<"antes" | null>(null);
 
   // cada pantalla nueva (otra fase, otra carta, otra tarjeta del onboarding) parte desde arriba
   const { paso, completo } = j.onboarding.borrador;
@@ -56,17 +56,14 @@ function Fase({
   j, tutorial, setTutorial, catalogo, errorCatalogo, reintentarCatalogo,
 }: {
   j: ReturnType<typeof usePartida>;
-  tutorial: "antes" | "ayuda" | null;
-  setTutorial: (t: "antes" | "ayuda" | null) => void;
+  tutorial: "antes" | null;
+  setTutorial: (t: "antes" | null) => void;
   catalogo: ReturnType<typeof useCatalogo>["catalogo"];
   errorCatalogo: string | null;
   reintentarCatalogo: () => void;
 }) {
   const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
-  if (tutorial === "ayuda") {
-    return <ComoFunciona textoListo="Volver a mi partida" onVolver={() => setTutorial(null)} onListo={() => setTutorial(null)} />;
-  }
   if (tutorial === "antes") {
     return (
       <ComoFunciona
@@ -99,7 +96,6 @@ function Fase({
         onElegir={j.elegir}
         onReintentar={j.reintentar}
         onComparar={j.compararCon}
-        onAyuda={() => setTutorial("ayuda")}
         onVerMundo={j.verMundo}
         onNarrar={j.narrar}
       />
