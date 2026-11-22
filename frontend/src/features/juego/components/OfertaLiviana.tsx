@@ -1,7 +1,7 @@
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
-import { TIPO_EMPLEADOR, cargoYSueldo, plata } from "../textos";
+import { TIPO_EMPLEADOR, plata } from "../textos";
 import type { Eleccion, Vista } from "../types";
-import { ErrorCaja } from "./piezas";
+import { ErrorCaja, Hoy, Salir } from "./piezas";
 import { Logo } from "./Logo";
 
 /**
@@ -11,12 +11,13 @@ import { Logo } from "./Logo";
  * Decir "No, sigo" es lo mismo que elegir "Quedarte".
  * Los dos botones pesan igual, para que la pantalla no empuje a quedarse.
  */
-export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir }: {
+export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSalir }: {
   vista: Vista;
   cargando: boolean;
   error: string | null;
   onMirar: () => void;
   onElegir: (e: Eleccion) => void;
+  onSalir?: () => void;
 }) {
   const p = vista.pendiente!;
   const anio = Math.min(vista.anio + 1, vista.anios);
@@ -29,10 +30,8 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir }: {
 
   return (
     <Screen gap={16}>
-      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
-      <Text size="sm">
-        <strong>Hoy:</strong> {cargoYSueldo(vista.estado, true)}/mes
-      </Text>
+      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
+      <Hoy e={vista.estado} />
       <Stack gap={10} className="vd-subir">
         <Meta>Te llegó una oferta</Meta>
         {p.narrativa?.situacion && (
@@ -63,11 +62,11 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir }: {
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}
         <div className="jg-dos-botones">
-          <Button variant="white" onClick={onMirar} disabled={cargando}>
-            Mirarla
-          </Button>
           <Button variant="white" onClick={() => quedarse && onElegir({ decision: p.decision, opcion: quedarse.opcion })} disabled={cargando || !quedarse}>
             No, sigo
+          </Button>
+          <Button variant="white" onClick={onMirar} disabled={cargando}>
+            Mirarla
           </Button>
         </div>
       </ScreenFooter>

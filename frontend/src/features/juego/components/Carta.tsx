@@ -9,7 +9,7 @@ import { Logo } from "./Logo";
 import { BarraPartes, Info, ProgresoAnios, sinMovimiento, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo, Salir } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Hoy, Pensando, RangoSueldo, Salir } from "./piezas";
 import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -1016,7 +1016,7 @@ export function Carta({
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
-      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
+      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} onSalir={onSalir} />}
       {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
         <div className="jg-preparando">
@@ -1024,30 +1024,7 @@ export function Carta({
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
-      <div className="jg-hoy">
-        <Text size="sm">
-          <strong>Hoy:</strong>{" "}
-          {sinSueldo(e) ? (
-            situacion(e.estado)
-          ) : (
-            <>
-              {e.rol || e.cargo}
-              {e.empresa && (
-                <>
-                  {" en "}
-                  {e.empresa}{" "}
-                  <span className="jg-hoy-logo">
-                    <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
-                  </span>
-                </>
-              )}
-            </>
-          )}
-        </Text>
-        <Text size="sm" className="jg-hoy-sueldo">
-          {sinSueldo(e) ? `Antes ganabas ${plata(e.sueldo_ref)}/mes` : `${plata(e.sueldo)}/mes`}
-        </Text>
-      </div>
+      <Hoy e={e} />
       <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>

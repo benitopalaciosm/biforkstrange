@@ -122,7 +122,7 @@ export function QuePaso({
   const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Otra decisión este año" : `Seguir al año ${proximo}`;
 
   // el dado sigue girando hasta que Claude cuenta el año: las noticias se muestran una vez y no cambian
-  if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} />;
+  if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} onSalir={onSalir} />;
 
   return (
     <Screen tone={noche ? "noche" : "dia"} gap={16} className="jg-quepaso" key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>

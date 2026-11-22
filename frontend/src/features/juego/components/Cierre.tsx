@@ -5,6 +5,7 @@ import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
+import { Salir } from "./piezas";
 
 type Tramo = { titulo: string; empresa: string | null; empresaId: number | null; rubro: string; desde: number; hasta: number; sueldo: number };
 
@@ -76,12 +77,13 @@ function resumenDelAnio(a: Anio): string {
 
 /** El cierre: tu vida frente a los gemelos de tu primera decisión. Viene de "8 · Fin de la partida" del kit. */
 export function CierrePantalla({
-  vista, sueldoInicial, onOtraVida, onCambiarPerfil, retrato = null,
+  vista, sueldoInicial, onOtraVida, onCambiarPerfil, onSalir, retrato = null,
 }: {
   vista: Vista;
   sueldoInicial: number;
   onOtraVida: () => void;
   onCambiarPerfil: () => void;
+  onSalir?: () => void;
   /** "Lo que tu gemelo sabe de ti", si Claude leyó tu CV o tu Claude: va en la tarjeta que se comparte. */
   retrato?: string | null;
 }) {
@@ -104,7 +106,7 @@ export function CierrePantalla({
   return (
     <Screen gap={28}>
       <Stack gap={12}>
-        <ScreenHeader left={<Pill tone="sol">Fin de la partida</Pill>} right={<Meta>{vista.anios} años · {e.edad} años</Meta>} />
+        <ScreenHeader left={<Pill tone="sol">Fin de la partida</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
         <Heading level={1}>Así terminó tu mundo {GEMELOS + 1}.</Heading>
       </Stack>
 

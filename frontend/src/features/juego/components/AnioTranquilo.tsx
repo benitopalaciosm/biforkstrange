@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
 import type { Eleccion, Vista } from "../types";
+import { Salir } from "./piezas";
 
 /**
  * Un año en que no te llegó nada. No te obliga a decidir ni te pone una lista: te hace una propuesta,
  * la que más se le plantea a gente como tú, con un dato real. Dices sí o sigues igual.
  * Quien quiere hacer otra cosa puede abrir la lista completa.
  */
-export function AnioTranquilo({ vista, cargando, error, onElegir }: {
+export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir }: {
   vista: Vista;
   cargando: boolean;
   error: string | null;
   onElegir: (e: Eleccion) => void;
+  onSalir?: () => void;
 }) {
   const [verTodo, setVerTodo] = useState(false);
   const p = vista.pendiente!;
@@ -22,7 +24,7 @@ export function AnioTranquilo({ vista, cargando, error, onElegir }: {
 
   return (
     <Screen gap={16}>
-      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
+      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
       <Stack gap={8} className="vd-subir">
         <Meta>Un año tranquilo</Meta>
         <Heading level={2} as="h1">
