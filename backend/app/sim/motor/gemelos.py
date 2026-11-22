@@ -1,8 +1,9 @@
-"""Tus gemelos: la misma persona, la misma decisión, otra suerte.
+"""Tus copias (en el código, gemelos): la misma persona, la misma decisión, otra suerte.
 
-Para una decisión, cada gemelo vive una vez con cada opción y con los mismos
-dados. Después de esa decisión no buscan más cambios (`Inercia`), así que la
-diferencia entre opciones es el efecto de esta decisión y no de otras diez.
+Para una decisión, cada copia vive una vez con cada opción y con los mismos dados, hasta la edad con que
+termina la partida. Después de esa decisión vive con la misma regla que la persona y responde lo demás como
+la gente real (`Poblacion`, con `GEMELOS_CON_DECISIONES`; ver docs/DECISIONES.md, decisión 4), así que la
+diferencia entre opciones es el efecto de esta decisión con una vida realista alrededor.
 """
 
 from collections import Counter
