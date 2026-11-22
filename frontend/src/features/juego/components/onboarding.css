@@ -85,3 +85,21 @@
   .ob-gemelo span { transform: translateY(40%); }
   .ob-avatar span { transition: none; }
 }
+
+/* Tu Claude o ChatGPT: un atajo opcional, más chico que el de LinkedIn */
+.ob-claude-abrir {
+  display: flex; gap: 10px; align-items: center; width: 100%; padding: 12px 14px; text-align: left;
+  border: 1.5px solid var(--linea); border-radius: 16px; background: var(--papel); color: var(--media);
+  font: 400 14px/20px var(--font); cursor: pointer; transition: border-color .2s, transform .2s;
+}
+.ob-claude-abrir strong { color: var(--tinta); }
+.ob-claude-abrir:hover { border-color: var(--acento); transform: translateY(-1px); }
+.ob-claude-abrir:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.ob-claude-chispa { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--sol); color: var(--tinta); font-size: 16px; animation: ob-girar 6s linear infinite; }
+@keyframes ob-girar { to { transform: rotate(360deg); } }
+.ob-claude { padding: 14px; border: 1.5px solid var(--acento); border-radius: 16px; background: var(--acento-suave); animation: vd-subir .35s ease-out both; }
+.ob-claude-texto { min-height: 96px; font: 400 13px/18px ui-monospace, Menlo, monospace; }
+.ob-tag--tuyo { background: var(--acento-suave); }
+@media (prefers-reduced-motion: reduce) { .ob-claude-chispa, .ob-claude { animation: none; } }
+.ob-ficha > * { min-width: 0; }
+.ob-ficha .ob-tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
