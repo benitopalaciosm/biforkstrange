@@ -4,6 +4,7 @@ import type { Anio, Rango, Vista } from "../types";
 import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
+import { IntuicionResumen } from "./Apuesta";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
 function resumenDelAnio(a: Anio): string {
@@ -61,6 +62,8 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
           </Text>
         )}
       </SunCard>
+
+      <IntuicionResumen />
 
       {primera && elegida && (
         <Stack as="section" gap={12}>
