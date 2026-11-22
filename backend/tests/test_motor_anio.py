@@ -142,6 +142,33 @@ def test_carta_forzada_por_la_duda_inicial_reemplaza_al_sorteo():
     assert [d["decision"] for d in reg["decisiones"] if d["origen"] == "carta"] == ["pedir_aumento"]
 
 
+def test_la_duda_inicial_no_se_salta_las_forzadas_del_anio():
+    """La duda va primero y después lo que la vida obliga: quien está cesante y duda si invertir en su red
+    igual busca pega ese año (antes la duda tapaba la cesantía y todos sus gemelos quedaban un año
+    entero sin trabajo). Y al fundador le sigue tocando decidir sobre su empresa."""
+    cesante = Perfil(edad=35, estado="buscando", sueldo=1_000_000)
+    v = vida(cesante, DadosGuion({"dec:cesantia:rapido": 0.0}), tipo_empleador="pyme", rubro="Comercio")
+    reg = v.vivir_anio(Guion({"invertir_en_red": "si", "cesantia": "rapido", **QUIETA}), carta="invertir_en_red")
+    assert [d["decision"] for d in reg["decisiones"] if d["origen"] == "carta"] == ["invertir_en_red", "cesantia"]
+    assert v.e["estado"] == "empleado"
+    fundador = Perfil(edad=35, estado="fundador", sueldo=2_000_000, empresa_anos=2)
+    reg = vida(fundador, DadosGuion()).vivir_anio(Guion({"invertir_en_red": "si", "seguir_con_tu_empresa": "seguir"}),
+                                                   carta="invertir_en_red")
+    assert [d["decision"] for d in reg["decisiones"]][:2] == ["invertir_en_red", "seguir_con_tu_empresa"]
+
+
+def test_si_la_duda_resuelve_la_forzada_esta_ya_no_se_pregunta():
+    """Con la duda en la misma forzada no se pregunta dos veces; y si la duda deja de estar cesante
+    (el bootcamp la coloca), la cesantía ya no aplica cuando le llega su turno."""
+    cesante = Perfil(edad=35, estado="buscando", sueldo=1_000_000)
+    v = vida(cesante, DadosGuion(), tipo_empleador="pyme", rubro="Comercio")
+    reg = v.vivir_anio(Guion({"cesantia": "nivel", **QUIETA}), carta="cesantia")
+    assert [d["decision"] for d in reg["decisiones"]] == ["cesantia"]
+    v = vida(cesante, DadosGuion({"dec:bootcamp:hacer": 0.0}), tipo_empleador="pyme", rubro="Comercio")
+    reg = v.vivir_anio(Guion({"bootcamp": "hacer", **QUIETA}), carta="bootcamp")
+    assert "cesantia" not in [d["decision"] for d in reg["decisiones"]] and v.e["estado"] == "empleado"
+
+
 # ------------------------------------------------------------------ luego
 def test_luego_decision_a_decision_en_el_mismo_anio():
     v = vida(Perfil.a_los_18(), DadosGuion())

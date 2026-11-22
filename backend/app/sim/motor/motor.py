@@ -179,7 +179,7 @@ class Vida:
 
     # ------------------------------------------------------------------ año
     def iniciar_anio(self, con_cartas: bool, carta: str | None = None) -> None:
-        """Sortea el mundo y arma la cola del año. `carta` fuerza la decisión (la duda inicial)."""
+        """Sortea el mundo y arma la cola del año. `carta` (la duda inicial) va primero, antes de las forzadas."""
         if self.cola:
             raise RuntimeError("el año en curso no ha terminado")
         self.registro = {"anio": self.anio + 1, "edad": self.e["edad"], "recesion": False,
@@ -188,10 +188,13 @@ class Vida:
         self._derivar(inicio=True)
         self._evento(EVENTO_MUNDO)
         self.registro["recesion"] = bool(self.e["recesion"])
+        decisiones = self._forzadas()
         if carta is not None:
-            decisiones = [carta]
+            # la duda va primero (es la carta que la persona eligió), pero no tapa las forzadas: quien está
+            # cesante igual tiene que buscar pega ese año y al fundador igual le toca seguir con su empresa.
+            # Si la duda las resuelve (encuentra trabajo), al llegarles su turno ya no aplican y se saltan.
+            decisiones = [carta] + [d for d in decisiones if d != carta]
         else:
-            decisiones = self._forzadas()
             if not decisiones and con_cartas:
                 sorteada = self._sortear_carta()
                 decisiones = [sorteada] if sorteada else []
