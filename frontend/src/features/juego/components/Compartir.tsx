@@ -3,8 +3,7 @@ import { toPng } from "html-to-image";
 import QRCode from "qrcode";
 import { Button, Meta, Stack, Text } from "@/shared/ui";
 import { plata } from "../textos";
-import { leerRetrato } from "../retrato";
-import type { Comparacion, Perfil } from "../types";
+import type { Comparacion } from "../types";
 import "../demo.css";
 
 /** Los colores de la pantalla, fijos: la imagen se ve igual con tema claro u oscuro. La base va naranja, como en la carta. */
@@ -45,12 +44,13 @@ function veredicto(c: Comparacion, elegida: string) {
  * Se descarga como PNG.
  */
 export function CompartirResultado({
-  comparacion, elegida, sueldoFinal, perfil,
+  comparacion, elegida, sueldoFinal, retrato = null,
 }: {
   comparacion: Comparacion;
   elegida: string;
   sueldoFinal: number;
-  perfil?: Perfil;
+  /** El retrato del perfil con que se jugó esta partida (no el de quien jugó antes). */
+  retrato?: string | null;
 }) {
   const [qr, setQr] = useState<string | null>(null);
   const [armando, setArmando] = useState(false);
@@ -61,7 +61,6 @@ export function CompartirResultado({
   const ganadores = comparacion.ganador_por_mundo ?? [];
   const colores = coloresFijos(comparacion);
   const v = veredicto(comparacion, elegida);
-  const retrato = leerRetrato(perfil);
 
   // los puntos agrupados por opción, como en la carta; los empates al final
   const orden = new Map<string | null, number>(comparacion.opciones.map((o, i) => [o.opcion, i]));

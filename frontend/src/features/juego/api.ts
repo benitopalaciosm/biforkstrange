@@ -1,5 +1,4 @@
 import { http } from "@/shared/lib/http";
-import { guardarRetrato } from "./retrato";
 import type { Catalogo, Duda, EnJuego, MundoDetalle, Narrado, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
 
 export const GEMELOS = 100;
@@ -82,9 +81,7 @@ function comoErrorApi(e: unknown): ErrorApi {
 export async function leerPerfil(entrada: string | { pdf: string }): Promise<PerfilLeido> {
   const cuerpo = typeof entrada === "string" ? { texto: entrada } : entrada;
   try {
-    const leido = await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
-    guardarRetrato(leido); // para la tarjeta que se comparte al final
-    return leido;
+    return await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
   } catch (e) {
     throw comoErrorApi(e);
   }

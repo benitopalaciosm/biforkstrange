@@ -20,17 +20,28 @@ export const PERFIL_INICIAL: Perfil = {
 const CLAVE = "gemelo-laboral:juego:v1";
 
 /** `fuentes`: de dónde salió cada dato de `perfil` (lo que falta es supuesto); null en partidas de antes. */
-type Guardado = { perfil: Perfil; partida: Partida | null; borrador?: Borrador; fuentes?: Record<string, Fuente> | null };
+type Guardado = {
+  perfil: Perfil;
+  partida: Partida | null;
+  borrador?: Borrador;
+  fuentes?: Record<string, Fuente> | null;
+  /** "Lo que tu gemelo sabe de ti", de este perfil: va en la tarjeta que se comparte. */
+  retrato?: string | null;
+};
+
+/** Antes el retrato se guardaba aparte y se asociaba por edad, sexo y estudios: podía salir el de otra persona. */
+const RETRATO_VIEJO = "gemelo-laboral:retrato:v1";
 
 function leer(): Guardado | null {
   try {
+    window.localStorage.removeItem(RETRATO_VIEJO);
     const crudo = window.localStorage.getItem(CLAVE);
     if (!crudo) return null;
     const g = JSON.parse(crudo) as Guardado;
     if (!g || typeof g.perfil !== "object" || g.perfil === null) return null;
     const borrador = g.borrador && typeof g.borrador === "object" ? { ...borradorInicial(PERFIL_INICIAL), ...g.borrador } : undefined;
     if (borrador) borrador.perfil = { ...PERFIL_INICIAL, ...borrador.perfil };
-    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null, borrador, fuentes: g.fuentes ?? null };
+    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null, borrador, fuentes: g.fuentes ?? null, retrato: g.retrato ?? null };
   } catch {
     return null;
   }
@@ -72,8 +83,16 @@ export function usePartida() {
   borradorActual.current = borrador;
   /** De dónde salió cada dato del perfil con que se juega: lo que no está quedó como supuesto. */
   const [fuentes, setFuentes] = useState<Record<string, Fuente> | null>(guardado?.fuentes ?? null);
+  const [retrato, setRetrato] = useState<string | null>(guardado?.retrato ?? null);
+  /** El perfil con que se va a jugar: con él van sus fuentes y su retrato, sacados del borrador de ahora. */
+  const fijarPerfil = useCallback((p: Perfil) => {
+    const b = borradorActual.current;
+    setPerfil(p);
+    setFuentes(b.fuentes);
+    setRetrato(b.claude?.retrato ?? b.leido?.retrato ?? null);
+  }, []);
 
-  useEffect(() => guardar({ perfil, partida, borrador, fuentes }), [perfil, partida, borrador, fuentes]);
+  useEffect(() => guardar({ perfil, partida, borrador, fuentes, retrato }), [perfil, partida, borrador, fuentes, retrato]);
 
   /** Pide la vista de `p`; si llega (y nadie pidió otra cosa entremedio) corre `listo`. */
   const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0) => {
@@ -116,8 +135,7 @@ export function usePartida() {
   const verDudas = useCallback(async (p: Perfil, sugeridas: DudaSugerida[] = []) => {
     const mio = ++turno.current;
     setDudasSugeridas(sugeridas);
-    setPerfil(p);
-    setFuentes(borradorActual.current.fuentes);
+    fijarPerfil(p);
     setPartida(null);
     setVista(null);
     setPrevia(null);
@@ -133,14 +151,13 @@ export function usePartida() {
     } finally {
       if (mio === turno.current) setCargando(false);
     }
-  }, []);
+  }, [fijarPerfil]);
 
   /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
   const empezarAlAzar = useCallback(
     (p: Perfil) => {
       turno.current++;
-      setPerfil(p);
-      setFuentes(borradorActual.current.fuentes);
+      fijarPerfil(p);
       setDudasSugeridas([]);
       setVista(null);
       setPrevia(null);
@@ -154,7 +171,7 @@ export function usePartida() {
         setFase(v.terminada ? "cierre" : "carta");
       });
     },
-    [pedir],
+    [pedir, fijarPerfil],
   );
 
   const empezar = useCallback(
@@ -255,6 +272,7 @@ export function usePartida() {
     setDudasSugeridas([]);
     setPerfil(PERFIL_INICIAL);
     setFuentes({});
+    setRetrato(null);
     onboarding.reiniciar(PERFIL_INICIAL);
     setCargando(false);
     setError(null);
@@ -262,7 +280,7 @@ export function usePartida() {
   }, [onboarding.reiniciar]);
 
   return {
-    fuentes, empezarDeCero,
+    fuentes, retrato, empezarDeCero,
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };

@@ -79,7 +79,7 @@ function Juego() {
       <CierrePantalla
         vista={j.vista}
         sueldoInicial={sueldoInicial}
-        perfil={j.partida?.perfil ?? j.perfil}
+        retrato={j.retrato}
         onOtraVida={j.jugarDeNuevo}
         onCambiarPerfil={j.irAPerfil}
       />
