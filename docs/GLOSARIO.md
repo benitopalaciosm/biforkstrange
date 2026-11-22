@@ -51,9 +51,6 @@ Si la IA automatiza tu ocupación, la complementa, no se sabe (incógnita) o no 
 **Adaptabilidad**:
 Qué tan bien te recuperas si la IA te saca de tu pega (0 a 1): edad, estudios, Santiago o región, ahorro y si ya usas IA (Manning y Aguirre 2026).
 
-**Apuesta robusta**:
-La opción que gana en más mundos con cualquier ritmo de la IA.
-
 ## Lo que le toca decidir
 
 **Decisión**:

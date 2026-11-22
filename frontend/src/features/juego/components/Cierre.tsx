@@ -8,7 +8,7 @@ import { coloresDe } from "./Carta";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
 import { Salir } from "./piezas";
-import { IACierre } from "./IAPorRitmo";
+import { IACierre } from "./IACierre";
 
 type Tramo = { titulo: string; empresa: string | null; empresaId: number | null; rubro: string; desde: number; hasta: number; sueldo: number };
 

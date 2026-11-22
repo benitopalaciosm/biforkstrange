@@ -102,7 +102,7 @@ Cada mundo trae un ritmo de la IA (lento, medio o rápido), sorteado con las pro
 
 **Lo que descartamos.**
 - Sortear el ritmo uniforme, como era antes: también es un peso, solo que inventado.
-- Mostrar los tres ritmos por separado sin un conteo total: es lo más honesto ante incertidumbre profunda, pero cambia cómo se lee "gana en X de 100". Quedó a medio camino: el conteo usa los pesos del FRI y la carta también separa por ritmo.
+- Mostrar los tres ritmos por separado sin un conteo total: es lo más honesto ante incertidumbre profunda, pero cambia cómo se lee "gana en X de 100". La carta muestra solo el conteo total, con los pesos del FRI; el cierre dice cuánto habría ganado tu opción con cada ritmo.
 - Meter la AGI como un cuarto ritmo con efectos: no hay frecuencias ni consenso, y sus efectos salen de modelos teóricos.
 
 **Por qué.** El FRI es la única fuente con probabilidades explícitas por escenario, de grupos con historial de pronóstico. Y los efectos quedan chicos, como dice esa misma fuente: aun con IA rápida ven el desempleo en 6% contra 5%.

@@ -292,10 +292,9 @@ export type Comparacion = {
   ia?: IAPorRitmo | null;
 };
 
-/** La comparación separada por ritmo de la IA. `robustas`: las opciones que ganan más mundos en los tres ritmos. */
+/** La comparación separada por ritmo de la IA (el cierre la usa para el sueldo con cada ritmo). */
 export type IAPorRitmo = {
   ritmos: Partial<Record<Ritmo, { mundos: number; gana: Record<string, number>; sueldo_p50: Record<string, number> }>>;
-  robustas: string[];
 };
 
 export type ConFuente = { fuente: string; cita: string; url: string };

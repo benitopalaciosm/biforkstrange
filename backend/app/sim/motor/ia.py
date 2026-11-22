@@ -113,11 +113,10 @@ def escenarios() -> dict:
 
 def por_ritmo(ritmos: list[str], ganadores: list[str | None], sueldos: dict[str, list[float]]) -> dict:
     """La comparación separada por ritmo de la IA: cuántos mundos hay de cada ritmo, en cuántos gana cada opción y
-    su sueldo mediano. `robustas`: las opciones que ganan en más mundos que cualquier otra en todos los ritmos."""
+    su sueldo mediano. El cierre la usa para decir cuánto habría ganado tu opción con cada ritmo."""
     from statistics import median
 
-    salida: dict = {"ritmos": {}, "robustas": []}
-    mejores_por_ritmo = []
+    salida: dict = {"ritmos": {}}
     for r in RITMOS:
         idx = [g for g, x in enumerate(ritmos) if x == r]
         if not idx:
@@ -125,8 +124,4 @@ def por_ritmo(ritmos: list[str], ganadores: list[str | None], sueldos: dict[str,
         gana = {o: sum(1 for g in idx if ganadores[g] == o) for o in sueldos}
         salida["ritmos"][r] = {"mundos": len(idx), "gana": gana,
                                "sueldo_p50": {o: round(median(v[g] for g in idx)) for o, v in sueldos.items()}}
-        tope = max(gana.values())
-        mejores_por_ritmo.append({o for o, c in gana.items() if c == tope and c > 0})
-    if mejores_por_ritmo:
-        salida["robustas"] = sorted(set.intersection(*mejores_por_ritmo))
     return salida

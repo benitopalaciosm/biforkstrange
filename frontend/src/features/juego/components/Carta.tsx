@@ -10,7 +10,6 @@ import { BarraPartes, DadoEnJuego, Info, ProgresoAnios, sinMovimiento, type Casi
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
 import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Pensando, RangoSueldo, Salir } from "./piezas";
-import { IAPorRitmoTabla } from "./IAPorRitmo";
 import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -1162,7 +1161,6 @@ export function Carta({
         </div>
       )}
 
-      {comparacion?.ia && comparadas.length > 1 && <IAPorRitmoTabla ia={comparacion.ia} comparadas={comparadas} colores={colores} />}
 
       {comparacion && opcion && (() => {
         const c = comparadas.find((x) => x.opcion === opcion.opcion);

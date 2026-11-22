@@ -185,7 +185,7 @@ def test_con_la_ia_prendida_la_cohorte_sigue_cuadrando_y_el_golpe_joven_es_chico
 
 
 @pytest.mark.ia
-def test_la_comparacion_separa_por_ritmo_y_marca_las_robustas():
+def test_la_comparacion_separa_por_ritmo():
     v = vida(Perfil(edad=30), Dados(0, "tu"))
     c = gemelos.comparar(v, "pedir_aumento", n=30)
     ritmos = c["ia"]["ritmos"]
@@ -193,7 +193,6 @@ def test_la_comparacion_separa_por_ritmo_y_marca_las_robustas():
     opciones = {o["opcion"] for o in c["opciones"]}
     for r in ritmos.values():
         assert set(r["gana"]) == opciones and sum(r["gana"].values()) <= r["mundos"]
-    assert set(c["ia"]["robustas"]) <= opciones
 
 
 def test_las_voces_y_los_ritmos_citan_fuentes_que_existen():

@@ -589,16 +589,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-filtro-dudas::-webkit-scrollbar { display: none; }
 .jg-filtro-dudas .vd-chip { flex: none; min-height: 36px; padding: 0 14px; font-size: 14px; }
 
-/* La incertidumbre de la IA: la comparación por ritmo (carta), el titular del año y las voces (cierre) */
-.jg-ia-tabla { display: flex; flex-direction: column; border: 1.5px solid var(--linea); border-radius: 12px; overflow: hidden; }
-.jg-ia-fila { display: grid; gap: 8px; align-items: baseline; padding: 8px 12px; border-top: 1.5px solid var(--linea); font: 400 13px/18px var(--font); color: var(--suave); }
-.jg-ia-fila:first-child { border-top: 0; }
-.jg-ia-fila > span { min-width: 0; overflow-wrap: anywhere; }
-.jg-ia-fila > span[role="cell"] { text-align: right; font-variant-numeric: tabular-nums; color: var(--tinta); }
-.jg-ia-fila > span[data-fuerte="true"] { font-weight: 700; }
-.jg-ia-cabeza > span { font-weight: 600; text-align: right; }
-.jg-ia-cabeza > span:first-child { text-align: left; }
-.jg-ia-fila i { font-style: normal; }
+/* La incertidumbre de la IA: el titular del año y la IA en tu mundo (cierre) */
 .jg-ia-voz { padding-left: 10px; border-left: 3px solid var(--linea); }
 .jg-ia-voz i { font-style: normal; }
 .jg-titular-ia .vd-noti-quien { color: var(--suave); }
