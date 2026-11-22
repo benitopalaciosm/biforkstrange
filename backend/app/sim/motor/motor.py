@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from app.sim.motor import empresas
 from app.sim.motor.azar import Dados
 from app.sim.motor.paquete import Paquete
-from app.sim.motor.perfil import NIVELES
+from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_de
 
 # "Solo lo laboral": fuera las decisiones de vida personal y los eventos de salud, duelo y pareja.
 DECISIONES_PERSONALES = frozenset(
@@ -582,11 +582,14 @@ class Vida:
             e.update(estado="inactivo", sueldo=0.0, deja_de_trabajar=0)
 
         # estudios
-        if e["estado"] == "estudiando" and e["carrera_id"] >= 0:
+        # sin carrera del catálogo, estudia lo que supone perfil.estudio_sin_carrera (semestres puestos al partir)
+        if e["estado"] == "estudiando" and (e["carrera_id"] >= 0 or e["semestres_restantes"] > 0):
             e["semestres_restantes"] -= 2
             e["anos_en_carrera"] += 1
             if e["semestres_restantes"] <= 0:
-                e.update(edu=EDU_AL_TITULARSE.get(e["tipo_institucion"], e["edu"]), estado="buscando",
+                titulo = EDU_AL_TITULARSE.get(e["tipo_institucion"]) or estudio_sin_carrera(
+                    e["edu"], tipo_institucion_de(self.pq, e.get("universidad_id", "")))[0]
+                e.update(edu=titulo, estado="buscando",
                          primer_empleo=1, anos_titulado=0, semestres_restantes=0, anos_en_carrera=0)
         elif e["estado"] != "estudiando":
             e["anos_titulado"] = self._acotar("anos_titulado", e["anos_titulado"] + 1)

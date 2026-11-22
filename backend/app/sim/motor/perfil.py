@@ -127,6 +127,38 @@ def avance_en_carrera(perfil: Perfil, pq: Paquete) -> tuple[int, int]:
     real de su carrera (mifuturo_carreras); siempre le queda al menos un año, porque sigue estudiando.
     """
     duracion = round(float(pq.tabla("mifuturo_carreras", "duracion_real_semestres", "carrera_id", perfil.carrera_id)))
+    return _avance(perfil, duracion)
+
+
+# Quien estudia una carrera que no está en el catálogo (el CV no la nombra). Supuesto del equipo: si su
+# institución es un IP o un CFT, una carrera técnica de 5 semestres; si no, según lo que ya terminó: con media
+# o técnica, una universitaria de 8 (la mayor parte de la matrícula de pregrado es universitaria); con un
+# título universitario o un postgrado, un postgrado de 4. Al terminar se titula de eso.
+SEMESTRES_SIN_CARRERA = {"universitaria": 8, "tecnica": 5, "postgrado": 4}
+
+
+def tipo_institucion_de(pq: Paquete, universidad_id: str) -> str:
+    """U, IP, CFT o EXT según el catálogo de instituciones; vacío si no se sabe."""
+    if not universidad_id:
+        return ""
+    try:
+        return str(pq.tabla("universidades", "tipo_institucion", "universidad_id", universidad_id))
+    except Exception:  # noqa: BLE001 - sin catálogo o sin fila
+        return ""
+
+
+def estudio_sin_carrera(edu: str, tipo_institucion: str) -> tuple[str, int]:
+    """(título al terminar, semestres que dura) de quien estudia sin carrera del catálogo. Ver SEMESTRES_SIN_CARRERA."""
+    if edu in ("universitaria", "postgrado"):
+        titulo = "postgrado"
+    elif tipo_institucion in ("IP", "CFT"):
+        titulo = "tecnica"
+    else:
+        titulo = "universitaria"
+    return titulo, SEMESTRES_SIN_CARRERA[titulo]
+
+
+def _avance(perfil: Perfil, duracion: int) -> tuple[int, int]:
     anos, restantes = perfil.anos_en_carrera, perfil.semestres_restantes
     if anos is None and restantes is not None:
         anos = (duracion - restantes) // 2
@@ -233,6 +265,11 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         if perfil.estado == "estudiando":
             # antes quedaba en 0 semestres: todo estudiante se titulaba al cerrar su primer año
             e["semestres_restantes"], e["anos_en_carrera"] = avance_en_carrera(perfil, pq)
+    elif perfil.estado == "estudiando" and not (perfil.edu == "media" and perfil.edad <= 18):
+        # sin carrera del catálogo (y no es quien sale del colegio, que elige con salir_del_colegio): antes nadie
+        # le descontaba semestres y estudiaba para siempre. Se supone su duración (SEMESTRES_SIN_CARRERA)
+        _, duracion = estudio_sin_carrera(perfil.edu, tipo_institucion_de(pq, perfil.universidad_id))
+        e["semestres_restantes"], e["anos_en_carrera"] = _avance(perfil, duracion)
     d = pq.derivar(e)
     tramo = "p80+" if d["percentil"] >= 80 else "p50-79" if d["percentil"] >= 50 else "p0-49"
     e["tasa_ahorro"] = pq.k("TASA_AHORRO", tramo)
