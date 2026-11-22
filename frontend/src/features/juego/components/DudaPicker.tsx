@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Espera } from "./Apuesta";
 import {
   Button, ChevronLeftIcon, Chip, DecisionArt, DecisionList, Heading, IconButton, Pill, Screen, ScreenHeader, Stack, Tag, Text,
 } from "@/shared/ui";
@@ -169,7 +170,7 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={dudas ? onReintentar : onReintentarDudas} />}
-        {simulando && <Cargando frases={[`Corriendo tus ${GEMELOS} simulaciones…`, "Diez años con cada opción…"]} />}
+        {simulando && <Espera frases={[`Corriendo tus ${GEMELOS} simulaciones…`, "Diez años con cada opción…"]} />}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
           {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} simulaciones` : "Elige una duda"}
         </Button>
