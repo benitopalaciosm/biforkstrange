@@ -128,3 +128,4 @@
   background: var(--dinero); color: #fff; font: 700 15px/1 var(--font); animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
 }
 @media (prefers-reduced-motion: reduce) { .ob-check { animation: none; } }
+.ob-icono--tu { display: grid; place-items: center; border-radius: 50%; background: var(--niebla); color: var(--tinta); border: 1.5px solid var(--linea); }

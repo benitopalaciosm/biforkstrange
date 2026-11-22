@@ -376,7 +376,7 @@ function Entrada({
     <>
       <Stack gap={6} className="ob-entra">
         <Heading level={1}>Armemos a tu gemelo.</Heading>
-        <Text>Súmale lo que quieras. Puedes usar los dos.</Text>
+        <Text>Súmale lo que quieras: elige una o combínalas.</Text>
       </Stack>
 
       <Stack gap={10} className="ob-entra">
@@ -432,12 +432,23 @@ function Entrada({
           <Marca listo={claudeListo} accion={claudeAbierto ? "Cerrar" : "Abrir"} />
         </button>
         {claudeAbierto && claude}
+
+        <button type="button" className="ob-fuente" onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
+          <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
+          <span className="ob-fuente-texto">
+            <strong>{algo ? "Completar lo que falta" : "Contesto yo unas preguntas"}</strong>
+            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu pega y tu sueldo. Un toque cada una."}</span>
+          </span>
+          <Marca listo={false} accion="Empezar" />
+        </button>
       </Stack>
 
       <ScreenFooter>
-        <Button onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
-          {algo ? "Seguir" : "Contestar unas preguntas"}
-        </Button>
+        {algo && (
+          <Button onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
+            Seguir
+          </Button>
+        )}
         <button type="button" className="ob-link" onClick={onSaltar} disabled={cargando}>
           Jugar sin datos
         </button>
