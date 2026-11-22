@@ -27,12 +27,20 @@ export function PerfilForm({
   errorCatalogo,
   onVolver,
   onListo,
+  onElegirDuda,
+  cargando = false,
+  error = null,
 }: {
   inicial: Perfil;
   catalogo: Catalogo | null;
   errorCatalogo: string | null;
   onVolver: () => void;
-  onListo: (p: Perfil, dudaSugerida: string | null) => void;
+  /** Empieza la partida: la primera carta sale al azar, como todas. */
+  onListo: (p: Perfil) => void;
+  /** Para quien prefiere partir por una duda concreta. */
+  onElegirDuda: (p: Perfil, dudaSugerida: string | null) => void;
+  cargando?: boolean;
+  error?: string | null;
 }) {
   const [p, setP] = useState<Perfil>(inicial);
   const [busca, setBusca] = useState("");
@@ -264,9 +272,15 @@ export function PerfilForm({
       )}
 
       <ScreenFooter>
-        <Button onClick={() => onListo(p, dudaSugerida)} disabled={!catalogo || !sueldoValido}>
-          Ver mis dudas
+        {error && <ErrorCaja error={error} />}
+        {cargando && <Cargando>Simulando tus mundos y sorteando tu primera carta…</Cargando>}
+        <Button onClick={() => onListo(p)} disabled={!catalogo || !sueldoValido || cargando}>
+          Empezar mi partida
         </Button>
+        <Button variant="quiet" onClick={() => onElegirDuda(p, dudaSugerida)} disabled={!catalogo || !sueldoValido || cargando}>
+          {dudaSugerida ? "Partir por la duda que trajo tu Claude" : "Prefiero elegir mi primera duda"}
+        </Button>
+        <Text size="sm">La primera carta sale al azar, como todas: entre las decisiones que calzan con tu situación.</Text>
       </ScreenFooter>
     </Screen>
   );

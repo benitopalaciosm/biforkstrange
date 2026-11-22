@@ -418,3 +418,23 @@ def test_mundo_sin_decision_pendiente_da_422(client):
     final, elecciones, _ = _jugar_entera(client, lambda p: p["opciones"][0], duda="oferta_externa")
     assert final["terminada"]
     assert _mundo(client, 0, duda="oferta_externa", elecciones=elecciones).status_code == 422
+
+
+# ------------------------------------------------------------------ por qué te tocó la carta
+def test_la_duda_elegida_se_dice_elegida(client):
+    assert _ok(client, duda="oferta_externa")["pendiente"]["por_que"] == {"tipo": "elegida"}
+
+
+def test_sin_duda_la_primera_carta_es_un_sorteo_con_su_probabilidad(client):
+    for semilla in range(5):
+        por_que = _ok(client, semilla=semilla)["pendiente"]["por_que"]
+        if por_que["tipo"] == "sorteo":
+            assert 0 < por_que["prob"] <= 1 and por_que["posibles"] >= 1
+        else:
+            assert por_que["tipo"] in {"obligada", "consecuencia"}
+
+
+def test_cada_carta_dice_por_que_te_toco(client):
+    _, _, vistas = _jugar_entera(client, lambda p: p["opciones"][-1], duda=DUDA)
+    tipos = {v["pendiente"]["por_que"]["tipo"] for v in vistas if v["pendiente"]}
+    assert tipos <= {"elegida", "sorteo", "obligada", "consecuencia"} and "elegida" in tipos

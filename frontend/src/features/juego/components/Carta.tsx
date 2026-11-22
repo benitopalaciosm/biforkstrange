@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, CheckIcon, Chip, DecisionArt, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars } from "@/shared/ui";
 import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, minuscula, plata, sinSueldo } from "../textos";
-import type { ContraBase, EjemploReal, Eleccion, MundoDetalle, OpcionComparada, OpcionPendiente, ParametrosComparar, Suceso, Vista } from "../types";
+import type { ContraBase, EjemploReal, Eleccion, PorQue, MundoDetalle, OpcionComparada, OpcionPendiente, ParametrosComparar, Suceso, Vista } from "../types";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
@@ -63,6 +63,46 @@ function destacado(o: OpcionComparada, base: OpcionComparada | undefined, riesgo
   return `${nombre} ${valor < antes ? "baja" : "sube"} de ${plata(antes)} a ${plata(valor)}`;
 }
 
+/** Por qué te tocó esta decisión, en una frase. */
+function porQueTexto(p: PorQue | undefined): string | null {
+  if (!p) return null;
+  if (p.tipo === "sorteo")
+    return `Esta carta salió al azar: este año podían tocarte ${p.posibles} decisiones según tu situación, y esta tenía ${Math.max(1, Math.round(p.prob * 100))} de 100 de salir.`;
+  if (p.tipo === "obligada") return "Esta decisión no es al azar: te toca por tu situación de este año.";
+  if (p.tipo === "elegida") return "Es la duda que elegiste para empezar.";
+  return "Esta decisión viene de algo que te acaba de pasar este año.";
+}
+
+/** Lo que puede pasar apenas eliges la opción, con su probabilidad: es el dado que vas a tirar. */
+function Probabilidades({ o }: { o: OpcionComparada }) {
+  const resultados = o.por_resultado;
+  if (resultados.length === 0) return null;
+  if (resultados.length === 1 && resultados[0].prob >= 0.995) {
+    return (
+      <span className="jg-probs">
+        <span className="jg-chico">Al elegirla</span>
+        <span className="jg-prob" data-tono={resultados[0].tono}>
+          <i />
+          <span>{resultados[0].texto || resultados[0].resultado}</span>
+          <b>seguro</b>
+        </span>
+      </span>
+    );
+  }
+  return (
+    <span className="jg-probs">
+      <span className="jg-chico">Al elegirla, el primer año</span>
+      {resultados.map((r) => (
+        <span className="jg-prob" data-tono={r.tono} key={r.resultado}>
+          <i />
+          <span>{r.texto || r.resultado}</span>
+          <b>{Math.round(r.prob * 100)} de 100</b>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /** Un empleador u oferta real de ese tipo, con su fuente. Es referencia: no es la empresa de la historia. */
 function EjemploRealLinea({ ejemplo }: { ejemplo: EjemploReal }) {
   const quien = ejemplo.cargo ? `${ejemplo.cargo} en ${ejemplo.nombre}` : ejemplo.nombre;
@@ -108,6 +148,10 @@ function OpcionConGemelos({
             Gana en {ganadas} de {total} mundos
           </span>
         )}
+      </span>
+
+      <span className="jg-opcion-bloque">
+        <Probabilidades o={o} />
       </span>
 
       <span className="jg-opcion-bloque">
@@ -528,6 +572,12 @@ export function Carta({
 
       <Stack gap={8} style={{ marginTop: 4 }}>
         <Meta>{pendiente.nombre}</Meta>
+        {porQueTexto(pendiente.por_que) && (
+          <span className="jg-por-que">
+            <span aria-hidden="true">⚄</span>
+            {porQueTexto(pendiente.por_que)}
+          </span>
+        )}
         {pendiente.narrativa && (
           <div className="jg-mensaje" key={llave}>
             <span className="jg-mensaje-escribiendo" aria-hidden="true">

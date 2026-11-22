@@ -123,6 +123,27 @@ export function usePartida() {
     }
   }, []);
 
+  /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
+  const empezarAlAzar = useCallback(
+    (p: Perfil) => {
+      turno.current++;
+      setPerfil(p);
+      setDudaSugerida(null);
+      setVista(null);
+      setPrevia(null);
+      const nueva: Partida = { perfil: p, semilla: Math.floor(Math.random() * 1_000_000), duda: null, elecciones: [] };
+      parametrosCarta.current = {};
+      setCargando(true);
+      void pedir(nueva, (v) => {
+        setPartida(nueva);
+        setPrevia(null);
+        setVista(v);
+        setFase(v.terminada ? "cierre" : "carta");
+      });
+    },
+    [pedir],
+  );
+
   const empezar = useCallback(
     (duda: string) => {
       const nueva: Partida = { perfil, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
@@ -188,7 +209,7 @@ export function usePartida() {
   }, [vista]);
 
   /** Otra vida con el mismo perfil: se vuelve a elegir la duda. */
-  const jugarDeNuevo = useCallback(() => void verDudas(perfil), [verDudas, perfil]);
+  const jugarDeNuevo = useCallback(() => empezarAlAzar(perfil), [empezarAlAzar, perfil]);
 
   const descartar = useCallback(() => {
     turno.current++;
@@ -201,6 +222,6 @@ export function usePartida() {
 
   return {
     fase, perfil, partida, vista, previa, dudas, dudaSugerida, cargando, recalculando, error,
-    irAInicio, irAPerfil, verDudas, empezar, continuar, elegir, compararCon, verMundo, seguir, jugarDeNuevo, descartar,
+    irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, seguir, jugarDeNuevo, descartar,
   };
 }
