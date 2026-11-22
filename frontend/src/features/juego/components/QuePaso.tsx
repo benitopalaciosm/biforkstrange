@@ -4,7 +4,7 @@ import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
 import { Contador, LineaSueldo, Ruleta, type Casilla } from "./graficos";
-import { Noticia } from "./piezas";
+import { Noticia, Pensando } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
 export function loNuevo(previa: Vista | null, vista: Vista): Anio[] {
@@ -78,7 +78,7 @@ export function QuePaso({
   /** Los eventos de cada año contados por Sonnet; sin él (o si falla) queda el texto del paquete. */
   onNarrar?: (que: "historia", signal: AbortSignal) => Promise<{ items: Narrado[] }>;
 }) {
-  const narrados = useNarracion(onNarrar ? (signal) => onNarrar("historia", signal) : null, `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`);
+  const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("historia", signal) : null, `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`);
   const tramos = loNuevo(previa, vista).filter((a) => a.fin || a.decisiones.length > 0 || a.eventos.some((e) => !e.rutina));
   const dado = tramos[0]?.decisiones[0];
   const cerrados = tramos.filter((a) => a.fin);
@@ -103,6 +103,9 @@ export function QuePaso({
   for (const a of cerrados) for (let ed = a.edad; ed < a.fin!.edad; ed++) edades.push(ed);
   const mismoAnio = !vista.terminada && cerrados.length === 0;
   const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Seguir: otra decisión este año" : `Seguir al año ${proximo}`;
+
+  // el dado sigue girando hasta que Sonnet cuenta el año: las noticias se muestran una vez y no cambian
+  if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} />;
 
   return (
     <Screen tone={noche ? "noche" : "dia"} gap={16} key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>

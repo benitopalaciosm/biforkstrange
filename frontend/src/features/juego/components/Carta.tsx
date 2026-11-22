@@ -266,7 +266,7 @@ function MundoAbierto({
   const esComun = (i: number, x: Suceso) => comunes[i].some((y) => claveSuceso(y) === claveSuceso(x));
   const anioDe = (i: number) => anioInicial + i;
   const delMundo = comunes.map((l, i) => ({ i, l })).filter((x) => x.l.length > 0);
-  const historias = useNarracion(onNarrar ? (signal) => onNarrar("mundo", signal, mundo.mundo) : null, `mundo:${mundo.mundo}`);
+  const { textos: historias } = useNarracion(onNarrar ? (signal) => onNarrar("mundo", signal, mundo.mundo) : null, `mundo:${mundo.mundo}`);
 
   return (
     <div className="jg-mundo" role="region" aria-label={`Mundo ${mundo.mundo + 1}`}>
@@ -553,7 +553,15 @@ export function Carta({
 
   // otra carta: se parte sin nada marcado
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
-  const narrados = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
+  // la situación y las ofertas que escribe Sonnet se muestran cuando llegan, nunca antes la plantilla
+  const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
+  // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
+  const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
+  const quienEscribe = oferta
+    ? { id: oferta.empresa_id, nombre: oferta.nombre, rubro: oferta.rubro, logo: oferta.logo }
+    : vista.estado.empresa && (vista.estado.empresa_id ?? -1) >= 0
+      ? { id: vista.estado.empresa_id!, nombre: vista.estado.empresa, rubro: vista.estado.rubro, logo: true }
+      : null;
 
   useEffect(() => {
     setSel(null);
@@ -623,7 +631,7 @@ export function Carta({
   return (
     <Screen gap={16} className={comparadas.length > 4 ? "jg-ancha jg-muy-ancha" : "jg-ancha"}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
-      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
+      {(cargando || !listo) && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
       <ProgresoAnios actual={anio} total={vista.anios} />
       <Text size="sm">
         <strong>Tú, en el mundo {GEMELOS + 1}:</strong> {cargoYSueldo(e)}
@@ -640,8 +648,11 @@ export function Carta({
             {porQueTexto(pendiente.por_que)}
           </span>
         )}
-        {pendiente.narrativa && (
-          <div className="jg-mensaje" key={llave}>
+        {pendiente.narrativa && listo && (
+          <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
+            {quienEscribe && (
+              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={36} />
+            )}
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />
               <i />

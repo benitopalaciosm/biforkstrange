@@ -92,6 +92,11 @@ concretos del contexto. Máximo 220 caracteres.
 La plantilla trae los hechos que decidió el juego: respétalos. Mismo resultado, misma empresa, \
 mismo cargo, mismo desenlace. No agregues sucesos que la plantilla y el contexto no traen.
 
+No inventes la historia de la persona. No menciones trabajos, empresas, jefaturas ni cargos \
+anteriores, años de experiencia, estudios ni logros que el contexto y la plantilla no traen: lo que \
+no está, no lo sabes. Su empresa y su cargo de hoy son los del contexto (empresa, cargo). Si el \
+contexto no trae empresa, di "tu empresa" o "tu pega", sin ponerle nombre; si no trae cargo, no lo nombres.
+
 Voz: segunda persona (tú), español de Chile neutro, cálido y sobrio. Sin modismos marcados, sin \
 signos de exclamación, sin halagos, sin dramatizar. Solo texto plano: sin markdown, sin comillas \
 alrededor del texto, sin emojis, sin listas.
