@@ -47,7 +47,7 @@ function Quedaste({ antes, ahora, recorrido, espera, despido }: { antes: Estado 
           </span>
         )}
         <span className="jg-cambio-antes">
-          {sinSueldo(ahora) ? `El último fue ${pesos(ahora.sueldo_ref)}` : comparable && delta !== 0 ? `Antes: ${pesos(antes!.sueldo)}` : "al mes"}
+          {sinSueldo(ahora) ? `El último fue ${plata(ahora.sueldo_ref)}` : comparable && delta !== 0 ? `Antes: ${plata(antes!.sueldo)}` : "al mes"}
         </span>
       </div>
       {comparable && delta < -1000 && <Info pregunta="¿Por qué bajó?">{porQueBajo(antes!, ahora, despido)}</Info>}

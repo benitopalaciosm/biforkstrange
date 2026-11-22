@@ -274,7 +274,6 @@ export function Onboarding({
             min={SLIDER_MIN}
             max={SLIDER_MAX}
             step={50_000}
-            color="var(--dinero)"
             onChange={(n) => set("sueldo", n)}
             display={pesos(p.sueldo)}
           />
@@ -289,7 +288,6 @@ export function Onboarding({
             min={p.edad + 1}
             max={60}
             step={1}
-            color="var(--carrera)"
             onChange={(n) => set("edad_final", n)}
             display={`${p.edad_final ?? p.edad + 10} años`}
           />
