@@ -132,7 +132,7 @@ export function CompartirResultado({
   return (
     <Stack as="section" gap={10} className="jg-compartir">
       <Meta>Comparte tu resultado</Meta>
-      <Button variant="sol" onClick={() => (imagen ? void compartir(imagen) : setArmando(true))} disabled={armando}>
+      <Button variant="white" onClick={() => (imagen ? void compartir(imagen) : setArmando(true))} disabled={armando}>
         {armando
           ? "Armando tu tarjeta…"
           : compartible
