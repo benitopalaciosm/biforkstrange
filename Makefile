@@ -1,4 +1,4 @@
-.PHONY: install back prod front test perfil simular jugar comparar dudas validar supuestos empresas universidades logos
+.PHONY: install back prod front test perfil simular jugar comparar dudas validar supuestos empresas universidades logos transiciones
 install:
 	cd backend && uv sync
 	cd frontend && npm install
@@ -55,3 +55,5 @@ universidades:
 logos:
 	cd backend && uv run --with pillow python -I scripts/logos.py $(DATOS_LABORALES)
 	$(MAKE) empresas universidades
+transiciones:
+	cd backend && uv run --with pyreadstat --with pandas python -I scripts/transiciones_tipo.py $(DATOS_LABORALES)
