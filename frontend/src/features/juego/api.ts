@@ -93,10 +93,13 @@ export function comoErrorApi(e: unknown): ErrorApi {
   return new ErrorApi(Number(m[1]), detalle);
 }
 
-/** El error en palabras de persona, para poner después de "No pudimos hablar con el simulador.". */
+/**
+ * El error en palabras de persona. "No pudimos conectar con el simulador." va solo cuando de verdad no hubo
+ * respuesta (status 0): ante un 5xx o un 4xx con detalle, el simulador sí respondió.
+ */
 export function textoError(e: unknown): string {
   const err = comoErrorApi(e);
-  if (err.status === 0) return err.detalle || SIN_RESPUESTA;
+  if (err.status === 0) return `No pudimos conectar con el simulador. ${err.detalle || SIN_RESPUESTA}`;
   if (err.status >= 500) return `Algo le falló al calcular (error ${err.status}). Prueba de nuevo.`;
   return err.detalle;
 }
