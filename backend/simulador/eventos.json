@@ -19,7 +19,7 @@
       {
        "var": "sueldo",
        "op": "multiplica",
-       "valor": "1 + clamp(si(anos_titulado < 4, crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - prob_ascenso * 0.075 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), -0.2, 0.25)"
+       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - k('ASCENSO_POBLACION', banda7) * (k('ALZA_ASCENSO', 0) + k('ALZA_ASCENSO', 1)) / 2 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), 0, 0.25)"
       }
      ]
     }
@@ -30,7 +30,34 @@
     "guvenen_2021"
    ],
    "calidad": "mixto",
-   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso esperado porque el perfil por edad ya lo incluye."
+   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso promedio de la población (ASCENSO_POBLACION por el alza media de un ascenso), porque el perfil por edad ya lo incluye; el ascenso de cada persona lo paga el evento ascenso. Así quien asciende más que el promedio gana más y, en promedio, el ascenso no se cuenta dos veces."
+  },
+  {
+   "id": "alza_independiente",
+   "nombre": "Alza anual del ingreso por cuenta propia",
+   "categoria": "trabajo",
+   "cuando": "estado == 'independiente'",
+   "prob_anual": 1,
+   "resultados": [
+    {
+     "id": "alza",
+     "prob": 1,
+     "texto": "Tu ingreso se mueve como el de la gente de tu edad que trabaja por su cuenta.",
+     "tono": "neutro",
+     "efectos": [
+      {
+       "var": "sueldo",
+       "op": "multiplica",
+       "valor": "1 + crecimiento_cuenta_propia"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "ine_esi_2025"
+   ],
+   "calidad": "mixto",
+   "notas": "crecimiento_cuenta_propia = p50 de la banda de edad siguiente / p50 de la actual en esi_ingreso_categoria_formalidad (categoría cuenta_propia; formal o informal según la variable formal), anualizado y acotado a ±6%. Es un corte transversal leído como trayectoria, igual que crecimiento_esi para los asalariados: quien entra con la mediana de su edad sigue en la mediana de cada edad. Formal: +3,8% a los 18-24, +5,5% a los 25-29, −1,2% a los 30-34, +4,9% a los 35-39, −2,7% a los 40-44, 0% después; informal: +6% (tope) a los 18-24 y 0% después (la mediana queda en 300 mil). Sin ruido individual ni efecto de la recesión."
   },
   {
    "id": "ascenso",
@@ -73,7 +100,7 @@
     {
      "id": "reemplea",
      "prob": "(1 - exp(-9 / k('MESES_CESANTIA', banda3))) * si(recesion, 0.85, 1)",
-     "texto": "Pierdes la pega y encuentras otra el mismo año.",
+     "texto": "Pierdes el trabajo y encuentras otro el mismo año.",
      "tono": "malo",
      "efectos": [
       {
@@ -97,7 +124,7 @@
     {
      "id": "cesante",
      "prob": "resto",
-     "texto": "Pierdes la pega.",
+     "texto": "Pierdes el trabajo.",
      "tono": "malo",
      "efectos": [
       {

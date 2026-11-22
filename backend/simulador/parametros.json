@@ -316,6 +316,23 @@
    "rango": null
   },
   {
+   "id": "ASCENSO_POBLACION",
+   "valor": {
+    "18-24": 0.056,
+    "25-29": 0.061,
+    "30-34": 0.061,
+    "35-39": 0.055,
+    "40-44": 0.05,
+    "45-49": 0.045,
+    "50-54": 0.045
+   },
+   "unidad": "probabilidad anual",
+   "descripcion": "Probabilidad de ascenso promedio de los años de empleado de la población, por tramo de edad. Es lo que el alza anual descuenta: el perfil por edad de la ESI ya incluye los ascensos promedio, así que quien asciende más que el promedio gana más y quien asciende menos, menos. Medida con la cohorte de validación (5.000 personas desde los 18, semilla 0, prob_ascenso de cada año de empleado); 50-54 repite 45-49 porque la cohorte llega a los 50. Si cambia la regla de ascenso, hay que volver a medirla (tests/test_motor_validacion.py lo revisa).",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
    "id": "P_GOLPE_INGRESO",
    "valor": 0.1,
    "unidad": "probabilidad anual",

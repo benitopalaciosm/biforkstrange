@@ -165,6 +165,40 @@ def test_al_quedar_sin_trabajo_se_suelta_la_empresa_y_se_recuerda_el_cargo():
     assert vida.e["empresa_id"] == -1 and vida.e["cargo_id"] == 0 and vida.resumen()["rol"] is None
 
 
+PROPIA = Perfil(edad=32, rubro="Finanzas y seguros", tipo_empleador="grande", nivel=2,
+                empresa_nombre="Banco del Estado de Chile", cargo_nombre="Analista de riesgo")
+
+
+def test_la_empresa_y_el_cargo_que_contaste_se_muestran_mientras_sigas_ahi():
+    vida = _vida(PROPIA, 11)
+    assert (vida.resumen()["empresa"], vida.resumen()["rol"]) == ("Banco del Estado de Chile", "Analista de riesgo")
+    assert vida.contexto_empleo()["empresa"] == "Banco del Estado de Chile"
+    # quien no está empleado no arrastra el nombre de una empresa
+    assert _vida(Perfil(estado="buscando", empresa_nombre="X", cargo_nombre="Y")).resumen()["empresa"] is None
+
+
+def test_al_ascender_se_suelta_el_nombre_del_cargo_y_al_irte_el_de_la_empresa():
+    vida = _vida(PROPIA, 11)
+    vida._aplicar([{"var": "nivel", "op": "suma", "valor": "1"}], "prueba")
+    assert (vida.resumen()["empresa"], vida.resumen()["rol"]) == ("Banco del Estado de Chile", None)
+    vida._aplicar([{"var": "estado", "op": "fija", "valor": "'buscando'"}], "prueba")
+    assert vida.resumen()["empresa"] is None
+    otra = _vida(PROPIA, 11)
+    otra._nuevo_empleador = True  # se cambia a otra empresa del mismo tipo
+    otra._aplicar([{"var": "antiguedad", "op": "fija", "valor": "0"}], "prueba")
+    assert otra.resumen()["empresa"] != "Banco del Estado de Chile"
+
+
+def test_la_carta_nombra_tu_empresa_real_o_ninguna():
+    """La historia de la carta no le inventa nombre a tu empresa de hoy."""
+    from app.sim.motor import narrativa
+
+    sin = narrativa.narrar("pedir_aumento", {"rubro": "Comercio", "tipo_empleador": "pyme", "edad": 30}, 1, 1)
+    assert "en tu empresa" in sin["situacion"]
+    con = narrativa.narrar("pedir_aumento", {"rubro": "Comercio", "empresa": "Falabella", "edad": 30}, 1, 1)
+    assert "en Falabella" in con["situacion"]
+
+
 def test_quien_trabaja_en_una_empresa_toma_la_exposicion_de_su_cargo():
     vida = _vida(Perfil(edad=30, rubro="Finanzas y seguros", tipo_empleador="grande"))
     car = empresas._catalogo(pq())["cargos"][0]
@@ -283,3 +317,10 @@ def test_quien_trabaja_en_salud_publica_recibe_ofertas_del_estado_de_su_sector()
         if emp and emp["tipo"] == "publico":
             publicas.append(emp["rubro"])
     assert publicas and sum(r == "Salud" for r in publicas) / len(publicas) >= 0.8
+
+
+@pytest.mark.parametrize("nombre", ["WOM", "wom", "Lider", "Banco de Chile", "banco de chile"])
+def test_la_empresa_del_cv_se_encuentra_en_el_catalogo_para_mostrar_su_logo(nombre):
+    emp = empresas.buscar(pq(), nombre)
+    assert emp is not None and emp["logo"]
+    assert empresas.buscar(pq(), "Empresa que no existe SpA") is None

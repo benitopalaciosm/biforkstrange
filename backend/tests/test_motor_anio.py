@@ -125,6 +125,20 @@ def test_la_suerte_de_cada_anio_es_distinta():
     assert len(alzas) >= 4
 
 
+@pytest.mark.parametrize("semilla", range(40))
+def test_quien_sigue_en_su_pega_no_ve_bajar_su_sueldo(semilla):
+    """El alza anual puede ser cero, pero nunca negativa: ni la mala suerte ni una recesión bajan el sueldo
+    de quien se queda en el mismo empleo. Con el alza que podía ser negativa, 37 de estas 40 vidas fallaban."""
+    v = vida(A_LOS_35, Dados(semilla, 0))
+    for _ in range(8):
+        antes = v.resumen()
+        v.vivir_anio(Inercia())
+        despues = v.resumen()
+        mismo = all(antes[k] == despues[k] for k in ("estado", "empresa_id", "nivel", "rol", "tipo_empleador", "rubro"))
+        if mismo and antes["estado"] == "empleado" and not v.e.get("jornada_parcial"):
+            assert despues["sueldo"] >= antes["sueldo"], (antes, despues)
+
+
 def test_fija_responde_una_sola_vez_y_despues_delega():
     v = vida(A_LOS_35, DadosGuion({"evento:oferta_llega": 0.0}))
     delegado = Guion({"oferta_externa": "quedarse"})
@@ -312,21 +326,22 @@ def test_vivir_se_detiene_a_los_60():
 
 # ------------------------------------------------------------------ cierre
 def _independiente(**estado):
-    """Trabaja por cuenta propia: ningún evento le mueve el sueldo, así el cierre se ve limpio."""
+    """Trabaja por cuenta propia a los 50: ningún evento le mueve el sueldo (50-54 es la última banda de la ESI,
+    así que el alza por cuenta propia es 0), y el cierre se ve limpio."""
     base = dict(tasa_ahorro=0.08, ahorro=1_000_000.0, skill=50)
-    return vida(Perfil(edad=35, estado="independiente", sueldo=1_000_000), DadosGuion(), **{**base, **estado})
+    return vida(Perfil(edad=50, estado="independiente", sueldo=1_000_000), DadosGuion(), **{**base, **estado})
 
 
 def test_cierre_edad_ahorro_y_oficio():
     v = _independiente()
     v.vivir_anio(Guion())
-    assert v.e["edad"] == 36 and v.anio == 1
+    assert v.e["edad"] == 51 and v.anio == 1
     # ahorro: lo que había + 8% de 12 sueldos, y sobre eso el retorno real de 3%
     assert v.e["ahorro"] == pytest.approx((1_000_000 + 12 * 1_000_000 * 0.08) * 1.03)
     assert v.e["skill"] == pytest.approx(51.5)       # +1,5 de oficio por año trabajado
     assert v.ingreso_total == pytest.approx(12_000_000)
     assert v.e["antiguedad"] == 0                     # la antigüedad es del empleo dependiente
-    assert v.e["anos_titulado"] == 12                 # 35 - 24, más el año
+    assert v.e["anos_titulado"] == 27                 # 50 - 24, más el año
     v.vivir_anio(Guion())
     assert v.e["ahorro"] == pytest.approx(((1_000_000 + 960_000) * 1.03 + 960_000) * 1.03)
     assert v.ingreso_total == pytest.approx(24_000_000) and v.e["skill"] == pytest.approx(53)
@@ -477,9 +492,10 @@ def test_cierre_alza_extra_anual_se_suma_al_alza_de_la_empleada():
     gemela.vivir_anio(Guion(QUIETA))
     assert "titularse_en_recesion" in [x["evento"] for x in reg["eventos"]]
     assert v.e["alza_extra_anual"] == pytest.approx(0.009)
-    # mismo dado del alza anual; en recesión el alza del año baja 1,5 puntos; después -9% y +0,9%
+    # mismo dado del alza anual; en recesión el alza del año baja 1,5 puntos, sin bajar de cero;
+    # después -9% y +0,9%
     alza_gemela = gemela.e["sueldo"] / 1_000_000
-    assert v.e["sueldo"] == pytest.approx(1_000_000 * (alza_gemela - 0.015) * 0.91 * 1.009)
+    assert v.e["sueldo"] == pytest.approx(1_000_000 * max(alza_gemela - 0.015, 1) * 0.91 * 1.009)
     for _ in range(9):
         v.vivir_anio(Guion(QUIETA))
     assert v.e["alza_extra_anual"] == pytest.approx(0.0, abs=1e-12)

@@ -1,7 +1,7 @@
-"""Qué textos de una partida narra Sonnet, armados desde la partida que vuelve a jugar el servidor.
+"""Qué textos de una partida narra Claude, armados desde la partida que vuelve a jugar el servidor.
 
 No se confía en texto del cliente: el servidor rejuega (perfil, semilla, duda, elecciones) y saca de ahí
-la plantilla y el contexto de cada texto. Sonnet solo reescribe; si falla, queda la plantilla.
+la plantilla y el contexto de cada texto. Claude solo reescribe; si falla, queda la plantilla.
 """
 
 from app.services import narrador_ia
@@ -9,7 +9,7 @@ from app.services.narrador_ia import Item
 from app.sim.motor import gemelos, partida
 from app.sim.motor.perfil import Perfil
 
-MAX_ITEMS = 36  # unas tres llamadas a Sonnet como máximo por pedido
+MAX_ITEMS = 36  # unas tres llamadas a Claude como máximo por pedido
 
 
 def _ficha_oferta(o: dict) -> str:
@@ -80,7 +80,7 @@ def items_mundo(m: dict) -> list[Item]:
 
 
 def narrar(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], que: str,
-           mundo: int | None = None, parametros: dict | None = None) -> dict:
+           mundo: int | None = None, parametros: dict | None = None, relato: str = "") -> dict:
     if que == "mundo":
         if mundo is None:
             raise ValueError("falta el número de mundo")
@@ -88,4 +88,4 @@ def narrar(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict
     else:
         vista = partida.vista(perfil, semilla, duda, elecciones, n_gemelos=0)
         items = items_pendiente(vista) if que == "pendiente" else items_historia(vista)
-    return {"items": [n.model_dump() for n in narrador_ia.narrar(items)]}
+    return {"items": [n.model_dump() for n in narrador_ia.narrar(items, relato)]}

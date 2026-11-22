@@ -6,8 +6,8 @@ from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.juego import DudasIn, EnJuegoIn, MundoIn, NarrarIn, PartidaIn, PesoCvIn, TextoPerfilIn
-from app.services import narracion, perfil_ia
+from app.schemas.juego import DudasIn, EnJuegoIn, MundoIn, NarrarIn, PartidaIn, PerfilIn, PesoCvIn, TextoPerfilIn
+from app.services import juego_personal, narracion, perfil_ia
 from app.sim.motor import empresas, partida, peso, supuestos, validacion
 from app.sim.motor.paquete import paquete
 from app.sim.motor.perfil import NIVELES
@@ -64,6 +64,11 @@ def validacion_contra_chile(n: int = Query(1000, ge=200, le=5000), semilla: int 
     return _validacion(n, semilla)
 
 
+def _personal(perfil: PerfilIn):
+    """El perfil del motor y tu relato (lo usa el narrador como trasfondo)."""
+    return perfil.a_perfil(), juego_personal.desde(perfil.relato)
+
+
 @router.post("/dudas")
 def dudas(body: DudasIn):
     """Decisiones del banco que esta persona puede elegir como su duda inicial."""
@@ -96,14 +101,15 @@ def ver_mundo(body: MundoIn):
 
 @router.post("/narrar")
 def narrar(body: NarrarIn):
-    """Los textos de la partida contados por Sonnet: la carta pendiente, la historia o un mundo.
+    """Los textos de la partida contados por Claude: la carta pendiente, la historia o un mundo.
 
-    Solo texto: ningún número. Si Sonnet no está o falla, cada texto vuelve con su plantilla
-    (`via: "plantilla"`), siempre con 200 si la partida es válida.
+    Solo texto: ningún número. Si Claude no está o falla, cada texto vuelve con su plantilla
+    (`via: "plantilla"`), siempre con 200 si la partida es válida. Tu relato va como trasfondo.
     """
+    p, relato = _personal(body.perfil)
     try:
-        return narracion.narrar(body.perfil.a_perfil(), body.semilla, body.duda,
-                                [e.model_dump() for e in body.elecciones], body.que, body.mundo, body.parametros)
+        return narracion.narrar(p, body.semilla, body.duda, [e.model_dump() for e in body.elecciones],
+                                body.que, body.mundo, body.parametros, relato=relato)
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error
 

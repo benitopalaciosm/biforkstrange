@@ -35,7 +35,7 @@ export const getEnJuego = (perfil: Perfil, dudas: string[]) =>
     body: JSON.stringify({ perfil, dudas, gemelos: GEMELOS }),
   });
 
-/** Textos de la partida contados por Sonnet. Sin gemelos: el servidor solo rejuega tu vida. */
+/** Textos de la partida contados por Claude. Sin gemelos: el servidor solo rejuega tu vida. */
 export const getNarracion = (
   partida: Partida,
   que: "pendiente" | "historia" | "mundo",

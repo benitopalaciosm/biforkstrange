@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Tag, Text, cssVars,
+  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Pill, Screen, ScreenHeader, Stack, Tag, Text,
 } from "@/shared/ui";
 import { GEMELOS, getEnJuego } from "../api";
-import { CALIDAD, arte, plata } from "../textos";
+import { arteDuda, mayuscula, plata, preguntaCorta } from "../textos";
 import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
 import { AvisoPerfil, Cargando, ErrorCaja } from "./piezas";
 
@@ -39,7 +39,6 @@ function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugerid
 
 export function DudaPicker({
   fuentes = null,
-  origenSugeridas = null,
   perfil,
   dudas,
   sugeridas = [],
@@ -93,38 +92,44 @@ export function DudaPicker({
       />
       <Stack gap={6}>
         <Heading level={1}>¿Qué duda te trajo?</Heading>
-        <Text>
-          {sugerida && dudas?.some((d) => d.decision === sugerida)
-            ? `${origenSugeridas === "cv" ? "Por tu CV" : "Por lo que contaste"}, estas son las que más te calzan. Es la primera carta de tu partida.`
-            : "Elige la que más se parece. Es la primera carta de tu partida."}
-        </Text>
-        {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
         <AvisoPerfil fuentes={fuentes} />
       </Stack>
       {enJuego && (
         <div className="jg-en-juego" role="note">
           <Tag tone="accent">La más en juego para ti</Tag>
           <Text size="sm">
-            Donde más te juegas es <strong>«{enJuego.nombre}»</strong>: entre la mala y la buena suerte hay {Math.round(enJuego.dispersion * 100)}% de
-            diferencia, medida sobre tu sueldo típico (de {plata(enJuego.mala)} a {plata(enJuego.buena)} al mes).
+            «{enJuego.nombre}»: de {plata(enJuego.mala)} (10%) a {plata(enJuego.buena)} (90%) al mes.
           </Text>
         </div>
       )}
-      {cargando && !dudas && <Cargando>Buscando las dudas que calzan contigo…</Cargando>}
-      {dudas && dudas.length === 0 && <Text>Con este perfil no hay dudas disponibles. Vuelve y cámbialo.</Text>}
+      {cargando && !dudas && <Cargando>Buscando tus dudas…</Cargando>}
+      {dudas && dudas.length === 0 && <Text>No hay dudas para este perfil. Vuelve y cámbialo.</Text>}
       {dudas && dudas.length > 0 && (
         <DecisionList<string>
+          tile
           label="Dudas posibles"
           value={sel}
           onChange={setSel}
           options={(orden ?? dudas).slice(0, todas ? undefined : VISIBLES).map((d) => ({
             id: d.decision,
-            art: <DecisionArt kind={arte(d.categoria)} />,
+            art: <DecisionArt kind={arteDuda(d.decision, d.categoria)} llenar />,
             title: d.nombre,
-            subtitle: porQue.get(d.decision) ?? d.pregunta,
-            tags: [...(enJuego?.decision === d.decision ? [{ label: "La más en juego", tone: "accent" as const }] : []), ...(porQue.has(d.decision) ? [{ label: "Para ti", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
+            subtitle: preguntaCorta(d.pregunta),
+            tags: [
+              enJuego?.decision === d.decision
+                ? { label: "La más en juego", tone: "accent" as const }
+                : porQue.has(d.decision)
+                  ? { label: "Para ti", tone: "sol" as const }
+                  : { label: mayuscula(d.categoria) },
+            ],
           }))}
         />
+      )}
+      {sel && porQue.get(sel) && (
+        <div className="vd-caja" style={{ gap: 4 }}>
+          <span className="vd-meta">Por qué te calza</span>
+          <Text size="sm">{porQue.get(sel)}</Text>
+        </div>
       )}
       {dudas && !todas && dudas.length > VISIBLES && (
         <Button variant="quiet" onClick={() => setTodas(true)}>
@@ -133,16 +138,7 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={dudas ? onReintentar : onReintentarDudas} />}
-        {simulando && (
-          <>
-            <div className="jg-viviendo" aria-hidden="true">
-              {Array.from({ length: 40 }, (_, i) => (
-                <i key={i} style={cssVars({ "--jg-i": i })} />
-              ))}
-            </div>
-            <Cargando>Simulando {GEMELOS} mundos: 10 años con cada opción…</Cargando>
-          </>
-        )}
+        {simulando && <Cargando frases={[`Simulando tus ${GEMELOS} mundos…`, "Diez años con cada opción…"]} />}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
           {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} mundos` : "Elige una duda"}
         </Button>

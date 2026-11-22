@@ -181,6 +181,22 @@ export function usePartida() {
   const reintentar = useCallback(() => reintento.current?.(), []);
   const reintentarDudas = useCallback(() => verDudas(perfil, dudasSugeridas), [verDudas, perfil, dudasSugeridas]);
 
+  /** Una partida nueva de `p` con la duda dada (o sin duda). */
+  const nuevaPartida = useCallback(
+    (p: Perfil, duda: string | null) => {
+      parametrosCarta.current = {};
+      setCargando(true);
+      const nueva: Partida = { perfil: p, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
+      void pedir(nueva, (v) => {
+        setPartida(nueva);
+        setPrevia(null);
+        setVista(v);
+        setFase(v.terminada ? "cierre" : "carta");
+      });
+    },
+    [pedir],
+  );
+
   /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
   const empezarAlAzar = useCallback(
     (p: Perfil) => {
@@ -189,33 +205,12 @@ export function usePartida() {
       setDudasSugeridas([]);
       setVista(null);
       setPrevia(null);
-      const nueva: Partida = { perfil: p, semilla: Math.floor(Math.random() * 1_000_000), duda: null, elecciones: [] };
-      parametrosCarta.current = {};
-      setCargando(true);
-      void pedir(nueva, (v) => {
-        setPartida(nueva);
-        setPrevia(null);
-        setVista(v);
-        setFase(v.terminada ? "cierre" : "carta");
-      });
+      nuevaPartida(p, null);
     },
-    [pedir, fijarPerfil],
+    [nuevaPartida, fijarPerfil],
   );
 
-  const empezar = useCallback(
-    (duda: string) => {
-      const nueva: Partida = { perfil, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
-      parametrosCarta.current = {};
-      setCargando(true);
-      void pedir(nueva, (v) => {
-        setPartida(nueva);
-        setPrevia(null);
-        setVista(v);
-        setFase(v.terminada ? "cierre" : "carta");
-      });
-    },
-    [perfil, pedir],
-  );
+  const empezar = useCallback((duda: string) => nuevaPartida(perfil, duda), [perfil, nuevaPartida]);
 
   /**
    * Retoma la partida guardada (al recargar la página). Si el motor cambió desde que se guardó y ya no la
@@ -286,7 +281,7 @@ export function usePartida() {
     return getMundo(partida, mundo, parametrosCarta.current);
   }, [partida]);
 
-  /** Textos de la partida contados por Sonnet (la carta, la historia o un mundo de la carta). */
+  /** Textos de la partida contados por Claude (la carta, la historia o un mundo de la carta). */
   const narrar = useCallback(
     (que: "pendiente" | "historia" | "mundo", signal: AbortSignal, mundo?: number) => {
       if (!partida) return Promise.reject(new Error("No hay partida"));

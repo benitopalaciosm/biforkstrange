@@ -21,7 +21,7 @@
   cursor: pointer; transition: transform .2s, background .2s;
 }
 .ob-zona strong { font: 700 17px/24px var(--font); }
-.ob-zona:hover, .ob-zona[data-encima] { transform: scale(1.02); background: #dfe5ff; }
+.ob-zona:hover, .ob-zona[data-encima] { transform: scale(1.02); background: color-mix(in srgb, var(--acento) 6%, var(--acento-suave)); }
 .ob-zona:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
 
 /* LinkedIn → PDF → gemelo, en loop */
@@ -54,13 +54,13 @@
 .ob-leyendo { align-items: center; padding: 18px 0; }
 .ob-hoja {
   position: relative; width: 150px; height: 190px; padding: 22px 16px; border: 2px solid var(--tinta); border-radius: 10px;
-  background: var(--papel); display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-shadow: 6px 6px 0 var(--tinta);
+  background: var(--papel); display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-shadow: 6px 6px 0 var(--sombra);
 }
 .ob-hoja i { height: 7px; border-radius: 4px; background: var(--linea); }
 .ob-hoja i:first-child { background: #0A66C2; }
 .ob-scan {
   position: absolute; left: 0; right: 0; height: 34px; top: -34px;
-  background: linear-gradient(to bottom, transparent, rgba(36, 71, 249, .28), transparent);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--acento) 28%, transparent), transparent);
   border-bottom: 2px solid var(--acento); animation: ob-escanear 1.6s ease-in-out infinite;
 }
 @keyframes ob-escanear { from { top: -34px; } to { top: 100%; } }
@@ -69,7 +69,9 @@
 /* La ficha del gemelo */
 .ob-ficha {
   display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 18px;
-  background: var(--sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
+  background: var(--sol); color: var(--sobre-sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
+  /* superficie amarilla: tinta oscura y blanco adentro también en modo oscuro */
+  --tinta: #1D1E22; --media: #2A2B30; --suave: #3A3B40; --papel: #FFFFFF; --niebla: #F2F2EF; --acento: #2447F9; --sombra: #1D1E22;
 }
 .ob-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .ob-tag { animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both; background: var(--papel); }
@@ -90,7 +92,7 @@
 .ob-claude-abrir strong { color: var(--tinta); }
 .ob-claude-abrir:hover { border-color: var(--acento); transform: translateY(-1px); }
 .ob-claude-abrir:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
-.ob-claude-chispa { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--sol); color: var(--tinta); font-size: 16px; animation: ob-girar 6s linear infinite; }
+.ob-claude-chispa { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--sol); color: var(--sobre-sol); font-size: 16px; animation: ob-girar 6s linear infinite; }
 @keyframes ob-girar { to { transform: rotate(360deg); } }
 .ob-claude { padding: 14px; border: 1.5px solid var(--acento); border-radius: 16px; background: var(--acento-suave); animation: vd-subir .35s ease-out both; }
 .ob-claude-texto { min-height: 96px; font: 400 13px/18px ui-monospace, Menlo, monospace; }
@@ -112,7 +114,7 @@
 .ob-fuente:hover:not(:disabled), .ob-fuente[data-encima] { border-color: var(--acento); transform: translateY(-1px); }
 .ob-fuente:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 .ob-fuente:disabled { cursor: progress; }
-.ob-fuente[data-listo] { border-color: var(--dinero); background: #effaf4; }
+.ob-fuente[data-listo] { border-color: var(--dinero); background: color-mix(in srgb, var(--dinero) 12%, var(--papel)); }
 .ob-fuente .ob-anim { width: 120px; height: 44px; transform: scale(.75); transform-origin: left center; margin-right: -24px; }
 .ob-fuente-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .ob-icono { flex: none; width: 40px; height: 40px; font-size: 20px; }
@@ -120,7 +122,7 @@
 .ob-accion { flex: none; font: 600 13px/18px var(--font); color: var(--acento); }
 .ob-check {
   flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
-  background: var(--dinero); color: #fff; font: 700 15px/1 var(--font); animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
+  background: var(--dinero); color: var(--papel); font: 700 15px/1 var(--font); animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
 }
 @media (prefers-reduced-motion: reduce) { .ob-check { animation: none; } }
 .ob-icono--tu { display: grid; place-items: center; border-radius: 50%; background: var(--niebla); color: var(--tinta); border: 1.5px solid var(--linea); }
@@ -148,3 +150,28 @@
 .ob-silueta-llena { fill: var(--tinta); }
 .ob-nivel { transition: transform .6s cubic-bezier(.2, .8, .2, 1); transform-box: fill-box; }
 @media (prefers-reduced-motion: reduce) { .ob-nivel { transition: none; } }
+/* Entrada abierta: cuéntanos de ti */
+.ob-relato { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.ob-relato-texto {
+  width: 100%; min-height: 150px; resize: vertical; box-sizing: border-box;
+  padding: 14px 16px; border: 2px solid var(--tinta); border-radius: 18px;
+  background: var(--papel); color: var(--tinta); font: 400 15px/22px var(--font);
+}
+.ob-relato-texto:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.ob-pistas { display: flex; flex-wrap: wrap; gap: 6px; }
+.ob-pistas span {
+  padding: 4px 10px; border: 1px solid var(--linea); border-radius: 999px;
+  font: 400 12px/16px var(--font); color: var(--media);
+}
+.ob-o { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--suave); font: 400 13px/18px var(--font); }
+.ob-o::before, .ob-o::after { content: ""; flex: 1; height: 1px; background: var(--linea); }
+
+/* Prompt para que tu propia IA te describa */
+.ob-agente { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--acento-suave); font: 400 14px/20px var(--font); color: var(--tinta); }
+.ob-agente-fila { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.ob-agente-fila > span { flex: 1 1 220px; }
+.ob-agente summary { cursor: pointer; font: 600 13px/18px var(--font); color: var(--media); }
+.ob-agente pre {
+  max-height: 260px; overflow: auto; white-space: pre-wrap; margin: 8px 0 0; padding: 12px;
+  border-radius: 10px; background: var(--papel); color: var(--tinta); font: 400 12px/17px var(--font); user-select: all;
+}

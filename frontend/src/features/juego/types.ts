@@ -55,10 +55,15 @@ export type Perfil = {
   empresas_cerradas?: number;
   /** universidad_id del catálogo; "" si no lo dice. */
   universidad_id?: string;
+  /** Su empresa y su cargo de hoy, con el nombre que dio. Solo para contar la historia: no mueven números. */
+  empresa_nombre?: string;
+  cargo_nombre?: string;
   /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
   rubro_sonado?: string | null;
   /** 1 si busca su primer empleo (sin experiencia tras titularse): parte en la primera pega, no en cesantía. */
   primer_empleo?: 0 | 1;
+  /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
+  relato?: string;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
@@ -78,6 +83,8 @@ export type PerfilLeido = {
   dudas_sugeridas?: DudaSugerida[];
   /** Su empleador actual, si está en la nómina del SII. */
   empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
+  /** Su empleador actual en el catálogo de empresas, si está: para mostrar su logo. */
+  empresa_catalogo?: { empresa_id: number; nombre: string; rubro: string; logo: boolean } | null;
   /** Lo que contó su Claude (solo por el prompt): temas que le apasionan y su proyecto paralelo. */
   intereses?: string[];
   proyecto?: string | null;
@@ -124,7 +131,7 @@ export type Estado = {
   antiguedad: number;
   ahorro: number;
   empresa_id?: number;
-  /** Empresa del catálogo donde trabaja y su cargo; null si su empleo no es del catálogo. */
+  /** Empresa y cargo donde trabaja: los del catálogo o, mientras siga en su pega de hoy, los que contó. */
   empresa?: string | null;
   rol?: string | null;
   ia_adopcion?: number;
@@ -285,8 +292,8 @@ export type Universidad = {
   selectiva: boolean;
 };
 
-/** Un texto contado por Sonnet (o su plantilla si Sonnet no estaba). */
-export type Narrado = { id: string; texto: string; via: "sonnet" | "plantilla" };
+/** Un texto contado por Claude (o su plantilla si Claude no estaba). */
+export type Narrado = { id: string; texto: string; via: "claude" | "plantilla" };
 
 export type OpcionPendiente = {
   opcion: string;

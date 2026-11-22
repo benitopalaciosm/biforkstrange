@@ -151,13 +151,15 @@ export function useBorrador(inicial: Borrador) {
       const r = await leerPerfil(texto);
       if (mio !== pedidoClaude.current) return false;
       const supuestos = new Set(r.supuestos.map((x) => x.campo));
-      const dados = r.dados ?? Object.keys(r.perfil).filter((k) => !supuestos.has(k));
+      // un nombre vacío (el texto no traía empresa o cargo) no borra el que ya sabíamos
+      const dados = (r.dados ?? Object.keys(r.perfil).filter((k) => !supuestos.has(k))).filter((k) => r.perfil[k as keyof Perfil] !== "");
       cambiar((b) => {
         // tu Claude pisa lo que leyó el CV, pero no lo que contestaste tú
         const suyos = dados.filter((k) => b.fuentes[k] !== "tu");
         return {
           ...b,
-          perfil: { ...b.perfil, ...Object.fromEntries(suyos.map((k) => [k, r.perfil[k as keyof Perfil]])) },
+          // lo que pegaste también es tu relato: el narrador lo usa
+          perfil: { ...b.perfil, ...Object.fromEntries(suyos.map((k) => [k, r.perfil[k as keyof Perfil]])), relato: texto },
           fuentes: { ...b.fuentes, ...Object.fromEntries(suyos.map((k) => [k, "claude" as const])) },
           claude: { intereses: r.intereses ?? [], proyecto: r.proyecto ?? null, retrato: r.retrato ?? null, sugeridas: r.dudas_sugeridas ?? [] },
         };

@@ -105,6 +105,8 @@ class PerfilIn(BaseModel):
     ascensos_por_ano: float | None = Field(None, ge=0, le=2)
     empresas_cerradas: int = Field(0, ge=0, le=10)
     universidad_id: str = Field("", max_length=40)
+    empresa_nombre: str = Field("", max_length=120)
+    cargo_nombre: str = Field("", max_length=120)
 
     @field_validator("universidad_id")
     @classmethod
@@ -126,6 +128,9 @@ class PerfilIn(BaseModel):
         if v and v not in _rubros():
             raise ValueError(f"rubro desconocido: {v!r}")
         return v
+
+    # cómo te describes con tus palabras: el narrador lo usa como trasfondo. Fuera de model_dump: no es campo del motor
+    relato: str = Field("", max_length=20000, exclude=True)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())

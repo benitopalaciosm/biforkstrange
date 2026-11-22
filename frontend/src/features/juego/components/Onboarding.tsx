@@ -8,16 +8,16 @@ import { MANUAL, type Onboarding as OnboardingEstado } from "../hooks/useBorrado
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, Sexo } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
-import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, banda } from "./PerfilForm";
+import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, TuPega, banda } from "./PerfilForm";
 
 /** Las elecciones de cada tarjeta: parten vacías y hay que tocarlas para seguir. */
 const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["sexo", "edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["ingles"] };
 /** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
 const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
 const SITUACION: Record<string, string> = {
-  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando pega", estudiando: "Estudiando",
+  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando trabajo", estudiando: "Estudiando",
 };
-const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
+const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de trabajo…", "Eligiendo tus dudas…"];
 
 /**
  * Onboarding en 3 pantallas: subes tu CV (o el PDF de LinkedIn) o contestas unas pocas preguntas, después solo
@@ -206,6 +206,7 @@ export function Onboarding({
 
       {catalogo && paso === "pega" && (
         <Tarjeta key="pega" titulo="¿Dónde trabajas hoy?">
+          <TuPega p={p} set={set} />
           <Row>
             {catalogo.tipos_empleador.map((t) => (
               <Chip key={t} pressed={elegido("tipo_empleador") && p.tipo_empleador === t} onToggle={() => set("tipo_empleador", t)}>
@@ -214,7 +215,7 @@ export function Onboarding({
             ))}
           </Row>
           <Stack gap={8}>
-            <span className="jg-etiqueta">Tu cargo</span>
+            <span className="jg-etiqueta">Nivel de tu cargo</span>
             <Row>
               {catalogo.niveles.map((n) => (
                 <Chip key={n.nivel} pressed={elegido("nivel") && p.nivel === n.nivel} onToggle={() => set("nivel", n.nivel)}>
@@ -268,7 +269,7 @@ export function Onboarding({
       {catalogo && paso === "plata" && (
         <Tarjeta key="plata" titulo={leido ? "Lo que un CV no dice." : "Lo último."}>
           <Slider
-            label="Te llega al mes (líquido)"
+            label="Sueldo líquido al mes"
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, p.sueldo))}
             min={SLIDER_MIN}
             max={SLIDER_MAX}
@@ -279,7 +280,7 @@ export function Onboarding({
           />
           {ref && (
             <Text size="sm">
-              La mitad de la gente como tú gana menos de <strong>{pesos(ref.p50)}</strong>.
+              Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
             </Text>
           )}
           <Stack gap={8}>
@@ -433,12 +434,13 @@ function Entrada({
             <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
             <span className="ob-fuente-texto">
               <strong>Contesto yo unas preguntas</strong>
-              <span className="ob-chico">Edad, sexo, estudios, tu pega y tu sueldo. Un toque cada una.</span>
+              <span className="ob-chico">Edad, sexo, estudios, tu trabajo y tu sueldo. Un toque cada una.</span>
             </span>
             <Marca listo={false} accion="Empezar" />
           </button>
         )}
       </Stack>
+
 
       <ScreenFooter>
         {algo && (
@@ -496,6 +498,8 @@ function Ficha({
     ["edad", `${p.edad} años`],
     ["sexo", p.sexo === "h" ? "Hombre" : "Mujer"],
     ["edu", EDUCACION[p.edu] ?? p.edu],
+    ["cargo_nombre", p.cargo_nombre?.trim() || undefined],
+    ["empresa_nombre", p.empresa_nombre?.trim() ? `En ${p.empresa_nombre.trim()}` : undefined],
     ["nivel", nivel],
     ["tipo_empleador", TIPO_EMPLEADOR[p.tipo_empleador] ?? p.tipo_empleador],
     ["rubro", p.rubro],
@@ -561,7 +565,7 @@ function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string
     let vivo = true;
     setErrorPrompt(null);
     getPrompt()
-      .then((r) => vivo && setPrompt(r.prompt))
+      .then((r) => vivo && setPrompt(r.prompt + PROMPT_RELATO))
       .catch((e: unknown) => vivo && setErrorPrompt(textoError(e)));
     return () => {
       vivo = false;
@@ -605,7 +609,7 @@ function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string
         id="ob-claude-texto"
         className="jg-campo ob-claude-texto"
         rows={5}
-        placeholder={"```gemelo-laboral\nsueldo_liquido: …"}
+        placeholder="Pega lo que te respondió, o cuéntanos de ti con tus palabras: qué haces, qué te cansa, cómo decides, qué te importa…"
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
       />
@@ -641,3 +645,8 @@ function Silueta({ lleno }: { lleno: number }) {
     </svg>
   );
 }
+
+/** Lo que se suma al prompt del equipo: el relato libre que usa el narrador para contar tus cartas. */
+const PROMPT_RELATO = `
+
+4. Después del bloque, agrega una sección "## Sobre mí, en mis palabras" escrita en primera persona, como si yo me presentara (150–300 palabras): qué hago y qué me cansa de mi pega, cómo decido frente al riesgo y los cambios, cómo soy trabajando con otras personas, lo que me importa fuera del trabajo y las dudas o planes que tengo hoy. Solo lo que sabes de verdad.`;

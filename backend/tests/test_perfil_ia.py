@@ -38,7 +38,7 @@ def test_la_via_de_claude_devuelve_dados(monkeypatch):
     r = perfil_ia.perfil_desde_texto("Tengo 28 años y estoy buscando pega.", "2026-11-21")
     assert r["via"] == "api"
     # lo del texto, más lo que el SII sabe de la empresa
-    assert r["dados"] == ["edad", "emprendio_antes", "estado", "meses_cesante", "rubro", "tipo_empleador"]
+    assert r["dados"] == ["edad", "emprendio_antes", "empresa_nombre", "estado", "meses_cesante", "rubro", "tipo_empleador"]
     supuestos = {s["campo"] for s in r["supuestos"]}
     assert {"sueldo", "region", "antiguedad", "carrera_id", "nivel"} <= supuestos
     assert not supuestos & set(r["dados"])
@@ -156,7 +156,7 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
         "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35,
         "estado": "empleado", "meses_cesante": 0, "parcial": 0, "remoto": 0, "usa_ia": 0, "empresa_anos": 0,
-        "empresa_fondos": 0, "anos_por_empleo": 3.0, "universidad_id": ""}
+        "empresa_fondos": 0, "anos_por_empleo": 3.0, "universidad_id": "", "empresa_nombre": "Fintual"}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -479,6 +479,24 @@ def test_el_prompt_es_corto_y_pide_lo_que_un_cv_no_dice():
     assert len(p) < 3500  # cabe en el link que abre Claude o ChatGPT con el prompt escrito
     for campo in ("sueldo_liquido:", "proyecto:", "afuera:", "rubro_sonado:", "intereses:", "Nada de salud"):
         assert campo in p
+
+
+def test_el_prompt_pide_tu_cargo_y_tus_pegas_anteriores_sin_suponerlas():
+    p = perfil_doc.prompt()
+    for campo in ("empresa:", "cargo:", "nivel:", "pegas_anteriores:", "no las supongas"):
+        assert campo in p
+
+
+def test_tu_cargo_y_tus_pegas_anteriores_entran_al_perfil():
+    unica = perfil_doc.leer_documento("```gemelo-laboral\nempresa: BancoEstado\ncargo: Analista de riesgo\n"
+                                      "nivel: Semi senior\npegas_anteriores: ninguna\n```")
+    p = unica["perfil"]
+    assert (p["empresa_nombre"], p["cargo_nombre"], p["nivel"]) == ("BancoEstado", "Analista de riesgo", 1)
+    assert {"empresa_nombre", "cargo_nombre", "nivel", "red"} <= set(unica["dados"]) and unica["avisos"] == []
+    dos = perfil_doc.leer_documento("```gemelo-laboral\npegas_anteriores: Falabella, analista; Entel, practicante\n```")
+    assert dos["perfil"]["red"] > p["red"]  # tres empleadores contra uno
+    # sin saber si hubo otras, no se supone nada
+    assert "red" not in perfil_doc.leer_documento("```gemelo-laboral\npegas_anteriores: ?\nedad: 30\nriesgo: 4\n```")["dados"]
 
 
 def test_lo_que_cuenta_tu_claude_sugiere_dudas_y_entra_al_perfil():

@@ -75,6 +75,10 @@ class Perfil:
     empresas_cerradas: int = 0            # empresas propias que ya cerró
     # Dónde estudió (universidades.universidad_id); vacío si no lo dice
     universidad_id: str = ""
+    # Su empresa y su cargo de hoy, con el nombre que dio. Solo para contar la historia: no mueven ningún
+    # número. Valen mientras siga en ese empleo (ver `Vida._nombre_empresa`).
+    empresa_nombre: str = ""
+    cargo_nombre: str = ""
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -255,6 +259,9 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         ocupacion_destino=2, quien_enferma="madre",
         universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
         institucion_destino=_institucion_por_defecto(pq), universidad_id=perfil.universidad_id or "",
+        # nombres de su empleo de hoy (no son variables del paquete: el motor los borra al dejar ese empleo)
+        empresa_inicial=perfil.empresa_nombre.strip() if perfil.estado == "empleado" else "",
+        cargo_inicial=perfil.cargo_nombre.strip() if perfil.estado == "empleado" else "",
     )
     # su historia no es del paquete: la lee la política de los gemelos, y solo si el CV la trae
     for rasgo in HISTORIA:
@@ -264,6 +271,10 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
     if perfil.practica and (perfil.estado == "estudiando" or e["primer_empleo"]):
         e["practica"] = perfil.practica  # solo pesa en su primera pega
+    if perfil.estado == "fundador" and perfil.sueldo > 0:
+        # ya tiene empresa: su ganancia parte de lo que declaró (el primer año gana eso en la mediana) y crece
+        # con los años como la de cualquier empresa; MICRO_MEDIANA queda para quien recién emprende
+        e["base_empresa"] = float(perfil.sueldo) / (1 + e["empresa_anos"] / 4)
     if perfil.ascensos_por_ano is not None:
         e["prob_ascenso_extra"] = ascenso_extra(perfil.ascensos_por_ano, perfil.nivel, pq)  # sin dato, 0 (estado.json)
     propios = parametros_propios(perfil, pq)

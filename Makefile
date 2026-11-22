@@ -10,7 +10,7 @@ prod:
 front:
 	cd frontend && npm run dev
 test:
-	cd backend && uv run pytest -q
+	cd backend && uv run pytest -q -n auto
 # Trayectoria laboral desde el terminal. Ej: make perfil OCUPACION=4 EDAD=24
 OCUPACION ?= 2
 EDAD ?= 30

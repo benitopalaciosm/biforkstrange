@@ -191,7 +191,8 @@ def estado_al_azar(R: random.Random) -> dict:
         "deuda_estudios": R.choice([0, 0, 8e6]), "animo": R.uniform(20, 90), "energia": R.uniform(10, 95),
         "salud": R.choice(["bien", "bien", "licencia", "cancer", "cronica"]), "red": R.uniform(0, 100),
         "skill": R.uniform(0, 100), "riesgo": R.uniform(0, 100), "ambicion": R.uniform(0, 100),
-        "usa_ia": R.randint(0, 1), "empresa_anos": R.randint(0, 8), "empresa_fondos": R.randint(0, 1),
+        "usa_ia": R.randint(0, 1), "empresa_anos": R.randint(0, 8),
+        "base_empresa": R.choice([0, 0, round(R.lognormvariate(math.log(600000), 0.6))]), "empresa_fondos": R.randint(0, 1),
         "madre_edad": madre, "padre_edad": madre + 2 if madre > 0 and R.random() < 0.85 else -1,
         "familiar_enfermo": R.choice(["", "", "", "madre", "padre"]), "recesion": 1 if R.random() < 0.2 else 0,
         "anos_en_carrera": R.randint(0, 5), "anos_en_startup": R.randint(0, 6),
@@ -216,6 +217,7 @@ def estado_al_azar(R: random.Random) -> dict:
             e[v["nombre"]] = neutro if R.random() < 0.5 else R.uniform(lo, hi)
     e = p.ref.derivar(e)
     e["prob_ascenso"] = R.choice([0.0, 0.05, R.uniform(0, 0.4)])
+    e["prima_personal"] = R.choice([1.0, R.uniform(0.6, 3.0)])  # la calcula el motor, no el paquete de referencia
     faltan = set(p.variables) - set(e)
     assert not faltan, f"el generador no cubre {faltan}"
     return e
