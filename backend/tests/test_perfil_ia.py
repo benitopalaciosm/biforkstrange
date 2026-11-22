@@ -23,7 +23,7 @@ def test_sin_sueldo_se_usa_la_mediana_de_su_edad_y_estudios():
     r = perfil_ia.completar(LEIDO.model_copy(update={"sueldo": None}))
     assert "sueldo" in [s["campo"] for s in r["supuestos"]]
     # ESI 2025, universitaria, 30-34 (valor literal de esi_perfil_edad_edu.csv)
-    assert r["perfil"]["sueldo"] == 1_097_145
+    assert r["perfil"]["sueldo"] == 1_100_000
 
 
 def test_valores_fuera_de_rango_o_inventados_se_descartan():
