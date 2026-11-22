@@ -75,7 +75,8 @@
 /* Lo que sabe tu gemelo: una cinta que pasa sola; se detiene al pasar el mouse */
 .ob-cinta { overflow: hidden; margin-right: -14px; }
 .ob-cinta[data-mueve] { mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 32px), transparent); }
-.ob-cinta-pista { display: flex; flex-wrap: wrap; gap: 6px; padding-right: 14px; }
+.ob-cinta-pista { display: flex; flex-wrap: nowrap; gap: 6px; padding-right: 14px; }
+.ob-ficha .ob-cinta .ob-tag { white-space: nowrap; flex: none; }
 .ob-cinta[data-mueve] .ob-cinta-pista { flex-wrap: nowrap; width: max-content; animation: ob-cinta linear infinite; }
 .ob-cinta[data-mueve]:hover .ob-cinta-pista { animation-play-state: paused; }
 .ob-cinta[data-mueve] .ob-tag { white-space: nowrap; flex: none; }

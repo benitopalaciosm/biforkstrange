@@ -1024,7 +1024,7 @@
         {
          "var": "edad",
          "op": "suma",
-         "valor": 3
+         "valor": 2
         }
        ]
       }
@@ -1078,7 +1078,7 @@
     {
      "id": "hacer",
      "nombre": "Hacerlo",
-     "detalle": "Tres a seis meses intensivos.",
+     "detalle": "Dejas tu trabajo: tres a seis meses intensivos.",
      "resultados": [
       {
        "id": "colocado",
@@ -1086,6 +1086,11 @@
        "texto": "Entras como junior en tecnología.",
        "tono": "bueno",
        "efectos": [
+        {
+         "var": "bootcamp",
+         "op": "fija",
+         "valor": 1
+        },
         {
          "var": "ahorro",
          "op": "suma",
@@ -1115,15 +1120,30 @@
          "var": "sueldo",
          "op": "fija",
          "valor": "max(sueldo_ref * 0.85, k('USD') * 1375 * 0.9)"
+        },
+        {
+         "var": "ocupacion",
+         "op": "fija",
+         "valor": 2
+        },
+        {
+         "var": "cargo_id",
+         "op": "fija",
+         "valor": -1
         }
        ]
       },
       {
        "id": "sin_pega",
        "prob": "resto",
-       "texto": "Terminas, pero no encuentras trabajo todavía.",
+       "texto": "Terminas, pero todavía no encuentras trabajo en tecnología: quedas buscando.",
        "tono": "malo",
        "efectos": [
+        {
+         "var": "bootcamp",
+         "op": "fija",
+         "valor": 1
+        },
         {
          "var": "ahorro",
          "op": "suma",
@@ -1209,14 +1229,9 @@
       {
        "id": "titula",
        "prob": 0.55,
-       "texto": "Te titulas.",
+       "texto": "Vas a titularte: terminas en tres años, estudiando de noche.",
        "tono": "bueno",
        "efectos": [
-        {
-         "var": "edu",
-         "op": "fija",
-         "valor": "'tecnica'"
-        },
         {
          "var": "ahorro",
          "op": "suma",
@@ -1230,7 +1245,18 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', 'tecnica', 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', 'tecnica') / tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)"
+         "valor": "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', 'tecnica', 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', 'tecnica') / tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)",
+         "en_anios": 3,
+         "aviso": {
+          "nombre": "Te titulas",
+          "texto": "Terminas la carrera que estudiaste de noche. Tu sueldo sube como el de quienes tienen ese título."
+         }
+        },
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'tecnica'",
+         "en_anios": 3
         }
        ]
       },
@@ -1638,7 +1664,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -1809,12 +1835,12 @@
     {
      "id": "informal",
      "nombre": "Trabajar informal mientras buscas",
-     "detalle": "Sin contrato ni cotizaciones. El asalariado informal gana 62% del formal.",
+     "detalle": "Sin contrato ni cotizaciones. Ganas como la mitad de quienes trabajan por su cuenta sin boleta a tu edad (ESI); puedes seguir buscando algo con contrato.",
      "resultados": [
       {
        "id": "trabaja",
        "prob": 1,
-       "texto": "Trabajas sin contrato mientras sigues postulando.",
+       "texto": "Trabajas sin contrato. Puedes seguir buscando algo con contrato.",
        "tono": "neutro",
        "efectos": [
         {
@@ -1888,7 +1914,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -1941,7 +1967,7 @@
     {
      "id": "cambiar",
      "nombre": "Cambiarte",
-     "detalle": "En Chile 54% de los cambios mejora el sueldo y 46% no.",
+     "detalle": "La oferta trae su sueldo: lo ves antes de decidir. De los cambios que la gente hace, 54% sube el sueldo (Banco Central); de las ofertas que llegan, menos, porque las que pagan menos se rechazan más.",
      "resultados": [
       {
        "id": "mejora",
@@ -2287,7 +2313,7 @@
     {
      "id": "pedir",
      "nombre": "Pedirlo",
-     "detalle": "Las mujeres piden casi tanto como los hombres y lo consiguen menos.",
+     "detalle": "Pedirlo no garantiza nada. A las mujeres se lo dan menos que a los hombres, aunque lo piden casi igual de seguido.",
      "resultados": [
       {
        "id": "si",
@@ -2984,8 +3010,8 @@
       {
        "id": "logra",
        "prob": "clamp(tabla('jobhop_transiciones', 'prob', 'origen', ocupacion, 'destino', ocupacion_destino) * 3, 0.02, 0.6)",
-       "texto": "Logras el cambio.",
-       "tono": "bueno",
+       "texto": "Logras el cambio: partes de cero en tu nuevo oficio, con el sueldo de quien empieza en él.",
+       "tono": "neutro",
        "efectos": [
         {
          "var": "ocupacion",
@@ -3267,7 +3293,7 @@
       {
        "id": "crece",
        "prob": "k('YC_ADQUIRIDA')",
-       "texto": "La empresa crece y la compran. Tus acciones valen algo.",
+       "texto": "La empresa crece y la compran años después. Si sigues ahí, tus acciones valen algo.",
        "tono": "bueno",
        "efectos": [
         {
@@ -3284,7 +3310,12 @@
          "var": "ahorro",
          "op": "suma",
          "valor": "sueldo * 12 * azar_uniforme(0.5, 3)",
-         "cuando": "anos_en_startup >= 4"
+         "cuando": "anos_en_startup >= 4",
+         "en_anios": 4,
+         "aviso": {
+          "nombre": "Compran tu startup",
+          "texto": "La startup donde entraste con acciones se vende, y tus acciones valen algo."
+         }
         },
         {
          "var": "nivel",
@@ -3497,6 +3528,113 @@
    "notas": "Nueva: el motor actual no modela el trabajo por cuenta propia; es la mayor brecha del benchmark (13% a 24% en Chile, 3% a 4% en el juego)."
   },
   {
+   "id": "volver_a_contrato",
+   "nombre": "Volver a un trabajo con contrato",
+   "categoria": "trabajo",
+   "pregunta": "¿Buscas un trabajo con contrato?",
+   "cuando": "estado == 'independiente'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.03,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "buscar",
+     "nombre": "Buscar con contrato",
+     "detalle": "Sigues con tus clientes mientras postulas. Quien vuelve a un empleo suele entrar ganando menos que en su último trabajo con contrato.",
+     "resultados": [
+      {
+       "id": "encuentra",
+       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95), 0, 0.9)",
+       "texto": "Vuelves a un trabajo con contrato.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "max(si(sueldo_ref > 0, sueldo_ref, tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7)) * azar_uniforme(0.78, 0.9), sueldo)"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_REEMPLEO')"
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No sale nada este año: sigues por tu cuenta.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "eps_2024",
+      "couch_placzek_2010",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "Seguir por tu cuenta",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues por tu cuenta.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "eps_2024",
+     "cifra": "A los 12 meses de buscar, 70% de los cesantes de 18-44 años ya encontró trabajo",
+     "uso": "probabilidad de encontrar en un año (la misma que la cesantía; supuesto: buscar trabajando por tu cuenta rinde igual)"
+    },
+    {
+     "fuente": "couch_placzek_2010",
+     "cifra": "Quien vuelve a un empleo entra ganando menos que antes",
+     "uso": "sueldo al volver: 78% a 90% del último sueldo con contrato, como «tomar lo primero que salga»"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "buscar",
+   "notas": "Sin ella, trabajar por tu cuenta (o informal) era una puerta de un solo sentido. El peso (0,03) es un supuesto del equipo calibrado para que la cohorte siga reproduciendo la cuenta propia por edad de la ENE (make validar); en tu partida aparece siempre entre lo que puedes buscar en un año tranquilo."
+  },
+  {
    "id": "emprender",
    "nombre": "Emprender",
    "categoria": "emprender",
@@ -3547,7 +3685,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -3568,7 +3706,7 @@
       {
        "id": "tracciona",
        "prob": 0.2,
-       "texto": "Tu proyecto tiene clientes. Puedes lanzarte con menos riesgo.",
+       "texto": "Tu proyecto consigue clientes. Ahora decides si te lanzas.",
        "tono": "bueno",
        "efectos": [
         {
@@ -3581,7 +3719,8 @@
          "op": "fija",
          "valor": 1
         }
-       ]
+       ],
+       "luego": "emprender"
       },
       {
        "id": "nada",
@@ -3678,7 +3817,7 @@
         {
          "var": "sueldo",
          "op": "fija",
-         "valor": "si(base_empresa > 0, base_empresa, k('MICRO_MEDIANA')) * azar_lognormal(0.3, 1, 4) * (1 + empresa_anos / 4)"
+         "valor": "si(base_empresa > 0, base_empresa, k('MICRO_MEDIANA')) * azar_lognormal(1 / (1 + k('EMPRESA_RUIDO_ANUAL')), 1, 1 + k('EMPRESA_RUIDO_ANUAL')) * (1 + empresa_anos / 4)"
         }
        ]
       },
@@ -3908,23 +4047,13 @@
       {
        "id": "vuelve",
        "prob": "resto",
-       "texto": "No resulta la visa y vuelves.",
+       "texto": "No resulta la visa: sigues en tu trabajo.",
        "tono": "malo",
        "efectos": [
         {
          "var": "ahorro",
          "op": "suma",
          "valor": -3000000
-        },
-        {
-         "var": "hueco",
-         "op": "fija",
-         "valor": 1
-        },
-        {
-         "var": "estado",
-         "op": "fija",
-         "valor": "'buscando'"
         }
        ]
       }
@@ -4200,7 +4329,7 @@
       {
        "id": "vuelve_bien",
        "prob": 0.6,
-       "texto": "Vuelves con energía.",
+       "texto": "Vuelves con energía y sales a buscar trabajo.",
        "tono": "bueno",
        "efectos": [
         {
@@ -4243,7 +4372,7 @@
       {
        "id": "cuesta_volver",
        "prob": "resto",
-       "texto": "Lo pasas bien, pero volver cuesta más de lo pensado.",
+       "texto": "Lo pasas bien, pero volver cuesta más de lo pensado: buscas trabajo con un hueco en el CV.",
        "tono": "malo",
        "efectos": [
         {

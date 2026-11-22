@@ -6,10 +6,10 @@ Versión 1.0.0, 21 de noviembre de 2026.
 
 | Qué | Cuántos |
 |---|---|
-| Decisiones | 36, con 87 opciones y 129 resultados posibles |
+| Decisiones | 37, con 89 opciones y 132 resultados posibles |
 | Eventos (pasan solos) | 10 |
-| Parámetros con fuente y rango | 64 (27 dato, 28 mixto, 3 sintético, 6 supuesto) |
-| Variables de estado | 85 |
+| Parámetros con fuente y rango | 65 (27 dato, 28 mixto, 3 sintético, 7 supuesto) |
+| Variables de estado | 86 |
 | Tablas CSV | 50, con 3.860 filas |
 | Fuentes citadas | 78 |
 | Objetivos de validación | 38 |
@@ -40,7 +40,7 @@ Un paso por año:
 3. **Mostrar opciones.** Solo las que cumplen `requisito`. `opciones_desde_tabla` genera una opción por fila de una tabla (las 252 carreras), con las columnas disponibles como `fila_<columna>`.
 4. **Sortear el resultado.** Cada resultado tiene `prob`: un número, una expresión o `'resto'` (1 menos la suma de los demás). Aplica sus `efectos` en orden y, si tiene `luego`, encadena esa decisión o evento en el mismo año.
 5. **Eventos.** Para cada evento cuyo `cuando` se cumple, sortea con `prob_anual` y luego uno de sus resultados.
-6. **Cerrar el año.** Suma 1 a `edad`, aplica el ahorro, descuenta un año a los efectos con `duracion` y revierte los que vencen.
+6. **Cerrar el año.** Suma 1 a `edad`, aplica el ahorro, descuenta un año a los efectos con `duracion` y revierte los que vencen, y aplica los efectos con `en_anios` que se cumplen.
 
 ### Efectos
 
@@ -50,6 +50,7 @@ Un paso por año:
 
 - `op`: `suma`, `multiplica` o `fija`.
 - `duracion`: años que dura. Sin el campo, el efecto es permanente. Al vencer se revierte: se resta lo sumado, se divide por lo multiplicado o se vuelve al valor anterior.
+- `en_anios`: el efecto se cumple al cerrar ese año, contando el año de la decisión como 1 (un título que estudias de noche: `"en_anios": 3`). Se evalúa con el estado de ese momento, incluido su `cuando`. Con `aviso` (`{"nombre": ..., "texto": ...}`), ese año sale como noticia.
 - `cuando`: el efecto solo se aplica si la condición se cumple en ese momento.
 - Las variables `modificador` (`tiempo_con_tu_gente`, `p_encontrar`, `riesgo_acv`...) no son resultados. El simulador las usa dentro de sus fórmulas, por ejemplo para calcular el indicador de vida personal o la probabilidad de encontrar trabajo.
 - Las variables `eleccion` (`rubro_destino`, `region_destino`, `ocupacion_destino`) las elige el jugador dentro de la opción antes del sorteo.

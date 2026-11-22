@@ -733,6 +733,17 @@
    "inicio": "0"
   },
   {
+   "nombre": "bootcamp",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si terminó un bootcamp de programación o datos: puede entrar a cargos de tecnología de nivel técnico aunque no tenga ese título.",
+   "inicio": "0"
+  },
+  {
    "nombre": "oferta_al_titularse",
    "tipo": "bool",
    "dominio": [

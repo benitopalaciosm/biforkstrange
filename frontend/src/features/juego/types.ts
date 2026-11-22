@@ -219,6 +219,8 @@ export type OpcionComparada = ContraBase & {
   meses_sin_trabajo: number;
   sin_trabajo_al_final: number;
   cargo_mas_probable: string;
+  /** Fracción de mundos que terminan en un cargo más alto que el de hoy. */
+  sube_de_cargo: number;
   cargos: { cargo: string; prob: number }[];
   /** Lo que se supuso dentro de la opción (rubro, región…). */
   parametros?: Record<string, string | number>;
@@ -246,6 +248,8 @@ export type AnioMundo = {
   recesion: boolean;
   sucesos: Suceso[];
   fin: {
+    /** Edad al cerrar el año (una ronda puede durar más de un año). */
+    edad: number;
     sueldo: number; sueldo_ref: number; cargo: string; estado: string; tipo_empleador: string;
     empresa?: string | null; rol?: string | null; rubro?: string;
   } | null;
@@ -447,3 +451,6 @@ export type DudaEnJuego = {
 /** Respuesta de `POST /api/juego/dudas-en-juego`. `mas_en_juego` es null si hay menos de dos dudas. */
 export type EnJuego = { gemelos: number; semilla: number; mas_en_juego: string | null; dudas: DudaEnJuego[] };
 
+
+/** Un año en que seguiste igual y no pasó nada: no se muestra "qué te pasó", solo esta franja en el año siguiente. */
+export type SinNovedad = { anio: number; sueldo: number; delta: number };

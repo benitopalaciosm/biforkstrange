@@ -65,7 +65,7 @@ def _violaciones(v, registro) -> list[str]:
         if d["resultado"] is None and e["p_encontrar"] >= 1:
             malas.append(f"decisión sin resultado {d['decision']}/{d['opcion']}")
     for x in registro["eventos"]:
-        if x["evento"] not in p.eventos or not 0 <= x["prob"] <= 1:
+        if (x["evento"] not in p.eventos and x["evento"] != "diferido") or not 0 <= x["prob"] <= 1:
             malas.append(f"evento raro {x['evento']}")
     if any(t["quedan"] <= 0 for t in v.temporales):
         malas.append("efecto vencido sin revertir")

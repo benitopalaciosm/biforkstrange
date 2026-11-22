@@ -1,7 +1,7 @@
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
-import { TIPO_EMPLEADOR, plata } from "../textos";
-import type { Eleccion, Vista } from "../types";
-import { ErrorCaja, Hoy, Salir } from "./piezas";
+import { EMPRESA_EJEMPLO, TIPO_EMPLEADOR, plata } from "../textos";
+import type { Eleccion, SinNovedad, Vista } from "../types";
+import { ErrorCaja, FranjaSinNovedad, Hoy, Salir } from "./piezas";
 import { Logo } from "./Logo";
 
 /**
@@ -11,8 +11,9 @@ import { Logo } from "./Logo";
  * Decir "No, sigo" es lo mismo que elegir "Quedarte".
  * Los dos botones pesan igual, para que la pantalla no empuje a quedarse.
  */
-export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSalir }: {
+export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSalir, sinNovedad }: {
   vista: Vista;
+  sinNovedad?: SinNovedad | null;
   cargando: boolean;
   error: string | null;
   onMirar: () => void;
@@ -31,6 +32,7 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSal
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
+      <FranjaSinNovedad s={sinNovedad} />
       <Hoy e={vista.estado} />
       <Stack gap={10} className="vd-subir">
         <Meta>Te llegó una oferta</Meta>
@@ -48,6 +50,7 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSal
             {[tipo, empresa.rubro].filter(Boolean).join(" · ")}
           </Text>
         )}
+        {empresa && <Text size="sm">{EMPRESA_EJEMPLO}</Text>}
         {ofrecido !== null && cambio !== null && (
           <Text>
             Te ofrecen <strong>{plata(ofrecido)} al mes</strong>{" "}

@@ -29,6 +29,8 @@ from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_
 # vivienda y herencia se sacó del paquete: estaba fuera del juego y no movía lo que se compara.
 EVENTOS_PERSONALES = frozenset({"cancer"})
 EVENTO_MUNDO = "recesion"
+ALZAS = frozenset({"alza_anual"})
+SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
 # Decisiones cuya historia nombra a la empresa que te ofrece trabajo
 DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar"})
 
@@ -120,6 +122,7 @@ class Vida:
         self.anio = 0                     # años ya cerrados
         self.cola: list[tuple] = []       # pasos pendientes del año en curso
         self.temporales: list[dict] = []  # efectos con duración, para revertirlos
+        self.diferidos: list[dict] = []   # efectos que se cumplen años después (`en_anios`): un título de noche
         self.historia: list[dict] = []
         self.registro: dict | None = None
         self.anios_buscando = 0
@@ -131,6 +134,7 @@ class Vida:
         self._origen = "inicio"         # qué decisión o evento trajo el empleador que viene
         self._espera_tipo = False       # el resultado sigue en tipo_de_empleador: la empresa se asigna ahí
         self._nuevo_empleador = False
+        self._oferta_fija: dict | None = None  # empresa y cargo que trajo la decisión: son los que se viven
         self._sortear_ia()
         self.pega = 0                     # sube cada vez que esta vida entra a un trabajo nuevo
         self.sugerida: str | None = None  # en un año tranquilo, lo que la gente como tú suele buscar
@@ -144,6 +148,7 @@ class Vida:
         otra.e = dict(self.e)
         otra.cola = list(self.cola)
         otra.temporales = [dict(t) for t in self.temporales]
+        otra.diferidos = [dict(t) for t in self.diferidos]
         otra.historia = list(self.historia)
         otra.registro = copy.deepcopy(self.registro)
         if dados is not None:
@@ -376,10 +381,13 @@ class Vida:
         # la segunda vez que sale la misma decisión en un año (carta y evento oferta_llega) tira dados nuevos
         ocurrencia = sum(1 for x in self.registro["decisiones"] if x["decision"] == decision_id)
         sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
-        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad")}
+        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion")}
         contexto.update(self.contexto_empleo())
+        if decision_id != "tipo_de_empleador":
+            self._oferta_fija = None
         if decision_id in DECISIONES_CON_OFERTA:
             contexto["oferta"] = self.oferta_de(decision_id, ocurrencia)
+            self._oferta_fija = contexto["oferta"]  # la historia nombra esta empresa y este cargo: son los que vives
         if decision_id == "tipo_de_empleador":
             self._nuevo_empleador = True  # cambiarse de empresa aunque sea al mismo tipo
         else:
@@ -395,6 +403,8 @@ class Vida:
             "texto": resultado["texto"] if resultado else "", "tono": (resultado or {}).get("tono", "neutro"),
             "prob": prob, "ocurrencia": ocurrencia, "contexto": contexto,
         })
+        if decision_id == "tipo_de_empleador" and self._oferta_fija:
+            del self.registro["decisiones"][-1]  # la oferta ya dijo a qué empresa entras: el sorteo no es noticia
         if decision_id == TRANQUILO:
             del self.registro["decisiones"][-1]["contexto"]  # no tiene historia que narrar
             if opcion.id != "seguir":
@@ -445,7 +455,7 @@ class Vida:
         for o in self.opciones(decision_id):
             ficha = empresas.oferta(self, decision_id, o.id, ocurrencia)
             if ficha is not None:
-                return {k: ficha[k] for k in ("empresa_id", "nombre", "cargo", "tipo", "rubro", "pais")}
+                return {k: ficha[k] for k in ("empresa_id", "cargo_id", "nombre", "cargo", "tipo", "rubro", "pais")}
         return None
 
     def _encolar_luego(self, luego: str | None) -> None:
@@ -486,6 +496,11 @@ class Vida:
         flujo = None
         base_referencia = False  # el sueldo nuevo sale de una tabla (nivel de referencia), no del sueldo anterior
         for ef in efectos:
+            if ef.get("en_anios"):
+                # se cumple al cerrar el año número `en_anios` (este incluido), con el estado de ese momento
+                self.diferidos.append({"quedan": int(ef["en_anios"]), "sitio": sitio,
+                                       "ef": {k: v for k, v in ef.items() if k != "en_anios"}})
+                continue
             exprs = [x for x in (ef.get("cuando"), ef["valor"]) if x is not None]
             if flujo is None and any(self.pq.compilar(x)[1] for x in exprs):
                 flujo = self.dados.flujo(self.anio, sitio)
@@ -549,6 +564,24 @@ class Vida:
             rubros, pesos = self._rubros_privados()
             e["rubro"] = rubros[self.dados.elegir(self.anio, "rubro", pesos)]
 
+    def _cumplir_diferidos(self) -> None:
+        """Los efectos con `en_anios` que vencen este año. El primero con `aviso` sale como noticia del año."""
+        quedan, vencen = [], []
+        for d in self.diferidos:
+            d["quedan"] -= 1
+            (vencen if d["quedan"] <= 0 else quedan).append(d)
+        self.diferidos = quedan
+        for d in vencen:
+            ef = d["ef"]
+            if ef.get("cuando") and not self.pq.evaluar(ef["cuando"], self.e, self.dados.flujo(self.anio, d["sitio"] + ":diferido")):
+                continue
+            aviso = ef.get("aviso")
+            self._aplicar([{k: v for k, v in ef.items() if k != "aviso"}], d["sitio"] + ":diferido")
+            if aviso and self.registro is not None:
+                self.registro["eventos"].append({
+                    "evento": "diferido", "nombre": aviso["nombre"], "resultado": "cumple", "texto": aviso["texto"],
+                    "tono": aviso.get("tono", "bueno"), "prob": 1.0, "prob_evento": 1.0, "directo": True, "rutina": False})
+
     def _asignar_empresa(self, antes: dict, base_referencia: bool) -> None:
         """Al entrar a un empleador nuevo: empresa y cargo del catálogo, y el sueldo pasa de lo que pagaba
         el empleo anterior a lo que paga este (razón de sus factores)."""
@@ -565,24 +598,31 @@ class Vida:
             self._revisar_cargo()
             return
         e["empresa_inicial"], e["cargo_inicial"] = "", ""
+        e["antiguedad"] = 0  # empleador nuevo: la antigüedad parte de cero (la startup no la fijaba)
         if e["tipo_empleador"] == "publico":
             rubro = empresas.rubro_publico(self.pq, antes)  # el sector del Estado según dónde venía
         else:
             rubro = empresas.rubro_actual(e)
         sitio = empresas.sitio_empresa(self._origen)
-        emp = empresas.sortear_empresa(self.pq, self.dados, self.anio, sitio, e["tipo_empleador"], rubro, e)
+        fija, self._oferta_fija = self._oferta_fija, None
+        emp = empresas.empresa(self.pq, fija["empresa_id"]) if fija else None
+        if emp is not None and emp["tipo"] == e["tipo_empleador"]:
+            car = empresas.cargo(self.pq, fija.get("cargo_id", -1))  # la que te ofrecieron, no otra sorteada
+        else:
+            emp = empresas.sortear_empresa(self.pq, self.dados, self.anio, sitio, e["tipo_empleador"], rubro, e)
+            car = None
         if emp is not None and e["tipo_empleador"] != "publico":
             e["rubro"] = emp["rubro"]  # sin rubro, o startup/remota de otro rubro: la empresa lo fija
-        car = empresas.sortear_cargo(self.pq, self.dados, self.anio, sitio + ":cargo", emp, e)
+        if car is None:
+            car = empresas.sortear_cargo(self.pq, self.dados, self.anio, sitio + ":cargo", emp, e)
         nuevo = empresas.factor_sueldo(emp, car)
-        # base de referencia (tabla) o primer empleo: el sueldo ya es el nivel promedio; si no, trae el factor viejo
-        viejo = 1.0 if base_referencia or e.get("sueldo_ref", 0) <= 0 else self._factor_empleo
-        if car is not None and car["ciuo08_1d"] != e["ocupacion"] and not base_referencia:
-            nuevo *= self._razon_ocupacion(e["ocupacion"], car["ciuo08_1d"])
+        # El resultado de la decisión ya dijo cuánto cambia el sueldo respecto del anterior ("sueldo 10% menor",
+        # "ganas lo mismo o menos"), con su fuente: la empresa y el cargo no se apilan encima. Solo cuando el
+        # sueldo sale de una tabla (nivel promedio de referencia) la empresa y el cargo lo ubican.
+        if base_referencia and e["sueldo"] > 0:
+            e["sueldo"] = self._acotar("sueldo", e["sueldo"] * nuevo)
         if car is not None:
             e["ocupacion"] = car["ciuo08_1d"]
-        if e["sueldo"] > 0 and viejo > 0:
-            e["sueldo"] = self._acotar("sueldo", e["sueldo"] * nuevo / viejo)
         self._factor_empleo = nuevo if emp is not None else 1.0
         e["empresa_id"] = emp["empresa_id"] if emp else -1
         e["cargo_id"] = car["cargo_id"] if car else -1
@@ -598,25 +638,9 @@ class Vida:
         nuevo = empresas.sortear_cargo(self.pq, self.dados, self.anio, f"cargo:{e['nivel']}", emp, e)
         if nuevo is None:
             return
-        factor = empresas.factor_sueldo(emp, nuevo)
-        if e["sueldo"] > 0 and self._factor_empleo > 0:
-            e["sueldo"] = self._acotar("sueldo", e["sueldo"] * factor / self._factor_empleo)
-        self._factor_empleo = factor
+        # el alza del ascenso ya la pagó el evento ascenso: el nombre nuevo del cargo no mueve el sueldo otra vez
+        self._factor_empleo = empresas.factor_sueldo(emp, nuevo)
         e["cargo_id"] = nuevo["cargo_id"]
-
-    def _razon_ocupacion(self, desde: int, hacia: int) -> float:
-        """Sueldo mediano del grupo ocupacional nuevo sobre el del actual (ESI, misma banda de edad)."""
-        def p50(g):
-            g = 10 if g == 0 else g
-            try:
-                return float(self.pq.tabla("esi_ingreso_ocupacion", "p50", "ciuo08_1d", g, "banda_edad", self.e["banda7"]))
-            except Exception:  # noqa: BLE001 - celda vacía en la banda: se usa la de 18-54
-                try:
-                    return float(self.pq.tabla("esi_ingreso_ocupacion", "p50", "ciuo08_1d", g, "banda_edad", "18-54"))
-                except Exception:  # noqa: BLE001
-                    return 0.0
-        a, b = p50(desde), p50(hacia)
-        return b / a if a > 0 and b > 0 else 1.0
 
     def _rubros_privados(self) -> tuple[list[str], list[float]]:
         if not hasattr(self.pq, "_rubros_privados"):
@@ -664,7 +688,12 @@ class Vida:
             "prob_evento": prob, "directo": directo,
             "rutina": ev["prob_anual"] == 1,  # pasa todos los años (alza anual, ánimo)
         })
+        sueldo_antes = self.e["sueldo"]
         self._aplicar(resultado["efectos"], f"{sitio}:{resultado['id']}")
+        if id_ in ALZAS and sueldo_antes > 0 and abs(self.e["sueldo"] - sueldo_antes) < 1:
+            # el sueldo es en pesos de hoy: un alza de 0 es un año en que solo te reajustaron por inflación.
+            # Se cuenta como noticia, para que el sueldo igual al peso no parezca un error.
+            self.registro["eventos"][-1].update(texto=SOLO_IPC, rutina=False, directo=True)
         self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
 
@@ -745,6 +774,8 @@ class Vida:
             else:
                 e[t["var"]] = t["previo"]
         self.temporales = vigentes
+        self._cumplir_diferidos()
+        e = self.e  # aplicar efectos re-deriva el estado (otro dict)
 
         if e["estado"] == "buscando":
             self.anios_buscando += 1

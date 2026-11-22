@@ -1,9 +1,26 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Button, Tag, Text, cx } from "@/shared/ui";
-import { CALIDAD, CAMPOS_PERFIL, enLista, plata, sinSueldo, situacion } from "../textos";
-import type { Calidad, Estado, Rango } from "../types";
+import { CALIDAD, CAMPOS_PERFIL, conSigno, enLista, plata, sinSueldo, situacion } from "../textos";
+import type { Calidad, Estado, Rango, SinNovedad } from "../types";
 import { Espera } from "./Apuesta";
 import { Logo } from "./Logo";
+
+/** "Año 2 sin novedades · $657 mil  +$4 mil al mes": lo único que cambió en un año que pasó sin nada. */
+export function FranjaSinNovedad({ s }: { s?: SinNovedad | null }) {
+  if (!s) return null;
+  return (
+    <div className="jg-sin-novedad" role="status">
+      <span>
+        Año {s.anio} sin novedades · <b>{plata(s.sueldo)}</b>
+      </span>
+      {Math.abs(s.delta) >= 1000 && (
+        <span className="jg-delta" data-signo={s.delta > 0 ? "mas" : "menos"}>
+          {conSigno(s.delta)} al mes
+        </span>
+      )}
+    </div>
+  );
+}
 
 /** Calidad del dato, discreta: dato / mixto / supuesto. */
 export function CalidadTag({ calidad }: { calidad: Calidad }) {
@@ -135,7 +152,7 @@ export function Noticia({ titulo, texto, lado, className }: { titulo: string; te
 
 /** Lo que el motor sortea de verdad en un año, y un par de cosas que no (dichas como lo que son: bromas). */
 const FRASES = [
-  "Tirando tu dado…",
+  "Sorteando tu año…",
   "¿Habrá recesión este año?",
   "Revisando si te ascienden…",
   "¿Te llegará una oferta?",

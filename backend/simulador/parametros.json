@@ -531,6 +531,18 @@
    "rango": null
   },
   {
+   "id": "EMPRESA_RUIDO_ANUAL",
+   "valor": 0.25,
+   "unidad": "fracción",
+   "descripcion": "Cuánto se mueve de un año a otro la ganancia de una misma empresa alrededor de su nivel: 1 de cada 10 años queda 25% sobre él (o bajo 1/1,25). El nivel de cada empresa (0,3 a 4 veces la mediana de un microemprendedor) se sortea una vez, al partir.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.1,
+    0.5
+   ]
+  },
+  {
    "id": "FUNDADOR_MEDIANA",
    "valor": 0.65,
    "unidad": "fracción",

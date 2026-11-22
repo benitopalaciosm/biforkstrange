@@ -1,5 +1,5 @@
 import "./onboarding.css";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   Button, ChevronLeftIcon, Chip, Heading, IconButton, Meta, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Tag, Text,
 } from "@/shared/ui";
@@ -274,7 +274,6 @@ export function Onboarding({
             min={SLIDER_MIN}
             max={SLIDER_MAX}
             step={50_000}
-            color="var(--dinero)"
             onChange={(n) => set("sueldo", n)}
             display={pesos(p.sueldo)}
           />
@@ -289,7 +288,6 @@ export function Onboarding({
             min={p.edad + 1}
             max={60}
             step={1}
-            color="var(--carrera)"
             onChange={(n) => set("edad_final", n)}
             display={`${p.edad_final ?? p.edad + 10} años`}
           />
@@ -528,8 +526,24 @@ function Ficha({
     ...(proyecto ? [{ clave: "proyecto", texto: `Proyecto: ${proyecto.length > 40 ? `${proyecto.slice(0, 40)}…` : proyecto}`, tuyo: true }] : []),
     ...intereses.map((x) => ({ clave: `interes:${x}`, texto: x, tuyo: true })),
   ];
-  // pocas cosas caben quietas; con más, pasan en una cinta que va y viene
-  const cinta = cosas.length > 4;
+  // si caben en una fila quedan quietas; si no, pasan en una cinta. Nunca bajan a otra fila: la ficha no
+  // cambia de alto mientras respondes, y lo que está debajo no se mueve justo cuando vas a tocarlo
+  const caja = useRef<HTMLDivElement>(null);
+  const [cinta, setCinta] = useState(false);
+  const firma = cosas.map((c) => c.texto).join("|");
+  useLayoutEffect(() => {
+    const el = caja.current;
+    if (!el) return;
+    const medir = () => {
+      const tags = [...el.querySelectorAll<HTMLElement>(".ob-tag:not(.ob-cinta-copia)")];
+      const ancho = tags.reduce((s, t) => s + t.offsetWidth, 0) + Math.max(0, tags.length - 1) * 6;
+      setCinta(ancho > el.clientWidth - 14);
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [firma]);
   return (
     <div className="ob-ficha">
       <Silueta lleno={Math.min(visibles.length + intereses.length, 7) / 7} />
@@ -538,7 +552,7 @@ function Ficha({
         {retrato && <Text size="sm" className="ob-retrato">«{retrato}»</Text>}
         {cosas.length === 0 && <span className="ob-chico">Se va armando con cada respuesta.</span>}
         {cosas.length > 0 && (
-          <div className="ob-cinta" data-mueve={cinta || undefined}>
+          <div className="ob-cinta" ref={caja} data-mueve={cinta || undefined}>
             <ul className="vd-sr">
               {cosas.map((c) => (
                 <li key={c.clave}>{c.texto}</li>
