@@ -1,7 +1,7 @@
 import "./onboarding.css";
 import { useEffect, useRef, useState } from "react";
 import {
-  Button, ChevronLeftIcon, Chip, Heading, IconButton, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Text,
+  Button, ChevronLeftIcon, Chip, Heading, IconButton, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Text,
 } from "@/shared/ui";
 import { getPrompt, textoError } from "../api";
 import { MANUAL, type Onboarding as OnboardingEstado } from "../hooks/useBorrador";
@@ -140,7 +140,7 @@ export function Onboarding({
                 ))}
               </div>
             ) : (
-              <Pill>Tu copia</Pill>
+              null
             )}
           </Row>
         }
