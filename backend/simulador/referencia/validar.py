@@ -171,7 +171,11 @@ def estado_al_azar():
          'universidad_destino': R.choice([f['universidad_id'] for f in pq.filas('sies_magister_2026')] + UNIS_EXT),
          'universidad_id': R.choice(UNIS_PRE + ['']), 'institucion_destino': R.choice(UNIS_PRE or ['']),
          'empresa_id': R.choice([-1] + EMPRESAS) if est == 'empleado' else -1, 'cargo_id': R.choice([-1] + CARGOS) if est == 'empleado' else -1,
-         'ia_adopcion': R.random(), 'ia_castigo_joven': R.uniform(0.75, 0.9)}
+         'ia_adopcion': R.random(), 'ia_castigo_joven': R.uniform(0.75, 0.9), 'ia_v2': R.randint(0, 1), 'ia_ritmo': R.choice(['lento', 'medio', 'rapido']),
+         'ia_tipo': R.choice(['automatiza', 'aumenta', 'incognita', 'no_afectado']), 'ia_anios': R.randint(0, 10),
+         'ia_rampa': R.random(), 'adaptabilidad': R.random(), 'ia_encontrar': R.uniform(0.5, 1), 'ia_empresa': R.randint(0, 1),
+         'ia_reconvertido': R.randint(0, 1), 'ia_prima_cobrada': R.randint(0, 1), 'ia_burbuja': 1 if R.random() < 0.1 else 0, 'auge_cobre': 1 if R.random() < 0.1 else 0,
+         'prima_personal': R.uniform(0.6, 3)}
     for v in EST.values():
         if v['tipo'] == 'modificador':
             e.setdefault(v['nombre'], 1 if v['inicio'] == '1' else 0)

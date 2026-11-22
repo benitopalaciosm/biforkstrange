@@ -8,6 +8,7 @@ import { coloresDe } from "./Carta";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
 import { Salir } from "./piezas";
+import { IACierre } from "./IAPorRitmo";
 
 type Tramo = { titulo: string; empresa: string | null; empresaId: number | null; rubro: string; desde: number; hasta: number; sueldo: number };
 
@@ -289,6 +290,8 @@ export function CierrePantalla({
           gemelos={primera.comparacion.gemelos}
         />
       )}
+
+      {cierre.ia && <IACierre ia={cierre.ia} elegida={elegida?.opcion} nombreElegida={elegida?.nombre} />}
 
 
       {primera && elegida && (

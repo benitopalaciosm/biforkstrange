@@ -145,7 +145,17 @@ export type Estado = {
   empresa?: string | null;
   rol?: string | null;
   ia_adopcion?: number;
+  /** Con la incertidumbre de IA prendida: el ritmo de tu mundo, cómo te toca la IA y qué tan adaptable eres (0-1). */
+  ia_ritmo?: Ritmo;
+  ia_tipo?: "automatiza" | "aumenta" | "incognita" | "no_afectado";
+  adaptabilidad?: number;
+  usa_ia?: number;
 };
+
+export type Ritmo = "lento" | "medio" | "rapido";
+
+/** Lo de la IA en un año de tu partida: el ritmo de tu mundo y el titular que leíste (si ese año hubo). */
+export type AnioIA = { ritmo: Ritmo; titular?: string | null; burbuja?: boolean; auge_cobre?: boolean };
 
 /** La historia de la carta: qué empresa, quién te escribe. Solo texto; los números vienen aparte. */
 export type Narrativa = { situacion: string } | null;
@@ -183,6 +193,8 @@ export type Anio = {
   anio: number;
   edad: number;
   recesion: boolean;
+  /** Solo con la incertidumbre de IA prendida. */
+  ia?: AnioIA;
   decisiones: DecisionTomada[];
   eventos: Evento[];
   /** Solo en los años cerrados. */
@@ -275,6 +287,24 @@ export type Comparacion = {
   opciones: OpcionComparada[];
   /** En cada mundo (el índice), con qué opción terminas ganando más; null si dos quedan a menos de 0,5%. */
   ganador_por_mundo?: (string | null)[];
+  /** El ritmo de la IA de cada mundo; null con la incertidumbre de IA apagada. */
+  ia_por_mundo?: (Ritmo | null)[] | null;
+  ia?: IAPorRitmo | null;
+};
+
+/** La comparación separada por ritmo de la IA. `robustas`: las opciones que ganan más mundos en los tres ritmos. */
+export type IAPorRitmo = {
+  ritmos: Partial<Record<Ritmo, { mundos: number; gana: Record<string, number>; sueldo_p50: Record<string, number> }>>;
+  robustas: string[];
+};
+
+export type ConFuente = { fuente: string; cita: string; url: string };
+export type CierreIA = {
+  ritmo: Ritmo;
+  ritmos: Record<Ritmo, ConFuente & { nombre: string; que_es: string }>;
+  voces: (ConFuente & { quien: string; tipo: string; dice: string })[];
+  fuera_del_juego: string;
+  por_ritmo: IAPorRitmo | null;
 };
 
 export type Suceso = { tipo: "decision" | "evento"; nombre: string; opcion?: string; texto: string; tono: Tono };
@@ -293,7 +323,7 @@ export type AnioMundo = {
 };
 
 /** Qué tan rápido llega la IA en un mundo: se sortea por gemelo dentro del rango con fuente de IA_JOVEN. */
-export type EscenarioIA = { adopcion: number; escenario: "lento" | "medio" | "rapido"; castigo_joven: number };
+export type EscenarioIA = { adopcion: number; escenario: Ritmo; castigo_joven: number; activa?: boolean };
 
 /** Respuesta de `POST /api/juego/mundo`: un mundo, con su historia por opción. */
 export type MundoDetalle = {
@@ -426,6 +456,7 @@ export type Cierre = {
   meses_sin_trabajo?: number;
   mejor_que_gemelos?: number;
   primera_decision: { decision: string; pregunta: string; elegida: string; comparacion: Comparacion } | null;
+  ia?: CierreIA;
 };
 
 export type Vista = {

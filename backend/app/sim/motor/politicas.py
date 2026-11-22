@@ -47,7 +47,11 @@ PESOS_CARTAS: dict[str, dict[str, float]] = {
     "media_jornada": {"pedir": 0.12},
     "cambiar_de_rubro": {"cambiar": 0.15},
     "cambiar_de_ocupacion": {"cambiar": 0.15},
-    "aprender_ia": {"aprender": 0.45},
+    # con la incertidumbre de IA prendida aprender_ia trae curso corto y programa largo en vez de aprender (ia.py)
+    "aprender_ia": {"aprender": 0.45, "curso_corto": 0.35, "programa_largo": 0.10},
+    # tu empresa adopta IA: NY Fed (2026) ve que más de un tercio de las empresas recapacita a su gente; el
+    # reparto es supuesto del equipo
+    "liderar_adopcion_ia": {"liderar": 0.15, "aprender": 0.45, "buscar": 0.05},
     "invertir_en_red": {"si": 0.35},
     "unirse_a_startup": {"ir": 0.25},
     "independizarse": {"formal": 0.30},
@@ -117,7 +121,7 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
 
 
 # Opción que equivale a no hacer nada, donde no es la última de la lista
-STATU_QUO = {"oferta_externa": "quedarse"}
+STATU_QUO = {"oferta_externa": "quedarse", "liderar_adopcion_ia": "seguir"}
 # Respuesta a una decisión que llega encadenada (`luego`) desde una opción que ya la eligió: quien,
 # cesante, elige "reconvertirte con un bootcamp" se inscribe ("Te inscribes"); no vuelve a dudar. Sin esto
 # los gemelos respondían la carta bootcamp con su peso de carta (Inercia: siempre "no").
