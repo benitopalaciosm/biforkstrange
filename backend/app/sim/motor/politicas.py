@@ -56,6 +56,25 @@ PESOS_CARTAS: dict[str, dict[str, float]] = {
     "sabatico": {"irse": 0.05},
     "ahorro": {"mucho": 0.20, "gastar": 0.20},
 }
+# Cuántos años dura una pega en Chile, en la mediana (supuesto del equipo, en línea con la EPS)
+ANOS_POR_EMPLEO_TIPICO = 3.0
+
+
+def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
+    """Los gemelos se parecen a ti: si tu CV muestra que te cambias seguido, aceptan más ofertas.
+
+    Sin historia (`anos_por_empleo` ausente) quedan los pesos de la población. Supuesto del equipo:
+    la probabilidad de cambiarse escala con 3 años / tus años por pega, entre la mitad y 1,8 veces.
+    """
+    anos = e.get("anos_por_empleo")
+    if not anos:
+        return {}
+    base = PESOS_FORZADAS["oferta_externa"]
+    cambiar = min(0.65, max(0.15, base["cambiar"] * min(1.8, max(0.5, ANOS_POR_EMPLEO_TIPICO / anos))))
+    return {"oferta_externa": {"cambiar": round(cambiar, 3), "contraoferta": base["contraoferta"],
+                               "quedarse": round(1 - cambiar - base["contraoferta"], 3)}}
+
+
 # Opción que equivale a no hacer nada, donde no es la última de la lista
 STATU_QUO = {"oferta_externa": "quedarse", "ahorro": "normal"}
 

@@ -94,6 +94,14 @@ class PerfilLeido(BaseModel):
     ingles: bool | None = Field(None, description="true si el texto dice inglés intermedio, avanzado o nativo; false si dice básico o nada.")
     anios_experiencia: int | None = Field(None, description="Años de experiencia laboral desde su primer trabajo formal.")
     empleadores: int | None = Field(None, description="Cuántos empleadores distintos ha tenido, contando el actual.")
+    situacion: Literal["empleado", "independiente", "fundador", "buscando", "estudiando"] | None = Field(
+        None, description="Su situación HOY: empleado, independiente (freelance o boletas), fundador de su empresa, buscando pega o estudiando.")
+    meses_sin_trabajo: int | None = Field(None, description="Si hoy está buscando: meses desde que terminó su último trabajo.")
+    jornada_parcial: bool | None = Field(None, description="true si su trabajo actual es part-time o media jornada.")
+    remoto: bool | None = Field(None, description="true si su trabajo actual es remoto o mayormente remoto.")
+    usa_ia: bool | None = Field(None, description="true si el texto muestra que trabaja con herramientas de IA (ChatGPT, Copilot, Claude, LLMs).")
+    empresa_propia_anos: int | None = Field(None, description="Si es fundador: años que tiene su empresa.")
+    levanto_inversion: bool | None = Field(None, description="Si es fundador: true si su empresa levantó inversión externa.")
     empresa_actual: str | None = Field(None, description="Su empleador de hoy: el nombre legal en Chile si lo conoces.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
@@ -138,6 +146,10 @@ sacaste. Si todo estaba literal, lista vacía.
 inglés); false si dice básico; null si no habla de idiomas.
 - anios_experiencia y empleadores: cuéntalos de la sección de experiencia. Prácticas y ayudantías \
 no cuentan como empleador.
+- situacion: mira el trabajo más reciente. Si no tiene fecha de término, está en él; si terminó y no \
+hay otro, está buscando (o estudiando, si cursa algo). Freelance, consultor independiente o boletas es \
+"independiente"; fundador, cofundador o CEO de su propia empresa es "fundador".
+- jornada_parcial, remoto, usa_ia: solo si el texto lo dice o lo muestra; si no, null.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -265,7 +277,8 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
     base = PerfilIn().model_dump()
     rubros = [r for r in pq.variables["rubro"]["dominio"] if r]
     perfil, supuestos = dict(base), []
-    extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual"}
+    extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
+              "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion"}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -304,6 +317,23 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
         perfil["red"] = max(10, min(70, 20 + 5 * leido.empleadores + (5 if perfil["nivel"] >= 3 else 0)))
         inferido.append(f"Red de contactos {perfil['red']} de 100 por {leido.empleadores} empleadores "
                         "(fórmula del equipo).")
+    if leido.situacion:
+        perfil["estado"] = leido.situacion
+    if leido.situacion == "buscando" and leido.meses_sin_trabajo is not None:
+        perfil["meses_cesante"] = max(0, min(120, leido.meses_sin_trabajo))
+    for campo, valor in (("parcial", leido.jornada_parcial), ("remoto", leido.remoto), ("usa_ia", leido.usa_ia),
+                         ("empresa_fondos", leido.levanto_inversion)):
+        if valor is not None:
+            perfil[campo] = int(valor)
+    if leido.empresa_propia_anos is not None:
+        perfil["empresa_anos"] = max(0, min(30, leido.empresa_propia_anos))
+    if leido.anios_experiencia and leido.empleadores:
+        from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
+
+        perfil["anos_por_empleo"] = round(leido.anios_experiencia / leido.empleadores, 1)
+        cambiar = pesos_personales({"anos_por_empleo": perfil["anos_por_empleo"]})["oferta_externa"]["cambiar"]
+        inferido.append(f"Te cambias de pega cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
+                        f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):

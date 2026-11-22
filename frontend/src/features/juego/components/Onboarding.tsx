@@ -16,6 +16,9 @@ const MANUAL: Paso[] = ["tu", "pega", "plata"];
 const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["ingles"] };
 /** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
 const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
+const SITUACION: Record<string, string> = {
+  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando pega", estudiando: "Estudiando",
+};
 const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
 
 /**
@@ -391,6 +394,11 @@ function Ficha({ p, sabidos, catalogo, retrato }: { p: Perfil; sabidos: Readonly
     ["rubro", p.rubro],
     ["sueldo", pesos(p.sueldo)],
     ["ingles", p.ingles ? "Inglés" : undefined],
+    ["estado", p.estado && p.estado !== "empleado" ? SITUACION[p.estado] : undefined],
+    ["remoto", p.remoto ? "Remoto" : undefined],
+    ["parcial", p.parcial ? "Media jornada" : undefined],
+    ["usa_ia", p.usa_ia ? "Usa IA" : undefined],
+    ["anos_por_empleo", p.anos_por_empleo ? `Se cambia cada ${p.anos_por_empleo.toLocaleString("es-CL")} años` : undefined],
   ];
   const visibles = datos.filter(([k, v]) => v && sabidos.has(k));
   return (

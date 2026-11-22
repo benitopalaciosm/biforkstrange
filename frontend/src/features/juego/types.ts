@@ -26,6 +26,16 @@ export type Perfil = {
   /** Habilidad y red de contactos (0 a 100), deducidas del CV. Sin dato, el motor usa 50 y 30. */
   skill?: number | null;
   red?: number | null;
+  /** Su situación de hoy y su historia, del CV. Sin dato, empleado a jornada completa, presencial. */
+  estado?: "empleado" | "independiente" | "fundador" | "buscando" | "estudiando";
+  meses_cesante?: number;
+  parcial?: 0 | 1;
+  remoto?: 0 | 1;
+  usa_ia?: 0 | 1;
+  empresa_anos?: number;
+  empresa_fondos?: 0 | 1;
+  /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
+  anos_por_empleo?: number | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

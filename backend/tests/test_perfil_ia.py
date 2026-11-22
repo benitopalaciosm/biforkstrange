@@ -125,7 +125,9 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
     assert r["perfil"] | {"ahorro": None} == {
         "edad": 33, "sexo": "m", "edu": "universitaria", "carrera_id": 166, "rubro": "Finanzas y seguros",
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
-        "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35}
+        "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35,
+        "estado": "empleado", "meses_cesante": 0, "parcial": 0, "remoto": 0, "usa_ia": 0, "empresa_anos": 0,
+        "empresa_fondos": 0, "anos_por_empleo": 3.0}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -217,3 +219,32 @@ def test_sin_cv_la_habilidad_se_estima_por_los_anios_desde_el_titulo():
     assert estado_inicial(Perfil(edad=45, edu="universitaria"), pq)["skill"] == 87
     assert estado_inicial(Perfil(edad=45, skill=40), pq)["skill"] == 40  # el dato del CV manda
     assert estado_inicial(Perfil.a_los_18(), pq)["skill"] == 50  # la cohorte de validación no cambia
+
+
+def test_situacion_y_trayectoria_del_cv():
+    leido = LEIDO.model_copy(update={"situacion": "buscando", "meses_sin_trabajo": 10, "remoto": True, "usa_ia": True,
+                                     "anios_experiencia": 6, "empleadores": 5})
+    p = perfil_ia.completar(leido)["perfil"]
+    assert (p["estado"], p["meses_cesante"], p["remoto"], p["usa_ia"], p["anos_por_empleo"]) == ("buscando", 10, 1, 1, 1.2)
+
+
+def test_la_situacion_llega_al_motor():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    pq = paquete()
+    e = estado_inicial(Perfil(estado="buscando", meses_cesante=10, sueldo=900_000), pq)
+    assert (e["estado"], e["hueco"], e["meses_cesante"]) == ("buscando", 1, 10)
+    e = estado_inicial(Perfil(parcial=1, remoto=1, usa_ia=1), pq)
+    assert (e["horas"], e["remoto"], e["usa_ia"]) == (22, 1, 1)
+    e = estado_inicial(Perfil(), pq)
+    assert (e["hueco"], e["horas"], e["remoto"], e["usa_ia"]) == (0, 44, 0, 0)  # sin datos: como antes
+
+
+def test_los_gemelos_se_cambian_como_tu():
+    from app.sim.motor.politicas import pesos_personales
+
+    assert pesos_personales({}) == {}
+    seguido = pesos_personales({"anos_por_empleo": 1.0})["oferta_externa"]["cambiar"]
+    quieto = pesos_personales({"anos_por_empleo": 8.0})["oferta_externa"]["cambiar"]
+    assert quieto < 0.34 < seguido <= 0.65
