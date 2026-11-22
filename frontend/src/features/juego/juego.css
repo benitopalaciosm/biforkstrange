@@ -296,7 +296,7 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-recorrido { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 2px solid var(--tinta); border-radius: 18px; background: var(--papel); overflow: hidden; }
 .jg-tramo { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-top: 1.5px solid var(--linea); }
 .jg-tramo:first-child { border-top: 0; }
-.jg-tramo-vacio { flex: none; width: 40px; height: 40px; border-radius: 10px; border: 1.5px dashed var(--linea); }
+.jg-tramo-vacio { flex: none; width: 40px; height: 40px; border-radius: 10px; background: var(--linea); opacity: 0.5; }
 .jg-tramo-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; font: 400 15px/20px var(--font); color: var(--tinta); }
 .jg-tramo-texto strong { font-weight: 700; }
 .jg-hoy-logo { display: inline-flex; vertical-align: middle; margin-top: -3px; }
