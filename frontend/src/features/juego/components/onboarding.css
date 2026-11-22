@@ -107,3 +107,24 @@
 
 .ob-otras { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 360px) { .ob-otras { grid-template-columns: 1fr; } }
+
+/* Las fuentes de la primera pantalla: una tarjeta por fuente, con su check */
+.ob-fuente {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; text-align: left;
+  border: 1.5px solid var(--linea); border-radius: 16px; background: var(--papel); color: var(--tinta);
+  font: 400 15px/20px var(--font); cursor: pointer; transition: border-color .2s, background .2s, transform .2s;
+}
+.ob-fuente:hover:not(:disabled), .ob-fuente[data-encima] { border-color: var(--acento); transform: translateY(-1px); }
+.ob-fuente:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.ob-fuente:disabled { cursor: progress; }
+.ob-fuente[data-listo] { border-color: var(--dinero); background: #effaf4; }
+.ob-fuente .ob-anim { width: 120px; height: 44px; transform: scale(.75); transform-origin: left center; margin-right: -24px; }
+.ob-fuente-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ob-icono { flex: none; width: 40px; height: 40px; font-size: 20px; }
+.ob-in.ob-icono { animation: none; font-size: 22px; border-radius: 9px; }
+.ob-accion { flex: none; font: 600 13px/18px var(--font); color: var(--acento); }
+.ob-check {
+  flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--dinero); color: #fff; font: 700 15px/1 var(--font); animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+@media (prefers-reduced-motion: reduce) { .ob-check { animation: none; } }

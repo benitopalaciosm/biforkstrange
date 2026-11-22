@@ -59,6 +59,9 @@ export function Onboarding({
     intereses: [], proyecto: null, retrato: null, sugeridas: [],
   });
   const [conClaude, setConClaude] = useState(false);
+  /** Las dos fuentes, en cualquier orden y combinables: tu LinkedIn o CV, y tu Claude o ChatGPT. */
+  const [cv, setCv] = useState<"nada" | "leyendo" | "listo">("nada");
+  const [claudeListo, setClaudeListo] = useState(false);
   const [leyendoClaude, setLeyendoClaude] = useState(false);
   const [errorClaude, setErrorClaude] = useState<string | null>(null);
   const pedido = useRef(0);
@@ -72,25 +75,21 @@ export function Onboarding({
   const leerPdf = async (pdf: string) => {
     const mio = ++pedido.current;
     setErrorLectura(null);
-    setPaso("leyendo");
+    setCv("leyendo");
     try {
       const r = await leerPerfil({ pdf });
       if (mio !== pedido.current) return;
       const supuestos = new Set(r.supuestos.map((s) => s.campo));
-      setP((x) => ({ ...x, ...r.perfil }));
+      // lo que ya contó tu Claude manda; el CV llena el resto
+      const delCv = Object.keys(r.perfil).filter((k) => !supuestos.has(k) && !sabidos.has(k));
+      setP((x) => ({ ...x, ...Object.fromEntries(delCv.map((k) => [k, r.perfil[k as keyof Perfil]])) }));
+      setSabidos((s) => new Set([...s, ...delCv]));
       setLeido(r);
-      setSabidos(new Set(Object.keys(r.perfil).filter((k) => !supuestos.has(k))));
-      // el CV casi nunca dice el sueldo: esa pantalla va siempre; las otras, solo si falta algo
-      const pasos: Paso[] = [];
-      if (["edad", "edu"].some((c) => supuestos.has(c))) pasos.push("tu");
-      if (["tipo_empleador", "nivel", "rubro"].some((c) => supuestos.has(c))) pasos.push("pega");
-      pasos.push("plata");
-      setFaltan(pasos);
-      setPaso(pasos[0]);
+      setCv("listo");
     } catch (e) {
       if (mio !== pedido.current) return;
       setErrorLectura(e instanceof ErrorApi ? e.detalle : "No pudimos leer tu CV.");
-      setPaso("entrada");
+      setCv("nada");
     }
   };
 
@@ -112,13 +111,7 @@ export function Onboarding({
       setSabidos(ahora);
       setExtra({ intereses: r.intereses ?? [], proyecto: r.proyecto ?? null, retrato: r.retrato ?? null, sugeridas });
       setConClaude(false);
-      if (paso === "entrada") {
-        // solo las tarjetas de lo que tu Claude no dijo; si dijo todo, directo a tus dudas
-        const pasos = MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !ahora.has(k)));
-        if (pasos.length === 0) return onElegirDuda(perfil, sugeridas);
-        setFaltan(pasos);
-        setPaso(pasos[0]);
-      }
+      setClaudeListo(true);
     } catch (e) {
       setErrorClaude(e instanceof ErrorApi ? e.detalle : "No pudimos leer lo que pegaste.");
     } finally {
@@ -126,9 +119,17 @@ export function Onboarding({
     }
   };
   const sugeridas = extra.sugeridas.length ? extra.sugeridas : leido?.dudas_sugeridas ?? [];
-  const panelClaude = (
-    <TuClaude abierto={conClaude} onAbrir={() => setConClaude(true)} leyendo={leyendoClaude} error={errorClaude} onTexto={(t) => void leerTuClaude(t)} />
-  );
+  /** Seguir: solo las tarjetas de lo que tus fuentes no dijeron; si dijeron todo, directo a tus dudas. */
+  const seguir = () => {
+    pedido.current++;
+    const usoFuentes = cv === "listo" || claudeListo;
+    const pasos = usoFuentes
+      ? MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !sabidos.has(k)))
+      : MANUAL;
+    if (pasos.length === 0) return onElegirDuda(p, sugeridas);
+    setFaltan(pasos);
+    setPaso(pasos[0]);
+  };
 
   if (completo) {
     return (
@@ -168,7 +169,7 @@ export function Onboarding({
     <Screen gap={18}>
       <ScreenHeader
         left={
-          <IconButton label="Volver" onClick={paso === "entrada" || paso === "leyendo" ? onVolver : atras}>
+          <IconButton label="Volver" onClick={paso === "entrada" ? onVolver : atras}>
             <ChevronLeftIcon />
           </IconButton>
         }
@@ -187,7 +188,7 @@ export function Onboarding({
         }
       />
 
-      {paso !== "entrada" && (
+      {(paso !== "entrada" || sabidos.size > 0) && (
         <Ficha p={p} sabidos={sabidos} catalogo={catalogo} retrato={extra.retrato ?? leido?.retrato ?? null} intereses={extra.intereses} proyecto={extra.proyecto} />
       )}
 
@@ -195,18 +196,18 @@ export function Onboarding({
 
       {paso === "entrada" && (
         <Entrada
+          cv={cv}
           error={errorLectura}
           onPdf={(pdf) => void leerPdf(pdf)}
-          onManual={() => {
-            setFaltan(MANUAL);
-            setPaso("tu");
-          }}
-          claude={panelClaude}
+          claudeListo={claudeListo}
+          claudeAbierto={conClaude}
+          onAbrirClaude={() => setConClaude((x) => !x)}
+          claude={<TuClaude leyendo={leyendoClaude} error={errorClaude} onTexto={(t) => void leerTuClaude(t)} />}
+          onSeguir={seguir}
           onSaltar={saltarTodo}
+          cargando={cargando}
         />
       )}
-
-      {paso === "leyendo" && <Leyendo />}
 
       {catalogo && paso === "tu" && (
         <Tarjeta key="tu" titulo="Primero, tú.">
@@ -287,7 +288,6 @@ export function Onboarding({
 
       {catalogo && paso === "plata" && (
         <Tarjeta key="plata" titulo={leido ? "Lo que un CV no dice." : "Lo último."}>
-          {panelClaude}
           <Slider
             label="Te llega al mes (líquido)"
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, p.sueldo))}
@@ -338,10 +338,24 @@ export function Onboarding({
   );
 }
 
-/** Pantalla 1: el atajo del CV (con la animación de LinkedIn) o las tarjetas. */
+/**
+ * Pantalla 1: tus fuentes, con un check cuando están. Puedes usar las dos, en cualquier orden;
+ * después Seguir pregunta solo lo que falta. O juegas sin datos.
+ */
 function Entrada({
-  error, onPdf, onManual, claude, onSaltar,
-}: { error: string | null; onPdf: (pdf: string) => void; onManual: () => void; claude: React.ReactNode; onSaltar: () => void }) {
+  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, cargando,
+}: {
+  cv: "nada" | "leyendo" | "listo";
+  error: string | null;
+  onPdf: (pdf: string) => void;
+  claudeListo: boolean;
+  claudeAbierto: boolean;
+  onAbrirClaude: () => void;
+  claude: React.ReactNode;
+  onSeguir: () => void;
+  onSaltar: () => void;
+  cargando: boolean;
+}) {
   const entrada = useRef<HTMLInputElement>(null);
   const [encima, setEncima] = useState(false);
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
@@ -356,61 +370,104 @@ function Entrada({
     lector.onerror = () => setErrorArchivo("No pudimos abrir el archivo.");
     lector.readAsDataURL(f);
   };
+  const algo = cv === "listo" || claudeListo;
 
   return (
     <>
       <Stack gap={6} className="ob-entra">
         <Heading level={1}>Armemos a tu gemelo.</Heading>
-        <Text>Con tu LinkedIn tarda 15 segundos.</Text>
+        <Text>Súmale lo que quieras. Puedes usar los dos.</Text>
       </Stack>
 
-      <button
-        type="button"
-        className="ob-zona ob-entra"
-        data-encima={encima || undefined}
-        onClick={() => entrada.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setEncima(true);
-        }}
-        onDragLeave={() => setEncima(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setEncima(false);
-          subir(e.dataTransfer.files?.[0]);
-        }}
-      >
-        <LinkedinAPdf />
-        <strong>Sube el PDF de tu LinkedIn o tu CV</strong>
-        <span className="ob-chico">En LinkedIn, desde el computador: tu perfil → Recursos → Guardar como PDF</span>
-      </button>
-      <input
-        ref={entrada}
-        type="file"
-        accept="application/pdf,.pdf"
-        hidden
-        onChange={(e) => {
-          subir(e.target.files?.[0]);
-          e.target.value = "";
-        }}
-      />
-      {(errorArchivo || error) && (
-        <div className="jg-error" role="alert">
-          {errorArchivo ?? `No pudimos leer tu CV. ${error}`}
-        </div>
-      )}
+      <Stack gap={10} className="ob-entra">
+        <button
+          type="button"
+          className="ob-fuente"
+          data-listo={cv === "listo" || undefined}
+          data-encima={encima || undefined}
+          disabled={cv === "leyendo"}
+          onClick={() => entrada.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setEncima(true);
+          }}
+          onDragLeave={() => setEncima(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setEncima(false);
+            subir(e.dataTransfer.files?.[0]);
+          }}
+        >
+          {cv === "leyendo" ? <LinkedinAPdf /> : <span className="ob-in ob-icono">in</span>}
+          <span className="ob-fuente-texto">
+            <strong>Tu LinkedIn o CV</strong>
+            <span className="ob-chico">
+              {cv === "leyendo" ? <LeyendoFrase /> : cv === "listo" ? "Listo. Puedes subir otro." : "PDF. En LinkedIn: tu perfil → Recursos → Guardar como PDF"}
+            </span>
+          </span>
+          <Marca listo={cv === "listo"} accion="Subir" />
+        </button>
+        <input
+          ref={entrada}
+          type="file"
+          accept="application/pdf,.pdf"
+          hidden
+          onChange={(e) => {
+            subir(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+        {(errorArchivo || error) && (
+          <div className="jg-error" role="alert">
+            {errorArchivo ?? `No pudimos leer tu CV. ${error}`}
+          </div>
+        )}
 
-      {claude}
+        <button type="button" className="ob-fuente" data-listo={claudeListo || undefined} aria-expanded={claudeAbierto} onClick={onAbrirClaude}>
+          <span className="ob-claude-chispa ob-icono" aria-hidden="true">✦</span>
+          <span className="ob-fuente-texto">
+            <strong>Tu Claude o ChatGPT</strong>
+            <span className="ob-chico">{claudeListo ? "Listo. Lo que contó ya está en tu gemelo." : "Sabe de tus proyectos y lo que te apasiona."}</span>
+          </span>
+          <Marca listo={claudeListo} accion={claudeAbierto ? "Cerrar" : "Abrir"} />
+        </button>
+        {claudeAbierto && claude}
+      </Stack>
 
-      <div className="ob-otras ob-entra">
-        <Button variant="white" onClick={onManual}>
-          Contestar preguntas
+      <ScreenFooter>
+        <Button onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
+          {algo ? "Seguir" : "Contestar unas preguntas"}
         </Button>
-        <Button variant="white" onClick={onSaltar}>
+        <button type="button" className="ob-link" onClick={onSaltar} disabled={cargando}>
           Jugar sin datos
-        </Button>
-      </div>
+        </button>
+      </ScreenFooter>
     </>
+  );
+}
+
+/** El check de cada fuente: ✓ cuando está, o la acción que la carga. */
+function Marca({ listo, accion }: { listo: boolean; accion: string }) {
+  return listo ? (
+    <span className="ob-check" aria-label="Listo">
+      ✓
+    </span>
+  ) : (
+    <span className="ob-accion">{accion}</span>
+  );
+}
+
+/** Frases que cambian mientras Claude lee el CV. */
+function LeyendoFrase() {
+  const [k, setK] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setK((x) => (x + 1) % FRASES.length), 2600);
+    return () => window.clearInterval(t);
+  }, []);
+  return (
+    <span role="status" key={k} className="ob-frase">
+      {FRASES[k]}
+    </span>
   );
 }
 
@@ -429,28 +486,6 @@ function LinkedinAPdf() {
         <span />
       </span>
     </div>
-  );
-}
-
-/** Mientras Claude lee: el documento escaneándose y frases que van cambiando. */
-function Leyendo() {
-  const [k, setK] = useState(0);
-  useEffect(() => {
-    const t = window.setInterval(() => setK((x) => (x + 1) % FRASES.length), 2600);
-    return () => window.clearInterval(t);
-  }, []);
-  return (
-    <Stack gap={14} className="ob-leyendo">
-      <div className="ob-hoja" aria-hidden="true">
-        {Array.from({ length: 7 }, (_, n) => (
-          <i key={n} style={{ width: `${55 + ((n * 37) % 40)}%` }} />
-        ))}
-        <span className="ob-scan" />
-      </div>
-      <Text role="status" key={k} className="ob-frase">
-        {FRASES[k]}
-      </Text>
-    </Stack>
   );
 }
 
@@ -519,14 +554,12 @@ function Tarjeta({ titulo, children }: { titulo: string; children: React.ReactNo
  * Pregúntale a tu Claude o ChatGPT: te conoce mejor que tu CV (tus proyectos, lo que te apasiona).
  * Un toque copia el prompt y lo abre ya escrito; pegas la respuesta y se suma a tu gemelo.
  */
-function TuClaude({
-  abierto, onAbrir, leyendo, error, onTexto,
-}: { abierto: boolean; onAbrir: () => void; leyendo: boolean; error: string | null; onTexto: (texto: string) => void }) {
+function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string | null; onTexto: (texto: string) => void }) {
   const [prompt, setPrompt] = useState<string | null>(null);
   const [texto, setTexto] = useState("");
   const [copiado, setCopiado] = useState(false);
   useEffect(() => {
-    if (!abierto || prompt) return;
+    if (prompt) return;
     let vivo = true;
     getPrompt()
       .then((r) => vivo && setPrompt(r.prompt))
@@ -534,18 +567,7 @@ function TuClaude({
     return () => {
       vivo = false;
     };
-  }, [abierto, prompt]);
-
-  if (!abierto) {
-    return (
-      <button type="button" className="ob-claude-abrir ob-entra" onClick={onAbrir}>
-        <span className="ob-claude-chispa" aria-hidden="true">✦</span>
-        <span>
-          <strong>¿Usas Claude o ChatGPT?</strong> Que te describa él: sabe de tus proyectos y lo que te apasiona.
-        </span>
-      </button>
-    );
-  }
+  }, [prompt]);
 
   const abrir = async (url: string) => {
     if (!prompt) return;
