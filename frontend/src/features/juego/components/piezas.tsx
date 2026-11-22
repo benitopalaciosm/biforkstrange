@@ -135,7 +135,7 @@ export function Noticia({ titulo, texto, lado, className }: { titulo: string; te
 
 /** Lo que el motor sortea de verdad en un año, y un par de cosas que no (dichas como lo que son: bromas). */
 const FRASES = [
-  "Tirando tu dado…",
+  "Sorteando tu año…",
   "¿Habrá recesión este año?",
   "Revisando si te ascienden…",
   "¿Te llegará una oferta?",

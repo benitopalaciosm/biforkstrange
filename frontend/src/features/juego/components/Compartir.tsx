@@ -175,7 +175,7 @@ export function CompartirResultado({
                 {cuenta(null) > 0 && (
                   <span>
                     <i style={{ background: EMPATE }} />
-                    Da lo mismo: {cuenta(null)}
+                    Empate: {cuenta(null)}
                   </span>
                 )}
               </div>

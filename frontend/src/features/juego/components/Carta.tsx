@@ -1183,14 +1183,14 @@ export function Carta({
 
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
-        {cargando && <Cargando>Tirando tu dado y viviendo el año…</Cargando>}
+        {cargando && <Cargando>Sorteando y viviendo tu año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando ? (
           <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>
             Elegir el detalle
           </Button>
         ) : (
           <Button onClick={confirmar} disabled={!opcion || cargando || recalculando}>
-            {cargando ? "Tirando el dado…" : opcion ? "Confirmar" : "Toca una opción"}
+            {cargando ? "Sorteando…" : opcion ? "Confirmar" : "Toca una opción"}
           </Button>
         )}
       </div>
