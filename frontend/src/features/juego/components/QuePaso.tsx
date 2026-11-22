@@ -42,7 +42,7 @@ const conPorcentaje = (a: Anio, primero: boolean) => a.eventos.some((e) => !e.ru
  * El texto del resultado del dado, coherente con lo que de verdad pasó con el sueldo. "Ganas lo mismo o menos"
  * describe el resultado antes de sortear el empleador nuevo; si con él terminas ganando más, se dice eso.
  */
-function textoDado(dado: DecisionTomada, tramo: Anio | undefined): string {
+function textoDado(dado: DecisionTomada, tramo: Anio | undefined, finAnio?: number): string {
   if (!/mismo o menos/i.test(dado.texto) || dado.sueldo_antes === undefined || !(dado.sueldo_antes > 0)) return dado.texto;
   // el sorteo del empleador que sigue a la decisión es parte del mismo cambio de sueldo
   const siguen = tramo ? tramo.decisiones.slice(tramo.decisiones.indexOf(dado) + 1) : [];
@@ -53,8 +53,11 @@ function textoDado(dado: DecisionTomada, tramo: Anio | undefined): string {
   }
   if (despues === undefined || !(despues > 0)) return dado.texto;
   const cambio = despues / dado.sueldo_antes - 1;
+  if (cambio >= CASI_IGUAL) return `Al final ganas ${Math.round(cambio * 100)}% más que antes.`;
+  // el cambio en sí no sube el sueldo, pero el alza del año puede dejarte arriba: se dicen las dos cosas
+  const delAnio = finAnio !== undefined && finAnio > 0 ? finAnio / dado.sueldo_antes - 1 : 0;
+  if (delAnio >= CASI_IGUAL) return `El cambio no te sube el sueldo, pero con el alza del año terminas ganando ${Math.round(delAnio * 100)}% más.`;
   if (Math.abs(cambio) < CASI_IGUAL) return "Ganas casi lo mismo que antes.";
-  if (cambio > 0) return `Al final ganas ${Math.round(cambio * 100)}% más que antes.`;
   return dado.texto;
 }
 
@@ -186,7 +189,7 @@ export function QuePaso({
             </>
           )}
           <SlowReveal delay={espera}>
-            <Narrative strong>{textoDado(dado, primero)}</Narrative>
+            <Narrative strong>{textoDado(dado, primero, sinSueldo(vista.estado) ? undefined : vista.estado.sueldo)}</Narrative>
           </SlowReveal>
         </Stack>
       )}
