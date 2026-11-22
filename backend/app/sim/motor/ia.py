@@ -129,11 +129,12 @@ def encontrar(pq, e: dict) -> float:
 
 @lru_cache(maxsize=1)
 def escenarios() -> dict:
-    """Qué es cada ritmo y las voces del cierre (simulador/escenarios_ia.json), con la cita de cada fuente."""
+    """Qué es cada ritmo, qué dice cada tipo de cargo y las voces del cierre (simulador/escenarios_ia.json), con la
+    cita de cada fuente."""
     raiz = Path(__file__).resolve().parents[3] / "simulador"
     datos = json.loads((raiz / "escenarios_ia.json").read_text(encoding="utf-8"))
     citas = {f["id"]: f for f in json.loads((raiz / "fuentes.json").read_text(encoding="utf-8"))["fuentes"]}
-    for x in [*datos["ritmos"].values(), *datos["voces"]]:
+    for x in [*datos["ritmos"].values(), *datos["tipos"].values(), *datos["voces"]]:
         x["cita"], x["url"] = citas[x["fuente"]]["cita"], citas[x["fuente"]]["url"]
     return datos
 

@@ -436,6 +436,9 @@ def ficha(pq: Paquete, emp: dict | None, car: dict | None) -> dict | None:
     """Lo que se muestra de una empresa: nombre, logo, cargo y sus cifras relativas al rubro."""
     if emp is None:
         return None
+    from app.sim.motor import ia
+
+    tipo_ia = ia.tipo_de_cargo(pq, car["cargo_id"]) if car else None
     return {
         "empresa_id": emp["empresa_id"], "nombre": emp["nombre"], "rubro": emp["rubro"], "tipo": emp["tipo"],
         "pais": emp.get("pais", ""), "dominio": emp.get("dominio", ""), "logo": emp["logo"], "origen": emp.get("origen", ""),
@@ -445,6 +448,8 @@ def ficha(pq: Paquete, emp: dict | None, car: dict | None) -> dict | None:
             "ascenso": round(emp["mult_ascenso"], 3), "cierre": round(emp["mult_cierre"], 3),
             "exposicion_ia": round(car["exposicion_ia"] if car else emp["exposicion_ia"], 3), "horas": int(emp["horas"]),
         },
+        # el tipo OIT del cargo, el mismo que usa el motor, con el texto del paquete (sin cargo no se dice nada)
+        "ia_tipo": tipo_ia, "ia_texto": ia.escenarios()["tipos"][tipo_ia]["carta"] if tipo_ia else None,
         "calidad": "sintetico",
     }
 

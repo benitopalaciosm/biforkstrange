@@ -1,7 +1,7 @@
 {
  "version": "1.0.0",
  "fecha": "2026-11-22",
- "descripcion": "Los tres ritmos de la IA y las voces que se muestran al cierre. Los pesos de cada ritmo están en parametros.json (P_RITMO_IA); aquí solo va el texto y de dónde sale cada cifra.",
+ "descripcion": "Los tres ritmos de la IA, los cuatro tipos de cargo y las voces que se muestran al cierre. Los pesos de cada ritmo están en parametros.json (P_RITMO_IA) y el tipo de cada cargo en tablas/ia_cargos_ciuo08.csv; aquí solo va el texto y de dónde sale cada cifra.",
  "ritmos": {
   "lento": {
    "nombre": "IA lenta",
@@ -17,6 +17,28 @@
    "nombre": "IA rápida",
    "que_es": "La IA supera al humano en la mayoría de las tareas. Además de contratar menos, se reestructuran las áreas donde la IA automatiza.",
    "fuente": "fri_2026"
+  }
+ },
+ "tipos": {
+  "automatiza": {
+   "nombre": "la IA lo automatiza",
+   "carta": "Según la OIT, la IA puede hacer buena parte de las tareas de este cargo",
+   "fuente": "oit_genai_2025"
+  },
+  "aumenta": {
+   "nombre": "la IA lo complementa",
+   "carta": "Según la OIT, la IA complementa este cargo más que reemplazarlo",
+   "fuente": "oit_genai_2025"
+  },
+  "incognita": {
+   "nombre": "no se sabe",
+   "carta": "Según la OIT, la IA toca este cargo, pero no se sabe si lo reemplaza o lo complementa",
+   "fuente": "oit_genai_2025"
+  },
+  "no_afectado": {
+   "nombre": "la IA casi no lo toca",
+   "carta": null,
+   "fuente": "oit_genai_2025"
   }
  },
  "voces": [

@@ -147,7 +147,7 @@ export type Estado = {
   ia_adopcion?: number;
   /** Con la incertidumbre de IA prendida: el ritmo de tu mundo, cómo te toca la IA y qué tan adaptable eres (0-1). */
   ia_ritmo?: Ritmo;
-  ia_tipo?: "automatiza" | "aumenta" | "incognita" | "no_afectado";
+  ia_tipo?: TipoIA;
   adaptabilidad?: number;
   usa_ia?: number;
 };
@@ -302,6 +302,8 @@ export type IAPorRitmo = {
   ritmos: Partial<Record<Ritmo, { mundos: number; gana: Record<string, number>; sueldo_p50: Record<string, number> }>>;
 };
 
+export type TipoIA = "automatiza" | "aumenta" | "incognita" | "no_afectado";
+
 export type ConFuente = { fuente: string; cita: string; url: string };
 export type CierreIA = {
   ritmo: Ritmo;
@@ -362,6 +364,9 @@ export type EmpresaOferta = {
   cargo: string | null;
   /** Relativas al promedio de su tipo y rubro (1 = promedio), salvo exposición a IA (0 a 1) y horas. */
   cifras: { sueldo: number; despido: number; ascenso: number; cierre: number; exposicion_ia: number; horas: number };
+  /** Cómo toca la IA al cargo (tipo OIT, el que usa el motor) y su frase para la carta; null sin cargo o si no lo toca. */
+  ia_tipo?: TipoIA | null;
+  ia_texto?: string | null;
   calidad: Calidad;
 };
 
