@@ -341,7 +341,7 @@ export function CierrePantalla({
                   color: colores[o.opcion],
                 }))}
               />
-              {conCeros && <Text size="sm">Los mundos que terminan sin trabajo cuentan con $0, por eso el 10% puede quedar bajo.</Text>}
+              {conCeros && <Text size="sm">Los mundos que terminan sin trabajo cuentan con $0, por eso «si te va mal» puede quedar bajo.</Text>}
             </Stack>
           </details>
         </Stack>

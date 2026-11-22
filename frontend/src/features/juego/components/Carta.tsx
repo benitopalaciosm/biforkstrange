@@ -116,7 +116,7 @@ function DeDondeSalen({ o, ganadas, total, edadFinal, respaldo, pendiente }: {
         </Text>
         <Text size="sm">
           <strong>Si te va bien</strong> es lo que superan solo 1 de cada 10 mundos; <strong>si te va mal</strong>, lo que no alcanzan 1 de cada 10; <strong>lo típico</strong>, el
-          mundo del medio.
+          mundo del medio. Los mundos que terminan sin trabajo cuentan con $0.
         </Text>
         {sorteo &&
           sorteo.map((r) => (
@@ -250,8 +250,7 @@ function OpcionConGemelos({
   // el tiempo sin trabajo dice más que "cuántas copias pasaron por la cesantía": en 10 años a casi todos
   // les toca una vez, pero suele durar meses. Es el promedio de tus copias, contando a las que nunca la vivieron.
   const mesesSinTrabajo = Math.round(o.meses_sin_trabajo);
-  // El rango de sueldo cuenta con $0 a quien termina sin trabajo; aquí se muestra solo entre quienes trabajan y los demás aparte.
-  const conTrabajo = o.sueldo_con_trabajo ?? o.sueldo;
+  // Una sola base en todas las pantallas: quien termina sin trabajo cuenta con $0 (cerrada, abierta, gráficos y cierre).
   const sinTrabajoFinal = mundos(o.sin_trabajo_al_final, de);
   const sube = mundos(o.sube_de_cargo ?? 0, de);
   return (
@@ -288,19 +287,19 @@ function OpcionConGemelos({
           <span className="jg-escenarios" role="list" aria-label={`Sueldo a los ${edadFinal}`}>
             <span role="listitem">
               <span>Si te va bien</span>
-              <b>{plata(conTrabajo.p90)}</b>
+              <b>{plata(o.sueldo.p90)}</b>
             </span>
             <span role="listitem" data-fuerte="true">
               <span>Lo típico a los {edadFinal}, en pesos de hoy</span>
-              <b>{plata(conTrabajo.p50)}</b>
+              <b>{plata(o.sueldo.p50)}</b>
             </span>
             <span role="listitem">
               <span>Si te va mal</span>
-              <b>{plata(conTrabajo.p10)}</b>
+              <b>{plata(o.sueldo.p10)}</b>
             </span>
             {sinTrabajoFinal > 0 && (
               <span role="listitem">
-                <span>Terminan sin trabajo a los {edadFinal} (no cuentan arriba)</span>
+                <span>Terminan sin trabajo a los {edadFinal} (cuentan con $0 arriba)</span>
                 <b>{sinTrabajoFinal} de {de}</b>
               </span>
             )}
