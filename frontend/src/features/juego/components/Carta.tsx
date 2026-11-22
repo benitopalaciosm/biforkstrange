@@ -241,7 +241,7 @@ function OpcionConGemelos({
               <b>{plata(o.sueldo.p90)}</b>
             </span>
             <span role="listitem" data-fuerte="true">
-              <span>Lo típico a los {edadFinal}</span>
+              <span>Lo típico a los {edadFinal}, en pesos de hoy</span>
               <b>{plata(o.sueldo.p50)}</b>
             </span>
             <span role="listitem">

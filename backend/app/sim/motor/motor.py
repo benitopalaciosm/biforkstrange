@@ -34,6 +34,8 @@ EVENTOS_PERSONALES = frozenset(
      "hijo_no_planificado", "herencia"}
 )
 EVENTO_MUNDO = "recesion"
+ALZAS = frozenset({"alza_anual"})
+SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
 # Decisiones cuya historia nombra a la empresa que te ofrece trabajo
 DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar"})
 
@@ -698,7 +700,12 @@ class Vida:
             "prob_evento": prob, "directo": directo,
             "rutina": ev["prob_anual"] == 1,  # pasa todos los años (alza anual, ánimo)
         })
+        sueldo_antes = self.e["sueldo"]
         self._aplicar(resultado["efectos"], f"{sitio}:{resultado['id']}")
+        if id_ in ALZAS and sueldo_antes > 0 and abs(self.e["sueldo"] - sueldo_antes) < 1:
+            # el sueldo es en pesos de hoy: un alza de 0 es un año en que solo te reajustaron por inflación.
+            # Se cuenta como noticia, para que el sueldo igual al peso no parezca un error.
+            self.registro["eventos"][-1].update(texto=SOLO_IPC, rutina=False, directo=True)
         self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
 

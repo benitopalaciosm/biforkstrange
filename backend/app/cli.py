@@ -387,7 +387,7 @@ def _texto_comparacion(comp: dict, supuestos: list[str] | None = None) -> list[s
         "con otra suerte):"
     )
     lineas += ["", *_tabla_gemelos(comp), ""]
-    lineas += _envolver("Sueldos líquidos al mes; la copia que termina sin trabajo cuenta con el sueldo al que "
+    lineas += _envolver("Sueldos líquidos al mes, en pesos de hoy (sin inflación); la copia que termina sin trabajo cuenta con el sueldo al que "
                         "apunta al volver.", "  ")
     for s in supuestos or []:
         lineas += _envolver(s, "  ")
