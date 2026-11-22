@@ -151,8 +151,10 @@ def elecciones_internas(vida: Vida, opcion: Opcion) -> list[dict]:
         filas = {f["rubro"]: f for f in pq.filas("esi_ingreso_rubro_edad") if f["banda_edad"] == "18-54"}
         salida.append({"variable": "rubro_destino", "pregunta": "¿A qué rubro?", "alternativas": [
             {"valor": r, "nombre": r, "prob": float(filas[r]["share_ocupados_banda"] or 0) if r in filas else 0.0,
-             # la carta pregunta por "un rubro que paga más": por defecto, el de mayor sueldo mediano
-             "preferencia": float(filas[r]["p50"] or 0) if r in filas else 0.0}
+             # la carta pregunta por "un rubro que paga más": por defecto, el de mayor sueldo mediano,
+             # salvo que la persona haya contado a qué rubro se cambiaría
+             "preferencia": (1e12 if r == e.get("rubro_sonado") else
+                             float(filas[r]["p50"] or 0) if r in filas else 0.0)}
             for r in pq.variables["rubro"]["dominio"] if r and r != e["rubro"]]})
     if "ocupacion_destino" in usadas:
         nombres = {int(f["origen"]): f["origen_nombre"] for f in pq.filas("jobhop_transiciones")}
