@@ -66,6 +66,8 @@ function guardar(g: Guardado) {
 
 const mensaje = textoError;
 
+const semillaAlAzar = () => Math.floor(Math.random() * 1_000_000);
+
 /** La vida que terminaste, para compararla con la siguiente cuando vuelves a vivir el mismo mundo. */
 export type VidaAnterior = {
   recorrido: { edad: number; sueldo: number }[];
@@ -128,6 +130,11 @@ export function usePartida() {
   /** Tu vida anterior en este mismo mundo: el cierre la dibuja junto a la de ahora. Solo en memoria. */
   const [anterior, setAnterior] = useState<VidaAnterior | null>(null);
   const turno = useRef(0);
+  /**
+   * La semilla de la próxima partida nueva, elegida antes de empezar: "más en juego" calcula las dudas con
+   * ella, así que la primera carta de la duda que se elija ya está calculada en el servidor.
+   */
+  const [semillaNueva, setSemillaNueva] = useState(semillaAlAzar);
   /** Lo elegido dentro de las opciones de la carta actual: los mundos se ven con eso mismo. */
   const parametrosCarta = useRef<ParametrosComparar>({});
   /** El onboarding a medio armar: sobrevive a ir y volver de las dudas. */
@@ -236,7 +243,8 @@ export function usePartida() {
     (p: Perfil, duda: string | null, semilla?: number) => {
       parametrosCarta.current = {};
       setCargando(true);
-      const nueva: Partida = { perfil: p, semilla: semilla ?? Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
+      const nueva: Partida = { perfil: p, semilla: semilla ?? semillaNueva, duda, elecciones: [] };
+      setSemillaNueva(semillaAlAzar()); // la próxima partida nueva es otro mundo
       void pedir(nueva, (v) => {
         setPartida(nueva);
         setPrevia(null);
@@ -244,7 +252,7 @@ export function usePartida() {
         setFase(v.terminada ? "cierre" : "carta");
       });
     },
-    [pedir],
+    [pedir, semillaNueva],
   );
 
   /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
@@ -404,7 +412,7 @@ export function usePartida() {
   }, [onboarding.reiniciar]);
 
   return {
-    aviso, fuentes, retrato, origenSugeridas, empezarDeCero, reintentarDudas, reintentar,
+    aviso, fuentes, retrato, origenSugeridas, empezarDeCero, reintentarDudas, reintentar, semillaNueva,
     fase, perfil, partida, vista, previa, sinNovedad, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, revivir, anterior, descartar,
   };

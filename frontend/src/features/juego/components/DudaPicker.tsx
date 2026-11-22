@@ -18,22 +18,22 @@ const prioridad = (id: string) => {
 
 /** Tu duda: la decisión que te trajo. Viene de la lista de caminos de "3 · Decisión del año" del kit. */
 /** "La más en juego para ti": de las dudas que sugiere el CV, la que abre más distancia entre la mala y la buena suerte. */
-function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugeridas: DudaSugerida[]): DudaEnJuego | null {
+function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugeridas: DudaSugerida[], semilla: number): DudaEnJuego | null {
   const posibles = new Set(dudas?.map((d) => d.decision) ?? []);
   const candidatas = sugeridas.map((s) => s.decision).filter((d) => posibles.has(d));
-  const clave = perfil && candidatas.length >= 2 ? JSON.stringify([perfil, candidatas]) : null;
+  const clave = perfil && candidatas.length >= 2 ? JSON.stringify([perfil, candidatas, semilla]) : null;
   const [mas, setMas] = useState<DudaEnJuego | null>(null);
   useEffect(() => {
     setMas(null);
     if (!clave || !perfil) return;
     let vigente = true;
-    getEnJuego(perfil, candidatas)
+    getEnJuego(perfil, candidatas, semilla)
       .then((r) => vigente && setMas(r.dudas.find((d) => d.decision === r.mas_en_juego) ?? null))
       .catch(() => undefined); // es un extra: si falla, la lista sigue igual
     return () => {
       vigente = false;
     };
-    // la clave resume perfil y candidatas
+    // la clave resume perfil, candidatas y semilla
   }, [clave]);
   return mas;
 }
@@ -50,7 +50,10 @@ export function DudaPicker({
   onReintentarDudas,
   onReintentar,
   onSinDuda,
+  semilla,
 }: {
+  /** La semilla de la partida que viene: con ella se mide "más en juego" y la carta elegida queda lista. */
+  semilla: number;
   /** Empezar sin una duda: la vida decide qué te llega el primer año, como en cualquier otro. */
   onSinDuda?: () => void;
   /** De dónde salió cada dato del perfil: lo que falta es supuesto. */
@@ -94,7 +97,7 @@ export function DudaPicker({
     if (c !== null) setTodas(true); // una categoría muestra todas las suyas, no solo las primeras
   };
   const simulando = cargando && dudas !== null;
-  const enJuego = useMasEnJuego(perfil, dudas, sugeridas);
+  const enJuego = useMasEnJuego(perfil, dudas, sugeridas, semilla);
   return (
     <Screen gap={16}>
       <ScreenHeader
