@@ -22,12 +22,14 @@
   --sol: #FFC83D;
   --sobre-sol: #1D1E22;
 
-  /* Noche: oficina, tunel, momentos duros */
-  --noche: #14151A;
-  --noche-2: #22232B;
-  --noche-linea: #3A3B45;
-  --sobre-noche: #F2F2EF;
-  --noche-suave: #A9AAB2;
+  /* Noche: oficina, tunel, momentos duros. Siguen el tema: en claro son un tinte frío apenas
+     más oscuro que el papel (no una pantalla negra), en oscuro un azul profundo. Así un año
+     malo se distingue sin que la app salte de blanco a negro y de vuelta. */
+  --noche: #EEF0F6;
+  --noche-2: #E1E4EF;
+  --noche-linea: #C9CDDC;
+  --sobre-noche: #1D1E22;
+  --noche-suave: #55576A;
 
   /* Los cuatro indicadores */
   --dinero: #17794B;
@@ -42,7 +44,7 @@
 
   /* Sombra dura de teclas y tarjetas; en superficies noche va la suya */
   --sombra: #1D1E22;
-  --sombra-noche: #F2F2EF;
+  --sombra-noche: #1D1E22;
   /* Contorno de las bandas noche: solo hace falta en modo oscuro */
   --borde-noche: transparent;
   /* Velo detrás de la hoja que sube desde abajo */
@@ -94,11 +96,11 @@ html { background: var(--papel); color: var(--tinta); }
 /* ───────── Base ───────── */
 .vd { position: relative; box-sizing: border-box; font-family: var(--font); color: var(--tinta); background: var(--papel); -webkit-font-smoothing: antialiased; }
 .vd *, .vd *::before, .vd *::after { box-sizing: border-box; }
+/* Pantalla noche: solo cambia las superficies por las de noche del tema activo. Acento,
+   indicadores y --media vienen del tema, que ya da buen contraste sobre ese fondo. */
 .vd-noche {
-  --papel: var(--noche); --niebla: var(--noche-2); --linea: var(--noche-linea); --control: #8C8D96;
-  --tinta: var(--sobre-noche); --media: #D0D1D6; --suave: var(--noche-suave); --sombra: var(--sombra-noche);
-  --acento: #8FA2FF; --sobre-acento: #14151A; --acento-suave: #262B4D;
-  --dinero: #4CC38A; --carrera: #8FA2FF; --vida: #FF7FA8;
+  --papel: var(--noche); --niebla: var(--noche-2); --linea: var(--noche-linea);
+  --tinta: var(--sobre-noche); --suave: var(--noche-suave); --sombra: var(--sombra-noche);
 }
 
 /* Pantalla de la app: columna de teléfono centrada */
@@ -347,7 +349,9 @@ html { background: var(--papel); color: var(--tinta); }
 
 /* Superficies de momento */
 .vd-sol { background: var(--sol); color: var(--sobre-sol); --tinta: #1D1E22; --media: #2A2B30; --suave: #3A3B40; }
-.vd-banda-noche { background: var(--noche); color: var(--sobre-noche); --tinta: var(--sobre-noche); --media: #D0D1D6; --suave: var(--noche-suave); --papel: var(--noche); --niebla: var(--noche-2); --sombra: var(--sombra-noche); box-shadow: inset 0 0 0 1.5px var(--borde-noche); }
+.vd-banda-noche { background: var(--noche); color: var(--sobre-noche); --tinta: var(--sobre-noche); --suave: var(--noche-suave); --papel: var(--noche); --niebla: var(--noche-2); --sombra: var(--sombra-noche); box-shadow: inset 0 0 0 1.5px var(--borde-noche); }
+/* Dentro de una pantalla noche la banda usa la otra superficie de noche, para no fundirse con el fondo */
+.vd-noche .vd-banda-noche { background: var(--noche-2); --papel: var(--noche-2); --niebla: var(--noche); }
 
 /* Botón de tema (claro / oscuro): arriba a la derecha de la página, sobre el margen de 48px
    que deja cada pantalla arriba. Se va con el scroll para no tapar contenido. */
