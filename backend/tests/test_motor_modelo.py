@@ -100,13 +100,13 @@ def test_el_primer_anio_el_fundador_gana_en_la_mediana_lo_que_declaro():
 
 
 def test_quien_recien_emprende_gana_como_un_microemprendedor_aunque_ya_haya_tenido_empresa():
-    """Partir una empresa nueva vuelve base_empresa a 0: su ganancia sale de MICRO_MEDIANA, no de la anterior."""
+    """Partir una empresa nueva sortea su base desde MICRO_MEDIANA, no la hereda de la anterior."""
     guion = Guion({"emprender": "emprender", "seguir_con_tu_empresa": "seguir"})
     sueldos = []
     for base in (0, 2_000_000):
         v = vida(Perfil(edad=35), DadosGuion({"dec:seguir_con_tu_empresa:seguir": 0.0}), base_empresa=base)
         v.vivir_anio(guion, carta="emprender")
-        assert v.e["estado"] == "fundador" and v.e["base_empresa"] == 0
+        assert v.e["estado"] == "fundador" and v.e["base_empresa"] > 0
         sueldos.append(v.e["sueldo"])
     assert sueldos[0] == sueldos[1] > 0
 

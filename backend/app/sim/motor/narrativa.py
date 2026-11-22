@@ -160,6 +160,9 @@ def narrar(decision: str, contexto: dict, semilla: int, anio: int, ocurrencia: i
     elif decision == "invertir_en_red":
         texto = (f"Te invitan a {s.uno('evento', ['un meetup de la industria', 'un after de exalumnos', 'una conferencia del rubro'])} "
                  f"este jueves. Podrías ir, o quedarte en la casa como siempre.")
+    elif decision == "emprender" and contexto.get("validado"):
+        texto = ("Tu proyecto de noches y fines de semana ya tiene clientes que pagan. "
+                 f"{cercano.capitalize()} te pregunta qué esperas para dedicarte a él.")
     elif decision == "emprender":
         texto = (f"Tienes una idea dándote vueltas hace meses: {s.uno('idea', ['un servicio para pymes de tu rubro', 'una app que resuelve algo que ves todos los días en el trabajo', 'una consultora propia'])}. "
                  f"{cercano.capitalize()} te anima a lanzarte.")

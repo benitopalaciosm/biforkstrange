@@ -125,6 +125,7 @@ class Vida:
         self.anio = 0                     # años ya cerrados
         self.cola: list[tuple] = []       # pasos pendientes del año en curso
         self.temporales: list[dict] = []  # efectos con duración, para revertirlos
+        self.diferidos: list[dict] = []   # efectos que se cumplen años después (`en_anios`): un título de noche
         self.historia: list[dict] = []
         self.registro: dict | None = None
         self.anios_buscando = 0
@@ -150,6 +151,7 @@ class Vida:
         otra.e = dict(self.e)
         otra.cola = list(self.cola)
         otra.temporales = [dict(t) for t in self.temporales]
+        otra.diferidos = [dict(t) for t in self.diferidos]
         otra.historia = list(self.historia)
         otra.registro = copy.deepcopy(self.registro)
         if dados is not None:
@@ -388,7 +390,7 @@ class Vida:
         # la segunda vez que sale la misma decisión en un año (carta y evento oferta_llega) tira dados nuevos
         ocurrencia = sum(1 for x in self.registro["decisiones"] if x["decision"] == decision_id)
         sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
-        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad")}
+        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo")}
         contexto.update(self.contexto_empleo())
         if decision_id != "tipo_de_empleador":
             self._oferta_fija = None
@@ -504,6 +506,11 @@ class Vida:
         flujo = None
         base_referencia = False  # el sueldo nuevo sale de una tabla (nivel de referencia), no del sueldo anterior
         for ef in efectos:
+            if ef.get("en_anios"):
+                # se cumple al cerrar el año número `en_anios` (este incluido), con el estado de ese momento
+                self.diferidos.append({"quedan": int(ef["en_anios"]), "sitio": sitio,
+                                       "ef": {k: v for k, v in ef.items() if k != "en_anios"}})
+                continue
             exprs = [x for x in (ef.get("cuando"), ef["valor"]) if x is not None]
             if flujo is None and any(self.pq.compilar(x)[1] for x in exprs):
                 flujo = self.dados.flujo(self.anio, sitio)
@@ -566,6 +573,24 @@ class Vida:
         elif not e["rubro"] or e["rubro"] == "Administración pública":
             rubros, pesos = self._rubros_privados()
             e["rubro"] = rubros[self.dados.elegir(self.anio, "rubro", pesos)]
+
+    def _cumplir_diferidos(self) -> None:
+        """Los efectos con `en_anios` que vencen este año. El primero con `aviso` sale como noticia del año."""
+        quedan, vencen = [], []
+        for d in self.diferidos:
+            d["quedan"] -= 1
+            (vencen if d["quedan"] <= 0 else quedan).append(d)
+        self.diferidos = quedan
+        for d in vencen:
+            ef = d["ef"]
+            if ef.get("cuando") and not self.pq.evaluar(ef["cuando"], self.e, self.dados.flujo(self.anio, d["sitio"] + ":diferido")):
+                continue
+            aviso = ef.get("aviso")
+            self._aplicar([{k: v for k, v in ef.items() if k != "aviso"}], d["sitio"] + ":diferido")
+            if aviso and self.registro is not None:
+                self.registro["eventos"].append({
+                    "evento": "diferido", "nombre": aviso["nombre"], "resultado": "cumple", "texto": aviso["texto"],
+                    "tono": aviso.get("tono", "bueno"), "prob": 1.0, "prob_evento": 1.0, "directo": True, "rutina": False})
 
     def _asignar_empresa(self, antes: dict, base_referencia: bool) -> None:
         """Al entrar a un empleador nuevo: empresa y cargo del catálogo, y el sueldo pasa de lo que pagaba
@@ -753,6 +778,8 @@ class Vida:
             else:
                 e[t["var"]] = t["previo"]
         self.temporales = vigentes
+        self._cumplir_diferidos()
+        e = self.e  # aplicar efectos re-deriva el estado (otro dict)
 
         if e["estado"] == "buscando":
             self.anios_buscando += 1

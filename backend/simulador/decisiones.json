@@ -1024,7 +1024,7 @@
         {
          "var": "edad",
          "op": "suma",
-         "valor": 3
+         "valor": 2
         }
        ]
       }
@@ -1078,7 +1078,7 @@
     {
      "id": "hacer",
      "nombre": "Hacerlo",
-     "detalle": "Tres a seis meses intensivos.",
+     "detalle": "Dejas tu trabajo: tres a seis meses intensivos.",
      "resultados": [
       {
        "id": "colocado",
@@ -1136,7 +1136,7 @@
       {
        "id": "sin_pega",
        "prob": "resto",
-       "texto": "Terminas, pero no encuentras trabajo todavía.",
+       "texto": "Terminas, pero todavía no encuentras trabajo en tecnología: quedas buscando.",
        "tono": "malo",
        "efectos": [
         {
@@ -1229,14 +1229,9 @@
       {
        "id": "titula",
        "prob": 0.55,
-       "texto": "Te titulas.",
+       "texto": "Vas a titularte: terminas en tres años, estudiando de noche.",
        "tono": "bueno",
        "efectos": [
-        {
-         "var": "edu",
-         "op": "fija",
-         "valor": "'tecnica'"
-        },
         {
          "var": "ahorro",
          "op": "suma",
@@ -1250,7 +1245,18 @@
         {
          "var": "sueldo",
          "op": "multiplica",
-         "valor": "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', 'tecnica', 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', 'tecnica') / tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)"
+         "valor": "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', 'tecnica', 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', 'tecnica') / tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), 'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)",
+         "en_anios": 3,
+         "aviso": {
+          "nombre": "Te titulas",
+          "texto": "Terminas la carrera que estudiaste de noche. Tu sueldo sube como el de quienes tienen ese título."
+         }
+        },
+        {
+         "var": "edu",
+         "op": "fija",
+         "valor": "'tecnica'",
+         "en_anios": 3
         }
        ]
       },
@@ -1658,7 +1664,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -1908,7 +1914,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -3287,7 +3293,7 @@
       {
        "id": "crece",
        "prob": "k('YC_ADQUIRIDA')",
-       "texto": "La empresa crece y la compran. Tus acciones valen algo.",
+       "texto": "La empresa crece y la compran años después. Si sigues ahí, tus acciones valen algo.",
        "tono": "bueno",
        "efectos": [
         {
@@ -3304,7 +3310,12 @@
          "var": "ahorro",
          "op": "suma",
          "valor": "sueldo * 12 * azar_uniforme(0.5, 3)",
-         "cuando": "anos_en_startup >= 4"
+         "cuando": "anos_en_startup >= 4",
+         "en_anios": 4,
+         "aviso": {
+          "nombre": "Compran tu startup",
+          "texto": "La startup donde entraste con acciones se vende, y tus acciones valen algo."
+         }
         },
         {
          "var": "nivel",
@@ -3674,7 +3685,7 @@
         {
          "var": "base_empresa",
          "op": "fija",
-         "valor": 0
+         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4)"
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -3695,7 +3706,7 @@
       {
        "id": "tracciona",
        "prob": 0.2,
-       "texto": "Tu proyecto tiene clientes. Puedes lanzarte con menos riesgo.",
+       "texto": "Tu proyecto consigue clientes. Ahora decides si te lanzas.",
        "tono": "bueno",
        "efectos": [
         {
@@ -3708,7 +3719,8 @@
          "op": "fija",
          "valor": 1
         }
-       ]
+       ],
+       "luego": "emprender"
       },
       {
        "id": "nada",
@@ -3805,7 +3817,7 @@
         {
          "var": "sueldo",
          "op": "fija",
-         "valor": "si(base_empresa > 0, base_empresa, k('MICRO_MEDIANA')) * azar_lognormal(0.3, 1, 4) * (1 + empresa_anos / 4)"
+         "valor": "si(base_empresa > 0, base_empresa, k('MICRO_MEDIANA')) * azar_lognormal(1 / (1 + k('EMPRESA_RUIDO_ANUAL')), 1, 1 + k('EMPRESA_RUIDO_ANUAL')) * (1 + empresa_anos / 4)"
         }
        ]
       },
@@ -4035,23 +4047,13 @@
       {
        "id": "vuelve",
        "prob": "resto",
-       "texto": "No resulta la visa y vuelves.",
+       "texto": "No resulta la visa: sigues en tu trabajo.",
        "tono": "malo",
        "efectos": [
         {
          "var": "ahorro",
          "op": "suma",
          "valor": -3000000
-        },
-        {
-         "var": "hueco",
-         "op": "fija",
-         "valor": 1
-        },
-        {
-         "var": "estado",
-         "op": "fija",
-         "valor": "'buscando'"
         }
        ]
       }
@@ -5014,7 +5016,7 @@
       {
        "id": "vuelve_bien",
        "prob": 0.6,
-       "texto": "Vuelves con energía.",
+       "texto": "Vuelves con energía y sales a buscar trabajo.",
        "tono": "bueno",
        "efectos": [
         {
@@ -5057,7 +5059,7 @@
       {
        "id": "cuesta_volver",
        "prob": "resto",
-       "texto": "Lo pasas bien, pero volver cuesta más de lo pensado.",
+       "texto": "Lo pasas bien, pero volver cuesta más de lo pensado: buscas trabajo con un hueco en el CV.",
        "tono": "malo",
        "efectos": [
         {
