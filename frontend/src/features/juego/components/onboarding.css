@@ -1,0 +1,87 @@
+/* Onboarding: 3 pantallas cortas con la ficha del gemelo armándose arriba */
+
+.ob-entra { animation: vd-subir .5s ease-out both; }
+.ob-entra:nth-of-type(2) { animation-delay: .08s; }
+.ob-tarjeta { animation: ob-deslizar .45s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes ob-deslizar { from { opacity: 0; transform: translateX(36px); } to { opacity: 1; transform: none; } }
+
+.ob-puntos { display: flex; gap: 6px; }
+.ob-puntos i { width: 22px; height: 6px; border-radius: 3px; background: var(--linea); transition: background .3s; }
+.ob-puntos i[data-hecho] { background: var(--acento); }
+
+.ob-link { align-self: center; border: 0; background: none; padding: 8px; font: 600 14px/20px var(--font); color: var(--media); text-decoration: underline; cursor: pointer; }
+.ob-link:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; border-radius: 8px; }
+.ob-chico { font: 400 13px/18px var(--font); color: var(--suave); }
+
+/* La zona para soltar el PDF */
+.ob-zona {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%;
+  padding: 26px 18px 22px; border: 2px dashed var(--acento); border-radius: 20px;
+  background: var(--acento-suave); color: var(--tinta); font: 400 15px/22px var(--font);
+  cursor: pointer; transition: transform .2s, background .2s;
+}
+.ob-zona strong { font: 700 17px/24px var(--font); }
+.ob-zona:hover, .ob-zona[data-encima] { transform: scale(1.02); background: #dfe5ff; }
+.ob-zona:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
+
+/* LinkedIn → PDF → gemelo, en loop */
+.ob-anim { position: relative; display: flex; align-items: center; justify-content: space-between; width: 220px; height: 64px; }
+.ob-in {
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 10px;
+  background: #0A66C2; color: #fff; font: 800 26px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: -1px;
+  animation: ob-latir 3s ease-in-out infinite;
+}
+.ob-via { position: absolute; left: 56px; right: 56px; top: 50%; border-top: 2px dotted var(--control); }
+.ob-pdf {
+  position: absolute; left: 50px; top: 10px; width: 32px; height: 42px; border-radius: 4px;
+  background: var(--papel); border: 2px solid var(--tinta); display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 0 5px;
+  animation: ob-volar 3s cubic-bezier(.5, 0, .3, 1) infinite;
+}
+.ob-pdf i { height: 3px; border-radius: 2px; background: var(--control); }
+.ob-pdf i:first-child { background: #0A66C2; width: 70%; }
+.ob-gemelo { position: relative; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--tinta); background: var(--papel); overflow: hidden; }
+.ob-gemelo span { position: absolute; inset: 0; background: var(--sol); transform: translateY(100%); animation: ob-llenar 3s ease-in-out infinite; }
+@keyframes ob-latir { 0%, 100% { transform: scale(1); } 10% { transform: scale(1.12); } 20% { transform: scale(1); } }
+@keyframes ob-volar {
+  0%, 12% { transform: translateX(0) scale(.4); opacity: 0; }
+  22% { transform: translateX(0) scale(1); opacity: 1; }
+  62% { transform: translateX(88px) translateY(-10px) rotate(8deg); opacity: 1; }
+  74%, 100% { transform: translateX(106px) scale(.3); opacity: 0; }
+}
+@keyframes ob-llenar { 0%, 64% { transform: translateY(100%); } 82%, 92% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+
+/* Leyendo: la hoja con una línea que la recorre */
+.ob-leyendo { align-items: center; padding: 18px 0; }
+.ob-hoja {
+  position: relative; width: 150px; height: 190px; padding: 22px 16px; border: 2px solid var(--tinta); border-radius: 10px;
+  background: var(--papel); display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-shadow: 6px 6px 0 var(--tinta);
+}
+.ob-hoja i { height: 7px; border-radius: 4px; background: var(--linea); }
+.ob-hoja i:first-child { background: #0A66C2; }
+.ob-scan {
+  position: absolute; left: 0; right: 0; height: 34px; top: -34px;
+  background: linear-gradient(to bottom, transparent, rgba(36, 71, 249, .28), transparent);
+  border-bottom: 2px solid var(--acento); animation: ob-escanear 1.6s ease-in-out infinite;
+}
+@keyframes ob-escanear { from { top: -34px; } to { top: 100%; } }
+.ob-frase { animation: vd-subir .4s ease-out both; text-align: center; }
+
+/* La ficha del gemelo */
+.ob-ficha {
+  display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 18px;
+  background: var(--sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
+}
+.ob-avatar { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
+.ob-avatar span { position: absolute; inset: 0; background: var(--acento); transform: translateY(calc(100% - var(--ob-lleno, 0) * 100% / 7)); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.ob-avatar[data-lleno="1"] { --ob-lleno: 1; } .ob-avatar[data-lleno="2"] { --ob-lleno: 2; } .ob-avatar[data-lleno="3"] { --ob-lleno: 3; }
+.ob-avatar[data-lleno="4"] { --ob-lleno: 4; } .ob-avatar[data-lleno="5"] { --ob-lleno: 5; } .ob-avatar[data-lleno="6"] { --ob-lleno: 6; }
+.ob-avatar[data-lleno="7"] { --ob-lleno: 7; }
+.ob-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ob-tag { animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both; background: var(--papel); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-entra, .ob-tarjeta, .ob-frase, .ob-ficha, .ob-tag, .ob-in, .ob-pdf, .ob-gemelo span, .ob-scan { animation: none; }
+  .ob-pdf { opacity: 1; transform: translateX(44px); }
+  .ob-gemelo span { transform: translateY(40%); }
+  .ob-avatar span { transition: none; }
+}

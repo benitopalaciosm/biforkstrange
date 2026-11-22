@@ -21,7 +21,24 @@ export type Perfil = {
   antiguedad?: number;
   region?: "rm" | "otra";
   ahorro?: number | null;
+  /** 1 si trabaja en inglés (intermedio o más). Mueve remoto y emigrar. */
+  ingles?: 0 | 1;
+  /** Habilidad y red de contactos (0 a 100), deducidas del CV. Sin dato, el motor usa 50 y 30. */
+  skill?: number | null;
+  red?: number | null;
+  /** Su situación de hoy y su historia, del CV. Sin dato, empleado a jornada completa, presencial. */
+  estado?: "empleado" | "independiente" | "fundador" | "buscando" | "estudiando";
+  meses_cesante?: number;
+  parcial?: 0 | 1;
+  remoto?: 0 | 1;
+  usa_ia?: 0 | 1;
+  empresa_anos?: number;
+  empresa_fondos?: 0 | 1;
+  /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
+  anos_por_empleo?: number | null;
 };
+
+export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
 
 /** Respuesta de `POST /api/juego/perfil`: el perfil que Claude llenó desde un texto. */
 export type PerfilLeido = {
@@ -34,6 +51,12 @@ export type PerfilLeido = {
   avisos: string[];
   /** La duda que el documento trae, si es una posible para este perfil. */
   duda: string | null;
+  /** Hasta 3 dudas que le calzan a esta persona según su CV, con el porqué. Solo si Claude leyó un texto o PDF. */
+  dudas_sugeridas?: DudaSugerida[];
+  /** Su empleador actual, si está en la nómina del SII. */
+  empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
+  /** Lo que su gemelo sabe de ella, en una línea. */
+  retrato?: string | null;
   /** "documento" si venía en el formato del prompt; "api" o "comando" si Claude leyó un texto libre. */
   via: string;
 };
@@ -47,6 +70,8 @@ export type Catalogo = {
   educacion: Educacion[];
   ocupaciones: { grupo: number; nombre: string }[];
   carreras: Carrera[];
+  /** Sueldo líquido por estudios y banda de edad (ESI 2025): la referencia del sueldo. */
+  sueldos_ref: { educacion: Educacion; banda: string; p25: number; p50: number; p75: number }[];
 };
 
 export type Duda = { decision: string; nombre: string; pregunta: string; categoria: string; calidad: Calidad };

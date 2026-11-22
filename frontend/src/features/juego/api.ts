@@ -51,9 +51,11 @@ function comoErrorApi(e: unknown): ErrorApi {
 }
 
 /** Lee el documento que armó el Claude de la persona (al tiro). Si es texto libre, Claude lo lee (cerca de medio minuto). */
-export async function leerPerfil(texto: string): Promise<PerfilLeido> {
+/** Claude lee un texto, o un PDF en base64 (el CV o el "Guardar como PDF" de LinkedIn), y llena el perfil. */
+export async function leerPerfil(entrada: string | { pdf: string }): Promise<PerfilLeido> {
+  const cuerpo = typeof entrada === "string" ? { texto: entrada } : entrada;
   try {
-    return await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify({ texto }) });
+    return await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
   } catch (e) {
     throw comoErrorApi(e);
   }

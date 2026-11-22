@@ -21,6 +21,17 @@ class PerfilIn(BaseModel):
     antiguedad: int = Field(2, ge=0, le=40)
     region: Literal["rm", "otra"] = "rm"
     ahorro: float | None = None
+    ingles: int = Field(0, ge=0, le=1)
+    skill: int | None = Field(None, ge=0, le=100)
+    red: int | None = Field(None, ge=0, le=100)
+    estado: Literal["empleado", "independiente", "fundador", "buscando", "estudiando"] = "empleado"
+    meses_cesante: int = Field(0, ge=0, le=120)
+    parcial: int = Field(0, ge=0, le=1)
+    remoto: int = Field(0, ge=0, le=1)
+    usa_ia: int = Field(0, ge=0, le=1)
+    empresa_anos: int = Field(0, ge=0, le=30)
+    empresa_fondos: int = Field(0, ge=0, le=1)
+    anos_por_empleo: float | None = Field(None, gt=0, le=40)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())
@@ -55,4 +66,6 @@ class DudasIn(BaseModel):
 class TextoPerfilIn(BaseModel):
     """Lo que la persona escribe o sube sobre sí misma (markdown, currículum pegado, un párrafo)."""
 
-    texto: str = Field(min_length=1, max_length=60_000)
+    texto: str = Field("", max_length=60_000)
+    # un PDF (el CV o el "Guardar como PDF" de LinkedIn) en base64; ~10 MB como máximo
+    pdf: str | None = Field(None, max_length=14_000_000)
