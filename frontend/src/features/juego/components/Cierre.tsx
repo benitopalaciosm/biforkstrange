@@ -3,7 +3,6 @@ import { aniosDe, cargoYSueldo, deCien, plata, sinSueldo, situacion } from "../t
 import type { Anio, Perfil, Rango, Vista } from "../types";
 import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
-import { IntuicionResumen } from "./Apuesta";
 import { CompartirResultado } from "./Compartir";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
@@ -68,7 +67,6 @@ export function CierrePantalla({
         )}
       </SunCard>
 
-      <IntuicionResumen />
 
       {primera && elegida && (
         <Stack as="section" gap={12}>

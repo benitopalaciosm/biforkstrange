@@ -1,0 +1,77 @@
+/* Esperas con apuestas: ruleta, tragamonedas, caballos, dado y naipes. Solo transform y opacity. */
+.ap-espera { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0; }
+.ap-escena { display: block; width: 176px; max-width: 100%; height: auto; overflow: hidden; }
+.ap-texto { margin: 0; max-width: 320px; font: 500 15px/22px var(--font); color: var(--media); text-align: center; text-wrap: balance; animation: vd-subir .35s var(--ease) both; }
+.ap-titulo { font: 500 13px/16px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+
+/* A pantalla completa: la noche mientras se vive el año */
+.ap-espera[data-modo="pantalla"] { position: fixed; inset: 0; z-index: 10; justify-content: center; gap: 22px; padding: 24px 16px; background: var(--noche); animation: vd-aparecer .25s ease both; }
+.ap-espera[data-modo="pantalla"] .ap-escena { width: min(260px, 72vw); }
+.ap-espera[data-modo="pantalla"] .ap-texto { min-height: 56px; font: 500 20px/28px var(--font); color: var(--sobre-noche); }
+.ap-espera[data-modo="pantalla"] .ap-titulo { color: var(--noche-suave); }
+
+/* Chica, al lado del texto: cuando puedes seguir haciendo otra cosa mientras esperas */
+.ap-espera[data-modo="compacto"] { flex-direction: row; justify-content: flex-start; gap: 12px; padding: 4px 0; }
+.ap-espera[data-modo="compacto"] .ap-escena { flex: none; width: 64px; }
+.ap-espera[data-modo="compacto"] .ap-texto { font: 500 14px/20px var(--font); text-align: left; }
+
+/* Ruleta */
+.ap-ruleta-rueda { transform-origin: 80px 61px; animation: ap-girar 3.2s linear infinite; }
+.ap-ruleta-bola { transform-origin: 80px 61px; animation: ap-girar 1.7s linear infinite reverse; }
+@keyframes ap-girar { to { transform: rotate(360deg); } }
+
+/* Tragamonedas */
+.ap-rodillo { animation: ap-rodar .6s linear infinite; }
+@keyframes ap-rodar { from { transform: translateY(0); } to { transform: translateY(-136px); } }
+.ap-luz { animation: ap-parpadeo .8s steps(1, end) infinite; }
+@keyframes ap-parpadeo { 0% { opacity: 1; } 50% { opacity: .25; } }
+/* La palanca baja: se aplasta hasta quedar bajo el eje, como vista de lado */
+.ap-palanca { transform-origin: 134px 70px; animation: ap-tirar 2.4s var(--ease) infinite; }
+@keyframes ap-tirar { 0%, 55%, 100% { transform: none; } 66%, 74% { transform: scaleY(-.5); } }
+
+/* Carrera de caballos */
+.ap-pasto { fill: color-mix(in srgb, var(--dinero) 30%, var(--papel)); }
+.ap-avanza { animation: ap-avanzar .45s linear infinite; }
+@keyframes ap-avanzar { to { transform: translateX(-16px); } }
+.ap-carrera { animation: ap-adelantar 3s ease-in-out infinite alternate; }
+@keyframes ap-adelantar { from { transform: translateX(-26px); } to { transform: translateX(26px); } }
+.ap-trote { animation: ap-trotar .36s ease-in-out infinite alternate; }
+@keyframes ap-trotar { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
+.ap-pata-b { opacity: 0; }
+.ap-pata-a, .ap-pata-b { animation: ap-paso .36s steps(1, end) infinite; }
+.ap-pata-b { animation-delay: -.18s; }
+@keyframes ap-paso { 0% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Dado: cuatro saltos de un cuarto de vuelta (una vuelta entera, así el loop no se nota);
+   cada cara dura un salto y cambia en lo más alto */
+.ap-dado { transform-origin: 80px 64px; animation: ap-saltar 4.8s ease-in-out infinite; }
+@keyframes ap-saltar {
+  0% { transform: translateY(0) rotate(0deg); }
+  10% { transform: translateY(-18px) rotate(45deg); }
+  20%, 25% { transform: translateY(0) rotate(90deg); }
+  35% { transform: translateY(-18px) rotate(135deg); }
+  45%, 50% { transform: translateY(0) rotate(180deg); }
+  60% { transform: translateY(-18px) rotate(225deg); }
+  70%, 75% { transform: translateY(0) rotate(270deg); }
+  85% { transform: translateY(-18px) rotate(315deg); }
+  95%, 100% { transform: translateY(0) rotate(360deg); }
+}
+.ap-sombra { transform-origin: 80px 96px; animation: ap-sombra 1.2s ease-in-out infinite; }
+@keyframes ap-sombra { 0%, 80%, 100% { transform: none; opacity: .3; } 40% { transform: scaleX(.6); opacity: .15; } }
+.ap-cara { opacity: 0; animation: ap-cara 7.2s linear infinite; }
+@keyframes ap-cara { 0%, 16.6% { opacity: 1; } 16.7%, 100% { opacity: 0; } }
+
+/* Naipes: se aplastan, se dan vuelta y vuelven */
+.ap-naipe { transform-box: fill-box; transform-origin: center; animation: ap-voltear 2.8s ease-in-out infinite; }
+@keyframes ap-voltear { 0%, 30% { transform: none; } 40% { transform: scaleX(0); } 50%, 80% { transform: none; } 90% { transform: scaleX(0); } 100% { transform: none; } }
+.ap-frente { animation: ap-frente 2.8s linear infinite; }
+@keyframes ap-frente { 0%, 39.9% { opacity: 0; } 40%, 89.9% { opacity: 1; } 90%, 100% { opacity: 0; } }
+
+/* Sin movimiento: un cuadro quieto de cada escena */
+@media (prefers-reduced-motion: reduce) {
+  .ap-espera, .ap-espera *, .ap-texto { animation: none !important; }
+  .ap-pata-b { opacity: 0; }
+  .ap-cara { opacity: 0; }
+  .ap-cara[data-cara="5"] { opacity: 1; }
+  .ap-frente { opacity: 1; }
+}

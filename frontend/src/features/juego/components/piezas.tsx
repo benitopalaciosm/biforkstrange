@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Avatar, Button, Tag, cx } from "@/shared/ui";
 import { CALIDAD, plata } from "../textos";
 import type { Calidad, Rango } from "../types";
+import { Espera } from "./Apuesta";
 
 /** Calidad del dato, discreta: dato / mixto / supuesto. */
 export function CalidadTag({ calidad }: { calidad: Calidad }) {
@@ -84,36 +85,19 @@ export function Noticia({ titulo, texto, lado, className }: { titulo: string; te
   );
 }
 
-const CARAS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 /** Lo que el motor sortea de verdad en un año, y un par de cosas que no (dichas como lo que son: bromas). */
 const FRASES = [
   "Tirando tu dado…",
-  "Viendo si hay recesión este año…",
+  "¿Habrá recesión este año?",
   "Revisando si te ascienden…",
-  "Mirando si te llega una oferta…",
-  "Los robots todavía no se toman el mundo…",
+  "¿Te llegará una oferta?",
+  "Los robots aún no llegan…",
   "Preguntando por los despidos…",
-  "Aún no sabemos quién gana el Mundial…",
+  "Nadie sabe quién gana el Mundial…",
   "Calculando tu sueldo nuevo…",
 ];
 
-/** Pantalla de espera mientras se vive tu año: el dado rodando y lo que se está viendo en tu mundo. */
+/** Pantalla de espera mientras se vive tu año: una apuesta que va girando y lo que se está viendo en tu mundo. */
 export function Pensando({ titulo }: { titulo: string }) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setN((x) => x + 1), 150);
-    return () => clearInterval(id);
-  }, []);
-  const frase = FRASES[Math.floor(n / 5) % FRASES.length];
-  return (
-    <div className="jg-pensando" role="status" aria-live="polite">
-      <span className="jg-pensando-mundo">{titulo}</span>
-      <span className="jg-pensando-dado" aria-hidden="true">
-        {CARAS[(n * 5) % CARAS.length]}
-      </span>
-      <span className="jg-pensando-frase" key={frase}>
-        {frase}
-      </span>
-    </div>
-  );
+  return <Espera pantalla titulo={titulo} frases={FRASES} cada={900} />;
 }
