@@ -770,8 +770,13 @@ class Vida:
 
     # ------------------------------------------------------------------ lectura
     def sueldo_o_ultimo(self) -> float:
-        """El sueldo actual o, si está sin trabajo, el último que tuvo."""
+        """El sueldo actual o, si está sin trabajo, el último que tuvo. Para mostrar, no para comparar."""
         return self.e["sueldo"] if self.e["sueldo"] > 0 else self.e["sueldo_ref"]
+
+    def sueldo_al_final(self) -> float:
+        """Lo que gana hoy: 0 si está sin trabajo o estudiando. Es lo que se compara entre opciones, para
+        que terminar cesante no empate con terminar empleado con el último sueldo."""
+        return self.e["sueldo"]
 
     def resumen(self) -> dict:
         e = self.e

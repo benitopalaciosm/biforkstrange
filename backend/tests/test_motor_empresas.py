@@ -373,4 +373,4 @@ def test_la_universidad_del_magister_dice_que_su_numero_es_el_arancel():
     v = partida.vista(Perfil(edad=30), 2, "magister", [], 0)
     opcion = next(o for o in v["pendiente"]["opciones"] if o["opcion"] == "vespertino")
     nombres = {a["valor"]: a["nombre"] for i in opcion["elecciones_internas"] for a in i["alternativas"]}
-    assert nombres["23"] == "UAI · arancel $8,5 M al año · selectiva"
+    assert nombres["23"] == "UAI · arancel $8,5 millones al año · selectiva"
