@@ -72,7 +72,7 @@ def test_auto_muestra_lo_que_entrega_el_motor(capsys):
         assert o["nombre"] in primera
         for q in ("p10", "p50", "p90"):
             assert _plata(o["sueldo"][q]) in primera
-        assert o["cargo_mas_probable"] in primera
+        assert "Terminan en un cargo más alto" in primera
     assert f"a {N} copias tuyas" in primera
     assert "Calidad de estos números: mixto" in primera
     base = next(o for o in comp["opciones"] if o["es_base"])

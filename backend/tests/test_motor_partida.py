@@ -121,7 +121,7 @@ CLAVES_VISTA = {"terminada", "anio", "anios", "edad_final", "semilla", "duda", "
 CLAVES_ESTADO = {"edad", "estado", "sueldo", "sueldo_ref", "nivel", "cargo", "tipo_empleador", "rubro", "edu",
                  "ocupacion", "antiguedad", "ahorro", "percentil", "exposicion_ia"}
 CLAVES_OPCION_COMPARADA = {"opcion", "nombre", "detalle", "calidad", "es_base", "sueldo", "ingreso_total",
-                           "paso_por_cesantia", "meses_sin_trabajo", "sin_trabajo_al_final", "cargo_mas_probable",
+                           "paso_por_cesantia", "meses_sin_trabajo", "sin_trabajo_al_final", "cargo_mas_probable", "sube_de_cargo",
                            "cargos", "gana_mas_que_base", "igual_que_base", "gana_menos_que_base",
                            "diferencia_tipica", "parametros", "por_resultado", "trayectoria"}
 
@@ -254,6 +254,7 @@ def test_comparar_forma_y_coherencia_interna():
         assert sum(r["prob"] for r in o["por_resultado"]) == pytest.approx(1)
         assert sum(x["prob"] for x in o["cargos"]) == pytest.approx(1)
         assert o["cargo_mas_probable"] == max(o["cargos"], key=lambda x: x["prob"])["cargo"]
+        assert 0 <= o["sube_de_cargo"] <= 1
         assert len(o["trayectoria"]) == anios
         assert [t["edad"] for t in o["trayectoria"]] == [36 + i for i in range(anios)]
         assert all(set(t) == {"edad", "p10", "p50", "p90", "sin_trabajo"} for t in o["trayectoria"])

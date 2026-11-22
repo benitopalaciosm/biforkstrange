@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, conSigno, plata, primeraFrase, sinSueldo, situacion } from "../textos";
+import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, plata, primeraFrase, sinSueldo, situacion } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
@@ -111,12 +111,6 @@ function ComoLeer({ o, total, edadFinal, respaldo }: { o: OpcionComparada; base:
 
 type Narrar = (que: "pendiente" | "historia" | "mundo", signal: AbortSignal, mundo?: number) => Promise<{ items: Narrado[] }>;
 
-/** "+8%" o "−20%" respecto del promedio de su tipo y rubro; "promedio" si casi no se mueve. */
-function relativo(x: number): string {
-  const d = Math.round((x - 1) * 100);
-  return Math.abs(d) < 3 ? "promedio" : `${d > 0 ? "+" : "−"}${Math.abs(d)}%`;
-}
-
 function nivelIA(x: number): string {
   return x >= 0.35 ? "alta" : x >= 0.2 ? "media" : "baja";
 }
@@ -125,18 +119,15 @@ export function ofertaTexto(e: EmpresaOferta): string {
   return e.cargo ? `Te ofrecen ser ${e.cargo} en ${e.nombre}.` : `Te ofrecen entrar a ${e.nombre}.`;
 }
 
-/** La empresa real y el cargo que trae la opción, con sus cifras. Las cifras son sintéticas: salen de su rubro y tamaño. */
+/**
+ * La empresa real y el cargo que trae la opción. Sus cifras de sueldo, despidos, ascensos y cierre son sintéticas
+ * (salen de su rubro y tamaño), así que no se muestran como si fueran de la empresa: solo la exposición a IA, que
+ * es la de la ocupación del cargo.
+ */
 function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: string }) {
   const c = empresa.cifras;
-  // solo lo que se aparta de lo normal en su rubro: "Sueldo promedio" no le dice nada a nadie
-  const cifras = [
-    relativo(c.sueldo) !== "promedio" && `Sueldo ${relativo(c.sueldo)} que su rubro`,
-    relativo(c.despido) !== "promedio" && `Despidos ${relativo(c.despido)}`,
-    relativo(c.ascenso) !== "promedio" && `Ascensos ${relativo(c.ascenso)}`,
-    empresa.tipo === "startup" && relativo(c.cierre) !== "promedio" && `Riesgo de cierre ${relativo(c.cierre)}`,
-    nivelIA(c.exposicion_ia) !== "baja" && `Exposición a IA ${nivelIA(c.exposicion_ia)}`,
-    c.horas > 45 && `${c.horas} h a la semana`,
-  ].filter((x): x is string => !!x);
+  const cifras = [nivelIA(c.exposicion_ia) !== "baja" && `Exposición a IA del cargo ${nivelIA(c.exposicion_ia)}`]
+    .filter((x): x is string => !!x);
   return (
     <span className="jg-empresa">
       <span className="jg-empresa-cabeza">
@@ -156,6 +147,7 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
           ))}
         </span>
       )}
+      <span className="jg-chico">{EMPRESA_EJEMPLO}</span>
     </span>
   );
 }
@@ -209,6 +201,7 @@ function OpcionConGemelos({
   const de = total || 100;
   const veredicto = !o.es_base ? contraBase(o, base)?.frase : null;
   const cesantia = Math.round(o.paso_por_cesantia * 100);
+  const sube = Math.round((o.sube_de_cargo ?? 0) * 100);
   return (
     <DecisionCard
       art={<DecisionArt kind={arteOpcion(decision, o.opcion, categoria)} />}
@@ -240,7 +233,7 @@ function OpcionConGemelos({
               <b>{plata(o.sueldo.p90)}</b>
             </span>
             <span role="listitem" data-fuerte="true">
-              <span>Lo típico a los {edadFinal}</span>
+              <span>Lo típico a los {edadFinal}, en pesos de hoy</span>
               <b>{plata(o.sueldo.p50)}</b>
             </span>
             <span role="listitem">
@@ -248,8 +241,12 @@ function OpcionConGemelos({
               <b>{plata(o.sueldo.p10)}</b>
             </span>
             <span role="listitem">
-              <span>Pasas por la cesantía</span>
+              <span>Cierras algún año buscando trabajo</span>
               <b>{cesantia === 0 ? "en ningún mundo" : `en ${cesantia} de 100`}</b>
+            </span>
+            <span role="listitem">
+              <span>Terminas en un cargo más alto</span>
+              <b>{sube === 0 ? "en ningún mundo" : `en ${sube} de 100`}</b>
             </span>
           </span>
           {veredicto && <span className="jg-frase">{veredicto}</span>}

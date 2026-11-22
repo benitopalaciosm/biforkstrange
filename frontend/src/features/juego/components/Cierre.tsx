@@ -112,7 +112,7 @@ export function CierrePantalla({
 
       <SunCard>
         <Meta>{sinSueldo(e) ? "Tu último sueldo" : "Tu sueldo final"}</Meta>
-        <BigNumber value={plata(cierre.sueldo_final)} unit="al mes" animate />
+        <BigNumber value={plata(cierre.sueldo_final)} unit="al mes, en pesos de hoy" animate />
         <Text>{sinSueldo(e) ? situacion(e.estado) : e.cargo}</Text>
         <Text size="sm">
           {cierre.anios_sin_trabajo > 0

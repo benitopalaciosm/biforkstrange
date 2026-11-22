@@ -75,7 +75,7 @@ def test_el_catalogo_trae_todas_las_clases_de_expresion():
     por_clase = {c: sum(1 for x in exprs if x[0] == c) for c in {x[0] for x in exprs}}
     assert set(por_clase) == {"cuando", "peso", "requisito", "prob", "valor", "efecto_cuando", "prob_anual", "filtro"}
     assert len({x[2] for x in exprs if isinstance(x[2], str)}) >= 200
-    assert por_clase["cuando"] == 43 + 17 and por_clase["prob_anual"] == 17 and por_clase["peso"] == 43
+    assert por_clase["cuando"] == 44 + 17 and por_clase["prob_anual"] == 17 and por_clase["peso"] == 44
 
 
 def test_paridad_con_el_evaluador_de_referencia():

@@ -219,6 +219,8 @@ export type OpcionComparada = ContraBase & {
   meses_sin_trabajo: number;
   sin_trabajo_al_final: number;
   cargo_mas_probable: string;
+  /** Fracción de mundos que terminan en un cargo más alto que el de hoy. */
+  sube_de_cargo: number;
   cargos: { cargo: string; prob: number }[];
   /** Lo que se supuso dentro de la opción (rubro, región…). */
   parametros?: Record<string, string | number>;

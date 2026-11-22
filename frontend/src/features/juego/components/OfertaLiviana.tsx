@@ -1,5 +1,5 @@
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
-import { TIPO_EMPLEADOR, plata } from "../textos";
+import { EMPRESA_EJEMPLO, TIPO_EMPLEADOR, plata } from "../textos";
 import type { Eleccion, Vista } from "../types";
 import { ErrorCaja, Hoy, Salir } from "./piezas";
 import { Logo } from "./Logo";
@@ -48,6 +48,7 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSal
             {[tipo, empresa.rubro].filter(Boolean).join(" · ")}
           </Text>
         )}
+        {empresa && <Text size="sm">{EMPRESA_EJEMPLO}</Text>}
         {ofrecido !== null && cambio !== null && (
           <Text>
             Te ofrecen <strong>{plata(ofrecido)} al mes</strong>{" "}

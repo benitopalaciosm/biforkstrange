@@ -121,6 +121,7 @@ const ARTE_DUDA: Record<string, DecisionArtKind> = {
   bootcamp: "laptop",
   remoto_para_afuera: "laptop",
   buscar_estando_empleado: "lupa",
+  volver_a_contrato: "lupa",
   cesantia: "lupa",
   invertir_en_red: "negociar",
   pedir_hibrido: "casa",
@@ -268,3 +269,6 @@ export function aniosDe(edad: number, edadFin: number | undefined, edadInicial: 
   const hasta = edadFin === undefined ? desde : Math.max(desde, edadFin - edadInicial);
   return hasta > desde ? `Años ${desde} a ${hasta}` : `Año ${desde}`;
 }
+
+/** Lo que se dice de una empresa real que aparece como ejemplo (docs/DECISIONES.md, 11). */
+export const EMPRESA_EJEMPLO = "Empresa real como ejemplo. Sus cifras y lo que le pasa en tu partida son simulados.";

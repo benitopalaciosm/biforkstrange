@@ -23,9 +23,9 @@ const queTanProbable = (prob: number) => (prob >= 0.995 ? "Seguro" : deCien(prob
 function porQueBajo(antes: Estado, ahora: Estado, despido: boolean): string {
   const otroEmpleador = (antes.empresa_id ?? -1) !== (ahora.empresa_id ?? -1) || antes.tipo_empleador !== ahora.tipo_empleador;
   if (despido && otroEmpleador)
-    return "No es el mismo trabajo: perdiste el anterior y encontraste otro el mismo año. Quien encuentra trabajo después de un despido entra ganando, típicamente, entre 85% y 102% de lo que ganaba (Couch y Placzek 2010). Y cada empleador paga distinto: una pyme, por ejemplo, paga menos que una empresa grande.";
+    return "No es el mismo trabajo: perdiste el anterior y encontraste otro el mismo año. Quien vuelve a trabajar después de un despido suele entrar ganando menos que antes (Couch y Placzek 2010).";
   if (otroEmpleador)
-    return "Cambiaste de empleador, y cada uno paga distinto según su tipo, su rubro y el cargo. En el mismo trabajo, en cambio, el sueldo no baja.";
+    return "Cambiaste de empleador, y no todos los cambios mejoran el sueldo: en Chile, casi la mitad no lo mejora (Banco Central). En el mismo trabajo, en cambio, el sueldo no baja.";
   return "En el mismo trabajo el alza anual nunca es negativa. Si bajó, es por algo que elegiste o te pasó este año, como menos horas o un cambio de cargo.";
 }
 
@@ -181,7 +181,9 @@ export function QuePaso({
               <Noticia
                 key={`d${j}`}
                 titulo={d.nombre}
-                texto={narrados[`anio:${a.anio}:decision:${a.decisiones.indexOf(d)}`] ?? (d.narrativa ? `${d.narrativa.situacion} ${d.texto}` : d.texto)}
+                texto={narrados[`anio:${a.anio}:decision:${a.decisiones.indexOf(d)}`] ??
+                  // la historia nombra a la empresa real: un resultado malo (la startup cierra) va sin ella
+                  (d.narrativa && d.tono !== "malo" ? `${d.narrativa.situacion} ${d.texto}` : d.texto)}
                 lado={queTanProbable(d.prob)}
               />
             ))}

@@ -96,7 +96,7 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
     opciones = vida.opciones(decision_id)
     parametros = parametros or {}
     anio0, buscando0, ingreso0 = len(vida.historia), vida.anios_buscando, vida.ingreso_total
-    edad0 = vida.e["edad"]
+    edad0, nivel0 = vida.e["edad"], vida.e["nivel"]
     usados = {o.id: _parametros(vida, o, parametros) for o in opciones}
     finales: dict[str, list[Vida]] = {
         o.id: [_vivir(vida.clonar(Dados(semilla, g)), decision_id, o.id, usados[o.id], anios) for g in range(n)]
@@ -150,6 +150,8 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
             "meses_sin_trabajo": 12 * sum(v.anios_buscando - buscando0 for v in vidas) / n,
             "sin_trabajo_al_final": sum(1 for v in vidas if v.e["estado"] == "buscando") / n,
             "cargo_mas_probable": NIVELES[niveles.most_common(1)[0][0]],
+            # la moda engaña: con 35 de 100 en junior y el resto repartido arriba, "lo más probable" es junior
+            "sube_de_cargo": sum(c for k, c in niveles.items() if k > nivel0) / n,
             "cargos": [{"cargo": NIVELES[k], "prob": c / n} for k, c in sorted(niveles.items())],
             **_contra_base([] if es_base else list(zip(sueldos, sueldos_base))),
             "por_resultado": por_resultado,

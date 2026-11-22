@@ -221,8 +221,10 @@ def test_luego_evento_a_decision_en_el_mismo_anio():
     guion = Guion({"pedir_aumento": "esperar", "oferta_externa": "cambiar", "tipo_de_empleador": "no se pregunta"},
                   con_cartas=True)
     reg = v.vivir_anio(guion, carta="pedir_aumento")
+    # el sorteo interno del tipo de empleador corre, pero no queda como noticia: la oferta ya dijo a qué empresa entras
     assert [(x["decision"], x["origen"]) for x in reg["decisiones"]] == [
-        ("pedir_aumento", "carta"), ("oferta_externa", "luego"), ("tipo_de_empleador", "luego")]
+        ("pedir_aumento", "carta"), ("oferta_externa", "luego")]
+    assert v.e["empresa_id"] == reg["decisiones"][1]["contexto"]["oferta"]["empresa_id"]
     assert "tipo_de_empleador" not in guion.vistas  # la interna no pasa por quien decide
     assert v.e["antiguedad"] == 1  # cambió de empleador este año
 
