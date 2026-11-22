@@ -107,6 +107,8 @@ class PerfilLeido(BaseModel):
     empresa_propia_anos: int | None = Field(None, description="Si es fundador: años que tiene su empresa.")
     levanto_inversion: bool | None = Field(None, description="Si es fundador: true si su empresa levantó inversión externa.")
     empresa_actual: str | None = Field(None, description="Su empleador de hoy: el nombre legal en Chile si lo conoces.")
+    cargo_actual: str | None = Field(
+        None, description="El nombre de su cargo de hoy, como lo escribe el texto (\"Analista de riesgo\"), sin la empresa.")
     anio_egreso_esperado: int | None = Field(
         None, description="Si hoy estudia: el año en que espera titularse, solo si el texto lo dice (\"egreso esperado 2028\").")
     anio_que_cursa: int | None = Field(
@@ -148,6 +150,9 @@ Cómo llenar cada campo:
 saber, déjalo en null. El simulador pone un valor por defecto y se lo muestra a la persona como \
 supuesto; un valor inventado por ti se vería como un dato suyo y ella no sabría que revisarlo.
 - Los campos describen su situación ACTUAL: el trabajo que tiene hoy, no los anteriores.
+- No inventes trabajos. Un trabajo anterior existe solo si el texto lo nombra; si el texto trae un \
+solo trabajo, es su único trabajo conocido. Lo mismo en por_que y en retrato: no menciones pegas, \
+empresas ni cargos que el texto no trae.
 - edad: si no la dice pero hay año de nacimiento o de egreso del colegio, calcúlala con la fecha \
 de hoy que viene en el mensaje. No la deduzcas de los años de experiencia.
 - edu: el nivel más alto terminado. Un magíster o doctorado terminado es "postgrado"; una carrera \
@@ -203,6 +208,8 @@ lista un solo cargo por empresa, 0; si no trae experiencia, null.
 no prosperó"). Vendidos o adquiridos no cuentan. Si tuvo empresas y no dice cómo terminaron, null.
 - universidad_id: copia el universidad_id del CATÁLOGO DE INSTITUCIONES donde estudió su pregrado \
 (universidad, instituto o CFT, en Chile o afuera). Solo si el texto la nombra; si no, null.
+- cargo_actual: el nombre de su cargo de hoy tal como aparece ("Analista de riesgo", "Product Manager"), \
+sin la empresa ni las fechas. Es distinto de nivel: nivel es la escala; cargo_actual, el nombre.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -370,7 +377,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     base = PerfilIn().model_dump()
     rubros = [r for r in pq.variables["rubro"]["dominio"] if r]
     perfil, supuestos = dict(base), []
-    extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
+    extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "cargo_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
               "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
               "ascensos_internos", "empresas_cerradas", *HISTORIA_LEIDA}
@@ -440,6 +447,9 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     inferido += _toda_su_carrera(leido, perfil, pq)
     inferido += _ritmo_de_ascensos(leido, perfil, pq)
     inferido += _empresas_cerradas(leido, perfil)
+    # los nombres de su empleo de hoy: solo para contar la historia con su empresa y su cargo reales
+    perfil["empresa_nombre"] = (leido.empresa_actual or "").strip()[:120]
+    perfil["cargo_nombre"] = (leido.cargo_actual or "").strip()[:120]
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):

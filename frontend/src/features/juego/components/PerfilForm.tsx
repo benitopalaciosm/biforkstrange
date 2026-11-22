@@ -37,6 +37,41 @@ function Revisa({ si }: { si: boolean }) {
 }
 
 /** El atajo: subes tu CV o el PDF de tu LinkedIn y Claude llena el formulario. */
+/** Tu empresa y tu cargo de hoy, con su nombre. Opcionales: solo sirven para contar tu historia, no mueven números. */
+export function TuPega({ p, set }: { p: Perfil; set: (k: "empresa_nombre" | "cargo_nombre", v: string) => void }) {
+  const idEmpresa = useId();
+  const idCargo = useId();
+  return (
+    <Stack gap={8}>
+      <label htmlFor={idEmpresa} className="jg-etiqueta">
+        Tu empresa
+      </label>
+      <input
+        id={idEmpresa}
+        className="jg-campo"
+        autoComplete="organization"
+        maxLength={120}
+        placeholder="Ej. BancoEstado"
+        value={p.empresa_nombre ?? ""}
+        onChange={(e) => set("empresa_nombre", e.target.value)}
+      />
+      <label htmlFor={idCargo} className="jg-etiqueta">
+        Cómo se llama tu cargo
+      </label>
+      <input
+        id={idCargo}
+        className="jg-campo"
+        autoComplete="organization-title"
+        maxLength={120}
+        placeholder="Ej. Analista de riesgo"
+        value={p.cargo_nombre ?? ""}
+        onChange={(e) => set("cargo_nombre", e.target.value)}
+      />
+      <Text size="sm">Opcional. Solo sirve para contar tu historia con nombres reales: no cambia tus números.</Text>
+    </Stack>
+  );
+}
+
 function SubirCv({ estado, empresa, onPdf }: { estado: EstadoLectura; empresa: PerfilLeido["empresa"]; onPdf: (pdfBase64: string) => void }) {
   const entrada = useRef<HTMLInputElement>(null);
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
@@ -408,6 +443,10 @@ export function PerfilForm({
             )}
           </Stack>
 
+          <Stack as="section">
+            <TuPega p={p} set={set} />
+          </Stack>
+
           <Stack as="section" className={marca("tipo_empleador")}>
             <span className="jg-etiqueta">Tipo de empresa</span>
             <Revisa si={marcados.has("tipo_empleador")} />
@@ -421,7 +460,7 @@ export function PerfilForm({
           </Stack>
 
           <Stack as="section" className={marca("nivel")}>
-            <span className="jg-etiqueta">Cargo</span>
+            <span className="jg-etiqueta">Nivel de tu cargo</span>
             <Revisa si={marcados.has("nivel")} />
             <Row>
               {catalogo.niveles.map((n) => (
