@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getDudas, getMundo, getNarracion, getVista } from "../api";
+import { getDudas, getMundo, getNarracion, getVista, textoError } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
 import { borradorInicial, useBorrador, type Borrador, type Fuente } from "./useBorrador";
 
@@ -55,7 +55,7 @@ function guardar(g: Guardado) {
   }
 }
 
-const mensaje = (e: unknown) => (e instanceof Error ? e.message : String(e));
+const mensaje = textoError;
 
 /**
  * La partida de la persona. El servidor no guarda nada: aquí vive (perfil, semilla, duda, elecciones)
@@ -93,9 +93,13 @@ export function usePartida() {
 
   useEffect(() => guardar({ perfil, partida, borrador, fuentes, retrato }), [perfil, partida, borrador, fuentes, retrato]);
 
+  /** Lo último que falló, para el botón "Reintentar": se repite eso mismo, no otra cosa. */
+  const reintento = useRef<(() => void) | null>(null);
+
   /** Pide la vista de `p`; si llega (y nadie pidió otra cosa entremedio) corre `listo`. */
-  const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0) => {
+  const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0): Promise<void> => {
     const mio = ++turno.current;
+    reintento.current = null;
     setError(null);
     const inicio = Date.now();
     try {
@@ -105,7 +109,14 @@ export function usePartida() {
       if (falta > 0) await new Promise((r) => setTimeout(r, falta));
       if (mio === turno.current) listo(v);
     } catch (e) {
-      if (mio === turno.current) setError(mensaje(e));
+      if (mio === turno.current) {
+        setError(mensaje(e));
+        reintento.current = () => {
+          if (parametros) setRecalculando(true);
+          else setCargando(true);
+          void pedir(p, listo, parametros, minimo);
+        };
+      }
     } finally {
       if (mio === turno.current) {
         setCargando(false);
@@ -151,6 +162,10 @@ export function usePartida() {
       if (mio === turno.current) setCargando(false);
     }
   }, [fijarPerfil]);
+
+  /** Si las dudas no llegaron (el backend no respondía), se vuelven a pedir con el mismo perfil. */
+  const reintentar = useCallback(() => reintento.current?.(), []);
+  const reintentarDudas = useCallback(() => verDudas(perfil, dudasSugeridas), [verDudas, perfil, dudasSugeridas]);
 
   /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
   const empezarAlAzar = useCallback(
@@ -279,7 +294,7 @@ export function usePartida() {
   }, [onboarding.reiniciar]);
 
   return {
-    fuentes, retrato, empezarDeCero,
+    fuentes, retrato, empezarDeCero, reintentarDudas, reintentar,
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };

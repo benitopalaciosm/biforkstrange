@@ -40,7 +40,7 @@ export function Inicio({
         <Tag>3 · Eliges y vives el mundo {GEMELOS + 1}</Tag>
       </Row>
       <ScreenFooter>
-        {error && <ErrorCaja error={error} />}
+        {error && <ErrorCaja error={error} onReintentar={hayPartida ? onContinuar : undefined} />}
         {cargando && <Cargando>Retomando tu partida…</Cargando>}
         {hayPartida && (
           <Button onClick={onContinuar} disabled={cargando}>

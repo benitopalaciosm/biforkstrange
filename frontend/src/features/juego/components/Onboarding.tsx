@@ -3,11 +3,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import {
   Button, ChevronLeftIcon, Chip, Heading, IconButton, Meta, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Tag, Text,
 } from "@/shared/ui";
-import { getPrompt } from "../api";
+import { getPrompt, textoError } from "../api";
 import { MANUAL, type Onboarding as OnboardingEstado } from "../hooks/useBorrador";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, Sexo } from "../types";
-import { ErrorCaja } from "./piezas";
+import { Cargando, ErrorCaja } from "./piezas";
 import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, banda } from "./PerfilForm";
 
 /** Las elecciones de cada tarjeta: parten vacías y hay que tocarlas para seguir. */
@@ -29,6 +29,8 @@ export function Onboarding({
   o,
   catalogo,
   errorCatalogo,
+  onReintentarCatalogo,
+  onReintentar,
   onVolver,
   onListo,
   onElegirDuda,
@@ -38,6 +40,8 @@ export function Onboarding({
   o: OnboardingEstado;
   catalogo: Catalogo | null;
   errorCatalogo: string | null;
+  onReintentarCatalogo?: () => void;
+  onReintentar?: () => void;
   onVolver: () => void;
   onListo: (p: Perfil) => void;
   onElegirDuda: (p: Perfil, sugeridas: DudaSugerida[]) => void;
@@ -73,6 +77,8 @@ export function Onboarding({
         inicial={p}
         catalogo={catalogo}
         errorCatalogo={errorCatalogo}
+        onReintentarCatalogo={onReintentarCatalogo}
+        onReintentar={onReintentar}
         onVolver={(perfil) => {
           o.aplicarFormulario(perfil);
           o.verCompleto(false);
@@ -140,7 +146,8 @@ export function Onboarding({
         <Ficha p={p} sabidos={sabidos} catalogo={catalogo} retrato={extra?.retrato ?? leido?.retrato ?? null} intereses={extra?.intereses} proyecto={extra?.proyecto} />
       )}
 
-      {errorCatalogo && <ErrorCaja error={errorCatalogo} />}
+      {errorCatalogo && <ErrorCaja error={errorCatalogo} onReintentar={onReintentarCatalogo} />}
+      {!catalogo && !errorCatalogo && i >= 0 && <Cargando>Cargando las alternativas…</Cargando>}
 
       {paso === "entrada" && (
         <Entrada
@@ -281,7 +288,7 @@ export function Onboarding({
 
       {i >= 0 && (
         <ScreenFooter>
-          {error && <ErrorCaja error={error} />}
+          {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
           <Button onClick={siguiente} disabled={!catalogo || cargando || faltaElegir}>
             {ultimo ? (sugeridas.length ? "Ver mis dudas" : "Elegir mi duda") : "Siguiente"}
           </Button>
@@ -527,18 +534,20 @@ function Tarjeta({ titulo, children }: { titulo: string; children: React.ReactNo
  */
 function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string | null; onTexto: (texto: string) => void }) {
   const [prompt, setPrompt] = useState<string | null>(null);
+  const [errorPrompt, setErrorPrompt] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
   const [texto, setTexto] = useState("");
   const [copiado, setCopiado] = useState(false);
   useEffect(() => {
-    if (prompt) return;
     let vivo = true;
+    setErrorPrompt(null);
     getPrompt()
       .then((r) => vivo && setPrompt(r.prompt))
-      .catch(() => vivo && setPrompt(null));
+      .catch((e: unknown) => vivo && setErrorPrompt(textoError(e)));
     return () => {
       vivo = false;
     };
-  }, [prompt]);
+  }, [intento]);
 
   const abrir = async (url: string) => {
     if (!prompt) return;
@@ -565,6 +574,10 @@ function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string
           Abrir ChatGPT
         </Button>
       </Row>
+      {!prompt && !errorPrompt && <span className="ob-chico" role="status">Trayendo el prompt del simulador…</span>}
+      {errorPrompt && (
+        <ErrorCaja error={`Sin el prompt no hay qué abrir en Claude ni en ChatGPT. ${errorPrompt}`} onReintentar={() => setIntento((n) => n + 1)} />
+      )}
       {copiado && <span className="ob-chico">También quedó copiado, por si no aparece escrito.</span>}
       <label className="ob-chico" htmlFor="ob-claude-texto">
         <strong>2.</strong> Pega aquí lo que te respondió

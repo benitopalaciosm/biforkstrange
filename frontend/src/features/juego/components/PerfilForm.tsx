@@ -110,6 +110,8 @@ export function PerfilForm({
   inicial,
   catalogo,
   errorCatalogo,
+  onReintentarCatalogo,
+  onReintentar,
   onVolver,
   onLeido,
   onListo,
@@ -120,6 +122,9 @@ export function PerfilForm({
   inicial: Perfil;
   catalogo: Catalogo | null;
   errorCatalogo: string | null;
+  onReintentarCatalogo?: () => void;
+  /** Repite lo que falló al empezar la partida. */
+  onReintentar?: () => void;
   /** Vuelve atrás con lo editado: no se pierde. */
   onVolver: (p: Perfil) => void;
   /** Lo que leyó Claude aquí (tu CV o lo de tu Claude): para el retrato y las dudas sugeridas. */
@@ -225,7 +230,7 @@ export function PerfilForm({
         <Text>Con esto armamos a tus gemelos. Toma un minuto.</Text>
       </Stack>
 
-      {errorCatalogo && <ErrorCaja error={errorCatalogo} />}
+      {errorCatalogo && <ErrorCaja error={errorCatalogo} onReintentar={onReintentarCatalogo} />}
       {!catalogo && !errorCatalogo && <Cargando>Cargando alternativas…</Cargando>}
 
       {retrato && (
@@ -487,7 +492,7 @@ export function PerfilForm({
       )}
 
       <ScreenFooter>
-        {error && <ErrorCaja error={error} />}
+        {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
         {cargando && <Cargando>Simulando tus mundos y sorteando tu primera carta…</Cargando>}
         <Button onClick={() => onElegirDuda(p, sugeridas)} disabled={!catalogo || !sueldoValido || cargando}>
           {sugeridas.length ? "Ver las dudas que te sugerimos" : "Elegir mi duda"}

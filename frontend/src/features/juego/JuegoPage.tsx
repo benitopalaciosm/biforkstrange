@@ -22,7 +22,7 @@ export function JuegoPage() {
 
 function Juego() {
   const j = usePartida();
-  const { catalogo, error: errorCatalogo } = useCatalogo();
+  const { catalogo, error: errorCatalogo, reintentar: reintentarCatalogo } = useCatalogo();
   /** El tutorial: "antes" de armar el perfil, o "ayuda" cuando se reabre a mitad de la partida. */
   const [tutorial, setTutorial] = useState<"antes" | "ayuda" | null>(null);
   const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
@@ -48,11 +48,11 @@ function Juego() {
     );
   }
   if (j.fase === "perfil") {
-    return <Onboarding o={j.onboarding} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
+    return <Onboarding o={j.onboarding} catalogo={catalogo} errorCatalogo={errorCatalogo} onReintentarCatalogo={reintentarCatalogo} onReintentar={j.reintentar} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker fuentes={j.fuentes} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
+      <DudaPicker fuentes={j.fuentes} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
@@ -66,6 +66,7 @@ function Juego() {
         recalculando={j.recalculando}
         error={j.error}
         onElegir={j.elegir}
+        onReintentar={j.reintentar}
         onComparar={j.compararCon}
         onAyuda={() => setTutorial("ayuda")}
         onVerMundo={j.verMundo}

@@ -46,6 +46,8 @@ export function DudaPicker({
   error,
   onVolver,
   onElegir,
+  onReintentarDudas,
+  onReintentar,
 }: {
   /** De dónde salió cada dato del perfil: lo que falta es supuesto. */
   fuentes?: Record<string, string> | null;
@@ -58,6 +60,10 @@ export function DudaPicker({
   error: string | null;
   onVolver: () => void;
   onElegir: (decision: string) => void;
+  /** Si la lista de dudas no llegó, se vuelve a pedir. */
+  onReintentarDudas?: () => void;
+  /** Si lo que falló fue simular la primera carta, se repite eso. */
+  onReintentar?: () => void;
 }) {
   const porQue = new Map(sugeridas.map((s) => [s.decision, s.por_que]));
   const rango = (id: string) => {
@@ -123,7 +129,7 @@ export function DudaPicker({
         </Button>
       )}
       <div className="jg-pie-fijo">
-        {error && <ErrorCaja error={error} />}
+        {error && <ErrorCaja error={error} onReintentar={dudas ? onReintentar : onReintentarDudas} />}
         {simulando && (
           <>
             <div className="jg-viviendo" aria-hidden="true">
