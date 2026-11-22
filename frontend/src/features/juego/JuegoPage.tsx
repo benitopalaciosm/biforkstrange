@@ -2,6 +2,7 @@ import "./juego.css";
 import { useEffect, useRef, useState } from "react";
 import { Button, Heading, Screen, ScreenFooter, Stack, Text } from "@/shared/ui";
 import { AnioTranquilo } from "./components/AnioTranquilo";
+import { OfertaLiviana } from "./components/OfertaLiviana";
 import { Carta } from "./components/Carta";
 import { CierrePantalla } from "./components/Cierre";
 import { ComoFunciona } from "./components/ComoFunciona";
@@ -64,6 +65,9 @@ function Fase({
   reintentarCatalogo: () => void;
 }) {
   const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
+  // una oferta que te llegó se muestra en corto; "Mirarla" abre la carta completa solo para esa oferta
+  const llaveCarta = `${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  const [mirada, setMirada] = useState<string | null>(null);
 
   if (tutorial === "antes") {
     return (
@@ -86,6 +90,9 @@ function Fase({
   }
   if (j.fase === "carta" && j.vista?.pendiente?.decision === "anio_tranquilo") {
     return <AnioTranquilo vista={j.vista} cargando={j.cargando} error={j.error} onElegir={j.elegir} />;
+  }
+  if (j.fase === "carta" && j.vista?.pendiente?.decision === "oferta_externa" && j.vista.pendiente.por_que?.tipo === "llega" && mirada !== llaveCarta) {
+    return <OfertaLiviana vista={j.vista} cargando={j.cargando} error={j.error} onMirar={() => setMirada(llaveCarta)} onElegir={j.elegir} />;
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
     return (

@@ -479,3 +479,6 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-juegas { display: flex; flex-direction: column; gap: 2px; padding-top: 10px; border-top: 1px solid var(--linea); }
 .jg-juegas-mejor { color: var(--dinero); }
 .jg-juegas-peor { color: var(--vida); }
+
+/* Oferta en corto: dos botones del mismo peso, para que la pantalla no empuje a quedarse */
+.jg-dos-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
