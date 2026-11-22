@@ -358,3 +358,11 @@ def test_emprender_no_trae_una_oferta_de_empresa():
     v = partida.vista(Perfil(edad=32, rubro="Comercio", tipo_empleador="pyme", nivel=2), 5, "emprender", [], 0)
     assert v["pendiente"]["decision"] == "emprender"
     assert all(o["empresa"] is None for o in v["pendiente"]["opciones"])
+
+
+def test_los_aranceles_de_pregrado_estan_en_pesos():
+    """UAI, UDD y Los Andes publican su arancel en UF ("UF 214"): leído como pesos daba $214 al año."""
+    chilenas = [f for f in UNIVERSIDADES if f["tipo_institucion"] != "EXT" and f["arancel_anual_pregrado"]]
+    assert chilenas
+    assert all(500_000 < float(f["arancel_anual_pregrado"]) < 20_000_000 for f in chilenas), [
+        (f["nombre"], f["arancel_anual_pregrado"]) for f in chilenas if not 500_000 < float(f["arancel_anual_pregrado"]) < 20_000_000]
