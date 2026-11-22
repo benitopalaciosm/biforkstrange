@@ -100,7 +100,7 @@ class PerfilLeido(BaseModel):
     anios_experiencia: int | None = Field(None, description="Años de experiencia laboral desde su primer trabajo formal.")
     empleadores: int | None = Field(None, description="Cuántos empleadores distintos ha tenido, contando el actual.")
     situacion: Literal["empleado", "independiente", "fundador", "buscando", "estudiando"] | None = Field(
-        None, description="Su situación HOY: empleado, independiente (freelance o boletas), fundador de su empresa, buscando pega o estudiando.")
+        None, description="Su situación HOY: empleado, independiente (freelance o boletas), fundador de su empresa, buscando trabajo o estudiando.")
     meses_sin_trabajo: int | None = Field(None, description="Si hoy está buscando: meses desde que terminó su último trabajo.")
     jornada_parcial: bool | None = Field(None, description="true si su trabajo actual es part-time o media jornada.")
     remoto: bool | None = Field(None, description="true si su trabajo actual es remoto o mayormente remoto.")
@@ -214,7 +214,7 @@ sin la empresa ni las fechas. Es distinto de nivel: nivel es la escala; cargo_ac
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
-está haciendo, según su momento (años en la pega, cargo, estudios, idiomas, rubro). Cada una con un \
+está haciendo, según su momento (años en el trabajo, cargo, estudios, idiomas, rubro). Cada una con un \
 por_que corto que cite algo concreto del texto ("Llevas 4 años en BancoEstado y ya eres senior"). Si \
 el texto dice qué duda tiene, esa va primera.
 - retrato: lo que su gemelo sabe de ella, en segunda persona y en máximo 25 palabras, solo con hechos \
@@ -439,7 +439,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
 
         perfil["anos_por_empleo"] = max(0.1, min(40.0, round(leido.anios_experiencia / leido.empleadores, 1)))
         cambiar = pesos_personales({"anos_por_empleo": perfil["anos_por_empleo"]})["oferta_externa"]["cambiar"]
-        inferido.append(f"Te cambias de pega cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
+        inferido.append(f"Te cambias de trabajo cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
                         f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
     inferido += _avance_en_carrera(leido, perfil, pq, hoy)
     inferido += _historia(leido, perfil)
@@ -482,7 +482,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
 HISTORIA_LEIDA = {
     "volvio_a_su_nivel": ("cesantia", "nivel", "Ya pasaste por una cesantía larga y volviste a tu nivel: si quedan "
                           "cesantes, tus gemelos esperan un cargo como el tuyo"),
-    "freelance_entre_pegas": ("cesantia", "informal", "Entre una pega y otra trabajaste por tu cuenta: si quedan "
+    "freelance_entre_pegas": ("cesantia", "informal", "Entre un trabajo y otro trabajaste por tu cuenta: si quedan "
                               "cesantes, tus gemelos hacen boletas"),
     "emprendio_antes": ("cesantia", "emprender", "Ya tuviste una empresa propia: si quedan cesantes, tus gemelos "
                         "emprenden"),
@@ -535,7 +535,7 @@ def _practica(leido: PerfilLeido, perfil: dict) -> list[str]:
     opcion = PRIMERA_PEGA_POR_PRACTICA[leido.practica][0]
     suyo = pesos_personales({"practica": leido.practica})["primera_pega"][opcion]
     donde = "una empresa grande" if leido.practica == "grande" else "el Estado"
-    return [f"Hiciste tu práctica en {donde}: al buscar su primera pega, tus gemelos postulan ahí {round(suyo * 100)}% "
+    return [f"Hiciste tu práctica en {donde}: al buscar su primer trabajo, tus gemelos postulan ahí {round(suyo * 100)}% "
             f"de las veces (la gente, {round(PESOS_FORZADAS['primera_pega'][opcion] * 100)}%; supuesto del equipo)."]
 
 
@@ -548,11 +548,11 @@ def _toda_su_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]
     perfil["toda_su_carrera_en"] = leido.toda_su_carrera_en
     propios = parametros_propios(Perfil(toda_su_carrera_en=leido.toda_su_carrera_en), pq)
     if leido.toda_su_carrera_en == "publico":
-        return [f"Toda tu carrera ha sido en el Estado: cuando tus gemelos cambian de pega, vuelven al Estado "
+        return [f"Toda tu carrera ha sido en el Estado: cuando tus gemelos cambian de trabajo, vuelven al Estado "
                 f"al menos {round(propios['PISO_REEMPLEO_PUBLICO'] * 100)}% de las veces (la gente, "
                 f"{round(pq.k('P_REEMPLEO_PUBLICO') * 100)}%; supuesto del equipo)."]
     privado = 1 - pq.k("P_REEMPLEO_PUBLICO")
-    return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de pega en el sector privado, "
+    return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de trabajo en el sector privado, "
             f"al menos {round(propios['PISO_STARTUP'] / privado * 100)}% de las veces es otra startup (la gente, "
             f"{round(pq.k('MIX_EMPLEADOR', 'startup') * 100)}%; supuesto del equipo)."]
 
@@ -606,7 +606,7 @@ def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str |
     anios_que_faltan = (restantes + 1) // 2
     plazo = "un año más" if anios_que_faltan == 1 else f"{anios_que_faltan} años más"
     if leido.anio_egreso_esperado is not None:
-        return [f"Esperas titularte en {leido.anio_egreso_esperado}: tus gemelos estudian {plazo} antes de buscar su primera pega."]
+        return [f"Esperas titularte en {leido.anio_egreso_esperado}: tus gemelos estudian {plazo} antes de buscar su primer trabajo."]
     if leido.anio_que_cursa is not None:
         return [f"Vas en {leido.anio_que_cursa}° año: según la duración real de tu carrera, tus gemelos estudian {plazo}."]
     return [f"No sabemos cuánto te falta para titularte: suponemos que entraste a los 18 y vas al día, así que "

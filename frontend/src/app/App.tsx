@@ -1,8 +1,19 @@
 import { JuegoPage } from "@/features/juego";
 import { SimulationPage } from "@/features/simulation";
 import { UiKitPage } from "@/features/ui-kit";
+import { ThemeToggle } from "@/shared/ui";
 
 export default function App() {
+  return (
+    <>
+      {/* Modo claro / oscuro, el mismo botón en todas las rutas */}
+      <ThemeToggle />
+      <Ruta />
+    </>
+  );
+}
+
+function Ruta() {
   const ruta = window.location.pathname;
 
   // Catálogo del kit de UI en /ui (sin router por ahora)

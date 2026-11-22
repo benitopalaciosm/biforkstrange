@@ -17,9 +17,9 @@ const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["edu"], pega: ["tipo_emp
 /** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
 const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
 const SITUACION: Record<string, string> = {
-  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando pega", estudiando: "Estudiando",
+  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando trabajo", estudiando: "Estudiando",
 };
-const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
+const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de trabajo…", "Eligiendo tus dudas…"];
 
 /**
  * Onboarding en 3 pantallas: subes tu CV (o el PDF de LinkedIn) o contestas unas pocas preguntas, después solo
@@ -291,7 +291,7 @@ export function Onboarding({
       {catalogo && paso === "plata" && (
         <Tarjeta key="plata" titulo={leido ? "Lo que un CV no dice." : "Lo último."}>
           <Slider
-            label="Te llega al mes (líquido)"
+            label="Sueldo líquido al mes"
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, p.sueldo))}
             min={SLIDER_MIN}
             max={SLIDER_MAX}
@@ -302,7 +302,7 @@ export function Onboarding({
           />
           {ref && (
             <Text size="sm">
-              La mitad de la gente como tú gana menos de <strong>{pesos(ref.p50)}</strong>.
+              Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
             </Text>
           )}
           <Stack gap={8}>
@@ -450,7 +450,7 @@ function Entrada({
           <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
           <span className="ob-fuente-texto">
             <strong>{algo ? "Completar lo que falta" : "Contesto yo unas preguntas"}</strong>
-            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu pega y tu sueldo. Un toque cada una."}</span>
+            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu trabajo y tu sueldo. Un toque cada una."}</span>
           </span>
           <Marca listo={false} accion="Empezar" />
         </button>

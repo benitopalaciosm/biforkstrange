@@ -114,7 +114,7 @@
       {
        "id": "busca",
        "prob": 1,
-       "texto": "Sales a buscar pega.",
+       "texto": "Sales a buscar trabajo.",
        "tono": "neutro",
        "efectos": [
         {
@@ -503,7 +503,7 @@
    "id": "trabajar_mientras_estudias",
    "nombre": "Trabajar mientras estudias",
    "categoria": "estudios",
-   "pregunta": "¿Tomas una pega de media jornada?",
+   "pregunta": "¿Tomas un trabajo de media jornada?",
    "cuando": "estado == 'estudiando'",
    "aparicion": {
     "tipo": "carta",
@@ -843,7 +843,7 @@
     },
     {
      "id": "vespertino",
-     "nombre": "Estudiar de noche sin dejar la pega",
+     "nombre": "Estudiar de noche sin dejar el trabajo",
      "detalle": "Pagas el arancel de la universidad que elijas (SIES 2026) y duermes menos dos años.",
      "resultados": [
       {
@@ -1104,7 +1104,7 @@
       {
        "id": "sin_pega",
        "prob": "resto",
-       "texto": "Terminas, pero no encuentras pega todavía.",
+       "texto": "Terminas, pero no encuentras trabajo todavía.",
        "tono": "malo",
        "efectos": [
         {
@@ -1261,7 +1261,7 @@
   },
   {
    "id": "primera_pega",
-   "nombre": "Tu primera pega",
+   "nombre": "Tu primer trabajo",
    "categoria": "trabajo",
    "pregunta": "¿Dónde postulas a tu primer trabajo estable?",
    "cuando": "y(estado == 'buscando', primer_empleo == 1)",
@@ -2042,9 +2042,9 @@
   },
   {
    "id": "buscar_estando_empleado",
-   "nombre": "Buscar pega sin renunciar",
+   "nombre": "Buscar trabajo sin renunciar",
    "categoria": "trabajo",
-   "pregunta": "¿Sales a buscar otra pega mientras trabajas?",
+   "pregunta": "¿Sales a buscar otro trabajo mientras trabajas?",
    "cuando": "estado == 'empleado'",
    "aparicion": {
     "tipo": "carta",
@@ -2122,7 +2122,7 @@
   },
   {
    "id": "renunciar",
-   "nombre": "Renunciar sin tener otra pega",
+   "nombre": "Renunciar sin tener otro trabajo",
    "categoria": "trabajo",
    "pregunta": "¿Renuncias?",
    "cuando": "estado == 'empleado'",
@@ -2571,7 +2571,7 @@
       {
        "id": "no",
        "prob": 1,
-       "texto": "Sigues en tu pega.",
+       "texto": "Sigues en tu trabajo.",
        "tono": "neutro",
        "efectos": []
       }
@@ -3411,7 +3411,7 @@
    "id": "emprender",
    "nombre": "Emprender",
    "categoria": "emprender",
-   "pregunta": "¿Dejas tu pega para armar tu empresa?",
+   "pregunta": "¿Dejas tu trabajo para armar tu empresa?",
    "cuando": "y(en(estado, 'empleado', 'buscando'), edad >= 20)",
    "aparicion": {
     "tipo": "carta",
@@ -3708,7 +3708,7 @@
       {
        "id": "cierra",
        "prob": 1,
-       "texto": "Cierras y sales a buscar pega.",
+       "texto": "Cierras y sales a buscar trabajo.",
        "tono": "neutro",
        "efectos": [
         {
