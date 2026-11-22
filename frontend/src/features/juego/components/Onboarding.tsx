@@ -269,7 +269,7 @@ export function Onboarding({
           />
           {ref && (
             <Text size="sm">
-              Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
+              Lo típico para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
             </Text>
           )}
           <Slider

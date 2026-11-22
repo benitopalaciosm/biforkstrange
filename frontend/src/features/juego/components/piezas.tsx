@@ -49,7 +49,7 @@ export function RangoSueldo({ rango, tope, color = "var(--dinero)", enPalabras =
       className="vd-pila"
       style={{ gap: 4 }}
       role="img"
-      aria-label={`10%: ${plata(rango.p10)}. Mediana: ${plata(rango.p50)}. 90%: ${plata(rango.p90)}.`}
+      aria-label={`Si te va mal: ${plata(rango.p10)}. Lo típico: ${plata(rango.p50)}. Si te va bien: ${plata(rango.p90)}.`}
     >
       <span className="vd-rango-pista">
         <i style={{ left: `${pos(rango.p10)}%`, width: `${Math.max(pos(rango.p90) - pos(rango.p10), 2)}%`, background: color }} />

@@ -342,7 +342,7 @@ export function PerfilForm({
             {ref && (
               <Row gap={8} style={{ alignItems: "center", flexWrap: "wrap" }}>
                 <Text size="sm">
-                  Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
+                  Lo típico para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
                 </Text>
                 {p.sueldo !== ref.p50 && (
                   <Chip pressed={false} onToggle={() => set("sueldo", ref.p50)}>
