@@ -373,25 +373,39 @@ function TodasAnioAnio({
   const act = series.find((o) => o.opcion === activa) ?? series[0];
   const e0 = hoy.edad;
   const e1 = Math.max(...series.map((o) => o.trayectoria[o.trayectoria.length - 1].edad));
-  const valores = [...series.flatMap((o) => o.trayectoria.map((p) => p.p50)), ...act.trayectoria.flatMap((p) => [p.p10, p.p90]), hoy.sueldo];
+  // la escala sale de las franjas de todas las opciones, no solo de la destacada: así, al tocar otra opción,
+  // las líneas y el punto de hoy no se mueven; solo cambia la franja
+  const valores = [...series.flatMap((o) => o.trayectoria.flatMap((p) => [p.p10, p.p90])), hoy.sueldo];
   const tope = Math.max(...valores, 1) * 1.06;
-  const piso = Math.max(0, Math.min(...valores) * 0.85);
+  // si en algún año 1 de cada 10 mundos queda sin sueldo, el eje parte en cero para que esa caída se lea como $0
+  const tocaCero = Math.min(...valores) <= 0;
+  const piso = tocaCero ? 0 : Math.min(...valores) * 0.8;
   const x = (edad: number) => X0 + ((edad - e0) / Math.max(1, e1 - e0)) * (X1 - X0);
   const y = (n: number) => Y1 - ((Math.max(piso, n) - piso) / Math.max(1, tope - piso)) * (Y1 - Y0);
   const linea = (ps: { edad: number; v: number }[]) => ps.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.edad).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
   const serieAct = conInicio(act);
   const franja = `${linea(serieAct.map((p) => ({ edad: p.edad, v: p.p90 })))} ${[...serieAct].reverse().map((p) => `L${x(p.edad).toFixed(1)},${y(p.p10).toFixed(1)}`).join(" ")} Z`;
-  const orden = [...series].sort((a, b) => Number(a.opcion === act.opcion) - Number(b.opcion === act.opcion));
-  const etiquetas = series
-    .map((o) => {
-      const fin = o.trayectoria[o.trayectoria.length - 1];
-      return { opcion: o.opcion, color: colores[o.opcion], texto: plata(fin.p50), y: y(fin.p50) };
-    })
-    .sort((a, b) => a.y - b.y);
-  for (let i = 1; i < etiquetas.length; i++) if (etiquetas[i].y - etiquetas[i - 1].y < 14) etiquetas[i].y = etiquetas[i - 1].y + 14;
-  const exceso = etiquetas[etiquetas.length - 1].y - (Y1 + 2);
-  if (exceso > 0) for (const e of etiquetas) e.y -= exceso;
+  // el orden de las líneas queda fijo (la del foco encima): si cambiara al destacar otra, el navegador reinicia
+  // la animación y la línea se vuelve a trazar desde cero. La destacada se repite encima, ya trazada.
+  const orden = [...series].sort((a, b) => Number(a.opcion === foco) - Number(b.opcion === foco));
   const finAct = act.trayectoria[act.trayectoria.length - 1];
+  // al final: lo típico de cada opción y, como en el abanico, los dos bordes de la franja destacada
+  const etiquetas: { k: string; texto: string; sub?: string; color?: string; y: number }[] = [
+    ...series.map((o) => {
+      const fin = o.trayectoria[o.trayectoria.length - 1];
+      return { k: o.opcion, color: colores[o.opcion], texto: plata(fin.p50), y: y(fin.p50) };
+    }),
+    { k: "p90", texto: plata(finAct.p90), sub: "90%", y: y(finAct.p90) },
+    { k: "p10", texto: finAct.p10 > 0 ? plata(finAct.p10) : "sin sueldo", sub: "10%", y: y(finAct.p10) },
+  ].sort((a, b) => a.y - b.y);
+  const alto = (e: { sub?: string }) => (e.sub ? 24 : 14);
+  for (let i = 1; i < etiquetas.length; i++) {
+    const min = etiquetas[i - 1].y + alto(etiquetas[i - 1]);
+    if (etiquetas[i].y < min) etiquetas[i].y = min;
+  }
+  const ultima = etiquetas[etiquetas.length - 1];
+  const exceso = ultima.y + alto(ultima) - 14 - (Y1 + 2);
+  if (exceso > 0) for (const e of etiquetas) e.y -= exceso;
   // si lo típico de todas queda cerca y la franja es ancha, eso es lo que hay que decir: pesa más la suerte que la decisión
   const finales = series.map((o) => o.trayectoria[o.trayectoria.length - 1].p50);
   const separacion = (Math.max(...finales) - Math.min(...finales)) / Math.max(1, finAct.p50);
@@ -417,13 +431,24 @@ function TodasAnioAnio({
             d={linea(conInicio(o).map((p) => ({ edad: p.edad, v: p.p50 })))}
           />
         ))}
+        {act.opcion !== foco && (
+          <path
+            className="jg-abanico-medio"
+            style={{ stroke: colores[act.opcion], strokeWidth: 3.5, animation: "none", strokeDashoffset: 0 }}
+            pathLength={1}
+            d={linea(serieAct.map((p) => ({ edad: p.edad, v: p.p50 })))}
+          />
+        )}
         <circle className="jg-abanico-hoy" cx={x(e0)} cy={y(hoy.sueldo)} r={4.5} />
         {etiquetas.map((e) => (
-          <text key={e.opcion} x={X1 + 8} y={e.y + 4} className="jg-abanico-num" style={{ fill: e.color }}>
-            {e.texto}
-          </text>
+          <g key={e.k}>
+            <text x={X1 + 8} y={e.y + 4} className="jg-abanico-num" style={{ fill: e.color ?? "var(--suave)" }}>
+              {e.texto}
+            </text>
+            {e.sub && <text x={X1 + 8} y={e.y + 14} className="jg-abanico-sub">{e.sub}</text>}
+          </g>
         ))}
-        <text x={X0} y={H - 6} className="jg-abanico-sub">hoy · {e0} años</text>
+        <text x={X0} y={H - 6} className="jg-abanico-sub">hoy · {e0} años · {plata(hoy.sueldo)}</text>
         <text x={X1} y={H - 6} textAnchor="end" className="jg-abanico-sub">{e1} años</text>
       </svg>
       <span className="jg-leyenda jg-leyenda-fila" role="group" aria-label="Destacar una opción">
@@ -439,6 +464,7 @@ function TodasAnioAnio({
       )}
       <span className="jg-chico">
         La línea es lo típico de cada opción. La franja: con «{act.nombre}», 8 de cada 10 mundos terminan entre {plata(finAct.p10)} y {plata(finAct.p90)}.
+        {act.trayectoria.some((p) => p.p10 <= 0) && " Donde la franja baja hasta la línea de abajo ($0), más de 1 de cada 10 mundos está sin trabajo ese año."}
       </span>
     </Stack>
   );
