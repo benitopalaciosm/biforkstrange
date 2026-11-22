@@ -52,14 +52,6 @@
    "verificacion": "descargado"
   },
   {
-   "id": "ine_ir",
-   "cita": "INE, Índice Real de Remuneraciones 2016-2026",
-   "url": "https://www.ine.gob.cl/estadisticas/economia/indices-de-precio-e-inflacion/indice-de-remuneraciones-y-costo-de-mano-de-obra",
-   "pais": "Chile",
-   "tipo": "índice",
-   "verificacion": "descargado"
-  },
-  {
    "id": "ine_eme_2025",
    "cita": "INE, Encuesta de Microemprendimiento 2025",
    "url": "https://www.ine.gob.cl/estadisticas/economia/comercio-servicios-y-turismo/microemprendimiento",
@@ -154,14 +146,6 @@
    "pais": "Chile",
    "tipo": "paper",
    "verificacion": "por confirmar"
-  },
-  {
-   "id": "dt_2024",
-   "cita": "Dirección del Trabajo, despidos 2024 (0,69% mensual)",
-   "url": "https://www.dt.gob.cl",
-   "pais": "Chile",
-   "tipo": "registro",
-   "verificacion": "leído en la fuente"
   },
   {
    "id": "ley_21091",

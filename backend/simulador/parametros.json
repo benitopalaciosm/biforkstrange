@@ -52,18 +52,6 @@
    ]
   },
   {
-   "id": "REAJUSTE_REAL",
-   "valor": 0.0173,
-   "unidad": "tasa anual",
-   "descripcion": "Crecimiento real del sueldo de toda la economía. Úsalo solo si el simulador muestra pesos del futuro.",
-   "fuente": "ine_ir",
-   "calidad": "dato",
-   "rango": [
-    0.0037,
-    0.0309
-   ]
-  },
-  {
    "id": "P_DESPIDO",
    "valor": {
     "18-29": 0.0529,
@@ -273,18 +261,6 @@
    "calidad": "dato",
    "rango": [
     0.5,
-    0.75
-   ]
-  },
-  {
-   "id": "PENAL_PAUSA_ELEGIDA",
-   "valor": 0.556,
-   "unidad": "multiplicador",
-   "descripcion": "Llamados tras una pausa para cuidar: 5% contra 9% tras un despido.",
-   "fuente": "weisshaar_2018",
-   "calidad": "mixto",
-   "rango": [
-    0.45,
     0.75
    ]
   },
@@ -543,18 +519,6 @@
    ]
   },
   {
-   "id": "FUNDADOR_MEDIANA",
-   "valor": 0.65,
-   "unidad": "fracción",
-   "descripcion": "Ganancia mediana del emprendedor a 10 años respecto de un empleado comparable.",
-   "fuente": "hamilton_2000",
-   "calidad": "mixto",
-   "rango": [
-    0.55,
-    0.8
-   ]
-  },
-  {
    "id": "SOBREVIVE_1",
    "valor": 0.8,
    "unidad": "probabilidad",
@@ -591,18 +555,6 @@
    ]
   },
   {
-   "id": "VC_FUNDADOR_CERO",
-   "valor": 0.75,
-   "unidad": "proporción",
-   "descripcion": "Fundadores con capital de riesgo que salen con cero.",
-   "fuente": "hall_woodward_2010",
-   "calidad": "mixto",
-   "rango": [
-    0.65,
-    0.8
-   ]
-  },
-  {
    "id": "YC_ADQUIRIDA",
    "valor": 0.242,
    "unidad": "proporción",
@@ -631,18 +583,6 @@
     1.8,
     3.53
    ]
-  },
-  {
-   "id": "PREMIO_CIUDAD_GRANDE",
-   "valor": [
-    0.1,
-    0.35
-   ],
-   "unidad": "fracción",
-   "descripcion": "Alza al llegar a la ciudad grande y a 10 años.",
-   "fuente": "delaroca_puga_2017",
-   "calidad": "mixto",
-   "rango": null
   },
   {
    "id": "MORT_GOMPERTZ",

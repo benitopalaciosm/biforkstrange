@@ -782,7 +782,7 @@ def _parser() -> argparse.ArgumentParser:
     va.set_defaults(func=cmd_validar)
 
     su = sub.add_parser("supuestos", help="cada parámetro del motor con su calidad, fuente y país")
-    su.add_argument("--calidad", choices=["dato", "mixto", "supuesto"], help="muestra solo esa calidad")
+    su.add_argument("--calidad", choices=["dato", "mixto", "sintetico", "supuesto"], help="muestra solo esa calidad")
     su.add_argument("--json", action="store_true", help="imprime la lista cruda en JSON")
     su.set_defaults(func=cmd_supuestos)
     return parser
