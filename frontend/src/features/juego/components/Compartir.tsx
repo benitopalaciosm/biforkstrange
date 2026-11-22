@@ -188,7 +188,7 @@ export function CompartirResultado({
               <span>
                 Mi sueldo en el mundo que viví: {plata(sueldoFinal)} al mes.
                 <br />
-                Juega tu vida y la de tus 100 gemelos en {url.replace(/^https?:\/\//, "")}
+                Juega tu vida y la de tus 100 copias en {url.replace(/^https?:\/\//, "")}
               </span>
               {qr && <img src={qr} alt="" />}
             </div>

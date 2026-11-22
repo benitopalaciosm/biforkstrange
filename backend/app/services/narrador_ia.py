@@ -92,7 +92,9 @@ concretos del contexto. Máximo 220 caracteres.
 - mundo: la historia de un futuro posible de la persona, en un párrafo corto. Máximo 600 caracteres.
 
 La plantilla trae los hechos que decidió el juego: respétalos. Mismo resultado, misma empresa, \
-mismo cargo, mismo desenlace. No agregues sucesos que la plantilla y el contexto no traen.
+mismo cargo, mismo desenlace. No agregues sucesos que la plantilla y el contexto no traen. \
+Cada item es independiente: no lleves hechos de un item a otro (por ejemplo, no menciones una \
+recesión, un despido o un ascenso en un item cuya plantilla no lo trae).
 
 No inventes la historia de la persona. No menciones trabajos, empresas, jefaturas ni cargos \
 anteriores, años de experiencia, estudios ni logros que el contexto y la plantilla no traen: lo que \
@@ -196,6 +198,10 @@ def _motivo_rechazo(item: Item, texto: str) -> str | None:
         return "largo"
     if item.contexto.get("tono") == "malo" and item.contexto.get("empresa") and not tiene_marca_simulacion(texto):
         return "sin_marca"
+    # un hecho de otro item que se coló (la recesión de un año contada en todos los años)
+    for hecho in ("recesi", "despid", "quiebr"):
+        if hecho in texto.lower() and hecho not in item.plantilla.lower():
+            return "hecho_ajeno"
     return None
 
 

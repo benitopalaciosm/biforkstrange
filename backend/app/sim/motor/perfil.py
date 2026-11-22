@@ -263,6 +263,13 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         empresa_inicial=perfil.empresa_nombre.strip() if perfil.estado == "empleado" else "",
         cargo_inicial=perfil.cargo_nombre.strip() if perfil.estado == "empleado" else "",
     )
+    # su línea de trabajo según el cargo que escribió: queda aunque se borre el nombre, para que las ofertas sigan
+    # en lo suyo mientras no tenga un cargo del catálogo (ver empresas.familias_de)
+    from app.sim.motor.empresas import familia_por_nombre
+
+    familia = familia_por_nombre(pq, perfil.cargo_nombre) if perfil.cargo_nombre.strip() else None
+    if familia:
+        e["familia_inicial"] = familia
     # su historia no es del paquete: la lee la política de los gemelos, y solo si el CV la trae
     for rasgo in HISTORIA:
         if getattr(perfil, rasgo):
