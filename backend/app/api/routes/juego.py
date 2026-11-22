@@ -6,9 +6,9 @@ from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.juego import DudasIn, MundoIn, PartidaIn, TextoPerfilIn
+from app.schemas.juego import DudasIn, EnJuegoIn, MundoIn, PartidaIn, PesoCvIn, TextoPerfilIn
 from app.services import perfil_ia
-from app.sim.motor import partida, supuestos, validacion
+from app.sim.motor import partida, peso, supuestos, validacion
 from app.sim.motor.paquete import paquete
 from app.sim.motor.perfil import NIVELES
 
@@ -114,3 +114,29 @@ def perfil_desde_texto(body: TextoPerfilIn):
         raise HTTPException(503, str(error)) from error
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
+
+
+@router.post("/peso-cv")
+def peso_del_cv(body: PesoCvIn):
+    """Lo que vale cada línea de tu CV en tu duda: la misma comparación, con los mismos dados, sin ese dato.
+
+    Devuelve los datos que más mueven el resultado (en cuántos mundos gana cada opción y su sueldo típico,
+    con el dato y sin él). Con la misma semilla y gemelos, "con" coincide con la carta de la duda.
+    """
+    try:
+        return peso.peso_cv(body.perfil.a_perfil(), body.duda, body.semilla, body.gemelos)
+    except (ValueError, KeyError) as error:
+        raise HTTPException(422, str(error)) from error
+
+
+@router.post("/dudas-en-juego")
+def dudas_en_juego(body: EnJuegoIn):
+    """De las dudas que sugiere el CV, cuánto se juega la persona en cada una y cuál es la que más.
+
+    Corre la comparación de cada duda (las que no aplican a este perfil se saltan) y marca en
+    `mas_en_juego` la de mayor rango entre la mala y la buena suerte, sobre el sueldo típico de quedarse.
+    """
+    try:
+        return peso.en_juego(body.perfil.a_perfil(), tuple(body.dudas), body.semilla, body.gemelos)
+    except KeyError as error:
+        raise HTTPException(422, f"no existe la decisión {error}") from error

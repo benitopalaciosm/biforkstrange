@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Text, cssVars,
+  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Tag, Text, cssVars,
 } from "@/shared/ui";
-import { GEMELOS } from "../api";
-import { CALIDAD, arte } from "../textos";
-import type { Duda, DudaSugerida } from "../types";
+import { GEMELOS, getEnJuego } from "../api";
+import { CALIDAD, arte, plata } from "../textos";
+import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 
 const VISIBLES = 4;
@@ -16,7 +16,29 @@ const prioridad = (id: string) => {
 };
 
 /** Tu duda: la decisión que te trajo. Viene de la lista de caminos de "3 · Decisión del año" del kit. */
+/** "La más en juego para ti": de las dudas que sugiere el CV, la que abre más distancia entre la mala y la buena suerte. */
+function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugeridas: DudaSugerida[]): DudaEnJuego | null {
+  const posibles = new Set(dudas?.map((d) => d.decision) ?? []);
+  const candidatas = sugeridas.map((s) => s.decision).filter((d) => posibles.has(d));
+  const clave = perfil && candidatas.length >= 2 ? JSON.stringify([perfil, candidatas]) : null;
+  const [mas, setMas] = useState<DudaEnJuego | null>(null);
+  useEffect(() => {
+    setMas(null);
+    if (!clave || !perfil) return;
+    let vigente = true;
+    getEnJuego(perfil, candidatas)
+      .then((r) => vigente && setMas(r.dudas.find((d) => d.decision === r.mas_en_juego) ?? null))
+      .catch(() => undefined); // es un extra: si falla, la lista sigue igual
+    return () => {
+      vigente = false;
+    };
+    // la clave resume perfil y candidatas
+  }, [clave]);
+  return mas;
+}
+
 export function DudaPicker({
+  perfil,
   dudas,
   sugeridas = [],
   cargando,
@@ -24,6 +46,8 @@ export function DudaPicker({
   onVolver,
   onElegir,
 }: {
+  /** Con el perfil se mide cuál de las dudas sugeridas tiene más en juego para esta persona. */
+  perfil?: Perfil;
   dudas: Duda[] | null;
   /** Las dudas que le calzan según su CV, con el porqué: van primero y la primera queda elegida. */
   sugeridas?: DudaSugerida[];
@@ -44,6 +68,7 @@ export function DudaPicker({
     ? [...dudas].sort((a, b) => rango(a.decision) - rango(b.decision) || prioridad(a.decision) - prioridad(b.decision))
     : dudas;
   const simulando = cargando && dudas !== null;
+  const enJuego = useMasEnJuego(perfil, dudas, sugeridas);
   return (
     <Screen gap={16}>
       <ScreenHeader
@@ -63,6 +88,15 @@ export function DudaPicker({
         </Text>
         {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
       </Stack>
+      {enJuego && (
+        <div className="jg-en-juego" role="note">
+          <Tag tone="accent">La más en juego para ti</Tag>
+          <Text size="sm">
+            Donde más te juegas es <strong>«{enJuego.nombre}»</strong>: entre la mala y la buena suerte hay {Math.round(enJuego.dispersion * 100)}% de
+            diferencia, medida sobre tu sueldo típico (de {plata(enJuego.mala)} a {plata(enJuego.buena)} al mes).
+          </Text>
+        </div>
+      )}
       {cargando && !dudas && <Cargando>Buscando las dudas que calzan contigo…</Cargando>}
       {dudas && dudas.length === 0 && <Text>Con este perfil no hay dudas disponibles. Vuelve y cámbialo.</Text>}
       {dudas && dudas.length > 0 && (
@@ -75,7 +109,7 @@ export function DudaPicker({
             art: <DecisionArt kind={arte(d.categoria)} />,
             title: d.nombre,
             subtitle: porQue.get(d.decision) ?? d.pregunta,
-            tags: [...(porQue.has(d.decision) ? [{ label: "Para ti", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
+            tags: [...(enJuego?.decision === d.decision ? [{ label: "La más en juego", tone: "accent" as const }] : []), ...(porQue.has(d.decision) ? [{ label: "Para ti", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
           }))}
         />
       )}
