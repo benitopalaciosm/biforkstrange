@@ -160,7 +160,10 @@ class Vida:
         otra.historia = list(self.historia)
         otra.registro = copy.deepcopy(self.registro)
         if dados is not None:
+            # otro mundo: la copia es la población, no tu partida. No hereda REPETIR_CARTA (variedad), que solo
+            # evita repetirte la misma pregunta a ti; sus cartas pesan como en la cohorte calibrada.
             otra.dados = dados
+            otra.variedad = 1.0
             otra._sortear_ia()
         return otra
 
