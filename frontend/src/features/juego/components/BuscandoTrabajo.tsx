@@ -3,7 +3,7 @@ import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack,
 import { GEMELOS } from "../api";
 import { TIPO_EMPLEADOR, plata } from "../textos";
 import type { Anio, Eleccion, Vista } from "../types";
-import { ErrorCaja, Salir } from "./piezas";
+import { Cargando, ErrorCaja, Pensando, Salir } from "./piezas";
 import { ProgresoAnios } from "./graficos";
 import { Logo } from "./Logo";
 
@@ -110,6 +110,8 @@ export function BuscandoTrabajo({ vista, cargando, error, onElegir, onMirar, onS
 
   return (
     <Screen tone="noche" gap={16}>
+      {/* la misma espera que la carta mientras se vive el mes */}
+      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} onSalir={onSalir} />}
       <ScreenHeader
         left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {MESES_LARGOS[b.mes - 1]}</Pill>}
         right={onSalir && <Salir onSalir={onSalir} />}
@@ -191,6 +193,7 @@ export function BuscandoTrabajo({ vista, cargando, error, onElegir, onMirar, onS
 
       <ScreenFooter>
         {error && <ErrorCaja error={error} onReintentar={ultima ? () => elegir(ultima) : undefined} />}
+        {cargando && <Cargando>Viviendo tu año…</Cargando>}
         <div className="jg-dos-botones">
           <Button variant="white" onClick={() => rechazar && elegir({ decision: p.decision, opcion: rechazar.opcion })} disabled={cargando || !rechazar}>
             La rechazo y sigo buscando

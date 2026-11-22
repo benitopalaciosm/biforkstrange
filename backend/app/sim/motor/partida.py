@@ -135,7 +135,12 @@ def _contra_la_otra(comparacion: dict, elegida: str, por_mundo: dict[str, list[f
 def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], partida: Partida,
             n: int, pq: Paquete) -> dict:
     """Tu vida frente a los gemelos de la primera decisión que tuvo mundos (un año tranquilo no tiene)."""
-    cierre = {"sueldo_final": round(partida.vida.sueldo_o_ultimo()), "estado": partida.vida.resumen(),
+    # el sueldo final es lo que ganas hoy (0 si terminas sin trabajo), la misma base con que se comparan las
+    # opciones y tus copias; si estás sin trabajo, el último sueldo va aparte, solo para mostrarlo
+    sin_trabajo = partida.vida.sueldo_al_final() <= 0
+    cierre = {"sueldo_final": round(partida.vida.sueldo_al_final()),
+              "ultimo_sueldo": round(partida.vida.sueldo_o_ultimo()) if sin_trabajo else None,
+              "estado": partida.vida.resumen(),
               "anios_sin_trabajo": partida.vida.anios_buscando, "meses_sin_trabajo": partida.vida.meses_buscando,
               "primera_decision": None}
     comparacion, elegida = None, None
@@ -152,8 +157,7 @@ def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dic
             por_mundo[o["opcion"]] = o.pop("sueldos_por_mundo")
             if o["opcion"] == elegida:
                 # se compara lo que ganas al final (0 si terminas sin trabajo), igual que entre los gemelos
-                hoy = partida.vida.sueldo_al_final()
-                cierre["mejor_que_gemelos"] = sum(1 for x in sueldos if x < hoy) / len(sueldos)
+                cierre["mejor_que_gemelos"] = sum(1 for x in sueldos if x < cierre["sueldo_final"]) / len(sueldos)
         cierre["primera_decision"] = {"decision": comparacion["decision"], "pregunta": comparacion["pregunta"],
                                       "elegida": elegida, "comparacion": comparacion,
                                       "contra": _contra_la_otra(comparacion, elegida, por_mundo)}

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Pill, Row, Screen, ScreenHeader, Stack, Text,
 } from "@/shared/ui";
-import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, deMundos, mayuscula, mundos, plata, primeraFrase, sinSueldo } from "../textos";
-import type { ContraBase, Eleccion, EmpresaOferta, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
+import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, mayuscula, mundos, plata, primeraFrase, repartir, sinSueldo } from "../textos";
+import type { ContraBase, Eleccion, EmpresaOferta, PorQue, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { BarraPartes, EjeX, Info, LIENZO, ProgresoAnios, escalaSueldo, rotuloSueldo, type Reparto } from "./graficos";
@@ -30,6 +30,17 @@ function veredictoDe(r: Reparto, que: string): string {
 }
 
 /**
+ * La diferencia con la otra opción que se muestra, la misma en la carta y en el cierre. Con muchos empates (20% o
+ * más), la diferencia típica de todos los mundos es cero y tapa lo que pasa cuando la opción sí cambia algo: ahí va
+ * la diferencia solo entre esos mundos, y `cuandoCambia` lo dice.
+ */
+export function diferenciaDe(c: ContraBase): { d: number | null; cuandoCambia: boolean } {
+  const igual = c.igual_que_base ?? Math.max(0, 1 - (c.gana_mas_que_base ?? 0) - (c.gana_menos_que_base ?? 0));
+  const cuandoCambia = igual >= 0.2 && c.diferencia_si_cambia !== null && c.diferencia_si_cambia !== undefined;
+  return { d: cuandoCambia ? (c.diferencia_si_cambia as number) : c.diferencia_tipica, cuandoCambia };
+}
+
+/**
  * Cómo le va a esta opción frente a la base, con la misma suerte: en cuántos mundos ganas más, menos o igual,
  * y de cuánta plata se trata. Si casi todo es empate se dice directo; si la diferencia es chica, también.
  */
@@ -44,11 +55,8 @@ export function contraBase(c: ContraBase, base: OpcionComparada | undefined, con
   const que = conBase ? `«${base.nombre}»` : "la otra opción";
   const frase = veredictoDe({ mas, igual, menos }, que);
 
-  // Con muchos empates, la diferencia típica de todos los mundos es cero y tapa lo que pasa
-  // cuando la opción sí cambia algo: ahí se muestra la diferencia solo entre esos mundos.
-  const conEmpates = igual >= 0.2 && c.diferencia_si_cambia !== null && c.diferencia_si_cambia !== undefined;
-  const d = conEmpates ? (c.diferencia_si_cambia as number) : c.diferencia_tipica;
-  const cuando = conEmpates ? "Cuando cambia, la diferencia típica" : "La diferencia típica";
+  const { d, cuandoCambia } = diferenciaDe(c);
+  const cuando = cuandoCambia ? "Cuando cambia, la diferencia típica" : "La diferencia típica";
   let magnitud: string | null = null;
   if (d !== null) {
     const chica = Math.abs(d) < 0.03 * base.sueldo.p50;
@@ -59,14 +67,14 @@ export function contraBase(c: ContraBase, base: OpcionComparada | undefined, con
   return { frase, magnitud };
 }
 
-/** Por qué te tocó esta decisión, en dos o tres palabras: va junto al nombre de la carta. */
+/** Por qué te tocó esta decisión, en dos o tres palabras (las de "Por qué te toca" del glosario): va junto a la pregunta. */
 function porQueCorto(p: PorQue | undefined): string | null {
   if (!p) return null;
-  if (p.tipo === "obligada") return "por tu situación";
+  if (p.tipo === "obligada") return "es obligada";
   if (p.tipo === "elegida") return "la elegiste tú";
   if (p.tipo === "llega") return "te llegó sin buscarla";
   if (p.tipo === "buscada") return "la buscaste tú";
-  return "por algo que te pasó";
+  return "la trae algo que elegiste antes";
 }
 
 /** La explicación larga de por qué te tocó esta decisión, para el "?" junto a su nombre. */
@@ -100,6 +108,8 @@ function DeDondeSalen({ o, ganadas, total, edadFinal, respaldo, pendiente }: {
 }) {
   const de = total || GEMELOS;
   const sorteo = respaldo && respaldo.length > 1 ? respaldo : null;
+  /** En cuántos de tus mundos salió cada resultado el primer año (el conteo de "¿Por qué sale así?"). */
+  const salio = (resultado: string) => o.por_resultado.find((r) => r.resultado === resultado)?.gemelos ?? 0;
   return (
     <details className="jg-plegable">
       <summary>De dónde salen los números</summary>
@@ -116,13 +126,20 @@ function DeDondeSalen({ o, ganadas, total, edadFinal, respaldo, pendiente }: {
         </Text>
         <Text size="sm">
           <strong>Si te va bien</strong> es lo que superan solo 1 de cada 10 mundos; <strong>si te va mal</strong>, lo que no alcanzan 1 de cada 10; <strong>lo típico</strong>, el
-          mundo del medio.
+          mundo del medio. Los mundos que terminan sin trabajo cuentan con $0.
         </Text>
+        {sorteo && (
+          <Text size="sm">
+            Cada resultado tiene una probabilidad con fuente. En tus {de} mundos sale más o menos veces por azar, como un dado tirado {de} veces: por
+            eso lo que salió en tus mundos no calza justo con la probabilidad.
+          </Text>
+        )}
         {sorteo &&
           sorteo.map((r) => (
             <Text size="sm" key={r.resultado}>
-              <strong>{r.texto}:</strong> {r.valor !== null ? `${Math.round(r.valor * 100)}%.` : "depende de tu situación."}{" "}
-              {r.fuentes.length > 0 ? `Fuente: ${r.fuentes.join("; ")}.` : ""}
+              <strong>{r.texto.trim().replace(/\.$/, "")}:</strong>{" "}
+              {r.valor !== null ? `probabilidad de ${Math.round(r.valor * 100)}%` : "su probabilidad depende de tu situación"}; en tus {de} mundos salió en{" "}
+              {salio(r.resultado)}.{r.fuentes.length > 0 ? ` Fuente: ${r.fuentes.join("; ")}.` : ""}
             </Text>
           ))}
         <Row gap={6} style={{ alignItems: "center", flexWrap: "wrap" }}>
@@ -199,7 +216,6 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
 }
 
 
-/** La opción para elegir: qué es, en cuántos mundos gana y el sueldo típico. La simulación va aparte, más abajo. */
 /**
  * La frase de una línea bajo el nombre: qué es la opción, sin números. El único número de la tarjeta es
  * "Mejor opción en X de 50"; el dado del primer año va en "¿Por qué sale así?", para no poner dos cifras
@@ -214,7 +230,7 @@ function fraseCorta(o: OpcionComparada, detalle: string): string | undefined {
 
 /**
  * La opción para elegir, corta: dibujo, nombre, una frase y en cuántos mundos es la mejor. Al elegirla se abre
- * solo con el sueldo (mediana y 10% · 90%) y, si hay, lo que se supuso dentro. El resto va más abajo.
+ * con el sueldo (lo típico, si te va bien y si te va mal) y, si hay, lo que se supuso dentro. El resto va más abajo.
  */
 function OpcionConGemelos({
   o, decision, categoria, base, selected, onSelect, supuesto, cambiable, edadFinal, color, ganadas, empates = 0, total, lider, empresa, textoEmpresa, oferta,
@@ -243,15 +259,14 @@ function OpcionConGemelos({
   empresa?: EmpresaOferta | null;
   textoEmpresa?: string;
 }) {
-  // Un solo número en todas partes: en cuántos mundos esta es la mejor opción, el mismo que la grilla de
-  // "Tus 50 mundos". Así la tarjeta y la grilla nunca dicen cosas distintas, y con los empates suman 50.
+  // Un solo número en todas partes: en cuántos mundos esta es la mejor opción, el mismo que cuentan la imagen
+  // para compartir y el cierre. Con los empates y las otras opciones suman los 50.
   const de = total || GEMELOS;
   const veredicto = !o.es_base ? contraBase(o, base)?.frase : null;
   // el tiempo sin trabajo dice más que "cuántas copias pasaron por la cesantía": en 10 años a casi todos
   // les toca una vez, pero suele durar meses. Es el promedio de tus copias, contando a las que nunca la vivieron.
   const mesesSinTrabajo = Math.round(o.meses_sin_trabajo);
-  // El rango de sueldo cuenta con $0 a quien termina sin trabajo; aquí se muestra solo entre quienes trabajan y los demás aparte.
-  const conTrabajo = o.sueldo_con_trabajo ?? o.sueldo;
+  // Una sola base en todas las pantallas: quien termina sin trabajo cuenta con $0 (cerrada, abierta, gráficos y cierre).
   const sinTrabajoFinal = mundos(o.sin_trabajo_al_final, de);
   const sube = mundos(o.sube_de_cargo ?? 0, de);
   return (
@@ -266,7 +281,7 @@ function OpcionConGemelos({
           {ganadas !== null && (
             <span className="jg-marcador" data-lider={lider}>
               <span className="jg-marcador-num">
-                {ganadas === 0 ? "En ningún mundo es la mejor" : <>Es la mejor en <b>{ganadas}</b> de {de} mundos</>}
+                {ganadas === 0 ? "En ningún mundo es la mejor" : <>Es la mejor en <b>{ganadas}</b>{"\u00a0"}de{"\u00a0"}{de} mundos</>}
                 {empates >= de / 2 && ganadas < POCAS_GANADAS * de && `; en ${empates} da lo mismo`}
               </span>
             </span>
@@ -288,20 +303,20 @@ function OpcionConGemelos({
           <span className="jg-escenarios" role="list" aria-label={`Sueldo a los ${edadFinal}`}>
             <span role="listitem">
               <span>Si te va bien</span>
-              <b>{plata(conTrabajo.p90)}</b>
+              <b>{plata(o.sueldo.p90)}</b>
             </span>
             <span role="listitem" data-fuerte="true">
               <span>Lo típico a los {edadFinal}, en pesos de hoy</span>
-              <b>{plata(conTrabajo.p50)}</b>
+              <b>{plata(o.sueldo.p50)}</b>
             </span>
             <span role="listitem">
               <span>Si te va mal</span>
-              <b>{plata(conTrabajo.p10)}</b>
+              <b>{plata(o.sueldo.p10)}</b>
             </span>
             {sinTrabajoFinal > 0 && (
               <span role="listitem">
-                <span>Terminan sin trabajo a los {edadFinal} (no cuentan arriba)</span>
-                <b>{sinTrabajoFinal} de {de}</b>
+                <span>Terminan sin trabajo a los {edadFinal} (cuentan con $0 arriba)</span>
+                <b>{sinTrabajoFinal}{"\u00a0"}de{"\u00a0"}{de}</b>
               </span>
             )}
             <span role="listitem">
@@ -310,7 +325,7 @@ function OpcionConGemelos({
             </span>
             <span role="listitem">
               <span>Terminas en un cargo más alto</span>
-              <b>{sube === 0 ? "en ningún mundo" : `en ${sube} de ${de}`}</b>
+              <b>{sube === 0 ? "en ningún mundo" : `en ${sube}\u00a0de\u00a0${de}`}</b>
             </span>
           </span>
           {veredicto && <span className="jg-frase">{veredicto}</span>}
@@ -464,38 +479,56 @@ function TodasAnioAnio({
 
 
 
-/** El porqué: según lo que salió en el dado, cuántos gemelos son y cómo terminaron frente a su par de la opción base. */
-function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undefined }) {
+/**
+ * El porqué: qué salió el primer año en tus mundos y, en los mundos de cada resultado, cómo terminaron frente a la
+ * opción base. Todo se cuenta en mundos y suma: los de cada resultado suman los de la opción.
+ */
+function Porque({ o, base, total }: { o: OpcionComparada; base: OpcionComparada | undefined; total: number }) {
   const compara = !o.es_base && base !== undefined;
   return (
     <Stack gap={0}>
       {o.por_resultado.map((r) => {
         const hay = compara && r.gana_mas_que_base !== null && r.gana_menos_que_base !== null;
         const igual = r.igual_que_base ?? 0;
+        const [mas, iguales, menos] = hay ? repartir([r.gana_mas_que_base as number, igual, r.gana_menos_que_base as number], r.gemelos) : [0, 0, 0];
+        const partes = [
+          { nombre: "ganan más", n: mas, tono: "mas" },
+          { nombre: "igual", n: iguales, tono: "igual" },
+          { nombre: "ganan menos", n: menos, tono: "menos" },
+        ];
         return (
           <div className="jg-resultado" key={r.resultado}>
             <span className="jg-resultado-cabeza">
               <span>{r.texto || r.resultado}</span>
-              <b>en {deMundos(r.prob)} mundos</b>
+              <b>en {r.gemelos}{"\u00a0"}de{"\u00a0"}{total} mundos</b>
             </span>
             <span className="jg-medidor" aria-hidden="true">
               <i style={{ width: `${Math.max(2, r.prob * 100)}%`, background: "var(--tinta)" }} />
             </span>
             {hay &&
-              (igual >= 0.995 ? (
+              (iguales === r.gemelos ? (
                 <span className="jg-chico">Igual que con «{base!.nombre}».</span>
               ) : (
                 <>
-                  <span className="jg-chico">Frente a «{base!.nombre}», de cada 100:</span>
-                  <BarraPartes
-                    partes={[
-                      { nombre: "ganan más", prob: r.gana_mas_que_base as number, tono: "mas" },
-                      { nombre: "igual", prob: igual, tono: "igual" },
-                      { nombre: "ganan menos", prob: r.gana_menos_que_base as number, tono: "menos" },
-                    ]}
-                  />
+                  <span className="jg-chico">
+                    Frente a «{base!.nombre}», en {r.gemelos === 1 ? "ese mundo" : `esos ${r.gemelos} mundos`}:
+                  </span>
+                  {/* la barra va en proporción; la leyenda, en mundos que suman los de este resultado */}
+                  <span className="jg-partes">
+                    <BarraPartes sinLeyenda partes={partes.map((p) => ({ nombre: p.nombre, prob: p.n, tono: p.tono }))} />
+                    <span className="jg-partes-leyenda">
+                      {partes
+                        .filter((p) => p.n > 0)
+                        .map((p) => (
+                          <span key={p.tono}>
+                            <i data-n={p.tono} />
+                            {p.nombre} <b>{p.n}</b>
+                          </span>
+                        ))}
+                    </span>
+                  </span>
                   {r.diferencia_si_cambia != null && Math.abs(r.diferencia_si_cambia) >= 1000 && (
-                    <span className="jg-chico">Cuando cambia, la mediana es {conSigno(r.diferencia_si_cambia)}/mes.</span>
+                    <span className="jg-chico">Cuando cambia, la diferencia típica es de {conSigno(r.diferencia_si_cambia)} al mes.</span>
                   )}
                 </>
               ))}
@@ -508,7 +541,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar, sinNovedad,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onSalir, onNarrar, sinNovedad,
 }: {
   /** El año anterior, si pasó sin novedades: va como franja arriba. */
   sinNovedad?: SinNovedad | null;
@@ -519,7 +552,6 @@ export function Carta({
   /** Repite lo que falló (tirar el dado o volver a simular una opción). */
   onReintentar?: () => void;
   onNarrar?: Narrar;
-  onVerMundo: (n: number) => Promise<MundoDetalle>;
   /** Volver a la portada sin perder la partida. */
   onSalir?: () => void;
   vista: Vista;
@@ -657,7 +689,7 @@ export function Carta({
       {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
         <div className="jg-preparando">
-          <Espera pantalla frases={["Preparando tu carta…", "Claude está escribiendo tu situación…"]} onSalir={onSalir} />
+          <Espera pantalla frases={["Preparando tu decisión…", "Claude está escribiendo tu situación…"]} onSalir={onSalir} />
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
@@ -780,8 +812,8 @@ export function Carta({
           <details className="jg-plegable">
             <summary>¿Por qué sale así «{foco.nombre}»?</summary>
             <Stack gap={10}>
-              <Text size="sm">Qué te pasa el primer año y cómo terminas.</Text>
-              <Porque o={foco} base={base} />
+              <Text size="sm">Qué le pasó a tu copia el primer año en cada uno de tus {ganadores?.length || GEMELOS} mundos, y cómo terminó.</Text>
+              <Porque o={foco} base={base} total={ganadores?.length || GEMELOS} />
             </Stack>
           </details>
 

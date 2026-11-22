@@ -510,7 +510,8 @@ def _texto_cierre(v: dict, internas: frozenset) -> list[str]:
         lineas += ["", *_envolver(f"Tu primera decisión: {primera['pregunta']} Elegiste «{elegida}».", "  "), ""]
         lineas += _texto_comparacion(comp)
         if "mejor_que_gemelos" in cierre:
-            cual = "Tu sueldo final" if estado["sueldo"] > 0 else "El sueldo al que apuntas al volver"
+            # se compara lo que ganas hoy: sin trabajo es $0, como entre tus copias
+            cual = "Tu sueldo final" if estado["sueldo"] > 0 else "Sin trabajo, tu sueldo final"
             lineas += ["", *_envolver(
                 f"{cual} ({_plata(cierre['sueldo_final'])}) es más alto que el de "
                 f"{round(cierre['mejor_que_gemelos'] * comp['gemelos'])} de tus {comp['gemelos']} copias que eligieron "
