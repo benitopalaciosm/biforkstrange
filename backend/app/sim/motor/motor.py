@@ -33,6 +33,11 @@ ALZAS = frozenset({"alza_anual"})
 SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
 # Decisiones cuya historia nombra a la empresa que te ofrece trabajo
 DECISIONES_CON_OFERTA = empresas.DECISIONES_CON_OFERTA
+# Cesante, quien elige buscar vive el resto del año mes a mes: cada mes pueden pasar los eventos con
+# paso "mes" del paquete (llega una oferta, pasa un mes más buscando). Ver docs/COMO-FUNCIONA.md.
+BUSCAR_MES_A_MES = {("cesantia", "buscar"), ("cesantia", "informal")}  # informal: trabaja sin contrato y sigue postulando
+OFERTA_MES = "oferta_cesante"   # su probabilidad la multiplica p_encontrar, como antes la de encontrar en el año
+MES_BUSCANDO = "mes_buscando"
 
 # La suerte en la pega (ascenso, despido, oferta, alza) va con el trabajo: dos vidas de un mismo mundo
 # la comparten mientras están en la misma pega, y deja de ser la misma cuando una se cambia.
@@ -61,7 +66,7 @@ REPETIR_CARTA = 0.3             # supuesto: en tu partida, cada vez que ya te to
 ANIOS_HUECO = 2                # cuánto pesa una pausa elegida al buscar trabajo
 EDU_AL_TITULARSE = {"U": "universitaria", "IP": "tecnica", "CFT": "tecnica"}
 # Decisiones donde el modificador p_encontrar multiplica la probabilidad de quedar
-BUSQUEDAS = frozenset({"cesantia", "primera_pega"})
+BUSQUEDAS = frozenset({"primera_pega"})
 # El paquete no tiene salida del trabajo por cuenta propia. Sin ella nadie vuelve a ser
 # empleado y la cohorte termina con la mitad de independientes (en Chile, 13% a 24%).
 P_INDEPENDIENTE_BUSCA_EMPLEO = 0.055
@@ -82,7 +87,8 @@ def p_independiente_busca_empleo(e: dict) -> float:
     return P_INDEPENDIENTE_BUSCA_EMPLEO
 # Sitio del sorteo del escenario de IA: uno por gemelo, igual en todas sus opciones
 SITIO_IA = "mundo:ia"
-_USA_SUELDO = re.compile(r"\bsueldo(_ref)?\b")  # un sueldo nuevo calculado desde el anterior
+# un sueldo nuevo calculado desde el anterior (una oferta estando cesante también: sale de lo que ganabas)
+_USA_SUELDO = re.compile(r"\b(sueldo(_ref)?|oferta_sueldo)\b")
 
 
 class FaltaEleccion(Exception):
@@ -126,6 +132,10 @@ class Vida:
         self.historia: list[dict] = []
         self.registro: dict | None = None
         self.anios_buscando = 0
+        self.meses_buscando = 0           # meses sin trabajo buscando, en toda la vida
+        self._meses_buscando_anio = 0     # los de este año: esos meses no hay sueldo
+        self._antes_del_despido = (0, 0.0)  # si te despidieron este año: meses que alcanzaste a trabajar y con qué sueldo
+        self.mes: int | None = None       # el mes en curso (1 a 12) cuando el año se vive mes a mes
         self.ingreso_total = 0.0
         self._anios_con_hueco = 0
         self.variedad = 1.0               # peso de una carta ya vista; la partida de la persona usa REPETIR_CARTA
@@ -221,7 +231,9 @@ class Vida:
         if self.cola:
             raise RuntimeError("el año en curso no ha terminado")
         self.registro = {"anio": self.anio + 1, "edad": self.e["edad"], "recesion": False,
-                         "decisiones": [], "eventos": []}
+                         "decisiones": [], "eventos": [],
+                         "sueldo_inicio": round(self.e["sueldo"]), "ahorro_inicio": round(self.e["ahorro"])}
+        self.mes, self._meses_buscando_anio, self._antes_del_despido = None, 0, (0, 0.0)
         self.reparto = None  # cómo se sorteó la carta de este año, si hubo sorteo
         self.sugerida = None
         self._derivar()
@@ -253,7 +265,13 @@ class Vida:
                 else:
                     decisiones = [sorteada] if sorteada else []
         self.cola = self.cola + [("decision", d, "carta") for d in decisiones]
-        self.cola += [("evento", id_) for id_ in self.pq.eventos if id_ != EVENTO_MUNDO and self._evento_en_alcance(id_)]
+        if self.e["busca_mientras_informal"]:
+            if self.e["estado"] == "independiente":
+                self.cola += [("mes", m) for m in range(1, 13)]  # sigue informal: otro año postulando mes a mes
+            else:
+                self.e["busca_mientras_informal"] = 0  # ya no está en lo informal (volvió a buscar, emprendió...)
+        self.cola += [("evento", id_) for id_, ev in self.pq.eventos.items()
+                      if id_ != EVENTO_MUNDO and ev.get("paso", "año") != "mes" and self._evento_en_alcance(id_)]
         self.cola.append(("cierre",))
 
     def avanzar(self, decisor) -> dict | None:
@@ -267,7 +285,14 @@ class Vida:
                 self._decidir(paso[1], paso[2], decisor)
             elif paso[0] == "evento":
                 self.cola.pop(0)
+                self.mes = paso[2] if len(paso) > 2 else None
                 self._evento(paso[1])
+            elif paso[0] == "mes":
+                # un mes de búsqueda: sus eventos van primero; lo que encadenen (una oferta) se intercala
+                self.cola.pop(0)
+                self.registro.setdefault("meses_busqueda", []).append(paso[1])
+                self.cola[0:0] = [("evento", id_, paso[1]) for id_, ev in self.pq.eventos.items()
+                                  if ev.get("paso") == "mes" and self._evento_en_alcance(id_)]
             elif paso[0] == "evento_directo":
                 self.cola.pop(0)
                 self._evento(paso[1], directo=True)
@@ -380,8 +405,9 @@ class Vida:
             self.e[var] = valor
         # la segunda vez que sale la misma decisión en un año (carta y evento oferta_llega) tira dados nuevos
         ocurrencia = sum(1 for x in self.registro["decisiones"] if x["decision"] == decision_id)
-        sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
-        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion")}
+        sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "") + (f":mes{self.mes}" if self.mes else "")
+        contexto = {k: self.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion",
+                                            "meses_cesante")}
         contexto.update(self.contexto_empleo())
         if decision_id != "tipo_de_empleador":
             self._oferta_fija = None
@@ -395,6 +421,7 @@ class Vida:
             self._nuevo_empleador = True  # cambiarse de empresa aunque sea al mismo tipo
         else:
             self._origen = empresas.origen_decision(decision_id, ocurrencia, opcion_id)
+        plata_antes = self._plata()
         if opcion.costo:
             self._aplicar(opcion.costo, sitio + ":costo", opcion.fila)
         resultado, prob = self._sortear(opcion.resultados, sitio, decision_id)
@@ -405,6 +432,7 @@ class Vida:
             "resultado": resultado["id"] if resultado else None,
             "texto": resultado["texto"] if resultado else "", "tono": (resultado or {}).get("tono", "neutro"),
             "prob": prob, "ocurrencia": ocurrencia, "contexto": contexto,
+            **({"mes": self.mes} if self.mes else {}),
         })
         if decision_id == "tipo_de_empleador" and self._oferta_fija:
             del self.registro["decisiones"][-1]  # la oferta ya dijo a qué empresa entras: el sorteo no es noticia
@@ -417,6 +445,29 @@ class Vida:
             self._aplicar(resultado["efectos"], sitio + ":" + resultado["id"], opcion.fila)
             self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
+        self._anotar_plata(self.registro["decisiones"][-1], plata_antes)
+        if (decision_id, opcion.id) in BUSCAR_MES_A_MES and (self.e["estado"] == "buscando" or self.e["busca_mientras_informal"]):
+            self._buscar_mes_a_mes(origen)
+
+    def _buscar_mes_a_mes(self, origen: str) -> None:
+        """El resto del año pasa de a un mes. Al empezar el año, los 12; si te despidieron este año, desde el
+        mes del despido (sorteado con la suerte de la pega: tus copias en el mismo trabajo pierden la pega el mismo mes)."""
+        desde = 1
+        if origen == "luego":
+            desde = 1 + int(12 * self.dados.u(self.anio, f"{self._sitio_evento('separacion_empleo')}:mes"))
+            self._antes_del_despido = (desde - 1, self.e["sueldo_ref"])  # esos meses sí cobraste tu sueldo de antes
+        self.cola[0:0] = [("mes", m) for m in range(desde, 13)]
+
+    def _plata(self) -> tuple[float, float]:
+        return self.e["sueldo"], self.e["ahorro"]
+
+    def _anotar_plata(self, anotado: dict, antes: tuple[float, float]) -> None:
+        """Si la decisión o el evento movió el sueldo o el ahorro, lo deja escrito para poder explicarlo."""
+        sueldo, ahorro = antes
+        if round(self.e["sueldo"]) != round(sueldo):
+            anotado["sueldo_antes"], anotado["sueldo_despues"] = round(sueldo), round(self.e["sueldo"])
+        if round(self.e["ahorro"]) != round(ahorro):
+            anotado["ahorro_cambio"] = round(self.e["ahorro"] - ahorro)
 
     def resultado_previsto(self, decision_id: str, opcion_id: str) -> str | None:
         """El resultado que saldría si elige esa opción ahora: los dados ya están echados (mismo sitio que `_decidir`)."""
@@ -424,7 +475,7 @@ class Vida:
         if opcion is None:
             return None
         ocurrencia = sum(1 for x in (self.registro or {}).get("decisiones", []) if x["decision"] == decision_id)
-        sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "")
+        sitio = f"dec:{decision_id}:{opcion_id}" + (f":{ocurrencia}" if ocurrencia else "") + (f":mes{self.mes}" if self.mes else "")
         resultado, _ = self._sortear(opcion.resultados, sitio, decision_id)
         return resultado["id"] if resultado else None
 
@@ -675,12 +726,15 @@ class Vida:
 
     def _evento(self, id_: str, directo: bool = False) -> None:
         ev = self.pq.eventos[id_]
-        sitio = self._sitio_evento(id_)
+        mensual = ev.get("paso") == "mes"
+        sitio = f"evento:{id_}:mes{self.mes}" if mensual and self.mes else self._sitio_evento(id_)
         prob = 1.0
         if not directo:
             if not self.pq.evaluar(ev["cuando"], self.e):
                 return
-            prob = min(max(float(self.pq.evaluar(ev["prob_anual"], self.e)), 0.0), 1.0)
+            prob = min(max(float(self.pq.evaluar(ev["prob_mensual" if mensual else "prob_anual"], self.e)), 0.0), 1.0)
+            if id_ == OFERTA_MES:
+                prob *= self.e["p_encontrar"]
             if self.dados.u(self.anio, sitio) >= prob:
                 return
         resultado, prob_resultado = self._sortear(ev["resultados"], f"{sitio}:res")
@@ -688,19 +742,26 @@ class Vida:
             return
         self._origen = f"evento:{id_}"
         self._espera_tipo = resultado.get("luego") == "tipo_de_empleador"
-        self.registro["eventos"].append({
+        anotado = {
             "evento": id_, "nombre": ev["nombre"], "resultado": resultado["id"], "texto": resultado["texto"],
             "tono": resultado.get("tono", "neutro"),
             "prob": prob * prob_resultado,  # de que pase el evento y salga este resultado
             "prob_evento": prob, "directo": directo,
-            "rutina": ev["prob_anual"] == 1,  # pasa todos los años (alza anual, ánimo)
-        })
+            "rutina": ev.get("prob_mensual" if mensual else "prob_anual") == 1,  # pasa siempre (alza anual, ánimo, un mes más)
+            **({"mes": self.mes} if mensual and self.mes else {}),
+        }
+        self.registro["eventos"].append(anotado)
+        antes = self._plata()
         sueldo_antes = self.e["sueldo"]
         self._aplicar(resultado["efectos"], f"{sitio}:{resultado['id']}")
+        self._anotar_plata(anotado, antes)
         if id_ in ALZAS and sueldo_antes > 0 and abs(self.e["sueldo"] - sueldo_antes) < 1:
             # el sueldo es en pesos de hoy: un alza de 0 es un año en que solo te reajustaron por inflación.
             # Se cuenta como noticia, para que el sueldo igual al peso no parezca un error.
-            self.registro["eventos"][-1].update(texto=SOLO_IPC, rutina=False, directo=True)
+            anotado.update(texto=SOLO_IPC, rutina=False, directo=True)
+        if id_ == MES_BUSCANDO:
+            self.meses_buscando += 1
+            self._meses_buscando_anio += 1
         self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
 
@@ -708,19 +769,34 @@ class Vida:
     def _cerrar(self) -> dict:
         e = self.e
         trabaja = e["estado"] in ("empleado", "independiente", "fundador")
+        # cómo se movió la plata al cerrar el año, para explicársela a la persona
+        plata = {"tasa_ahorro": e["tasa_ahorro"], "retorno_real": self.pq.k("RETORNO_REAL")}
         if e["estado"] == "empleado" and e["alza_extra_anual"]:
+            plata["alza_extra"] = e["alza_extra_anual"]
             e["sueldo"] = self._acotar("sueldo", e["sueldo"] * (1 + e["alza_extra_anual"]))
 
-        # plata
-        self.ingreso_total += 12 * e["sueldo"]
-        if e["sueldo"] > 0:
-            e["ahorro"] += 12 * e["sueldo"] * e["tasa_ahorro"]
+        # plata: los meses que pasaste buscando no hubo sueldo (lo que se gastó esos meses ya salió del ahorro, mes a mes)
+        meses_antes, sueldo_antes = self._antes_del_despido
+        meses_con_sueldo = max(0, 12 - min(12, self._meses_buscando_anio) - meses_antes)
+        if self._meses_buscando_anio:
+            plata["meses_sin_sueldo"] = min(12, self._meses_buscando_anio)
+        if e["estado"] == "buscando" and not self._meses_buscando_anio:
+            self.meses_buscando += 12  # un año buscando sin vivirlo mes a mes (la primera pega)
+        ganado = meses_con_sueldo * e["sueldo"] + meses_antes * sueldo_antes
+        self.ingreso_total += ganado
+        plata["ganado"] = round(ganado)
+        if ganado > 0:
+            plata["ahorrado"] = round(ganado * e["tasa_ahorro"])
+            e["ahorro"] += ganado * e["tasa_ahorro"]
         if e["deuda_estudios"] > 0 and e["estado"] != "estudiando" and e["sueldo"] > 0:
-            pago = min(e["deuda_estudios"], 12 * e["sueldo"] * PAGO_DEUDA_ESTUDIOS)
+            pago = min(e["deuda_estudios"], meses_con_sueldo * e["sueldo"] * PAGO_DEUDA_ESTUDIOS)
+            plata["deuda_estudios"] = round(pago)
             e["deuda_estudios"] -= pago
             e["ahorro"] -= pago
         if e["ahorro"] > 0:
+            plata["retorno"] = round(e["ahorro"] * self.pq.k("RETORNO_REAL"))
             e["ahorro"] *= 1 + self.pq.k("RETORNO_REAL")
+        self.registro["plata"] = plata
 
         # trabajo
         if trabaja:
@@ -811,6 +887,8 @@ class Vida:
             "sueldo_ref": round(e["sueldo_ref"]), "nivel": e["nivel"], "cargo": NIVELES[e["nivel"]],
             "tipo_empleador": e["tipo_empleador"], "rubro": e["rubro"], "edu": e["edu"],
             "ocupacion": e["ocupacion"], "antiguedad": e["antiguedad"], "ahorro": round(e["ahorro"]),
+            "tasa_ahorro": e["tasa_ahorro"], "meses_cesante": e["meses_cesante"],
+            "ingreso_total": round(self.ingreso_total),  # lo ganado en sueldos desde que empezó la partida
             "percentil": e["percentil"], "exposicion_ia": e["exposicion_ia"],
             "primer_empleo": e["primer_empleo"],
             "empresa_id": e.get("empresa_id", -1), "empresa": self._nombre_empresa(), "rol": self._nombre_cargo(),

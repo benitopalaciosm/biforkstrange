@@ -803,6 +803,66 @@
     1.5,
     3
    ]
+  },
+  {
+   "id": "K_OFERTA_CESANTE",
+   "valor": 1.8,
+   "unidad": "ofertas por mes esperado de búsqueda",
+   "descripcion": "Ofertas al mes = K / MESES_CESANTIA. Calibrado para que, con la regla del gemelo, la búsqueda dure en promedio MESES_CESANTIA (9,4 contra 9,1 en una prueba de 4.000 cesantías).",
+   "fuente": "eps_2024",
+   "calidad": "mixto",
+   "rango": [
+    1.5,
+    2.2
+   ]
+  },
+  {
+   "id": "GEMELO_UMBRAL_OFERTA",
+   "valor": 0.9,
+   "unidad": "fracción de sueldo_ref",
+   "descripcion": "El gemelo acepta una oferta si paga al menos esta fracción de su sueldo de referencia.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    0.8,
+    1.0
+   ]
+  },
+  {
+   "id": "GEMELO_MES_ACEPTA_TODO",
+   "valor": 7,
+   "unidad": "meses",
+   "descripcion": "Desde este mes de búsqueda el gemelo acepta cualquier oferta.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    4,
+    12
+   ]
+  },
+  {
+   "id": "COSTO_VOLVER_A_ESTUDIAR",
+   "valor": 7185000,
+   "unidad": "CLP",
+   "descripcion": "Lo que cuesta sacar un título técnico estudiando de noche: arancel anual mediano de un CFT ($2.395.000) por su duración real mediana (6 semestres, 3 años). Quien lo deja en segundo año paga la mitad.",
+   "fuente": "mineduc_mifuturo",
+   "calidad": "mixto",
+   "rango": [
+    4800000,
+    9600000
+   ]
+  },
+  {
+   "id": "COSTO_INTERCAMBIO",
+   "valor": 6000000,
+   "unidad": "CLP",
+   "descripcion": "Lo que cuesta vivir un semestre afuera (pasajes, arriendo y gastos), además del arancel que ya pagas en Chile.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": [
+    3000000,
+    10000000
+   ]
   }
  ]
 }

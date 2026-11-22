@@ -96,6 +96,7 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
     opciones = vida.opciones(decision_id)
     parametros = parametros or {}
     anio0, buscando0, ingreso0 = len(vida.historia), vida.anios_buscando, vida.ingreso_total
+    meses0 = vida.meses_buscando
     edad0, nivel0 = vida.e["edad"], vida.e["nivel"]
     usados = {o.id: _parametros(vida, o, parametros) for o in opciones}
     finales: dict[str, list[Vida]] = {
@@ -146,8 +147,9 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
             "es_base": es_base, "parametros": usados[o.id],
             "sueldo": _rango(sueldos),
             "ingreso_total": _rango([v.ingreso_total - ingreso0 for v in vidas]),
-            "paso_por_cesantia": sum(1 for v in vidas if v.anios_buscando > buscando0) / n,
-            "meses_sin_trabajo": 12 * sum(v.anios_buscando - buscando0 for v in vidas) / n,
+            # cesante, la búsqueda se vive mes a mes: cuenta quien pasó al menos un mes buscando
+            "paso_por_cesantia": sum(1 for v in vidas if v.meses_buscando > meses0 or v.anios_buscando > buscando0) / n,
+            "meses_sin_trabajo": sum(v.meses_buscando - meses0 for v in vidas) / n,
             "sin_trabajo_al_final": sum(1 for v in vidas if v.e["estado"] == "buscando") / n,
             "cargo_mas_probable": NIVELES[niveles.most_common(1)[0][0]],
             # la moda engaña: con 35 de 100 en junior y el resto repartido arriba, "lo más probable" es junior

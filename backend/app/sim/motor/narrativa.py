@@ -216,9 +216,17 @@ def narrar(decision: str, contexto: dict, semilla: int, anio: int, ocurrencia: i
     elif decision == "bootcamp":
         texto = (f"Ves un aviso de {s.uno('bc', ['un bootcamp de programación', 'un bootcamp de análisis de datos', 'un bootcamp de diseño UX'])}: "
                  f"cuatro meses intensivos para cambiarte al mundo tech.")
-    elif decision == "cesantia":
-        texto = (f"Llevas meses mandando currículums. {s.uno('ces', ['Te llamaron de dos lados y en ninguno quedaste', 'Te ofrecieron algo, pero pagan menos que antes', 'Un conocido te ofrece trabajar con él sin contrato'])}. "
+    elif decision == "cesantia" and int(contexto.get("meses_cesante") or 0) > 0:
+        texto = (f"Llevas {int(contexto['meses_cesante'])} meses sin trabajo. {s.uno('ces', ['Te llamaron de dos lados y en ninguno quedaste', 'Un conocido te ofrece trabajar con él sin contrato', 'Viste un bootcamp que promete reconvertirte en cuatro meses'])}. "
                  f"Los ahorros se van achicando.")
+    elif decision == "cesantia":
+        texto = (f"Te quedaste sin trabajo. {s.uno('ces', ['Actualizas el currículum esa misma noche', 'Un conocido te ofrece trabajar con él sin contrato', 'Te preguntas si es el momento de armar lo tuyo'])}. "
+                 f"Desde ahora cada mes cuenta.")
+    elif decision == "oferta_en_cesantia":
+        meses = int(contexto.get("meses_cesante") or 0)
+        llevas = "Recién empiezas a buscar" if meses == 0 else f"Llevas {meses} {'mes' if meses == 1 else 'meses'} buscando"
+        donde = f"de {oferta['nombre']}" if oferta.get("nombre") else "de una empresa"
+        texto = f"{llevas}. {canal}, te llama {quien} {donde} y te ofrece {puesto}."
     else:
         return None
     return {"situacion": texto}

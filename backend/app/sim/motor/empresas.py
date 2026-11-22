@@ -345,6 +345,8 @@ def _tipo_y_rubro(vida, decision_id: str, opcion_id: str) -> tuple[str, str | No
             literal = v[1:-1] if v.startswith("'") and v.endswith("'") else None
             if ef["var"] == "tipo_empleador" and ef["op"] == "fija" and literal:
                 tipo = literal
+            elif ef["var"] == "tipo_empleador" and ef["op"] == "fija" and e.get(v):
+                tipo = e[v]  # el de una oferta ya sorteada (oferta_tipo_empleador)
             elif ef["var"] == "rubro" and ef["op"] == "fija":
                 rubro = literal if literal is not None else e.get(v) if v in e else None
             elif ef["var"] == "estado" and literal == "empleado":
@@ -384,7 +386,8 @@ def _predecir_tipo(vida) -> str | None:
 # Decisiones que tratan de una sola oferta: todas sus opciones hablan de la misma empresa (cambiarte o
 # usarla para negociar). En las demás, cada opción es otra búsqueda y trae su propia empresa: en la
 # cesantía, "esperar algo de tu nivel" no es la misma pega que "tomar lo primero que salga".
-DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar"})
+DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar",
+                                   "oferta_en_cesantia"})  # la oferta que llega estando cesante: una sola empresa
 
 
 def origen_decision(decision_id: str, ocurrencia: int, opcion_id: str = "") -> str:

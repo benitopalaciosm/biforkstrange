@@ -227,6 +227,42 @@
    "inicio": "0"
   },
   {
+   "nombre": "oferta_sueldo",
+   "tipo": "numero",
+   "dominio": [
+    0,
+    30000000
+   ],
+   "unidad": "CLP líquidos al mes",
+   "descripcion": "Sueldo de la oferta que llegó este mes estando cesante; 0 si no hay oferta pendiente.",
+   "inicio": "0"
+  },
+  {
+   "nombre": "busca_mientras_informal",
+   "tipo": "bool",
+   "dominio": [
+    0,
+    1
+   ],
+   "unidad": "",
+   "descripcion": "1 si trabaja informal mientras sigue buscando un empleo con contrato: le siguen llegando ofertas cada mes (oferta_cesante).",
+   "inicio": "0"
+  },
+  {
+   "nombre": "oferta_tipo_empleador",
+   "tipo": "categoria",
+   "dominio": [
+    "grande",
+    "pyme",
+    "startup",
+    "publico",
+    ""
+   ],
+   "unidad": "",
+   "descripcion": "Tipo de empleador de la oferta pendiente.",
+   "inicio": "''"
+  },
+  {
    "nombre": "hueco",
    "tipo": "bool",
    "dominio": [
