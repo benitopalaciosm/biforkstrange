@@ -419,12 +419,12 @@ def test_quien_asciende_rapido_asciende_mas():
 
     pq = paquete()
     assert estado_inicial(Perfil(), pq)["prob_ascenso_extra"] == 0  # sin dato, como siempre
-    # se compara con el ritmo del paquete en los cargos que ya subió (ASCENSO 0,10 y 0,08 hasta senior)
-    assert ascenso_extra(0.15, 2, pq) == pytest.approx(0.5 * (0.15 - 0.09))
+    # se compara con el ritmo del paquete en los cargos que ya subió (ASCENSO 0,10 y 0,07 hasta senior)
+    assert ascenso_extra(0.15, 2, pq) == pytest.approx(0.5 * (0.15 - 0.085))
     assert ascenso_extra(0.05, 2, pq) == 0  # más lento no resta
     assert ascenso_extra(1.0, 1, pq) == 0.04  # tope
     e = estado_inicial(Perfil(nivel=2, ascensos_por_ano=0.15), pq)
-    assert e["prob_ascenso_extra"] == pytest.approx(0.03)
+    assert e["prob_ascenso_extra"] == pytest.approx(0.0325)
 
     leido = LEIDO.model_copy(update={"ascensos_internos": 2, "anios_experiencia": 8})  # nivel 2
     r = perfil_ia.completar(leido)
@@ -591,15 +591,15 @@ def test_claude_copia_el_sueldo_literal_y_la_app_lo_convierte_a_la_vista():
     # pesos, mensual y líquido: es el dato tal cual, sin frase de supuesto
     r = leer(sueldo_monto=1_800_000, sueldo_moneda="CLP", sueldo_periodo="mensual", sueldo_tipo="liquido")
     assert r["perfil"]["sueldo"] == 1_800_000 and r["inferido"] == []
-    # bruto: 82% (LIQUIDO del paquete), dicho como supuesto
+    # bruto: 81% (LIQUIDO del paquete), dicho como supuesto
     r = leer(sueldo_monto=3_200_000, sueldo_moneda="CLP", sueldo_periodo="mensual", sueldo_tipo="bruto")
-    assert r["perfil"]["sueldo"] == 2_624_000
+    assert r["perfil"]["sueldo"] == 2_592_000
     assert "sueldo" not in {s["campo"] for s in r["supuestos"]}  # vino del texto: no es un valor por defecto
-    assert any("82% del bruto" in f and "supuesto" in f for f in r["inferido"])
-    # dólares al año, brutos: 60.000 × 950 / 12 × 0,82
+    assert any("81% del bruto" in f and "supuesto" in f for f in r["inferido"])
+    # dólares al año, brutos: 60.000 × 951 / 12 × 0,81 = 3.851.550, redondeado a miles
     r = leer(sueldo_monto=60_000, sueldo_moneda="USD", sueldo_periodo="anual", sueldo_tipo="bruto")
-    assert r["perfil"]["sueldo"] == 3_895_000
-    assert any("1 USD = $950" in f and "dividido en 12" in f for f in r["inferido"])
+    assert r["perfil"]["sueldo"] == 3_852_000
+    assert any("1 USD = $951" in f and "dividido en 12" in f for f in r["inferido"])
     # lo que el texto no dice se supone, y se dice
     r = leer(sueldo_monto=1_500_000, sueldo_moneda="CLP")
     assert r["perfil"]["sueldo"] == 1_500_000

@@ -16,8 +16,8 @@ from app.sim.motor.perfil import Perfil, estado_inicial
 from app.sim.motor.politicas import Inercia
 
 # Literales de parametros.json (no se importan del código bajo prueba)
-ASCENSO_POBLACION = {"18-24": 0.056, "25-29": 0.061, "30-34": 0.061, "35-39": 0.055, "40-44": 0.05,
-                     "45-49": 0.045, "50-54": 0.045}
+ASCENSO_POBLACION = {"18-24": 0.065, "25-29": 0.069, "30-34": 0.066, "35-39": 0.06, "40-44": 0.055,
+                     "45-49": 0.052, "50-54": 0.052}
 ALZA_ASCENSO_MEDIA = (0.05 + 0.1) / 2
 MICRO_MEDIANA = 400_000
 
