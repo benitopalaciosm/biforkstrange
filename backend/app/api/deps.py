@@ -50,11 +50,13 @@ def get_twin_repo() -> TwinProfileRepository:
 
 @lru_cache
 def get_twin_brain() -> Brain:
-    if get_settings().llm_enabled:
+    from app.services.claude_comun import hay_credenciales
+
+    if hay_credenciales():
         from app.core.llm import get_claude
 
         return ClaudeBrain(get_claude())
-    return OfflineBrain()  # sin ANTHROPIC_API_KEY: preguntas de prueba, sin costo
+    return OfflineBrain()  # sin credenciales de Anthropic: preguntas de prueba, sin costo
 
 
 def get_twin_service(

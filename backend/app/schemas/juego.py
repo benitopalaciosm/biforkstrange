@@ -1,8 +1,16 @@
+from functools import lru_cache
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
+from app.sim.motor.empresas import universidades
+from app.sim.motor.paquete import paquete
 from app.sim.motor.perfil import Perfil
+
+
+@lru_cache(maxsize=1)
+def _ids_universidades() -> frozenset[str]:
+    return frozenset(u["universidad_id"] for u in universidades(paquete()))
 
 
 class PerfilIn(BaseModel):
@@ -43,9 +51,29 @@ class PerfilIn(BaseModel):
     toda_su_carrera_en: Literal["", "publico", "startup"] = ""
     ascensos_por_ano: float | None = Field(None, ge=0, le=2)
     empresas_cerradas: int = Field(0, ge=0, le=10)
-    # lo abierto: cómo te describes con tus palabras y tu gemelo digital (sus rasgos afinados)
-    relato: str = Field("", max_length=20000, exclude=True)  # fuera de model_dump: no es campo del motor
+    universidad_id: str = Field("", max_length=40)
+
+    @field_validator("universidad_id")
+    @classmethod
+    def _universidad_del_catalogo(cls, v: str) -> str:
+        if v and v not in _ids_universidades():
+            raise ValueError(f"universidad desconocida: {v!r}")
+        return v
+
+    # lo abierto: cómo te describes con tus palabras y tu gemelo digital. Fuera de model_dump: no son campos del motor
+    relato: str = Field("", max_length=20000, exclude=True)
     gemelo_id: str | None = Field(None, max_length=64, exclude=True)
+    # la afinidad del gemelo congelada al empezar la partida (de POST /juego/afinidad); manda sobre gemelo_id
+    afinidad: dict[str, float] | None = Field(None, exclude=True)
+
+    @field_validator("afinidad")
+    @classmethod
+    def _afinidad_acotada(cls, v: dict[str, float] | None) -> dict[str, float] | None:
+        if v is None:
+            return None
+        from app.services.juego_personal import acotar_afinidad
+
+        return acotar_afinidad(v)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())
@@ -65,6 +93,17 @@ class PartidaIn(BaseModel):
     gemelos: int = Field(100, ge=0, le=2000)
     # lo que se elige dentro de cada opción de la decisión pendiente, para comparar: {opción: {variable: valor}}
     parametros: dict[str, dict[str, str | int]] = {}
+
+
+class NarrarIn(PartidaIn):
+    """Qué textos narrar de la partida: la carta pendiente, la historia o un mundo."""
+
+    que: Literal["pendiente", "historia", "mundo"] = "pendiente"
+    mundo: int | None = Field(None, ge=0, le=1999)
+
+
+class AfinidadIn(BaseModel):
+    gemelo_id: str = Field(min_length=1, max_length=64)
 
 
 class MundoIn(PartidaIn):

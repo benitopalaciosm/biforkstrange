@@ -26,7 +26,8 @@ function contexto(p: Perfil): string {
 
 /**
  * Paso del onboarding: tu gemelo apuesta en secreto cómo vas a responder, respondes y ves si te leyó.
- * Usa el examen a ciegas de /gemelo; si no tienes gemelo, lo arma con lo que contaste.
+ * Usa el examen a ciegas de /gemelo; si no tienes gemelo, lo arma con lo que contaste. Las respuestas del
+ * examen no mueven rasgos por sí solas: al cerrar la última ronda se vuelve a estimar el perfil con ellas.
  */
 export function Prueba({ perfil, onGemelo }: { perfil: Perfil; onGemelo: (id: string) => void }) {
   const [gemelo, setGemelo] = useState<TwinProfile | null>(null);
@@ -35,6 +36,7 @@ export function Prueba({ perfil, onGemelo }: { perfil: Perfil; onGemelo: (id: st
   const [rondas, setRondas] = useState<ExamItem[]>([]);
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [aprendio, setAprendio] = useState(false);
 
   async function asegurarGemelo(): Promise<TwinProfile> {
     if (gemelo) return gemelo;
@@ -82,6 +84,12 @@ export function Prueba({ perfil, onGemelo }: { perfil: Perfil; onGemelo: (id: st
       setRevelado(r.reveal);
       setRondas((x) => [...x, r.reveal]);
       setPregunta(null);
+      if (rondas.length + 1 >= RONDAS) {
+        // lo que respondiste entra al contexto del gemelo; se vuelven a estimar los rasgos que no has medido
+        setOcupado("Tu gemelo está aprendiendo de tus respuestas…");
+        setGemelo(await twinApi.prior(r.profile.id, r.profile.version));
+        setAprendio(true);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos guardar tu respuesta.");
     } finally {
@@ -98,8 +106,9 @@ export function Prueba({ perfil, onGemelo }: { perfil: Perfil; onGemelo: (id: st
         <Heading level={2}>¿Tu gemelo te conoce?</Heading>
         {!pregunta && !revelado && (
           <Text size="sm">
-            Te hace una pregunta, apuesta en secreto qué vas a responder y después comparamos. Con lo que falle, aprende
-            antes de que empiece tu partida.
+            Te hace una pregunta, apuesta en secreto qué vas a responder y después comparamos. Después de {RONDAS}{" "}
+            preguntas recalcula tus rasgos con lo que respondiste. Si lo pruebas, queda conectado a tu partida: sus rasgos
+            deciden qué cartas te salen, no lo que pasa con cada una.
           </Text>
         )}
       </Stack>
@@ -128,7 +137,8 @@ export function Prueba({ perfil, onGemelo }: { perfil: Perfil; onGemelo: (id: st
       )}
       {rondas.length >= RONDAS && !pregunta && (
         <Text size="sm">
-          Listo. Puedes seguir afinándolo cuando quieras en <a href="/gemelo#examen" target="_blank" rel="noreferrer">tu gemelo</a>.
+          {aprendio ? "Listo: tu gemelo ya recalculó tus rasgos con lo que respondiste. " : "Listo. "}
+          Puedes seguir afinándolo cuando quieras en <a href="/gemelo#examen" target="_blank" rel="noreferrer">tu gemelo</a>.
         </Text>
       )}
     </div>

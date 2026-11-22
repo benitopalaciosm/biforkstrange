@@ -1,10 +1,14 @@
 import { http } from "@/shared/lib/http";
 import { guardarRetrato } from "./retrato";
-import type { Catalogo, Duda, EnJuego, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
+import type { Catalogo, Duda, EnJuego, MundoDetalle, Narrado, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
 
 export const GEMELOS = 100;
 
 export const getCatalogo = () => http<Catalogo>("/api/juego/catalogo");
+
+/** La afinidad de tu gemelo (cuánto te tira cada carta), para congelarla al empezar la partida. */
+export const getAfinidad = (gemelo_id: string) =>
+  http<{ afinidad: Record<string, number> }>("/api/juego/afinidad", { method: "POST", body: JSON.stringify({ gemelo_id }) });
 
 export const getDudas = (perfil: Perfil) =>
   http<Duda[]>("/api/juego/dudas", { method: "POST", body: JSON.stringify({ perfil }) });
@@ -34,6 +38,18 @@ export const getEnJuego = (perfil: Perfil, dudas: string[]) =>
   http<EnJuego>("/api/juego/dudas-en-juego", {
     method: "POST",
     body: JSON.stringify({ perfil, dudas, gemelos: GEMELOS }),
+  });
+
+/** Textos de la partida contados por Sonnet. Sin gemelos: el servidor solo rejuega tu vida. */
+export const getNarracion = (
+  partida: Partida,
+  que: "pendiente" | "historia" | "mundo",
+  opciones: { mundo?: number; parametros?: ParametrosComparar; signal?: AbortSignal } = {},
+) =>
+  http<{ items: Narrado[] }>("/api/juego/narrar", {
+    method: "POST",
+    body: JSON.stringify({ ...partida, gemelos: 0, que, mundo: opciones.mundo, parametros: opciones.parametros ?? {} }),
+    signal: opciones.signal,
   });
 
 export const TEXTO_MAX = 60_000;

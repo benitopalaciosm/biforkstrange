@@ -1,26 +1,20 @@
-"""El juego hecho a tu medida: tu relato libre y los rasgos afinados de tu gemelo.
+"""El juego hecho a tu medida: tu relato libre y los rasgos de tu gemelo.
 
 Cada fuente tiene un solo efecto; ninguna toca las reglas, los resultados ni los mundos de comparación:
-1. Tu gemelo decide QUÉ cartas te salen: cada carta pesa más o menos según tus rasgos medidos
-   (afinidad). Solo en tu partida; la población calibrada y los mundos de comparación no cambian.
-2. Tu relato decide CÓMO se cuentan: Claude reescribe la situación de la carta y el detalle de
-   cada opción con lo que contaste y lo que ya viviste. Se guarda en memoria para que la misma carta
-   no cambie de texto cada vez que la partida se vuelve a jugar.
+1. Tu gemelo decide QUÉ cartas te salen: cada carta pesa más o menos según tus rasgos (afinidad).
+   Solo en tu partida; la población calibrada y los mundos de comparación no cambian. La afinidad se
+   congela al empezar la partida (`POST /juego/afinidad`) para que rejugarla dé siempre las mismas cartas.
+2. Tu relato decide CÓMO se cuentan: el narrador (`narrador_ia`) lo recibe como trasfondo al reescribir
+   la carta pendiente y tu historia, con sus mismas reglas (sin cifras, largo máximo, caché).
 """
 
-import hashlib
-import logging
 import math
+import re
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel
-
-from app.core.config import get_settings
 from app.twin.profile import TwinProfile
 
-log = logging.getLogger(__name__)
-
-PERFIL_CHARS = 6000
+RELATO_CHARS = 6000
 FUERZA = 1.2  # supuesto: un rasgo en el extremo, medido con certeza, multiplica el peso por ~e^1.2 ≈ 3,3
 SD_SIN_DATO = 25  # sobre esta duda el rasgo no se usa
 
@@ -54,15 +48,19 @@ AFINIDAD: dict[str, list[str]] = {
     "comprar_vivienda": ["vcon", "ord", "-rfin"],
 }
 
+# Bloques entre cercas (```gemelo-laboral … ```): traen sueldo y otros datos del formulario, no el relato.
+_CERCAS = re.compile(r"```.*?(```|$)", re.DOTALL)
+
 
 @dataclass
 class Personal:
-    texto: str  # lo que el narrador sabe de la persona: solo su relato ("" si no escribió nada)
+    relato: str  # lo que el narrador sabe de la persona en sus palabras ("" si no escribió nada)
     afinidad: dict[str, float] = field(default_factory=dict)  # del gemelo: solo qué cartas te salen
 
-    @property
-    def clave(self) -> str:
-        return hashlib.sha1(self.texto.encode()).hexdigest()[:16]
+
+def limpiar_relato(texto: str) -> str:
+    """El relato sin los bloques de datos que pegó junto a él, recortado a lo que entra al prompt."""
+    return re.sub(r"\n{3,}", "\n\n", _CERCAS.sub("", texto or "")).strip()[:RELATO_CHARS]
 
 
 def _valor(p: TwinProfile, k: str) -> float | None:
@@ -85,111 +83,16 @@ def afinidad(p: TwinProfile) -> dict[str, float]:
     return out
 
 
-def desde(relato: str, gemelo: TwinProfile | None) -> Personal | None:
-    relato = relato.strip()
-    if not relato and gemelo is None:
+def acotar_afinidad(af: dict[str, float]) -> dict[str, float]:
+    """La afinidad que manda el cliente: solo cartas conocidas y dentro del rango que puede dar un gemelo."""
+    lo, hi = math.exp(-FUERZA), math.exp(FUERZA)
+    return {k: min(hi, max(lo, float(v))) for k, v in af.items() if k in AFINIDAD and math.isfinite(v)}
+
+
+def desde(relato: str, gemelo: TwinProfile | None, congelada: dict[str, float] | None = None) -> Personal | None:
+    """Lo personal de la partida. `congelada` (la afinidad del inicio) manda sobre el gemelo vivo."""
+    relato = limpiar_relato(relato)
+    af = congelada if congelada is not None else (afinidad(gemelo) if gemelo else {})
+    if not relato and not af:
         return None
-    return Personal(
-        texto=f"CÓMO SE DESCRIBE, EN SUS PALABRAS:\n{relato[:PERFIL_CHARS]}" if relato else "",
-        afinidad=afinidad(gemelo) if gemelo else {},
-    )
-
-
-# ---------------------------------------------------------------- narración con Claude
-
-class _OpcionOut(BaseModel):
-    opcion: str
-    detalle: str
-
-
-class _CartaOut(BaseModel):
-    situacion: str
-    opciones: list[_OpcionOut]
-
-
-_cache: dict[tuple, dict] = {}
-
-
-def _prompt(personal: Personal, carta: dict, contexto: dict, plantilla: str, vivido: str) -> str:
-    ops = "\n".join(f'- "{o["opcion"]}": {o["nombre"]}. {o.get("detalle", "")}' for o in carta["opciones"])
-    ctx = ", ".join(f"{k} {v}" for k, v in contexto.items() if v not in ("", None))
-    return f"""Eres el narrador de un juego sobre decisiones de trabajo. Cada año a la persona le llega una carta: una situación y opciones. El motor del juego ya decidió QUÉ carta es y QUÉ hace cada opción; tú solo la cuentas a la medida de esta persona.
-
-QUIÉN ES
-{personal.texto}
-
-DÓNDE ESTÁ HOY (estado del juego): {ctx}
-
-LO QUE YA VIVIÓ EN ESTA PARTIDA
-{vivido or "(es su primer año)"}
-
-LA CARTA: {carta["nombre"]} — {carta["pregunta"]}
-Versión genérica de la situación: {plantilla or "(no hay)"}
-Opciones (no cambies qué significa cada una):
-{ops}
-
-Escribe:
-- "situacion": 2–3 frases (máximo 55 palabras), segunda persona, español de Chile. Que nazca de su vida: su pega, lo que le importa, lo que contó y lo que ya vivió en la partida. Concreta (un lugar, una persona, un momento).
-- "opciones": para CADA opción, con su mismo id en "opcion", un "detalle" de máximo 14 palabras que diga qué significaría para ESTA persona.
-
-Reglas: no inventes cifras (montos, porcentajes), ni datos de salud o de terceros. Respeta el estado del juego aunque choque con lo que contó (el juego manda). Género: el que use al hablar de sí; si no está claro, neutro."""
-
-
-def _vivido(salida: dict) -> str:
-    lineas = []
-    for a in salida.get("historia", [])[-6:]:
-        hechos = [f'{d["nombre"]}: {d.get("opcion_nombre", "")}' for d in a.get("decisiones", [])]
-        malos = [e["nombre"] for e in a.get("eventos", []) if e.get("tono") in ("malo", "bueno") and not e.get("rutina")]
-        lineas.append(f'- {a.get("edad")} años: ' + "; ".join(hechos + malos))
-    return "\n".join(lineas)
-
-
-def _llm():
-    from app.core.llm import get_claude
-
-    return get_claude(get_settings().anthropic_model)
-
-
-def narrar_pendiente(salida: dict, personal: Personal, semilla: int) -> None:
-    """Reescribe la carta pendiente a tu medida (en el lugar). Sin API key o si Claude falla, queda la plantilla."""
-    pend = salida.get("pendiente")
-    if not pend or not get_settings().llm_enabled:
-        return
-    anio = salida["anio"]
-    ocurrencia = sum(1 for d in (salida.get("anio_en_curso") or {}).get("decisiones", []) if d["decision"] == pend["decision"])
-    clave = (personal.clave, semilla, anio, pend["decision"], ocurrencia)
-    hecho = _cache.get(clave)
-    if hecho is None:
-        plantilla = (pend.get("narrativa") or {}).get("situacion", "")
-        ids = {o["opcion"] for o in pend["opciones"]}
-
-        def check(o: _CartaOut):
-            if not o.situacion.strip() or {x.opcion for x in o.opciones} != ids:
-                raise ValueError(f"Devuelve una entrada por opción, con estos ids: {sorted(ids)}")
-
-        try:
-            out = _llm().ask(_prompt(personal, pend, salida["estado"], plantilla, _vivido(salida)), _CartaOut,
-                             check=check, max_tokens=4000, fast=True)
-        except Exception as e:  # el juego sigue con la plantilla
-            log.warning("No se pudo personalizar la carta %s: %s", pend["decision"], e)
-            return
-        hecho = {"situacion": out.situacion.strip(), "detalles": {o.opcion: o.detalle.strip() for o in out.opciones}}
-        _cache[clave] = hecho
-    _aplicar(pend, hecho)
-    pend["personalizada"] = True
-
-
-def _aplicar(d: dict, hecho: dict) -> None:
-    d["narrativa"] = {**(d.get("narrativa") or {}), "situacion": hecho["situacion"]}
-    for o in d.get("opciones") or []:
-        if o["opcion"] in hecho["detalles"]:
-            o["detalle"] = hecho["detalles"][o["opcion"]]
-
-
-def historia_personal(salida: dict, personal: Personal, semilla: int) -> None:
-    """Las cartas ya respondidas conservan el texto con que te llegaron."""
-    for a in salida.get("historia", []) + ([salida["anio_en_curso"]] if salida.get("anio_en_curso") else []):
-        for d in a.get("decisiones", []):
-            hecho = _cache.get((personal.clave, semilla, a["anio"] - 1, d["decision"], d.get("ocurrencia", 0)))
-            if hecho:
-                d["narrativa"] = {**(d.get("narrativa") or {}), "situacion": hecho["situacion"]}
+    return Personal(relato=relato, afinidad=af)

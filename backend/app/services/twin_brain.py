@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.core.llm import ClaudeJSON
 from app.twin import prompts
+from app.twin.cat import SDO
 from app.twin.dims import DIMS, TEMA_LABELS
 from app.twin.profile import Dim, ExamItem, Option
 
@@ -98,6 +99,12 @@ def _clamp(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
 
 
+# Una estimación de Claude desde texto vale a lo más como una respuesta de elección forzada (ruido SDO).
+# Con un piso menor, la adivinanza pesaba más que las respuestas reales: 85 ± 8 seguía en 56 después de
+# cuatro respuestas que decían 20.
+PRIOR_SD_MIN = SDO
+
+
 # ---- Claude ----
 
 class ClaudeBrain:
@@ -111,7 +118,7 @@ class ClaudeBrain:
 
         out = self.llm.ask(prompts.prior(context, keys), PriorOut, effort="medium", check=check)
         return {
-            d.key: Dim(m=_clamp(d.m, 0, 100), sd=_clamp(d.sd, 8, 30), ev=d.ev)
+            d.key: Dim(m=_clamp(d.m, 0, 100), sd=_clamp(d.sd, PRIOR_SD_MIN, 30), ev=d.ev)
             for d in out.dims
             if d.key in keys
         }

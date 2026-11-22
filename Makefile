@@ -1,4 +1,4 @@
-.PHONY: install back front test perfil simular jugar comparar dudas validar supuestos
+.PHONY: install back front test perfil simular jugar comparar dudas validar supuestos empresas universidades logos transiciones
 install:
 	cd backend && uv sync
 	cd frontend && npm install
@@ -43,3 +43,14 @@ validar:
 # De dónde sale cada número: make supuestos  (o make supuestos CALIDAD=supuesto)
 supuestos:
 	cd backend && uv run python -m app.cli supuestos $(if $(CALIDAD),--calidad $(CALIDAD))
+# Catálogos de empresas, cargos y universidades (simulador/tablas). Los crudos viven fuera del repo.
+DATOS_LABORALES ?= ../../datos_laborales
+empresas:
+	cd backend && python3 -I scripts/empresas_catalogo.py $(DATOS_LABORALES)
+universidades:
+	cd backend && uv run --with openpyxl python -I scripts/universidades.py $(DATOS_LABORALES)
+logos:
+	cd backend && uv run --with pillow python -I scripts/logos.py $(DATOS_LABORALES)
+	$(MAKE) empresas universidades
+transiciones:
+	cd backend && uv run --with pyreadstat --with pandas python -I scripts/transiciones_tipo.py $(DATOS_LABORALES)

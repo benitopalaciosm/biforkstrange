@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getDudas, getMundo, getVista } from "../api";
+import { getAfinidad, getDudas, getMundo, getNarracion, getVista } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
 
 export type Fase = "inicio" | "perfil" | "duda" | "carta" | "paso" | "cierre";
@@ -41,6 +41,19 @@ function guardar(g: Guardado) {
 }
 
 const mensaje = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/**
+ * Congela la afinidad del gemelo al empezar. El servidor rejuega la partida en cada llamada: si leyera el
+ * gemelo vivo y este cambiara (otra pestaña en /gemelo) o se perdiera (reinicio), las cartas cambiarían.
+ */
+async function congelarAfinidad(p: Perfil): Promise<Perfil> {
+  if (!p.gemelo_id) return { ...p, afinidad: undefined };
+  try {
+    return { ...p, afinidad: (await getAfinidad(p.gemelo_id)).afinidad };
+  } catch {
+    return { ...p, afinidad: {} }; // el gemelo ya no está: la partida se juega sin él, siempre igual
+  }
+}
 
 /**
  * La partida de la persona. El servidor no guarda nada: aquí vive (perfil, semilla, duda, elecciones)
@@ -102,8 +115,9 @@ export function usePartida() {
   /** Perfil listo: se piden las dudas que esa persona puede elegir. */
   const [dudasSugeridas, setDudasSugeridas] = useState<DudaSugerida[]>([]);
 
-  const verDudas = useCallback(async (p: Perfil, sugeridas: DudaSugerida[] = []) => {
+  const verDudas = useCallback(async (conAfinidad: Perfil, sugeridas: DudaSugerida[] = []) => {
     const mio = ++turno.current;
+    const p = { ...conAfinidad, afinidad: undefined }; // la de una partida anterior no vale: se congela al empezar
     setDudasSugeridas(sugeridas);
     setPerfil(p);
     setPartida(null);
@@ -124,16 +138,16 @@ export function usePartida() {
   }, []);
 
   /** Perfil listo y sin duda elegida: la primera carta se sortea como todas las demás. */
-  const empezarAlAzar = useCallback(
-    (p: Perfil) => {
-      turno.current++;
-      setPerfil(p);
-      setDudasSugeridas([]);
-      setVista(null);
-      setPrevia(null);
-      const nueva: Partida = { perfil: p, semilla: Math.floor(Math.random() * 1_000_000), duda: null, elecciones: [] };
+  /** Una partida nueva de `p` con la duda dada (o sin duda), con la afinidad del gemelo congelada. */
+  const nuevaPartida = useCallback(
+    async (p: Perfil, duda: string | null) => {
+      const mio = ++turno.current;
       parametrosCarta.current = {};
       setCargando(true);
+      const congelado = await congelarAfinidad(p);
+      if (mio !== turno.current) return; // alguien pidió otra cosa mientras tanto
+      setPerfil(congelado);
+      const nueva: Partida = { perfil: congelado, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
       void pedir(nueva, (v) => {
         setPartida(nueva);
         setPrevia(null);
@@ -144,20 +158,18 @@ export function usePartida() {
     [pedir],
   );
 
-  const empezar = useCallback(
-    (duda: string) => {
-      const nueva: Partida = { perfil, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
-      parametrosCarta.current = {};
-      setCargando(true);
-      void pedir(nueva, (v) => {
-        setPartida(nueva);
-        setPrevia(null);
-        setVista(v);
-        setFase(v.terminada ? "cierre" : "carta");
-      });
+  const empezarAlAzar = useCallback(
+    (p: Perfil) => {
+      setPerfil(p);
+      setDudasSugeridas([]);
+      setVista(null);
+      setPrevia(null);
+      void nuevaPartida(p, null);
     },
-    [perfil, pedir],
+    [nuevaPartida],
   );
+
+  const empezar = useCallback((duda: string) => void nuevaPartida(perfil, duda), [perfil, nuevaPartida]);
 
   /** Retoma la partida guardada (al recargar la página). */
   const continuar = useCallback(() => {
@@ -204,6 +216,15 @@ export function usePartida() {
     return getMundo(partida, mundo, parametrosCarta.current);
   }, [partida]);
 
+  /** Textos de la partida contados por Sonnet (la carta, la historia o un mundo de la carta). */
+  const narrar = useCallback(
+    (que: "pendiente" | "historia" | "mundo", signal: AbortSignal, mundo?: number) => {
+      if (!partida) return Promise.reject(new Error("No hay partida"));
+      return getNarracion(partida, que, { mundo, parametros: que === "mundo" ? parametrosCarta.current : {}, signal });
+    },
+    [partida],
+  );
+
   const seguir = useCallback(() => {
     if (vista) setFase(vista.terminada ? "cierre" : "carta");
   }, [vista]);
@@ -222,6 +243,6 @@ export function usePartida() {
 
   return {
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error,
-    irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, seguir, jugarDeNuevo, descartar,
+    irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };
 }

@@ -11,7 +11,7 @@ PRIVACIDAD = (
 
 def prior(context: str, keys: list[str]) -> str:
     dims = "\n".join(f"{k}: {DIMS[k].nombre}. {DIMS[k].descripcion}" for k in keys)
-    return f"""Eres un psicólogo organizacional. Estima, para la persona descrita, su posición (0–100, donde 50 es el promedio de profesionales jóvenes) en cada dimensión, y tu incertidumbre como desviación estándar (sd entre 8 y 30). Usa sd alta (25–30) si el perfil no da evidencia directa; sd baja solo con evidencia clara y repetida. Prioriza lo que respondió de verdad (examen, correcciones, calibración) por sobre lo autodeclarado. No caricaturices ni rellenes con estereotipos.
+    return f"""Eres un psicólogo organizacional. Estima, para la persona descrita, su posición (0–100, donde 50 es el promedio de profesionales jóvenes) en cada dimensión, y tu incertidumbre como desviación estándar (sd entre 18 y 30). Usa sd alta (25–30) si el perfil no da evidencia directa; 18–20 solo con evidencia clara y repetida. Prioriza lo que respondió de verdad (examen, correcciones, calibración) por sobre lo autodeclarado. No caricaturices ni rellenes con estereotipos.
 
 PERFIL
 {context}
