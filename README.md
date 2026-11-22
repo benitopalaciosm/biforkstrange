@@ -6,9 +6,7 @@
 
 Track: Simulations · Platanus Hack 26 Santiago, team 32
 
-Las decisiones de carrera se toman a ciegas, y la mitad depende de la suerte. **Agarra la pala** es un simulador donde tu gemelo digital vive 10 años de tu vida laboral antes que tú: cada año enfrenta una decisión, eliges qué hace, se tira el dado y ves qué le pasó.
-
-Lo que hace la diferencia: **antes de elegir, ves cómo le fue a tus gemelos**.
+Las decisiones de carrera se toman una sola vez y nunca sabes cómo te habría ido con la otra. **Agarra la pala** se las pasa a tu gemelo digital: él prueba cada opción en 100 mundos distintos, con la misma suerte en todos, y recién ahí eliges tú.
 
 ## Cómo funciona
 
