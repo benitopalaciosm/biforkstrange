@@ -26,26 +26,28 @@ export function AnioTranquilo({ vista, cargando, error, onElegir }: {
       <Stack gap={8} className="vd-subir">
         <Meta>Un año tranquilo</Meta>
         <Heading level={2} as="h1">
-          Este año no te llegó ninguna propuesta.
+          Un año sin sobresaltos.
         </Heading>
+        <Text>No te llegó ninguna propuesta. Puedes seguir igual, o mirar algo por tu cuenta.</Text>
       </Stack>
 
+      {/* La sugerencia es opcional: va como una idea suave, no como la acción principal */}
       {s && (
         <div className="jg-propuesta vd-subir">
-          <span className="jg-propuesta-eti">Algo que gente como tú se plantea este año</span>
-          <b>{s.pregunta}</b>
-          {s.dato && (
+          <span className="jg-propuesta-eti">Si quieres, una idea</span>
+          <b>{s.nombre}</b>
+          <span className="jg-propuesta-dato">{s.pregunta}</span>
+          {/* solo la estadística de qué tan seguido la gente lo hace; las cifras de papers van dentro de la decisión */}
+          {s.dato && s.es_frecuencia && (
             <span className="jg-propuesta-dato">
-              <strong>{s.es_frecuencia ? "Dato oficial: " : "Un dato: "}</strong>
-              {s.dato}
-              {s.fuente && <small> · {s.fuente}</small>}
+              <small>
+                {s.dato} · {s.fuente}
+              </small>
             </span>
           )}
-          <div className="jg-propuesta-botones">
-            <Button onClick={() => elegir(s.decision)} disabled={cargando}>
-              Sí, quiero ver cómo me iría
-            </Button>
-          </div>
+          <button type="button" className="ob-link jg-propuesta-ver" onClick={() => elegir(s.decision)} disabled={cargando}>
+            Ver cómo te iría
+          </button>
         </div>
       )}
 
@@ -62,7 +64,7 @@ export function AnioTranquilo({ vista, cargando, error, onElegir }: {
 
       {error && <Text size="sm">{error}</Text>}
       <ScreenFooter>
-        <Button variant={s ? "quiet" : undefined} onClick={() => elegir("seguir")} disabled={cargando}>
+        <Button onClick={() => elegir("seguir")} disabled={cargando}>
           Seguir igual este año
         </Button>
         {!verTodo && otras.length > 0 && (

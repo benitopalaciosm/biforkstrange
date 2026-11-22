@@ -55,6 +55,7 @@ def jugar(perfil: Perfil, semilla: int, elecciones: list[dict], duda: str | None
     if duda is not None and not vida.aplica(duda):
         raise ValueError(f"la decisión {duda!r} no aplica a este perfil")
     jugador = Jugador(elecciones)
+    vida.primer_anio_con_propuesta = duda is None  # sin duda, el primer año igual trae algo que decidir
     edad_final = perfil.edad + anios  # un doctorado ocupa varios años: se cuenta por edad, no por rondas
     try:
         while vida.e["edad"] < edad_final and not vida.terminada():
@@ -139,7 +140,7 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
             "calidad": d["calidad"], "creencia_vs_dato": None, "evidencia": [],
             "sugerida": vida.sugerida,  # lo que más suele buscar la gente como tú este año
             # la propuesta del año: la decisión sugerida, con un dato del paquete que la respalda
-            "sugerencia": _sugerencia(pq, vida.sugerida),
+            "sugerencia": _sugerencia(pq, _sugerible(vida)),
             "opciones": [{**opcion_a_dict(o), "elecciones_internas": [], "ejemplo_real": None} for o in falta.opciones],
             "comparacion": None,
         }
@@ -183,6 +184,24 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
     return salida
 
 
+# Decisiones drásticas: siguen en "ver más", pero no se destacan como la idea del año (nadie las pidió)
+NO_SUGERIR = frozenset({"renunciar", "sabatico", "emigrar"})
+
+
+def _sugerible(vida: Vida) -> str | None:
+    """La idea que se muestra en un año tranquilo: la que sorteó el motor, salvo que sea drástica; entonces, la
+    más frecuente de las que no lo son. Solo cambia lo que se muestra: las copias siguen con lo que se sorteó."""
+    if vida.sugerida and vida.sugerida not in NO_SUGERIR:
+        return vida.sugerida
+    otras = [(id_, peso) for id_, peso in vida.cartas_posibles() if id_ in vida.buscables() and id_ not in NO_SUGERIR]
+    return max(otras, key=lambda x: x[1])[0] if otras else None
+
+
+def _cita_corta(cita: str) -> str:
+    """Lo primero de la cita, sin el detalle: "Subsecretaría de Previsión Social" en vez de la ronda y el módulo."""
+    return cita.split(",")[0].strip()
+
+
 def _sugerencia(pq: Paquete, decision_id: str | None) -> dict | None:
     """La propuesta de un año tranquilo. No es un modelo nuevo: es la decisión que el motor ya sorteó según qué tan
     seguido le pasa a gente como tú (el peso del paquete), con la primera cifra de su evidencia."""
@@ -196,7 +215,7 @@ def _sugerencia(pq: Paquete, decision_id: str | None) -> dict | None:
     dato = (frecuencias or evidencia or [None])[0]
     fuente = pq.fuentes.get(dato["fuente"], {}) if dato else {}
     return {"decision": decision_id, "nombre": d["nombre"], "pregunta": d["pregunta"],
-            "dato": dato["cifra"] if dato else None, "fuente": fuente.get("cita") if dato else None,
+            "dato": dato["cifra"] if dato else None, "fuente": _cita_corta(fuente.get("cita", "")) if dato else None,
             "es_frecuencia": bool(frecuencias), "creencia_vs_dato": d.get("creencia_vs_dato")}
 
 

@@ -465,11 +465,12 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 
 /* Año tranquilo: la propuesta del año */
 .jg-propuesta {
-  display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 16px;
-  background: var(--acento-suave); border: 1px solid var(--acento);
+  display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 14px;
+  background: var(--papel); border: 1px dashed var(--linea);
 }
-.jg-propuesta-eti { font-size: .8em; color: var(--acento); }
-.jg-propuesta b { font-size: 1.15em; font-weight: 600; }
+.jg-propuesta-eti { font-size: .8em; color: var(--suave); }
+.jg-propuesta b { font-weight: 600; }
+.jg-propuesta-ver { align-self: flex-start; margin-top: 2px; }
 .jg-propuesta-dato { color: var(--media); font-size: .9em; }
 .jg-propuesta-dato small { color: var(--suave); }
 .jg-propuesta-botones { margin-top: 6px; }

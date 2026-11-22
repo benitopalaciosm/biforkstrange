@@ -139,6 +139,7 @@ class Vida:
         self._sortear_ia()
         self.pega = 0                     # sube cada vez que esta vida entra a un trabajo nuevo
         self.sugerida: str | None = None  # en un año tranquilo, lo que la gente como tú suele buscar
+        self.primer_anio_con_propuesta = False  # la persona: su partida no parte con un año tranquilo
         self._derivar(inicio=True)
         self.reparto: dict | None = None
 
@@ -241,6 +242,13 @@ class Vida:
         else:
             if not decisiones and con_cartas:
                 sorteada = self._sortear_carta()
+                if sorteada and sorteada not in LLEGAN and self.primer_anio_con_propuesta and self.anio == 0:
+                    # la partida no parte con un año tranquilo: el primer año te llega algo que decidir
+                    llegan = [(id_, peso) for id_, peso in self.cartas_posibles() if id_ in LLEGAN]
+                    if llegan:
+                        sorteada = llegan[self.dados.elegir(self.anio, "carta:primera", [p for _, p in llegan])][0]
+                        self.reparto = {"carta": sorteada, "prob": dict(llegan)[sorteada] / sum(p for _, p in llegan),
+                                        "posibles": len(llegan)}
                 if sorteada and sorteada not in LLEGAN:
                     self.sugerida = sorteada  # no te llegó nada: año tranquilo, puedes buscar algo
                     decisiones = [TRANQUILO]
