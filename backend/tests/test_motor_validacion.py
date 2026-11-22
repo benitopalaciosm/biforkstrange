@@ -35,9 +35,10 @@ CUADRAN = [
     # desde que el alza anual no baja el sueldo de quien sigue en su pega, los sueldos medianos cuadran
     "ingreso_p50_30-34", "ingreso_p50_35-39", "ingreso_p50_40-44", "ingreso_p50_45-49", "ingreso_p75_45-49",
 ]
+# ingreso_p25_25-29 e ingreso_p25_35-39 dejaron de ser brecha: con prima_personal los independientes ya no
+# caen todos a la mediana informal. Quedan fuera de CUADRAN porque cuadran al borde (simulado ~14% bajo la
+# meta, tolerancia 15%).
 BRECHAS = {
-    "ingreso_p25_25-29": "todos los independientes ganan la mediana informal (300 mil), sin dispersión ni alza",
-    "ingreso_p25_35-39": "ídem",
     "publico_35-39": "P_REEMPLEO_PUBLICO = 0,12 fija el empleo público en 12% de los asalariados a toda edad",
 }
 

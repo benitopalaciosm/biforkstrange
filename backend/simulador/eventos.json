@@ -19,7 +19,7 @@
       {
        "var": "sueldo",
        "op": "multiplica",
-       "valor": "1 + clamp(si(anos_titulado < 4, crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - prob_ascenso * 0.075 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), 0, 0.25)"
+       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - prob_ascenso * 0.075 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), 0, 0.25)"
       }
      ]
     }

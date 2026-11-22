@@ -333,7 +333,7 @@ def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
         salida = subprocess.run(
             ["claude", "-p", "--model", MODELO, "--effort", "low", "--output-format", "json",
              "--json-schema", json.dumps(esquema_api().model_json_schema())],
-            input=prompt, capture_output=True, text=True, timeout=90, check=True,
+            input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=90, check=True,
         )
         cuerpo = json.loads(salida.stdout)
         datos = cuerpo.get("structured_output")

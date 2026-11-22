@@ -60,6 +60,12 @@ export type Perfil = {
   cargo_nombre?: string;
   /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
   rubro_sonado?: string | null;
+  /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
+  relato?: string;
+  /** Su gemelo digital (/gemelo): sus rasgos afinados mueven qué cartas le salen. */
+  gemelo_id?: string | null;
+  /** La afinidad del gemelo congelada al empezar la partida: rejugarla da siempre las mismas cartas. */
+  afinidad?: Record<string, number>;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
