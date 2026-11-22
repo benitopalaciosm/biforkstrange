@@ -27,7 +27,9 @@ from pydantic import BaseModel, Field, ValidationError
 from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import NIVELES
 
-MODELO = "claude-opus-5-5"
+# Llenar un formulario no necesita razonar: Haiku con poco esfuerzo responde en segundos.
+MODELO = "claude-haiku-5-5"
+ESPERA_MAX = 20  # segundos por intento; la persona está mirando la pantalla
 MAX_CARACTERES = 60_000  # un currículum largo tiene unos 15.000
 
 
@@ -108,17 +110,16 @@ def _catalogo(pq: Paquete) -> str:
 
 
 def _por_api(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
-    cliente = anthropic.Anthropic()
-    respuesta = cliente.beta.messages.parse(
+    cliente = anthropic.Anthropic(timeout=ESPERA_MAX, max_retries=1)
+    respuesta = cliente.messages.parse(
         model=MODELO,
         max_tokens=4000,
-        # si un clasificador de seguridad declina, la API reintenta en otro modelo dentro de la misma llamada
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
+        thinking={"type": "disabled"},
+        output_config={"effort": "low"},
         system=[
             {"type": "text", "text": INSTRUCCIONES},
-            # el catálogo es largo y no cambia: queda en caché entre llamadas
-            {"type": "text", "text": _catalogo(pq), "cache_control": {"type": "ephemeral"}},
+            # el catálogo es largo y no cambia: queda en caché una hora entre llamadas
+            {"type": "text", "text": _catalogo(pq), "cache_control": {"type": "ephemeral", "ttl": "1h"}},
         ],
         messages=[{"role": "user", "content": f"Fecha de hoy: {hoy}\n\n<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>"}],
         output_format=PerfilLeido,
@@ -134,8 +135,9 @@ def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
               f"<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>")
     try:
         salida = subprocess.run(
-            ["claude", "-p", "--output-format", "json", "--json-schema", json.dumps(PerfilLeido.model_json_schema())],
-            input=prompt, capture_output=True, text=True, timeout=180, check=True,
+            ["claude", "-p", "--model", MODELO, "--effort", "low", "--output-format", "json",
+             "--json-schema", json.dumps(PerfilLeido.model_json_schema())],
+            input=prompt, capture_output=True, text=True, timeout=90, check=True,
         )
         cuerpo = json.loads(salida.stdout)
         datos = cuerpo.get("structured_output")
