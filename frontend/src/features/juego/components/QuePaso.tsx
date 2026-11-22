@@ -119,7 +119,12 @@ export function QuePaso({
   const edades: number[] = [];
   for (const a of cerrados) for (let ed = a.edad; ed < a.fin!.edad; ed++) edades.push(ed);
   const mismoAnio = !vista.terminada && cerrados.length === 0;
-  const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Otra decisión este año" : `Seguir al año ${proximo}`;
+  // en el mismo año viene otra decisión: el botón dice cuál, no "Otra decisión este año"
+  const siguiente = vista.pendiente;
+  const queSigue = siguiente?.decision === "oferta_externa" && siguiente.por_que?.tipo === "llega"
+    ? "Ver la oferta que te llegó"
+    : siguiente ? `Siguiente: ${siguiente.nombre}` : "Seguir";
+  const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? queSigue : `Seguir al año ${proximo}`;
 
   // el dado sigue girando hasta que Claude cuenta el año: las noticias se muestran una vez y no cambian
   if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} onSalir={onSalir} />;
