@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from app.sim.motor import empresas, ia
 from app.sim.motor.narrativa import titular_ia
 from app.sim.motor.azar import Dados
-from app.sim.motor.paquete import Paquete
+from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_de
 
 # "Solo lo laboral": el cáncer queda en el paquete, pero el juego no lo sortea. Lo de familia, pareja,
@@ -63,33 +63,26 @@ _DECISION_TRANQUILO = {
 }
 EDAD_MAXIMA = 60
 
-# Reglas del cierre de año que el paquete deja al simulador. Supuestos del equipo.
-SKILL_POR_ANIO = 1.5            # oficio que suma un año trabajado
-PAGO_DEUDA_ESTUDIOS = 0.10      # parte del sueldo que paga el crédito (regla del CAE)
-PRIMA_MIN, PRIMA_MAX = 0.6, 3.0  # supuesto: cuánto de tu nivel viaja contigo a una pega nueva
-REPETIR_CARTA = 0.3             # supuesto: en tu partida, cada vez que ya te tocó una carta pesa 0,3 veces
-ANIOS_HUECO = 2                # cuánto pesa una pausa elegida al buscar trabajo
+# Las reglas del cierre de año que el paquete deja al simulador leen sus números del paquete (parametros.json):
+# SKILL_POR_ANIO, PAGO_DEUDA_ESTUDIOS, PRIMA_PERSONAL_RANGO, ANIOS_HUECO y los de P_INDEPENDIENTE_BUSCA_EMPLEO.
+# En tu partida, cada vez que ya te tocó una carta pesa REPETIR_CARTA veces (partida.py lo pone en `variedad`).
+REPETIR_CARTA = paquete().k("REPETIR_CARTA")
 EDU_AL_TITULARSE = {"U": "universitaria", "IP": "tecnica", "CFT": "tecnica"}
 # Decisiones donde el modificador p_encontrar multiplica la probabilidad de quedar
 BUSQUEDAS = frozenset({"primera_pega"})
-# El paquete no tiene salida del trabajo por cuenta propia. Sin ella nadie vuelve a ser
-# empleado y la cohorte termina con la mitad de independientes (en Chile, 13% a 24%).
-P_INDEPENDIENTE_BUSCA_EMPLEO = 0.055
-# Según su historia (del CV, si la trae). Supuesto del equipo, sin dato detrás: quien ya volvió una vez
-# de trabajar por su cuenta a un empleo vuelve el doble de seguido; quien lleva 5 años o más por su
-# cuenta, la mitad. Sin historia, la tasa de arriba, calibrada para la cohorte.
-INDEPENDIENTE_DE_PASO = 2.0
-INDEPENDIENTE_VETERANO, ANOS_VETERANO = 0.5, 5
 
 
-def p_independiente_busca_empleo(e: dict) -> float:
-    """Chance anual de que un independiente salga a buscar empleo. Lee la historia del CV que trae el estado
+def p_independiente_busca_empleo(e: dict, pq: Paquete | None = None) -> float:
+    """Chance anual de que un independiente salga a buscar empleo (el paquete no tiene salida del trabajo por cuenta
+    propia: sin ella la cohorte termina con la mitad de independientes). Lee la historia del CV que trae el estado
     (`freelance_entre_pegas`: ya volvió una vez a la planilla; `anos_independiente`), que no es del paquete."""
+    pq = pq or paquete()
+    base = pq.k("P_INDEPENDIENTE_BUSCA_EMPLEO")
     if e.get("freelance_entre_pegas"):
-        return P_INDEPENDIENTE_BUSCA_EMPLEO * INDEPENDIENTE_DE_PASO
-    if e.get("anos_independiente", 0) >= ANOS_VETERANO:
-        return P_INDEPENDIENTE_BUSCA_EMPLEO * INDEPENDIENTE_VETERANO
-    return P_INDEPENDIENTE_BUSCA_EMPLEO
+        return base * pq.k("INDEPENDIENTE_DE_PASO")
+    if e.get("anos_independiente", 0) >= pq.k("ANOS_VETERANO"):
+        return base * pq.k("INDEPENDIENTE_VETERANO")
+    return base
 # Sitio del sorteo del escenario de IA: uno por gemelo, igual en todas sus opciones
 SITIO_IA = "mundo:ia"
 # un sueldo nuevo calculado desde el anterior (una oferta estando cesante también: sale de lo que ganabas)
@@ -228,7 +221,8 @@ class Vida:
                 "'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)", e)
         except Exception:
             return 1.0
-        return min(PRIMA_MAX, max(PRIMA_MIN, e["sueldo_ref"] / p50)) if p50 else 1.0
+        bajo, alto = self.pq.k("PRIMA_PERSONAL_RANGO")
+        return min(alto, max(bajo, e["sueldo_ref"] / p50)) if p50 else 1.0
 
     def _veces_vista(self, decision_id: str) -> int:
         anios = self.historia + ([self.registro] if self.registro else [])
@@ -824,7 +818,7 @@ class Vida:
             plata["ahorrado"] = round(ganado * e["tasa_ahorro"])
             e["ahorro"] += ganado * e["tasa_ahorro"]
         if e["deuda_estudios"] > 0 and e["estado"] != "estudiando" and e["sueldo"] > 0:
-            pago = min(e["deuda_estudios"], meses_con_sueldo * e["sueldo"] * PAGO_DEUDA_ESTUDIOS)
+            pago = min(e["deuda_estudios"], meses_con_sueldo * e["sueldo"] * self.pq.k("PAGO_DEUDA_ESTUDIOS"))
             plata["deuda_estudios"] = round(pago)
             e["deuda_estudios"] -= pago
             e["ahorro"] -= pago
@@ -835,7 +829,7 @@ class Vida:
 
         # trabajo
         if trabaja:
-            e["skill"] = self._acotar("skill", e["skill"] + SKILL_POR_ANIO * e["aprendizaje"])
+            e["skill"] = self._acotar("skill", e["skill"] + self.pq.k("SKILL_POR_ANIO") * e["aprendizaje"])
         if e["estado"] == "empleado":
             e["antiguedad"] = self._acotar("antiguedad", e["antiguedad"] + 1)
             e["anos_en_startup"] = e["anos_en_startup"] + 1 if e["tipo_empleador"] == "startup" else 0
@@ -849,7 +843,7 @@ class Vida:
             if e["cierra_en"] == 0 and e["estado"] == "empleado" and e["tipo_empleador"] == "startup":
                 self._evento("startup_cierra", directo=True)
                 e = self.e
-        if e["estado"] == "independiente" and self.dados.u(self.anio, "independiente:vuelve") < p_independiente_busca_empleo(e):
+        if e["estado"] == "independiente" and self.dados.u(self.anio, "independiente:vuelve") < p_independiente_busca_empleo(e, self.pq):
             e.update(estado="buscando", sueldo=0.0, primer_empleo=1 if e["sueldo_ref"] <= 0 else 0)
         if e["deja_de_trabajar"]:
             if e["sueldo"] > 0:
@@ -876,7 +870,7 @@ class Vida:
 
         # una pausa elegida pesa dos años
         self._anios_con_hueco = self._anios_con_hueco + 1 if e["hueco"] else 0
-        if self._anios_con_hueco >= ANIOS_HUECO:
+        if self._anios_con_hueco >= self.pq.k("ANIOS_HUECO"):
             e["hueco"], self._anios_con_hueco = 0, 0
 
         # efectos con duración

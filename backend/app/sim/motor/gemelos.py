@@ -231,7 +231,7 @@ def mundo(vida: Vida, decision_id: str, numero: int, *, anios: int = HORIZONTE, 
                "escenario": next(iter(vidas.values()))[1].e.get("ia_ritmo")
                or escenario_ia(next(iter(vidas.values()))[1].e.get("ia_adopcion", 0.5)),
                "activa": ia.activa(),
-               "castigo_joven": round(next(iter(vidas.values()))[1].e.get("ia_castigo_joven", 0.81), 3)},
+               "castigo_joven": round(next(iter(vidas.values()))[1].e.get("ia_castigo_joven", vida.pq.k("IA_JOVEN")), 3)},
         "ganador": _ganador({k: v.sueldo_al_final() for k, (_, v) in vidas.items()}),
         "opciones": [
             {"opcion": o.id, "nombre": o.nombre, "sueldo_final": round(v.sueldo_al_final()), "estado_final": v.e["estado"],

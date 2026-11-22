@@ -834,6 +834,14 @@
    "pais": "mundo",
    "tipo": "paper",
    "verificacion": "resumen"
+  },
+  {
+   "id": "ley_20634",
+   "cita": "Ley 20.634 (2012), que modifica el Crédito con Aval del Estado: la cuota mensual no puede pasar del 10% de la renta del deudor",
+   "url": "",
+   "pais": "Chile",
+   "tipo": "ley",
+   "verificacion": "resumen"
   }
  ]
 }

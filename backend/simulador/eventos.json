@@ -70,7 +70,7 @@
       {
        "var": "sueldo",
        "op": "multiplica",
-       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - k('ASCENSO_POBLACION', banda7) * (k('ALZA_ASCENSO', 0) + k('ALZA_ASCENSO', 1)) / 2 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0) + si(y(auge_cobre, rubro == 'Minería'), k('AUGE_COBRE_ALZA'), 0), 0, 0.25)"
+       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - k('ASCENSO_POBLACION', banda7) * (k('ALZA_ASCENSO', 0) + k('ALZA_ASCENSO', 1)) / 2 + si(azar() < 1 - k('P_GOLPE_INGRESO'), 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0) + si(y(auge_cobre, rubro == 'Minería'), k('AUGE_COBRE_ALZA'), 0), 0, 0.25)"
       }
      ]
     }

@@ -1196,6 +1196,90 @@
    "fuente": "sp_cobre_2026",
    "calidad": "supuesto",
    "rango": null
+  },
+  {
+   "id": "SKILL_POR_ANIO",
+   "valor": 1.5,
+   "unidad": "puntos de skill (0-100) por año",
+   "descripcion": "Oficio que suma un año trabajado (empleado, independiente o fundador), multiplicado por el aprendizaje de la persona. Regla del cierre de año del motor.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "PAGO_DEUDA_ESTUDIOS",
+   "valor": 0.1,
+   "unidad": "fracción del sueldo",
+   "descripcion": "Parte del sueldo que se va cada mes a pagar el crédito de estudios. Es el tope de la cuota del CAE (10% de la renta) aplicado a todos: el pago real puede ser menor.",
+   "fuente": "ley_20634",
+   "calidad": "mixto",
+   "rango": null
+  },
+  {
+   "id": "PRIMA_PERSONAL_RANGO",
+   "valor": [
+    0.6,
+    3.0
+   ],
+   "unidad": "veces la mediana [mín, máx]",
+   "descripcion": "Cuánto de lo que ganas sobre la mediana de tu edad y educación viaja contigo cuando una regla fija el sueldo desde una tabla nacional (informal, otra ocupación, por tu cuenta). Se acota a este rango.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "REPETIR_CARTA",
+   "valor": 0.3,
+   "unidad": "multiplicador por vez ya vista",
+   "descripcion": "Solo en la partida de la persona: cada vez que ya le tocó una carta, esa carta pesa 0,3 veces en el sorteo, para que no se repita la misma pregunta año tras año. Las copias y la cohorte no lo usan (la población calibrada no se toca).",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "ANIOS_HUECO",
+   "valor": 2,
+   "unidad": "años",
+   "descripcion": "Cuántos años pesa una pausa elegida (sabático) al buscar trabajo: mientras dura, las ofertas llegan menos y pagan menos (PENAL_HUECO).",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "P_INDEPENDIENTE_BUSCA_EMPLEO",
+   "valor": 0.055,
+   "unidad": "probabilidad anual",
+   "descripcion": "Chance anual de que un independiente salga a buscar empleo. El paquete no tiene salida del trabajo por cuenta propia; sin ella nadie vuelve a ser empleado y la cohorte termina con la mitad de independientes (en Chile, 13% a 24%). Calibrada para que la cohorte cuadre los independientes a los 45-49 (docs/motor/VALIDACION.md).",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "INDEPENDIENTE_DE_PASO",
+   "valor": 2.0,
+   "unidad": "multiplicador",
+   "descripcion": "Quien ya volvió una vez de trabajar por su cuenta a un empleo (historia del CV) sale a buscar empleo este múltiplo de veces más seguido que P_INDEPENDIENTE_BUSCA_EMPLEO.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "INDEPENDIENTE_VETERANO",
+   "valor": 0.5,
+   "unidad": "multiplicador",
+   "descripcion": "Quien lleva ANOS_VETERANO años o más por su cuenta (historia del CV) sale a buscar empleo este múltiplo de P_INDEPENDIENTE_BUSCA_EMPLEO.",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
+  },
+  {
+   "id": "ANOS_VETERANO",
+   "valor": 5,
+   "unidad": "años",
+   "descripcion": "Años por cuenta propia desde los que el trabajo independiente cuenta como la forma de trabajar de la persona (INDEPENDIENTE_VETERANO).",
+   "fuente": "equipo",
+   "calidad": "supuesto",
+   "rango": null
   }
  ]
 }
