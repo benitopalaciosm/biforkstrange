@@ -140,7 +140,6 @@ def test_el_prompt_trae_el_formato_y_las_listas_validas():
     p = perfil_doc.prompt()
     assert "```gemelo-laboral" in p
     assert "Finanzas y seguros" in p and "unirse_a_startup (" in p
-    assert "tener_hijo" not in p  # solo lo laboral
 
 
 def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):

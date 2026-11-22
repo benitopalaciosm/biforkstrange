@@ -70,7 +70,7 @@ def test_elecciones_de_mas_dan_un_error_claro():
 
 def test_eleccion_para_otra_decision_da_un_error_claro():
     pendiente = partida.jugar(Perfil(), 3, []).pendiente.decision["id"]
-    otra = "renunciar" if pendiente != "renunciar" else "ahorro"
+    otra = "renunciar" if pendiente != "renunciar" else "pedir_aumento"
     with pytest.raises(ValueError, match=f"{otra}.*{pendiente}"):
         partida.jugar(Perfil(), 3, [{"decision": otra, "opcion": "no"}])
 
@@ -285,24 +285,11 @@ def test_comparar_reparte_los_resultados_segun_las_probabilidades_del_paquete():
         assert por[resultado]["texto"] and por[resultado]["tono"] in ("bueno", "malo", "neutro")
 
 
-def test_gana_mas_que_base_es_pareado_por_gemelo():
-    """Ahorrar más o menos no cambia el sueldo: cada gemelo termina con el mismo sueldo en las
-    tres opciones, así que ninguno le gana a su propia versión base. Si la comparación no fuera
-    gemelo a gemelo (contra otro gemelo, o contra la lista ordenada), cerca de la mitad ganaría."""
-    c = gemelos.comparar(_al_inicio(), "ahorro", n=n(80), anios=6, semilla=3, crudo=True)
-    assert len(c["opciones"]) == 3
-    assert len(set(c["opciones"][0]["sueldos"])) > n(80) * 0.9  # los gemelos sí difieren entre ellos
-    for o in c["opciones"]:
-        if not o["es_base"]:
-            assert (o["gana_mas_que_base"], o["igual_que_base"], o["gana_menos_que_base"]) == (0.0, 1.0, 0.0)
-            assert o["diferencia_tipica"] == 0
-            assert [r["gana_mas_que_base"] for r in o["por_resultado"]] == [0.0]
-        assert o["sueldos"] == c["opciones"][0]["sueldos"]
-
-
 def test_gana_mas_que_base_sigue_al_resultado_de_cada_gemelo():
     """Pedir aumento: a quien le dicen que no, termina igual que su versión que no pidió; a quien
-    le dicen que sí, casi siempre termina arriba (mismos dados después, sueldo 4% a 10% mayor)."""
+    le dicen que sí, casi siempre termina arriba (mismos dados después, sueldo 4% a 10% mayor).
+    Que los del no queden todos iguales prueba que la comparación es gemelo a gemelo: contra otro
+    gemelo, o contra la lista ordenada, cerca de la mitad ganaría."""
     m = n(200)
     c = gemelos.comparar(_al_inicio(Perfil(edad=35, sexo="m")), "pedir_aumento", n=m, anios=5, semilla=4)
     pedir, esperar = c["opciones"]
@@ -382,7 +369,6 @@ def test_la_base_de_comparacion():
     assert gemelos.comparar(_al_inicio(), "oferta_externa", n=3, anios=1)["base"] == "quedarse"
     assert gemelos.comparar(_al_inicio(), "magister", n=3, anios=1)["base"] == "no"
     assert gemelos.comparar(_al_inicio(), "pedir_aumento", n=3, anios=1)["base"] == "esperar"
-    assert gemelos.comparar(_al_inicio(), "ahorro", n=3, anios=1)["base"] == "normal"  # no la última (gastar)
     cesante = gemelos.comparar(vida(CESANTE, Dados(0, "tu"), tipo_empleador="pyme"), "cesantia", n=3, anios=1)
     assert [o["es_base"] for o in cesante["opciones"]].count(True) == 1
     assert cesante["base"] != "emprender"  # en una forzada la base no es la última opción de la lista

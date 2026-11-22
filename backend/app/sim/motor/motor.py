@@ -25,14 +25,9 @@ from app.sim.motor.azar import Dados
 from app.sim.motor.paquete import Paquete
 from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_de
 
-# "Solo lo laboral": fuera las decisiones de vida personal y los eventos de salud, duelo y pareja.
-DECISIONES_PERSONALES = frozenset(
-    {"tener_hijo", "formalizar_pareja", "separarse", "buscar_pareja", "cuidar_familiar", "comprar_vivienda"}
-)
-EVENTOS_PERSONALES = frozenset(
-    {"cancer", "muere_madre", "muere_padre", "enferma_familiar", "forma_pareja", "termina_pareja",
-     "hijo_no_planificado", "herencia"}
-)
+# "Solo lo laboral": el cáncer queda en el paquete, pero el juego no lo sortea. Lo de familia, pareja,
+# vivienda y herencia se sacó del paquete: estaba fuera del juego y no movía lo que se compara.
+EVENTOS_PERSONALES = frozenset({"cancer"})
 EVENTO_MUNDO = "recesion"
 ALZAS = frozenset({"alza_anual"})
 SOLO_IPC = "Este año solo te reajustaron por inflación: en pesos de hoy, tu sueldo quedó igual."
@@ -144,7 +139,7 @@ class Vida:
         self.pega = 0                     # sube cada vez que esta vida entra a un trabajo nuevo
         self.sugerida: str | None = None  # en un año tranquilo, lo que la gente como tú suele buscar
         self.primer_anio_con_propuesta = False  # la persona: su partida no parte con un año tranquilo
-        self._derivar(inicio=True)
+        self._derivar()
         self.reparto: dict | None = None
 
     # ------------------------------------------------------------------ copia
@@ -172,19 +167,13 @@ class Vida:
         self.e["ia_castigo_joven"] = alto - (alto - bajo) * u
 
     # ------------------------------------------------------------------ alcance
-    def _decision_en_alcance(self, id_: str) -> bool:
-        return self.alcance != "laboral" or id_ not in DECISIONES_PERSONALES
-
     def _evento_en_alcance(self, id_: str) -> bool:
         return self.alcance != "laboral" or id_ not in EVENTOS_PERSONALES
 
     # ------------------------------------------------------------------ estado derivado
-    def _derivar(self, inicio: bool = False) -> None:
-        previa = self.e.get("pareja_previa")
+    def _derivar(self) -> None:
         self.e = self.pq.derivar(self.e)
         self.e["prima_personal"] = self._prima_personal()
-        if not inicio and previa is not None:
-            self.e["pareja_previa"] = previa  # es la situación al inicio del año
         self._exposicion_del_puesto()
         ascenso = self.pq.eventos["ascenso"]
         aplica = self.pq.evaluar(ascenso["cuando"], self.e)
@@ -235,7 +224,7 @@ class Vida:
                          "decisiones": [], "eventos": []}
         self.reparto = None  # cómo se sorteó la carta de este año, si hubo sorteo
         self.sugerida = None
-        self._derivar(inicio=True)
+        self._derivar()
         self._evento(EVENTO_MUNDO)
         self.registro["recesion"] = bool(self.e["recesion"])
         decisiones = self._forzadas()
@@ -315,13 +304,13 @@ class Vida:
 
     def _forzadas(self) -> list[str]:
         return [id_ for id_, d in self.pq.decisiones.items()
-                if d["aparicion"]["tipo"] == "forzada" and self._decision_en_alcance(id_) and self.aplica(id_)]
+                if d["aparicion"]["tipo"] == "forzada" and self.aplica(id_)]
 
     def cartas_posibles(self) -> list[tuple[str, float]]:
         """Cartas que podrían salir este año, con su peso."""
         salida = []
         for id_, d in self.pq.decisiones.items():
-            if d["aparicion"]["tipo"] != "carta" or not self._decision_en_alcance(id_) or not self.aplica(id_):
+            if d["aparicion"]["tipo"] != "carta" or not self.aplica(id_):
                 continue
             peso = self.pq.evaluar(d["aparicion"]["peso"], self.e)
             if id_ == "renunciar":
@@ -372,7 +361,7 @@ class Vida:
 
     def _decidir(self, decision_id: str, origen: str, decisor) -> None:
         d = self.decision(decision_id)
-        vigente = self._decision_en_alcance(decision_id) and (origen != "carta" or self.pq.evaluar(d["cuando"], self.e))
+        vigente = origen != "carta" or self.pq.evaluar(d["cuando"], self.e)
         opciones = self.opciones(decision_id) if vigente else []
         if not opciones:
             self.cola.pop(0)
@@ -473,8 +462,7 @@ class Vida:
         if not luego:
             return
         if luego in self.pq.decisiones:
-            if self._decision_en_alcance(luego):
-                self.cola.insert(0, ("decision", luego, "luego"))
+            self.cola.insert(0, ("decision", luego, "luego"))
         elif self._evento_en_alcance(luego):
             self.cola.insert(0, ("evento_directo", luego))
 
@@ -675,7 +663,7 @@ class Vida:
         (ascenso, despido, oferta, alza) se comparte mientras están en el mismo trabajo:
         al cambiarse de pega, esa vida pasa a tener otra suerte."""
         if not SUERTE_POR_PEGA or id_ not in EVENTOS_DE_LA_PEGA:
-            return f"evento:{id_}"  # lo del país y lo personal (pareja, salud) es igual en todas las vidas
+            return f"evento:{id_}"  # lo del país y lo personal (la salud) es igual en todas las vidas
         return f"evento:{id_}@{self.pega}"
 
     def _evento(self, id_: str, directo: bool = False) -> None:
@@ -714,7 +702,7 @@ class Vida:
         e = self.e
         trabaja = e["estado"] in ("empleado", "independiente", "fundador")
         if e["estado"] == "empleado" and e["alza_extra_anual"]:
-            e["sueldo"] *= 1 + e["alza_extra_anual"]
+            e["sueldo"] = self._acotar("sueldo", e["sueldo"] * (1 + e["alza_extra_anual"]))
 
         # plata
         self.ingreso_total += 12 * e["sueldo"]
@@ -793,7 +781,7 @@ class Vida:
             self.anios_buscando += 1
         e["edad"] += 1
         self.anio += 1
-        self._derivar(inicio=True)
+        self._derivar()
         self.registro["fin"] = self.resumen()
         self.historia.append(self.registro)
         cerrado, self.registro = self.registro, None

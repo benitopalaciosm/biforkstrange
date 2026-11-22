@@ -74,8 +74,8 @@ def test_el_catalogo_trae_todas_las_clases_de_expresion():
     exprs = expresiones_del_paquete()
     por_clase = {c: sum(1 for x in exprs if x[0] == c) for c in {x[0] for x in exprs}}
     assert set(por_clase) == {"cuando", "peso", "requisito", "prob", "valor", "efecto_cuando", "prob_anual", "filtro"}
-    assert len({x[2] for x in exprs if isinstance(x[2], str)}) >= 200
-    assert por_clase["cuando"] == 44 + 17 and por_clase["prob_anual"] == 17 and por_clase["peso"] == 44
+    assert len({x[2] for x in exprs if isinstance(x[2], str)}) >= 150
+    assert por_clase["cuando"] == 37 + 10 and por_clase["prob_anual"] == 10 and por_clase["peso"] == 37
 
 
 def test_paridad_con_el_evaluador_de_referencia():
@@ -87,7 +87,7 @@ def test_paridad_con_el_evaluador_de_referencia():
     for _, donde, expr, fila in expresiones_del_paquete():
         unicas.setdefault((expr, fila), donde)
     con_azar = {expr for (expr, _f) in unicas if isinstance(expr, str) and p.compilar(expr)[1]}
-    assert len(con_azar) >= 15  # alza anual, ascensos, herencia, cesantía...
+    assert len(con_azar) >= 15  # alza anual, ascensos, cesantía...
     sin_dados = random.Random(0)
     diferencias, comparadas, ambos_fallan, distintos_de_cero = [], 0, 0, 0
     for i in range(n(2000)):
