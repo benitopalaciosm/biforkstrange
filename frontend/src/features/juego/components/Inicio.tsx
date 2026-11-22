@@ -20,7 +20,7 @@ export function Inicio({
 }) {
   return (
     <Screen>
-      <ScreenHeader left={<Pill>Gemelo laboral</Pill>} right={<Meta>10 años</Meta>} />
+      <ScreenHeader left={<Pill>Agarrar la pala</Pill>} right={<Meta>10 años</Meta>} />
       <LifePathHero past={["Estudios", "Tu pega"]} today="Tú, hoy" chosen="Lo que eliges" alternatives={["Otra opción", "Seguir igual"]} />
       <Stack gap={12}>
         <Heading level={1}>Vive tu decisión antes de tomarla.</Heading>

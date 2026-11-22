@@ -52,7 +52,7 @@ function Juego() {
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker fuentes={j.fuentes} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} />
+      <DudaPicker fuentes={j.fuentes} origenSugeridas={j.origenSugeridas} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {

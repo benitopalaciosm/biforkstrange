@@ -141,10 +141,15 @@ export function usePartida() {
 
   /** Perfil listo: se piden las dudas que esa persona puede elegir. */
   const [dudasSugeridas, setDudasSugeridas] = useState<DudaSugerida[]>([]);
+  /** Si las sugeridas las trajo tu Claude (van primero) o solo el CV: la pantalla lo dice. */
+  const [origenSugeridas, setOrigenSugeridas] = useState<"cv" | "claude" | null>(null);
 
   const verDudas = useCallback(async (p: Perfil, sugeridas: DudaSugerida[] = []) => {
     const mio = ++turno.current;
     setDudasSugeridas(sugeridas);
+    const b = borradorActual.current;
+    const deClaude = new Set(b.claude?.sugeridas.map((d) => d.decision) ?? []);
+    setOrigenSugeridas(sugeridas.length === 0 ? null : sugeridas.some((d) => deClaude.has(d.decision)) ? "claude" : "cv");
     fijarPerfil(p);
     setPartida(null);
     setVista(null);
@@ -294,7 +299,7 @@ export function usePartida() {
   }, [onboarding.reiniciar]);
 
   return {
-    fuentes, retrato, empezarDeCero, reintentarDudas, reintentar,
+    fuentes, retrato, origenSugeridas, empezarDeCero, reintentarDudas, reintentar,
     fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };

@@ -39,6 +39,7 @@ function useMasEnJuego(perfil: Perfil | undefined, dudas: Duda[] | null, sugerid
 
 export function DudaPicker({
   fuentes = null,
+  origenSugeridas = null,
   perfil,
   dudas,
   sugeridas = [],
@@ -51,10 +52,12 @@ export function DudaPicker({
 }: {
   /** De dónde salió cada dato del perfil: lo que falta es supuesto. */
   fuentes?: Record<string, string> | null;
+  /** De dónde vienen las sugeridas: del CV, o de lo que contaste a tu Claude. */
+  origenSugeridas?: "cv" | "claude" | null;
   /** Con el perfil se mide cuál de las dudas sugeridas tiene más en juego para esta persona. */
   perfil?: Perfil;
   dudas: Duda[] | null;
-  /** Las dudas que le calzan según su CV, con el porqué: van primero y la primera queda elegida. */
+  /** Las dudas que le calzan según su CV o su Claude, con el porqué: van primero y la primera queda elegida. */
   sugeridas?: DudaSugerida[];
   cargando: boolean;
   error: string | null;
@@ -92,7 +95,7 @@ export function DudaPicker({
         <Heading level={1}>¿Qué duda te trajo?</Heading>
         <Text>
           {sugerida && dudas?.some((d) => d.decision === sugerida)
-            ? "Por tu CV, estas son las que más te calzan. Es la primera carta de tu partida."
+            ? `${origenSugeridas === "cv" ? "Por tu CV" : "Por lo que contaste"}, estas son las que más te calzan. Es la primera carta de tu partida.`
             : "Elige la que más se parece. Es la primera carta de tu partida."}
         </Text>
         {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
@@ -141,7 +144,7 @@ export function DudaPicker({
           </>
         )}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
-          {simulando ? "Simulando…" : `Ver mis ${GEMELOS} mundos`}
+          {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} mundos` : "Elige una duda"}
         </Button>
       </div>
     </Screen>

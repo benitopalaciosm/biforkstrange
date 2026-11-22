@@ -124,7 +124,11 @@ export function PesoDelCv({ perfil, duda, semilla }: { perfil: Perfil; duda: str
       {peso.datos.map((d, i) => (
         <Linea key={d.campo} d={d} i={i} />
       ))}
-      {quietos.length > 0 && <Text size="sm">En esta duda casi no pesan {lista(quietos)}.</Text>}
+      {quietos.length > 0 && (
+        <Text size="sm">
+          En esta duda casi no {quietos.length === 1 ? "pesa" : "pesan"} {lista(quietos)}.
+        </Text>
+      )}
       <Info pregunta="¿Cómo se calcula?">
         Cada mundo tiene sus dados: si te despiden, si hay recesión, si te sale la oferta. Para cada dato de tu CV repetimos los mismos {peso.gemelos} mundos
         cambiando solo ese dato por lo que el simulador supone cuando no lo sabe (sin inglés, una red promedio, la habilidad que dan tus años). Lo que cambia

@@ -60,13 +60,15 @@ export function Onboarding({
   const leerTuClaude = async (texto: string) => {
     if (await o.leerTuClaude(texto)) setConClaude(false);
   };
+  const usoFuentes = cv === "listo" || claudeListo;
+  /** Las tarjetas de lo que tus fuentes no dijeron (todas, si no usaste fuentes). */
+  const pasosQueFaltan = usoFuentes
+    ? MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !sabidos.has(k)))
+    : MANUAL;
   /** Seguir: solo las tarjetas de lo que tus fuentes no dijeron; si dijeron todo, directo a tus dudas. */
   const seguir = () => {
     o.soltarLecturas();
-    const usoFuentes = cv === "listo" || claudeListo;
-    const pasos = usoFuentes
-      ? MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !sabidos.has(k)))
-      : MANUAL;
+    const pasos = pasosQueFaltan;
     if (pasos.length === 0) return onElegirDuda(p, sugeridas);
     o.irA(pasos[0], pasos);
   };
@@ -159,6 +161,7 @@ export function Onboarding({
           onAbrirClaude={() => setConClaude((x) => !x)}
           claude={<TuClaude leyendo={o.leyendoClaude} error={o.errorClaude} onTexto={(t) => void leerTuClaude(t)} />}
           onSeguir={seguir}
+          faltaAlgo={pasosQueFaltan.length > 0}
           onSaltar={saltarTodo}
           onRevisar={() => o.verCompleto(true)}
           cargando={cargando}
@@ -311,7 +314,7 @@ export function Onboarding({
  * después Seguir pregunta solo lo que falta. O juegas sin datos.
  */
 function Entrada({
-  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, onRevisar, cargando,
+  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, faltaAlgo, onSaltar, onRevisar, cargando,
 }: {
   cv: "nada" | "leyendo" | "listo";
   error: string | null;
@@ -321,6 +324,8 @@ function Entrada({
   onAbrirClaude: () => void;
   claude: React.ReactNode;
   onSeguir: () => void;
+  /** Si tus fuentes no contestaron todo, Seguir lleva a las preguntas que faltan; si no, a tus dudas. */
+  faltaAlgo: boolean;
   onSaltar: () => void;
   /** El formulario completo, para corregir lo que leyeron tus fuentes. */
   onRevisar: () => void;
@@ -414,21 +419,27 @@ function Entrada({
         </button>
         {claudeAbierto && claude}
 
-        <button type="button" className="ob-fuente" onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
-          <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
-          <span className="ob-fuente-texto">
-            <strong>{algo ? "Completar lo que falta" : "Contesto yo unas preguntas"}</strong>
-            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu pega y tu sueldo. Un toque cada una."}</span>
-          </span>
-          <Marca listo={false} accion="Empezar" />
-        </button>
+        {/* con alguna fuente cargada, esto mismo es el botón de abajo: no se repite */}
+        {!algo && (
+          <button type="button" className="ob-fuente" onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
+            <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
+            <span className="ob-fuente-texto">
+              <strong>Contesto yo unas preguntas</strong>
+              <span className="ob-chico">Edad, sexo, estudios, tu pega y tu sueldo. Un toque cada una.</span>
+            </span>
+            <Marca listo={false} accion="Empezar" />
+          </button>
+        )}
       </Stack>
 
       <ScreenFooter>
         {algo && (
-          <Button onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
-            Seguir
-          </Button>
+          <>
+            <Button onClick={onSeguir} disabled={cv === "leyendo" || cargando}>
+              {faltaAlgo ? "Completar lo que falta" : "Elegir mi duda"}
+            </Button>
+            {faltaAlgo && <span className="ob-chico">Solo lo que tus fuentes no dijeron.</span>}
+          </>
         )}
         {algo && (
           <button type="button" className="ob-link" onClick={onRevisar} disabled={cv === "leyendo" || cargando}>
@@ -436,7 +447,7 @@ function Entrada({
           </button>
         )}
         <button type="button" className="ob-link" onClick={onSaltar} disabled={cargando}>
-          Jugar sin datos
+          {algo ? "Saltar las preguntas" : "Jugar sin datos"}
         </button>
       </ScreenFooter>
     </>
