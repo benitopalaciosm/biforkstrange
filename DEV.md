@@ -1,4 +1,4 @@
-# Agarra la pala: desarrollo
+# Bifurca: desarrollo
 
 ## Arranque
 
@@ -34,10 +34,10 @@ Variables de entorno:
 | Servicio | Variable | Ejemplo | Para qué |
 |---|---|---|---|
 | API | `ANTHROPIC_API_KEY` | `sk-ant-...` | Leer el CV con Claude y narrar. Sin ella, el perfil se llena a mano y los textos salen de plantillas |
-| API | `CORS_ORIGINS` | `["https://agarrar-la-pala.onrender.com"]` | Orígenes que pueden llamar a la API. Va en **formato JSON** (una lista entre corchetes con comillas dobles); una URL suelta no se lee |
+| API | `CORS_ORIGINS` | `["https://bifurca.onrender.com"]` | Orígenes que pueden llamar a la API. Va en **formato JSON** (una lista entre corchetes con comillas dobles); una URL suelta no se lee |
 | API | `WEB_CONCURRENCY` | `2` | Procesos de uvicorn. Cada uno usa ~170 MB después de jugar: 2 caben en 512 MB. Más procesos solo ayudan si el plan tiene más CPUs |
 | API | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | | Opcionales: guardar las corridas de `/api/simulations` |
-| Front | `VITE_API_URL` | `https://agarrar-la-pala-api.onrender.com` | URL de la API. Vite la mete en el build: si cambia, hay que volver a construir el front |
+| Front | `VITE_API_URL` | `https://bifurca-api.onrender.com` | URL de la API. Vite la mete en el build: si cambia, hay que volver a construir el front |
 
 `PORT` lo pone Render. En local, el backend lee estas mismas variables de `backend/.env` (incluida
 `ANTHROPIC_API_KEY`); una variable de entorno pesa más que el `.env`.

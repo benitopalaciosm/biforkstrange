@@ -34,5 +34,5 @@ def test_prod_sin_variables_parte_con_dos_procesos_en_el_8000(tmp_path):
 
 
 def test_cors_origins_se_lee_como_json(monkeypatch):
-    monkeypatch.setenv("CORS_ORIGINS", '["https://agarrar-la-pala.onrender.com", "http://localhost:5173"]')
-    assert Settings(_env_file=None).cors_origins == ["https://agarrar-la-pala.onrender.com", "http://localhost:5173"]
+    monkeypatch.setenv("CORS_ORIGINS", '["https://bifurca.onrender.com", "http://localhost:5173"]')
+    assert Settings(_env_file=None).cors_origins == ["https://bifurca.onrender.com", "http://localhost:5173"]

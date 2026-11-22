@@ -10,7 +10,7 @@ import "../demo.css";
 const BASE = "#F08A1C";
 const COLORES = ["#17794B", "#2447F9", "#D6336C", "#7C5CD6", "#0E9AA7"];
 const EMPATE = "#B9BAC0";
-const NOMBRE = "agarrar-la-pala-mi-resultado.png";
+const NOMBRE = "bifurca-mi-resultado.png";
 
 /** Si el navegador puede compartir imágenes (el menú de compartir del celular): si no, se descarga. */
 function puedeCompartirArchivos(): boolean {
@@ -124,7 +124,7 @@ export function CompartirResultado({
     setAviso(null);
     if (!compartible) return descargar(png);
     try {
-      await navigator.share({ files: [comoArchivo(png)], title: "Agarrar la pala", text: `${v.titulo}: ${v.texto}` });
+      await navigator.share({ files: [comoArchivo(png)], title: "Bifurca", text: `${v.titulo}: ${v.texto}` });
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       // armar la imagen toma un rato y el navegador ya no lo cuenta como tu toque: queda lista para otro
@@ -153,7 +153,7 @@ export function CompartirResultado({
         <div className="jg-tarjeta-lienzo" aria-hidden="true">
           <div className="jg-tarjeta" ref={tarjeta}>
             <div className="jg-tarjeta-marca">
-              Agarrar la pala
+              Bifurca
               <span>{comparacion.gemelos} mundos, la misma suerte</span>
             </div>
             <p className="jg-tarjeta-pregunta">{comparacion.pregunta}</p>
