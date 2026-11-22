@@ -291,7 +291,7 @@ export function Onboarding({
       {catalogo && paso === "plata" && (
         <Tarjeta key="plata" titulo={leido ? "Lo que un CV no dice." : "Lo último."}>
           <Slider
-            label="Te llega al mes (líquido)"
+            label="Sueldo líquido al mes"
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, p.sueldo))}
             min={SLIDER_MIN}
             max={SLIDER_MAX}
@@ -302,7 +302,7 @@ export function Onboarding({
           />
           {ref && (
             <Text size="sm">
-              La mitad de la gente como tú gana menos de <strong>{pesos(ref.p50)}</strong>.
+              Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
             </Text>
           )}
           <Stack gap={8}>

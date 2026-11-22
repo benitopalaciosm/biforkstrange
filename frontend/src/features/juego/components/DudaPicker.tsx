@@ -69,7 +69,6 @@ export function DudaPicker({
     : dudas;
   const simulando = cargando && dudas !== null;
   const enJuego = useMasEnJuego(perfil, dudas, sugeridas);
-  const conCv = sugerida !== null && (dudas?.some((d) => d.decision === sugerida) ?? false);
   return (
     <Screen gap={16}>
       <ScreenHeader
@@ -82,19 +81,17 @@ export function DudaPicker({
       />
       <Stack gap={6}>
         <Heading level={1}>¿Qué duda te trajo?</Heading>
-        <Text>{conCv ? "Por tu CV, las primeras te calzan más." : "Elige una. Es tu primera carta."}</Text>
       </Stack>
       {enJuego && (
         <div className="jg-en-juego" role="note">
           <Tag tone="accent">La más en juego para ti</Tag>
           <Text size="sm">
-            Donde más te juegas es <strong>«{enJuego.nombre}»</strong>: entre la mala y la buena suerte hay {Math.round(enJuego.dispersion * 100)}% de
-            diferencia, medida sobre tu sueldo típico (de {plata(enJuego.mala)} a {plata(enJuego.buena)} al mes).
+            «{enJuego.nombre}»: de {plata(enJuego.mala)} (10%) a {plata(enJuego.buena)} (90%) al mes.
           </Text>
         </div>
       )}
-      {cargando && !dudas && <Cargando>Buscando las dudas que calzan contigo…</Cargando>}
-      {dudas && dudas.length === 0 && <Text>Con este perfil no hay dudas disponibles. Vuelve y cámbialo.</Text>}
+      {cargando && !dudas && <Cargando>Buscando tus dudas…</Cargando>}
+      {dudas && dudas.length === 0 && <Text>No hay dudas para este perfil. Vuelve y cámbialo.</Text>}
       {dudas && dudas.length > 0 && (
         <DecisionList<string>
           tile

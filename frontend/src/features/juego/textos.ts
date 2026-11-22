@@ -34,6 +34,9 @@ export function deCada(p: number): string {
 /** Siempre sobre 10, para comparar opciones entre sí: "7 de cada 10". */
 export const deCada10 = (p: number) => `${Math.round(p * 10)} de cada 10`;
 
+/** Sobre 100, como se cuentan los mundos: "63 de 100". Lo que pasa muy rara vez no se redondea a cero. */
+export const deCien = (p: number) => (p > 0 && p < 0.005 ? "menos de 1 de 100" : `${Math.round(p * 100)} de 100`);
+
 export const minuscula = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
 export const CALIDAD: Record<Calidad, { nombre: string; explica: string }> = {

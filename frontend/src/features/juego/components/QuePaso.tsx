@@ -1,9 +1,9 @@
 import { Button, Meta, Narrative, NightBand, Panel, Pill, Screen, ScreenFooter, ScreenHeader, SlowReveal, Stack, Text, YearTicker, cssVars } from "@/shared/ui";
-import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, pesos, plata, sinSueldo, situacion } from "../textos";
+import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, deCien, pesos, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
-import { Contador, LineaSueldo, Ruleta, type Casilla } from "./graficos";
+import { Contador, Info, LineaSueldo, Ruleta, type Casilla } from "./graficos";
 import { Noticia, Pensando } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
@@ -17,7 +17,7 @@ export function loNuevo(previa: Vista | null, vista: Vista): Anio[] {
     .map((a, i) => (i === 0 ? { ...a, decisiones: a.decisiones.slice(yaDecisiones), eventos: a.eventos.slice(yaEventos) } : a));
 }
 
-const queTanProbable = (prob: number) => (prob >= 0.995 ? "Era seguro" : `Pasa en ${deCada(prob)}`);
+const queTanProbable = (prob: number) => (prob >= 0.995 ? "Seguro" : deCien(prob));
 
 function Quedaste({ antes, ahora, recorrido, espera }: { antes: Estado | undefined; ahora: Estado; recorrido: { edad: number; sueldo: number }[]; espera: number }) {
   const cargo = antes && antes.cargo !== ahora.cargo ? `${antes.cargo} → ${ahora.cargo}` : ahora.cargo;
@@ -41,7 +41,7 @@ function Quedaste({ antes, ahora, recorrido, espera }: { antes: Estado | undefin
         </span>
       </div>
       {comparable && delta < -1000 && antes!.cargo === ahora.cargo && (
-        <span className="jg-chico">Además de tus decisiones, cada año tu sueldo se mueve solo, según tu edad y tu suerte. Este año te tocó bajar.</span>
+        <Info pregunta="¿Por qué bajó?">Además de tus decisiones, cada año tu sueldo se mueve solo, según tu edad y tu dado.</Info>
       )}
       <LineaSueldo puntos={recorrido} />
       <div className="jg-datos">
@@ -102,7 +102,7 @@ export function QuePaso({
   const edades: number[] = [];
   for (const a of cerrados) for (let ed = a.edad; ed < a.fin!.edad; ed++) edades.push(ed);
   const mismoAnio = !vista.terminada && cerrados.length === 0;
-  const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Seguir: otra decisión este año" : `Seguir al año ${proximo}`;
+  const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Otra decisión este año" : `Seguir al año ${proximo}`;
 
   // el dado sigue girando hasta que Sonnet cuenta el año: las noticias se muestran una vez y no cambian
   if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} />;
@@ -117,7 +117,7 @@ export function QuePaso({
       {edades.length > 1 && (
         <Stack gap={6}>
           <YearTicker years={edades.map((ed) => `Año ${ed - edadInicial + 1}`)} stepMs={900} />
-          <Text>Pasaron {edades.length} años antes de tu siguiente decisión.</Text>
+          <Text>Pasaron {edades.length} años.</Text>
         </Stack>
       )}
 
@@ -126,7 +126,7 @@ export function QuePaso({
           <Meta>Elegiste «{dado.opcion_nombre}»{hayRuleta ? " · tiramos tu dado" : ""}</Meta>
           {hayRuleta && (
             <>
-              <Text size="sm">Esto pasó en los {GEMELOS} mundos simulados con esa opción. Tú eres el mundo {GEMELOS + 1}, con tu propio dado:</Text>
+              <Text size="sm">Así salió en los {GEMELOS} mundos. Este es tu dado:</Text>
               <Ruleta casillas={casillas} salio={dado.resultado} />
             </>
           )}
@@ -136,10 +136,10 @@ export function QuePaso({
           <SlowReveal delay={espera + 0.5}>
             <Text size="sm">
               {hayRuleta
-                ? `En tu mundo pasó lo mismo que en ${Math.round(tocada!.prob * 100)} de cada 100 mundos simulados.`
+                ? `Pasó en ${deCien(tocada!.prob)} mundos.`
                 : dado.prob >= 0.995
-                  ? "Con esta opción, esto era seguro."
-                  : `Con esta opción, esto pasa en ${deCada10(dado.prob)} mundos.`}
+                  ? "Con esta opción, era seguro."
+                  : `Pasa en ${deCien(dado.prob)} mundos.`}
             </Text>
           </SlowReveal>
         </Stack>
@@ -152,7 +152,7 @@ export function QuePaso({
         return (
           <Stack as="section" gap={8} key={`${a.anio}:${a.edad}`} className="jg-despues" style={cssVars({ "--jg-espera": `${espera + 0.8 + i * 0.25}s` })}>
             <Meta>
-              {aniosDe(a.edad, a.fin?.edad, edadInicial)} · {a.edad} años{a.fin ? "" : " · sigue en curso"}
+              {aniosDe(a.edad, a.fin?.edad, edadInicial)} · {a.edad} años{a.fin ? "" : " · en curso"}
             </Meta>
             {eventos.map((e, j) => (
               <Noticia
@@ -171,16 +171,12 @@ export function QuePaso({
               />
             ))}
             {nada && <Text size="sm">{a.fin && a.fin.edad - a.edad > 1
-                  ? "Nada más fuera de lo normal en estos años."
+                  ? "Nada más en estos años."
                   : i === 0 && dado
-                    ? "Nada más fuera de lo normal este año."
-                    : "Un año sin noticias: la vida siguió su curso."}</Text>}
-            {a.fin && a.fin.edad - a.edad > 1 && (
-              <Text size="sm">
-                Esto te tomó {a.fin.edad - a.edad} años: partiste con {a.edad} y sales con {a.fin.edad}.
-              </Text>
-            )}
-            {a.fin && tramos.length > 1 && <Text size="sm">Cierras el año con: {cargoYSueldo(a.fin, true)}.</Text>}
+                    ? "Nada más este año."
+                    : "Un año sin noticias."}</Text>}
+            {a.fin && a.fin.edad - a.edad > 1 && <Text size="sm">Te tomó {a.fin.edad - a.edad} años.</Text>}
+            {a.fin && tramos.length > 1 && <Text size="sm">Cierras con: {cargoYSueldo(a.fin, true)}.</Text>}
           </Stack>
         );
       })}
@@ -188,7 +184,7 @@ export function QuePaso({
       {quedoSinTrabajo && (
         <NightBand>
           <Meta>Quedaste sin trabajo</Meta>
-          <Text>Tu último sueldo fue {plata(vista.estado.sueldo_ref)}. La próxima carta es cómo sigues buscando.</Text>
+          <Text>La próxima carta: cómo sigues buscando.</Text>
         </NightBand>
       )}
 
