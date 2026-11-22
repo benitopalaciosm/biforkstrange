@@ -578,11 +578,9 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 /* Un año que pasó sin nada: una franja arriba del año siguiente, en vez de una pantalla entera */
 .jg-sin-novedad { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 12px; background: var(--niebla); font: 400 13px/18px var(--font); color: var(--tinta); animation: vd-subir .4s var(--ease) both; }
 
-/* Carta: lo típico de cada opción a la vista, y elegir desde el pie */
+/* Carta: lo típico de cada opción a la vista */
 .jg-tipico { font: 400 13px/18px var(--font); color: var(--suave); }
 .jg-tipico b { color: var(--tinta); font-weight: 700; }
-.jg-pie-opciones { display: flex; gap: 8px; }
-.jg-pie-opcion { flex: 1 1 0; min-width: 0; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* "Ver más cosas que podrías hacer": cada una con su dibujo, como en la lista de dudas */
 .jg-tranquilo-arte { flex: none; width: 48px; height: 48px; border: 1.5px solid var(--tinta); border-radius: 10px; overflow: hidden; }
