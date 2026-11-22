@@ -870,15 +870,15 @@
    "valor": {
     "lento": 0,
     "medio": 0,
-    "rapido": 1.6
+    "rapido": 1.1
    },
    "unidad": "veces P_SEPARACION",
-   "descripcion": "Despidos por reestructuración con IA, sobre la tasa de separación normal. Los economistas del FRI ven el desempleo de 2030 en 5,0% con IA lenta y moderada, y en 6,0% con IA rápida. Con la misma tasa de encontrar pega, pasar de 5% a 6% sube las separaciones cerca de 21%; repartido en el empleo que la IA automatiza (3% en Chile, peso 1) o donde es incógnita (20%, peso 0,5), unos 13% efectivos, da 1,6 veces la tasa base para ellos. La derivación es del equipo.",
+   "descripcion": "Despidos por reestructuración con IA, sobre la tasa de separación normal. Los economistas del FRI ven el desempleo de 2030 en 5,0% con IA lenta y moderada, y en 6,0% con IA rápida. Con la misma tasa de encontrar pega, pasar de 5% a 6% sube las separaciones cerca de 21%. Se reparte en el empleo que la IA automatiza (peso 1) o donde es incógnita (peso 0,5) tal como queda en el juego: en la cohorte de validación, 9% de los años empleados automatiza y 21% es incógnita (OIT-Banco Mundial 2024 da 3% y 20% para Chile; el catálogo de cargos tiene más oficinistas), unos 19,6% efectivos; 21/19,6 da 1,1 veces la tasa base para ellos. La derivación es del equipo.",
    "fuente": "fri_2026",
    "calidad": "supuesto",
    "rango": [
-    0.8,
-    2.4
+    0.55,
+    1.6
    ]
   },
   {
