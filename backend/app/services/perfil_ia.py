@@ -116,6 +116,8 @@ class PerfilLeido(BaseModel):
         None, description="true si antes de su situación de hoy tuvo una empresa o emprendimiento propio.")
     anos_independiente: int | None = Field(
         None, description="Si hoy trabaja por su cuenta (freelance, boletas): hace cuántos años, según las fechas.")
+    practica: Literal["grande", "pyme", "startup", "publico"] | None = Field(
+        None, description="Si estudia o busca su primer empleo: tipo de empleador donde hizo su práctica profesional.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -176,6 +178,9 @@ consultor independiente, boletas).
   - emprendio_antes: true si tuvo una empresa o emprendimiento propio que ya no es su situación de hoy.
   - anos_independiente: solo si su situación es "independiente": años completos desde que empezó a \
 trabajar por su cuenta sin interrupción, según la fecha de inicio.
+  - practica: solo si estudia o nunca ha tenido un empleo después de titularse, y el texto nombra su \
+práctica profesional. El tipo de esa empresa con los mismos criterios de tipo_empleador ("publico" si \
+fue en el Estado). Si hizo varias, la más reciente.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -306,7 +311,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     perfil, supuestos = dict(base), []
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
-              "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", *HISTORIA_LEIDA}
+              "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -365,6 +370,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     inferido += _avance_en_carrera(leido, perfil, pq, hoy)
     inferido += _historia(leido, perfil)
     inferido += _independiente(leido, perfil)
+    inferido += _practica(leido, perfil)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -432,6 +438,22 @@ def _independiente(leido: PerfilLeido, perfil: dict) -> list[str]:
         return [f"Ya volviste una vez de trabajar por tu cuenta a un empleo: vuelven a buscar empleo {cada}."]
     return [f"Llevas {perfil['anos_independiente']} años por tu cuenta: es tu forma de trabajar, y solo vuelven a "
             f"buscar empleo {cada}."]
+
+
+def _practica(leido: PerfilLeido, perfil: dict) -> list[str]:
+    """Dónde hizo la práctica: pesa en su primera pega (politicas.PRIMERA_PEGA_POR_PRACTICA)."""
+    if not leido.practica or perfil["estado"] not in ("estudiando", "buscando"):
+        return []
+    from app.sim.motor.politicas import PESOS_FORZADAS, PRIMERA_PEGA_POR_PRACTICA, pesos_personales
+
+    perfil["practica"] = leido.practica
+    if leido.practica not in PRIMERA_PEGA_POR_PRACTICA:
+        return []
+    opcion = PRIMERA_PEGA_POR_PRACTICA[leido.practica][0]
+    suyo = pesos_personales({"practica": leido.practica})["primera_pega"][opcion]
+    donde = "una empresa grande" if leido.practica == "grande" else "el Estado"
+    return [f"Hiciste tu práctica en {donde}: al buscar su primera pega, tus gemelos postulan ahí {round(suyo * 100)}% "
+            f"de las veces (la gente, {round(PESOS_FORZADAS['primera_pega'][opcion] * 100)}%; supuesto del equipo)."]
 
 
 def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:

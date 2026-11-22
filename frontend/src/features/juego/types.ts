@@ -45,6 +45,8 @@ export type Perfil = {
   emprendio_antes?: 0 | 1;
   /** Si trabaja por su cuenta: hace cuántos años. Con 5 o más, sus gemelos vuelven menos a un empleo. */
   anos_independiente?: number | null;
+  /** Si estudia o busca su primera pega: dónde hizo la práctica. Grande o Estado pesa en su primera pega. */
+  practica?: "" | "grande" | "pyme" | "startup" | "publico";
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

@@ -67,6 +67,8 @@ CESANTIA_POR_HISTORIA = {
     "freelance_entre_pegas": ("informal", 0.12),  # ya hizo boletas entre una pega y otra
     "emprendio_antes": ("emprender", 0.06),    # ya tuvo una empresa propia
 }
+# Dónde hizo la práctica, y cuánto peso suma a buscar la primera pega en ese tipo de empleador (supuesto)
+PRIMERA_PEGA_POR_PRACTICA = {"grande": ("grande", 0.13), "publico": ("estado", 0.10)}
 
 
 def _mover(pesos: dict[str, float], opcion: str, cuanto: float) -> dict[str, float]:
@@ -84,6 +86,8 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
     - oferta_externa: la probabilidad de cambiarse escala con 3 años / tus años por pega, entre la mitad
       y 1,8 veces.
     - cesantia: cada rasgo de `CESANTIA_POR_HISTORIA` suma peso a la opción que se le parece.
+    - primera_pega: una práctica en una empresa grande o en el Estado suma peso a postular ahí
+      (`practica` solo llega al estado de quien estudia o busca su primer empleo).
     """
     salida: dict[str, dict[str, float]] = {}
     anos = e.get("anos_por_empleo")
@@ -98,6 +102,9 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
             cesantia = _mover(cesantia, opcion, cuanto)
     if cesantia is not PESOS_FORZADAS["cesantia"]:
         salida["cesantia"] = cesantia
+    if e.get("practica") in PRIMERA_PEGA_POR_PRACTICA:
+        opcion, cuanto = PRIMERA_PEGA_POR_PRACTICA[e["practica"]]
+        salida["primera_pega"] = _mover(PESOS_FORZADAS["primera_pega"], opcion, cuanto)
     return salida
 
 

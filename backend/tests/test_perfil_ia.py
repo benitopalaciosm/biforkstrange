@@ -302,6 +302,28 @@ def test_independiente_veterano_o_de_paso():
     assert r["perfil"]["anos_independiente"] is None
 
 
+def test_la_practica_pesa_en_la_primera_pega():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+    from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
+
+    estudia = dict(edad=22, estado="estudiando", edu="media", sueldo=0, rubro="", tipo_empleador="", nivel=0)
+    assert pesos_personales(estado_inicial(Perfil(**estudia), paquete())) == {}  # sin práctica, como siempre
+    for practica, opcion in (("grande", "grande"), ("publico", "estado")):
+        e = estado_inicial(Perfil(**estudia, practica=practica), paquete())
+        pesos = pesos_personales(e)["primera_pega"]
+        assert pesos[opcion] > PESOS_FORZADAS["primera_pega"][opcion]
+        assert sum(pesos.values()) == pytest.approx(1, abs=1e-3)
+    assert pesos_personales(estado_inicial(Perfil(**estudia, practica="pyme"), paquete())) == {}
+    # solo a quien estudia o busca su primer empleo: a quien ya trabaja no le llega
+    assert "practica" not in estado_inicial(Perfil(practica="grande"), paquete())
+
+    r = perfil_ia.completar(LEIDO.model_copy(update={"situacion": "estudiando", "practica": "publico"}))
+    assert r["perfil"]["practica"] == "publico" and any("práctica en el Estado" in f for f in r["inferido"])
+    r = perfil_ia.completar(LEIDO.model_copy(update={"practica": "grande"}))  # empleado: no aplica
+    assert r["perfil"]["practica"] == "" and not any("práctica" in f for f in r["inferido"])
+
+
 def test_los_gemelos_se_cambian_como_tu():
     from app.sim.motor.politicas import pesos_personales
 

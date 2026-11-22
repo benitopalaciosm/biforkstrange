@@ -64,6 +64,7 @@ class Perfil:
     freelance_entre_pegas: int = 0        # trabajó por su cuenta entre una pega y otra
     emprendio_antes: int = 0              # ya tuvo una empresa propia antes de la de hoy
     anos_independiente: int | None = None  # si hoy trabaja por su cuenta: hace cuántos años
+    practica: str = ""                    # tipo de empleador de su práctica (grande | pyme | startup | publico)
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -152,6 +153,8 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
             e[rasgo] = getattr(perfil, rasgo)
     if perfil.estado != "independiente":
         e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
+    if perfil.practica and (perfil.estado == "estudiando" or e["primer_empleo"]):
+        e["practica"] = perfil.practica  # solo pesa en su primera pega
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)
         e["tipo_institucion"] = pq.tabla("mifuturo_carreras", "tipo_institucion", "carrera_id", perfil.carrera_id)

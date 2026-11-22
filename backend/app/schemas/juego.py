@@ -38,6 +38,7 @@ class PerfilIn(BaseModel):
     freelance_entre_pegas: int = Field(0, ge=0, le=1)
     emprendio_antes: int = Field(0, ge=0, le=1)
     anos_independiente: int | None = Field(None, ge=0, le=40)
+    practica: Literal["", "grande", "pyme", "startup", "publico"] = ""
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())
