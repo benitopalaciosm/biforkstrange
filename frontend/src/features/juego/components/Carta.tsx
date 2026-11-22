@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, Chip, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, minuscula, plata, primeraFrase, sinPunto, sinSueldo } from "../textos";
+import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, minuscula, plata, primeraFrase, sinSueldo } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
@@ -155,19 +155,14 @@ const ESCENARIO_IA: Record<EscenarioIA["escenario"], string> = { lento: "lenta",
 
 /** La opción para elegir: qué es, en cuántos mundos gana y el sueldo típico. La simulación va aparte, más abajo. */
 /**
- * La frase de una línea bajo el nombre. Si la opción tiene dado, lo bueno que puede pasar y en cuántos mundos
- * ("Te igualan la oferta · 19 de 100", igual que al abrirla); si no, la primera oración del detalle cuando es corta.
+ * La frase de una línea bajo el nombre: qué es la opción, sin números. El único número de la tarjeta cerrada es
+ * "Gana en X de 100"; el dado del primer año se ve al abrirla, para no poner dos cifras parecidas que miden cosas distintas.
  */
 function fraseCorta(o: OpcionComparada, detalle: string): string | undefined {
-  const rs = o.por_resultado;
-  if (rs.length > 1) {
-    const porProb = [...rs].sort((a, b) => b.prob - a.prob);
-    const r = porProb.find((x) => x.tono === "bueno") ?? porProb[0];
-    return `${sinPunto(r.texto || r.resultado)} · ${Math.round(r.prob * 100)} de 100`;
-  }
   const corta = detalle ? primeraFrase(detalle) : "";
-  if (corta && corta.length <= 60) return corta;
-  return rs[0]?.texto || corta || undefined;
+  if (corta && corta.length <= 60 && !/\d/.test(corta)) return corta;
+  const seguro = o.por_resultado.length === 1 ? o.por_resultado[0].texto : "";
+  return seguro || undefined;
 }
 
 /**
