@@ -42,6 +42,7 @@ El paquete dice qué pasa con cada decisión y evento. Esto lo decide el motor y
 - **Recesión al inicio del año**, para que la decisión y los eventos del año ya la vean.
 - **Los efectos de un resultado leen el estado de antes del resultado.** Así "el sueldo queda en 0" y "el finiquito es sueldo por años" funcionan juntos.
 - **Cierre de año:** ahorro según la tasa del percentil, retorno real de 3%, pago del crédito con 10% del sueldo, +1,5 de oficio por año trabajado, antigüedad, titulación al terminar los semestres.
+- **Quien estudia algo que no está en el catálogo de carreras:** dura 8 semestres y se titula universitario; 5 y técnico si su institución es un IP o un CFT; con un título universitario, es un postgrado de 4 (`perfil.SEMESTRES_SIN_CARRERA`). Sin dato de cuánto lleva, entró a los 18 y va al día.
 - **Rubro del primer empleo:** se sortea según cuánta gente ocupada hay en cada rubro (ESI).
 - **Salida del trabajo por cuenta propia:** 5,5% al año vuelve a buscar empleo (calibrado contra la proporción de independientes por edad). El paquete no trae esa salida.
 - **Sin trabajo no hay sueldo:** si una regla deja buscando sin llevar el sueldo a cero, el motor lo hace y guarda el último sueldo.

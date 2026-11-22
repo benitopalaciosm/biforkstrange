@@ -44,6 +44,37 @@ def test_bootcamp_desde_la_cesantia_no_revienta_el_anio():
     assert v.e["estado"] == "empleado" and v.e["tipo_empleador"] != ""
 
 
+def test_mas_meses_cesante_nunca_ayuda_a_encontrar_trabajo():
+    """Corregido. cesantia/rapido sumaba 0,1 x min(3, meses/12): con 7 meses encontraba más rápido (0,84) que
+    recién despedido (0,78), con 8 caía a 0,51 por el hueco y con 36 volvía a 0,75. MESES_CESANTIA es una
+    exponencial (salida constante, EPS) y el hueco de 8 meses es el único castigo por duración (Kroft)."""
+    from dataclasses import replace
+
+    base = Perfil(edad=30, estado="buscando", sueldo=1_400_000)
+    for opcion in ("rapido", "nivel"):
+        prob = next(o for o in pq().decisiones["cesantia"]["opciones"] if o["id"] == opcion)["resultados"][0]["prob"]
+        ps = [pq().evaluar(prob, vida(replace(base, meses_cesante=m)).e) for m in range(0, 61)]
+        assert all(b <= a for a, b in zip(ps, ps[1:])), opcion
+        # dentro de la simulación (sin hueco), los meses que ya lleva tampoco cambian nada
+        assert pq().evaluar(prob, vida(base, meses_cesante=36).e) == pytest.approx(ps[0])
+    rapido = pq().decisiones["cesantia"]["opciones"][0]["resultados"][0]["prob"]
+    assert pq().evaluar(rapido, vida(base).e) == pytest.approx(0.783, abs=1e-3)  # recién despedido, como antes
+
+
+@pytest.mark.parametrize("estado", ["fundador", "independiente", "buscando"])
+def test_emigrar_es_para_quien_se_va_con_trabajo(estado):
+    """Corregido. emigrar no pedía estar empleado: a un fundador "irse" le multiplicaba por 3,5 el sueldo y lo
+    dejaba fundador en EE.UU.; a un cesante, buscando afuera con sueldo 0. El premio de Clemens es sobre el
+    sueldo de un trabajador idéntico: la carta ahora pide estado == 'empleado' (decisiones.json)."""
+    v = vida(Perfil(edad=30, estado=estado, sueldo=1_400_000, ingles=1))
+    assert not v.aplica("emigrar") and "emigrar" not in dict(v.cartas_posibles())
+    assert "emigrar" not in [d["decision"] for d in partida.dudas_posibles(Perfil(edad=30, estado=estado, ingles=1))]
+    empleada = vida(Perfil(edad=30, ingles=1), DadosGuion({"dec:emigrar:irse": 0.0}))
+    assert empleada.aplica("emigrar")
+    empleada.vivir_anio(Guion({"emigrar": "irse", **QUIETA}), carta="emigrar")
+    assert (empleada.e["estado"], empleada.e["pais"], empleada.e["tipo_empleador"]) == ("empleado", "afuera", "extranjero")
+
+
 def test_dos_ofertas_en_el_mismo_anio_se_sortean_por_separado():
     pares = []
     for g in range(400):
@@ -92,8 +123,8 @@ def test_al_cerrar_la_startup_la_antiguedad_vuelve_a_cero():
 
 
 @pytest.mark.xfail(strict=True, reason="meses_cesante solo se reinicia en cesantia/encuentra. Quien falla una "
-                   "primera_pega (+12) y después consigue trabajo queda empleado con meses_cesante > 0; años después, "
-                   "si queda cesante, parte con +0,1 de probabilidad de encontrar rápido por cada 12 meses viejos")
+                   "primera_pega (+12) y después consigue trabajo queda empleado con meses_cesante > 0. Desde que "
+                   "cesantia/rapido no lee meses_cesante ya no mueve ninguna probabilidad, pero el estado queda incoherente")
 def test_al_conseguir_trabajo_los_meses_cesante_vuelven_a_cero():
     d = DadosGuion({(1, "dec:primera_pega:pyme"): 0.0})
     v = vida(Perfil.a_los_18(), d)
@@ -235,16 +266,33 @@ def test_una_duda_que_no_se_puede_jugar_da_un_error_claro(duda):
 
 
 # ------------------------------------------------------------------ gemelos y políticas
-@pytest.mark.xfail(strict=True, reason="comparar(cesantia): la opción 'bootcamp' encadena la decisión bootcamp y ahí los "
-                   "gemelos (Inercia, sin pesos para esa decisión) eligen siempre 'no'. La columna 'bootcamp' que ve la "
-                   "persona es en realidad 'no hacer nada este año'")
 def test_los_gemelos_que_eligen_bootcamp_en_la_cesantia_hacen_el_bootcamp():
+    """Corregido. comparar(cesantia): la opción 'bootcamp' encadena la decisión bootcamp y ahí los gemelos
+    (Inercia, sin pesos para esa decisión) elegían siempre 'no': la columna 'bootcamp' era en realidad 'no
+    hacer nada este año'. Ahora la decisión encadenada respeta lo que ya eligieron (PESOS_ENCADENADAS)."""
     hicieron = 0
     for g in range(40):
         v = vida(CESANTE, Dados(0, g), tipo_empleador="pyme", rubro="Comercio")
         v.vivir_anio(Fija("cesantia", "bootcamp"), carta="cesantia")
         hicieron += ("bootcamp", "hacer") in [(d["decision"], d["opcion"]) for d in v.historia[0]["decisiones"]]
-    assert hicieron > 0
+    assert hicieron == 40
+
+
+def test_el_bootcamp_como_carta_suelta_sigue_respondiendose_con_su_peso_de_carta():
+    """Lo encadenado no se filtra a la carta: si el bootcamp sale como carta, Inercia no lo busca (no hace
+    nada) y la población lo hace con su peso de carta."""
+    from app.sim.motor.politicas import Inercia, Poblacion
+
+    v = vida(CESANTE, Dados(0, 0), tipo_empleador="pyme", rubro="Comercio")
+    v.iniciar_anio(False, carta="bootcamp")
+    d = pq().decisiones["bootcamp"]
+    assert Inercia().elegir(v, d, v.opciones("bootcamp"))[0] == "no"
+    hacen = 0
+    for g in range(400):
+        v = vida(CESANTE, Dados(0, g), tipo_empleador="pyme", rubro="Comercio")
+        v.iniciar_anio(True, carta="bootcamp")
+        hacen += Poblacion().elegir(v, d, v.opciones("bootcamp"))[0] == "hacer"
+    assert 0.03 < hacen / 400 < 0.15  # PESOS_CARTAS: 0,08
 
 
 @pytest.mark.xfail(strict=True, reason="politicas.py _pesos: el peso escrito para la última opción se ignora y se "

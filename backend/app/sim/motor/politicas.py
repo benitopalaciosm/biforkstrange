@@ -116,6 +116,15 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
 
 # Opción que equivale a no hacer nada, donde no es la última de la lista
 STATU_QUO = {"oferta_externa": "quedarse", "ahorro": "normal"}
+# Respuesta a una decisión que llega encadenada (`luego`) desde una opción que ya la eligió: quien,
+# cesante, elige "reconvertirte con un bootcamp" se inscribe ("Te inscribes"); no vuelve a dudar. Sin esto
+# los gemelos respondían la carta bootcamp con su peso de carta (Inercia: siempre "no").
+PESOS_ENCADENADAS: dict[str, dict[str, float]] = {"bootcamp": {"hacer": 1.0}}
+
+
+def _llega_encadenada(vida: Vida, decision_id: str) -> bool:
+    """Si la decisión que se está respondiendo llegó por el `luego` de otra (es el primer paso de la cola)."""
+    return bool(vida.cola) and vida.cola[0] == ("decision", decision_id, "luego")
 
 
 def opcion_base(decision: dict, opciones: list[Opcion]) -> str:
@@ -271,6 +280,8 @@ class _PorPesos:
         sitio = f"elige:{id_}" + (f":{ocurrencia}" if ocurrencia else "")
         if decision.get("opciones_desde_tabla") and not decision["opciones"]:
             pesos = [1.0] * len(opciones)  # carrera: al azar entre las de su tipo de institución
+        elif id_ in PESOS_ENCADENADAS and _llega_encadenada(vida, id_):
+            pesos = _pesos(decision, opciones, PESOS_ENCADENADAS)
         else:
             tabla = next((t for t in (self.pesos, *self.tablas) if id_ in t), {})
             pesos = _pesos(decision, opciones, {id_: tabla.get(id_, {})})

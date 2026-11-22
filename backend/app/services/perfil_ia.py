@@ -546,6 +546,12 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         perfil["estado"] = leido.situacion
     if leido.situacion == "buscando" and leido.meses_sin_trabajo is not None:
         perfil["meses_cesante"] = max(0, min(120, leido.meses_sin_trabajo))
+    if perfil["estado"] == "buscando" and (leido.anios_experiencia == 0 or leido.empleadores == 0 or leido.practica):
+        # busca su primera pega: sin el flag caía en la cesantía, porque el sueldo nunca es 0 (perfil.busca_primer_empleo)
+        perfil["primer_empleo"] = 1
+        inferido.append("Buscas tu primera pega: tus gemelos postulan como recién titulados, no como cesantes.")
+    if datos["nivel"] is None and (perfil["estado"] == "estudiando" or perfil["primer_empleo"]):
+        perfil["nivel"] = 0  # sin cargo en el CV, su primera pega parte en Junior, no en el semi senior por omisión
     for campo, valor in (("parcial", leido.jornada_parcial), ("remoto", leido.remoto), ("usa_ia", leido.usa_ia),
                          ("empresa_fondos", leido.levanto_inversion)):
         if valor is not None:

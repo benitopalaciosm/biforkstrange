@@ -363,6 +363,30 @@ def test_la_practica_pesa_en_la_primera_pega():
     assert r["perfil"]["practica"] == "" and not any("práctica" in f for f in r["inferido"])
 
 
+def test_quien_busca_su_primera_pega_parte_en_primera_pega_y_con_su_practica():
+    """completar siempre llena el sueldo, así que el motor no puede usar sueldo == 0: completar marca
+    primer_empleo cuando busca sin experiencia (o con práctica) y la partida parte en primera_pega."""
+    from app.sim.motor import partida
+    from app.sim.motor.perfil import Perfil
+
+    nuevo = PerfilLeido(situacion="buscando", edad=24, edu="universitaria", anios_experiencia=0)
+    for leido in (nuevo, nuevo.model_copy(update={"anios_experiencia": None, "empleadores": 0}),
+                  nuevo.model_copy(update={"anios_experiencia": None, "practica": "publico"})):
+        r = perfil_ia.completar(leido)
+        assert r["perfil"]["primer_empleo"] == 1 and r["perfil"]["sueldo"] > 0
+        v = partida.vista(Perfil(**r["perfil"]), 1, None, [], 0)
+        assert v["pendiente"]["decision"] == "primera_pega"
+    assert perfil_ia.completar(nuevo.model_copy(update={"practica": "publico"}))["perfil"]["practica"] == "publico"
+    # sin cargo en el CV, quien busca su primera pega o estudia parte en Junior; con dato, el dato
+    assert perfil_ia.completar(nuevo)["perfil"]["nivel"] == 0
+    assert perfil_ia.completar(nuevo.model_copy(update={"situacion": "estudiando"}))["perfil"]["nivel"] == 0
+    assert perfil_ia.completar(nuevo.model_copy(update={"nivel": 2}))["perfil"]["nivel"] == 2
+    assert perfil_ia.completar(LEIDO.model_copy(update={"nivel": None}))["perfil"]["nivel"] == 1  # empleado
+    # con experiencia, o empleado, no se marca
+    assert perfil_ia.completar(nuevo.model_copy(update={"anios_experiencia": 4}))["perfil"]["primer_empleo"] == 0
+    assert perfil_ia.completar(LEIDO.model_copy(update={"anios_experiencia": 0}))["perfil"]["primer_empleo"] == 0
+
+
 def test_toda_su_carrera_en_el_estado_o_en_startups_sesga_el_reempleo():
     from app.sim.motor.paquete import K_PROPIOS, paquete
     from app.sim.motor.perfil import Perfil, estado_inicial
