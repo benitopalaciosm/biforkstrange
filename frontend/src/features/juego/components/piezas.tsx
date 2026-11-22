@@ -179,7 +179,7 @@ export function Hoy({ e }: { e: Estado }) {
         )}
       </Text>
       <Text size="sm" className="jg-hoy-sueldo">
-        {sinSueldo(e) ? `Antes ganabas ${plata(e.sueldo_ref)}/mes` : `${plata(e.sueldo)}/mes`}
+        {sinSueldo(e) ? (e.sueldo_ref > 0 ? `Antes ganabas ${plata(e.sueldo_ref)}/mes` : "Sin sueldo") : `${plata(e.sueldo)}/mes`}
       </Text>
     </div>
   );
