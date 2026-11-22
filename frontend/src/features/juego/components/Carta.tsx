@@ -1124,6 +1124,12 @@ export function Carta({
       />
       {/* el único dado de la decisión: gira mientras responde el motor; "qué te pasó" cierra el sorteo */}
       {cargando && <DadoEnJuego casillas={enJuego} titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} texto={enJuego.length > 1 ? undefined : `Viviendo tu año ${anio}…`} onSalir={onSalir} />}
+      {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
+      {!cargando && !listo && (
+        <div className="jg-preparando">
+          <Cargando>Preparando tu carta…</Cargando>
+        </div>
+      )}
       <ProgresoAnios actual={anio} total={vista.anios} />
       <FranjaSinNovedad s={sinNovedad} />
       <Hoy e={e} />
@@ -1138,16 +1144,14 @@ export function Carta({
           porQueCorto(pendiente.por_que) && <span className="jg-chico">{mayuscula(porQueCorto(pendiente.por_que)!)}</span>
         )}
         {/* la carta se ve apenas llega del motor; la situación que escribe Claude entra cuando llega */}
-        {pendiente.narrativa && (
+        {pendiente.narrativa && listo && (
           <div className="jg-mensaje" key={llave}>
-            {listo ? (
-              <p className="jg-mensaje-texto">{narrados.situacion ?? pendiente.narrativa.situacion}</p>
-            ) : (
-              <span className="jg-mensaje-espera" role="status" aria-label="Escribiendo tu situación…">
-                <i />
-                <i />
-              </span>
-            )}
+            <span className="jg-mensaje-escribiendo" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <p className="jg-mensaje-texto">{narrados.situacion ?? pendiente.narrativa.situacion}</p>
           </div>
         )}
         <Heading level={2} as="h1" className="jg-carta-pregunta">
@@ -1278,6 +1282,7 @@ export function Carta({
 
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
+        {cargando && <Cargando>Sorteando y viviendo tu año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando ? (
           <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>
             Elegir el detalle
