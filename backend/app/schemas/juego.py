@@ -32,6 +32,16 @@ class PerfilIn(BaseModel):
     empresa_anos: int = Field(0, ge=0, le=30)
     empresa_fondos: int = Field(0, ge=0, le=1)
     anos_por_empleo: float | None = Field(None, gt=0, le=40)
+    semestres_restantes: int | None = Field(None, ge=0, le=16)
+    anos_en_carrera: int | None = Field(None, ge=0, le=10)
+    volvio_a_su_nivel: int = Field(0, ge=0, le=1)
+    freelance_entre_pegas: int = Field(0, ge=0, le=1)
+    emprendio_antes: int = Field(0, ge=0, le=1)
+    anos_independiente: int | None = Field(None, ge=0, le=40)
+    practica: Literal["", "grande", "pyme", "startup", "publico"] = ""
+    toda_su_carrera_en: Literal["", "publico", "startup"] = ""
+    ascensos_por_ano: float | None = Field(None, ge=0, le=2)
+    empresas_cerradas: int = Field(0, ge=0, le=10)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())

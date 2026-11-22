@@ -36,6 +36,23 @@ export type Perfil = {
   empresa_fondos?: 0 | 1;
   /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
   anos_por_empleo?: number | null;
+  /** Si estudia: semestres que le faltan y años que lleva en la carrera. Sin dato, se suponen por su edad. */
+  semestres_restantes?: number | null;
+  anos_en_carrera?: number | null;
+  /** Cómo salió de sus cesantías (1 = sí): sus gemelos responden igual si quedan cesantes. */
+  volvio_a_su_nivel?: 0 | 1;
+  freelance_entre_pegas?: 0 | 1;
+  emprendio_antes?: 0 | 1;
+  /** Si trabaja por su cuenta: hace cuántos años. Con 5 o más, sus gemelos vuelven menos a un empleo. */
+  anos_independiente?: number | null;
+  /** Si estudia o busca su primera pega: dónde hizo la práctica. Grande o Estado pesa en su primera pega. */
+  practica?: "" | "grande" | "pyme" | "startup" | "publico";
+  /** Si todos sus empleos fueron en el Estado o en startups: al cambiar de pega, sus gemelos vuelven ahí más seguido. */
+  toda_su_carrera_en?: "" | "publico" | "startup";
+  /** Ascensos dentro de una misma empresa por año de experiencia. Si es más rápido que lo típico, asciende más. */
+  ascensos_por_ano?: number | null;
+  /** Empresas propias que ya cerró: si sus gemelos tienen empresa, la cierran más seguido. */
+  empresas_cerradas?: number;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
