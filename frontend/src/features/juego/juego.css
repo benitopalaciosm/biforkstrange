@@ -184,16 +184,17 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-ruleta-tramo { display: flex; align-items: center; justify-content: center; min-width: 4px; border-left: 2px solid var(--tinta); background: var(--niebla); color: var(--tinta); font: 600 12px/1 var(--mono); }
 .jg-ruleta-tramo:first-child { border-left: 0; border-radius: 10px 0 0 10px; }
 .jg-ruleta-tramo:nth-last-child(2) { border-radius: 0 10px 10px 0; }
-.jg-ruleta-tramo[data-tono="bueno"] { background: color-mix(in srgb, var(--jg-mas) 28%, var(--papel)); }
-.jg-ruleta-tramo[data-tono="malo"] { background: color-mix(in srgb, var(--jg-menos) 34%, var(--papel)); }
+/* bueno y malo con el tono del juego (amarillo y tinta), no con colores de opción: verde y naranjo son «Irte» y «Quedarte» */
+.jg-ruleta-tramo[data-tono="bueno"] { background: color-mix(in srgb, var(--sol) 45%, var(--papel)); }
+.jg-ruleta-tramo[data-tono="malo"] { background: color-mix(in srgb, var(--tinta) 22%, var(--papel)); }
 /* Quieta: el sorteo ya se vio en la espera; acá solo queda el resultado */
-.jg-ruleta-tramo--tuyo { box-shadow: inset 0 0 0 4px var(--sol); }
+.jg-ruleta-tramo--tuyo { box-shadow: inset 0 0 0 3px var(--tinta); }
 .jg-ruleta-ficha { position: absolute; top: -9px; left: var(--jg-meta); width: 22px; height: 50px; margin-left: -11px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--sol); box-shadow: 0 3px 0 var(--sombra); }
 .jg-ruleta-leyenda { display: flex; flex-direction: column; gap: 3px; font: 400 13px/18px var(--font); color: var(--suave); }
 .jg-ruleta-leyenda span { display: flex; align-items: baseline; gap: 6px; }
 .jg-ruleta-leyenda i { flex: none; align-self: center; width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid var(--tinta); background: var(--niebla); }
-.jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--jg-mas); }
-.jg-ruleta-leyenda i[data-tono="malo"] { background: var(--jg-menos); }
+.jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--sol); }
+.jg-ruleta-leyenda i[data-tono="malo"] { background: var(--tinta); }
 .jg-ruleta-leyenda b { margin-left: auto; white-space: nowrap; font: 600 12px/18px var(--mono); }
 .jg-ruleta-tuyo { color: var(--tinta); font-weight: 600; }
 /* Después del sorteo, tu sueldo ya dibujado: nada más se simula en pantalla */
