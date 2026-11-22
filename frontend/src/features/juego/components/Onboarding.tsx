@@ -45,7 +45,7 @@ export function Onboarding({
   error?: string | null;
 }) {
   const { perfil: p, paso, faltan, leido, claude: extra, completo } = o.borrador;
-  const sabidos = new Set(o.borrador.sabidos);
+  const sabidos = new Set(Object.keys(o.borrador.fuentes));
   const cv = o.leyendoCv ? "leyendo" : leido ? "listo" : "nada";
   const claudeListo = extra !== null;
   const [otroRubro, setOtroRubro] = useState(false);
