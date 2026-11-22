@@ -17,18 +17,19 @@ import base64
 import binascii
 import io
 import json
-import os
 import shutil
 import subprocess
 from functools import lru_cache
-from pathlib import Path
 from typing import Literal
 
-import anthropic
+import anthropic  # noqa: F401  (los tests reemplazan perfil_ia.anthropic.Anthropic)
 from pydantic import BaseModel, Field, ValidationError
 
+from app.services.claude_comun import ERRORES_API, ClaudeNoDisponible, cliente, traducir_error
+from app.services.claude_comun import hay_credenciales as _hay_credenciales
 from app.sim.motor.paquete import Paquete, paquete
-from app.sim.motor.perfil import NIVELES
+from app.sim.motor.empresas import universidades
+from app.sim.motor.perfil import NIVELES, prima_universidad
 
 # Llenar un formulario no necesita razonar: Haiku con poco esfuerzo responde en segundos.
 MODELO = "claude-haiku-5-5"
@@ -63,7 +64,7 @@ def _texto_del_pdf(pdf: bytes) -> str:
         raise ValueError("No pudimos leer ese PDF. Prueba con otro o pega el texto.") from error
 
 
-class ModeloNoDisponible(RuntimeError):
+class ModeloNoDisponible(ClaudeNoDisponible):
     """No hay cómo llamar a Claude, o no pudo leer el texto: el perfil se llena a mano."""
 
 
@@ -80,6 +81,7 @@ class PerfilLeido(BaseModel):
     edu: Literal["media", "tecnica", "universitaria", "postgrado"] | None = Field(
         None, description="Nivel de estudios más alto TERMINADO.")
     carrera_id: int | None = Field(None, description="carrera_id del catálogo que mejor calza con lo que estudió.")
+    universidad_id: str | None = Field(None, description="universidad_id del catálogo de instituciones donde estudió el pregrado. Solo si el texto la nombra.")
     rubro: str | None = Field(None, description="Rubro del empleador actual, exactamente como aparece en la lista.")
     tipo_empleador: Literal["grande", "pyme", "startup", "publico", "extranjero"] | None = None
     nivel: int | None = Field(None, description="Cargo actual: 0 junior, 1 semi senior, 2 senior, 3 jefatura, 4 gerencia.")
@@ -197,6 +199,8 @@ siguiente es mayor en la escala de CARGOS. Cambiarse de empresa a un cargo mayor
 lista un solo cargo por empresa, 0; si no trae experiencia, null.
   - empresas_cerradas: emprendimientos propios que terminaron cerrando ("cerramos en 2022", "la empresa \
 no prosperó"). Vendidos o adquiridos no cuentan. Si tuvo empresas y no dice cómo terminaron, null.
+- universidad_id: copia el universidad_id del CATÁLOGO DE INSTITUCIONES donde estudió su pregrado \
+(universidad, instituto o CFT, en Chile o afuera). Solo si el texto la nombra; si no, null.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -222,7 +226,9 @@ def _catalogo(pq: Paquete) -> str:
         "GRUPOS OCUPACIONALES (número | nombre):", *[f"{g} | {n}" for g, n in ocupaciones], "",
         "CARGOS (nivel | nombre):", *[f"{i} | {n}" for i, n in enumerate(NIVELES)], "",
         "DUDAS (id | nombre | pregunta):", *[f"{d['id']} | {d['nombre']} | {d['pregunta']}" for d in _dudas(pq)], "",
-        "CATÁLOGO DE CARRERAS (carrera_id | tipo de institución | carrera):", *carreras,
+        "CATÁLOGO DE CARRERAS (carrera_id | tipo de institución | carrera):", *carreras, "",
+        "CATÁLOGO DE INSTITUCIONES (universidad_id | nombre | país):",
+        *[f"{u['universidad_id']} | {u['nombre']} | {u['pais']}" for u in universidades(pq)],
     ])
 
 
@@ -235,8 +241,7 @@ def _dudas(pq: Paquete) -> list[dict]:
 
 
 def _por_api(texto: str, hoy: str, pq: Paquete, pdf: bytes | None = None) -> PerfilLeido:
-    cliente = anthropic.Anthropic(timeout=ESPERA_MAX, max_retries=1)
-    respuesta = cliente.messages.parse(
+    respuesta = cliente(ESPERA_MAX, max_retries=1).messages.parse(
         model=MODELO,
         max_tokens=4000,
         thinking={"type": "disabled"},
@@ -290,26 +295,14 @@ def leer(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = No
     if _hay_credenciales():
         try:
             return _por_api(texto, hoy, pq, pdf), "api"
-        except anthropic.AuthenticationError as error:
-            raise ModeloNoDisponible("La llave de la API de Claude no es válida.") from error
-        except anthropic.RateLimitError as error:
-            raise ModeloNoDisponible("La API de Claude está con límite de uso; prueba en un minuto.") from error
-        except anthropic.APIStatusError as error:
-            raise ModeloNoDisponible(f"La API de Claude respondió con un error ({error.status_code}).") from error
-        except anthropic.APIConnectionError as error:
-            raise ModeloNoDisponible("No se pudo conectar con la API de Claude.") from error
+        except ERRORES_API as error:
+            raise traducir_error(error, ModeloNoDisponible) from error
     if shutil.which("claude"):
         if pdf:
             texto = f"{texto}\n\n{_texto_del_pdf(pdf)}".strip()
         return _por_comando(texto, hoy, pq), "comando"
     raise ModeloNoDisponible(
         "No hay credenciales para llamar a Claude. Define ANTHROPIC_API_KEY o llena el perfil a mano.")
-
-
-def _hay_credenciales() -> bool:
-    """Las mismas fuentes que resuelve el SDK: variables de entorno o un perfil de `ant auth login`."""
-    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
-                or (Path.home() / ".config" / "anthropic").is_dir())
 
 
 def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = None) -> dict:
@@ -334,6 +327,8 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         datos["rubro"] = None
     if datos["carrera_id"] is not None and not 0 <= datos["carrera_id"] <= 251:
         datos["carrera_id"] = None
+    if datos.get("universidad_id") and datos["universidad_id"] not in {u["universidad_id"] for u in universidades(pq)}:
+        datos["universidad_id"] = None
     for campo, limites in (("edad", (18, 50)), ("nivel", (0, 4)), ("riesgo", (0, 10)), ("ocupacion", (0, 9)),
                            ("antiguedad", (0, 40)), ("sueldo", (1, 30_000_000))):
         if datos[campo] is not None and not limites[0] <= datos[campo] <= limites[1]:
@@ -349,7 +344,9 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     if datos["sueldo"] is None:
         # sin sueldo declarado: el del medio para su edad y estudios (ESI), para no partir de un número ajeno
         estado = pq.derivar({"edad": perfil["edad"], "sexo": perfil["sexo"], "edu": perfil["edu"], "sueldo": 0})
-        perfil["sueldo"] = round(pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]), -4)
+        # la institución mueve ese sueldo solo aquí: si lo declaró, su prima ya está adentro
+        prima = prima_universidad(pq, perfil.get("universidad_id") or "")
+        perfil["sueldo"] = round(prima * pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]), -4)
     inferido = list(leido.inferido)
     if leido.ingles is not None:
         perfil["ingles"] = int(leido.ingles)
