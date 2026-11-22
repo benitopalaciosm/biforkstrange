@@ -622,6 +622,10 @@ class Vida:
                 if "ia_empresa" in self.e:
                     self.e["ia_empresa"] = 0  # la empresa nueva todavía no adopta IA
             if ef.get("duracion"):
+                if ef["op"] == "fija":
+                    # si ya hay un `fija` vigente en la variable, el valor al que se vuelve es el de antes de ese:
+                    # sin esto, el auge del cobre que sale dos años seguidos quedaba prendido para siempre
+                    previo = next((t["previo"] for t in self.temporales if t["var"] == var and t["op"] == "fija"), previo)
                 self.temporales.append({"quedan": ef["duracion"], "var": var, "op": ef["op"],
                                         "valor": valor, "previo": previo})
         self._completar_empleo(ref_movido=self.e["sueldo_ref"] != antes["sueldo_ref"], antes=antes,
@@ -894,16 +898,19 @@ class Vida:
             e["hueco"], self._anios_con_hueco = 0, 0
 
         # efectos con duración
-        vigentes = []
         for t in self.temporales:
             t["quedan"] -= 1
+        vigentes = [t for t in self.temporales if t["quedan"] > 0]
+        for t in self.temporales:
             if t["quedan"] > 0:
-                vigentes.append(t)
-            elif t["op"] == "suma":
+                continue
+            if t["op"] == "suma":
                 e[t["var"]] -= t["valor"]
             elif t["op"] == "multiplica":
                 e[t["var"]] = e[t["var"]] / t["valor"] if t["valor"] else t["previo"]
-            else:
+            elif not any(v["var"] == t["var"] and v["op"] == "fija" for v in vigentes):
+                # un `fija` que vence vuelve al valor de antes, salvo que otro `fija` de la misma variable siga vigente
+                # (el auge del cobre que sale dos años seguidos): ese manda hasta que venza él
                 e[t["var"]] = t["previo"]
         self.temporales = vigentes
         self._cumplir_diferidos()
