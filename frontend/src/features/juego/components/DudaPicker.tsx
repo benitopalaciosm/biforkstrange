@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Pill, Screen, ScreenHeader, Stack, Tag, Text,
+  Button, ChevronLeftIcon, Chip, DecisionArt, DecisionList, Heading, IconButton, Pill, Screen, ScreenHeader, Stack, Tag, Text,
 } from "@/shared/ui";
 import { GEMELOS, getEnJuego } from "../api";
 import { arteDuda, mayuscula, plata, preguntaCorta } from "../textos";
@@ -78,9 +78,20 @@ export function DudaPicker({
   const sugerida = sugeridas[0]?.decision ?? null;
   const [sel, setSel] = useState<string | null>(sugerida);
   const [todas, setTodas] = useState(false);
+  /** Con la lista completa abierta, se puede ver solo una categoría (Trabajo, Estudios…). */
+  const [categoria, setCategoria] = useState<string | null>(null);
   const orden = dudas
     ? [...dudas].sort((a, b) => rango(a.decision) - rango(b.decision) || prioridad(a.decision) - prioridad(b.decision))
     : dudas;
+  // las categorías en orden de cuántas dudas tienen
+  const conteo = new Map<string, number>();
+  for (const d of dudas ?? []) conteo.set(d.categoria, (conteo.get(d.categoria) ?? 0) + 1);
+  const categorias = [...conteo.keys()].sort((a, b) => conteo.get(b)! - conteo.get(a)!);
+  const mostradas = (orden ?? dudas ?? []).filter((d) => categoria === null || d.categoria === categoria || d.decision === sel);
+  const elegirCategoria = (c: string | null) => {
+    setCategoria(c);
+    if (c !== null) setTodas(true); // una categoría muestra todas las suyas, no solo las primeras
+  };
   const simulando = cargando && dudas !== null;
   const enJuego = useMasEnJuego(perfil, dudas, sugeridas);
   return (
@@ -112,13 +123,25 @@ export function DudaPicker({
       )}
       {cargando && !dudas && <Cargando>Buscando tus dudas…</Cargando>}
       {dudas && dudas.length === 0 && <Text>No hay dudas para este perfil. Vuelve y cámbialo.</Text>}
+      {dudas && dudas.length > VISIBLES && categorias.length > 1 && (
+        <div className="jg-filtro-dudas" role="group" aria-label="Filtrar dudas por tema">
+          <Chip pressed={categoria === null} onToggle={() => elegirCategoria(null)}>
+            Todas
+          </Chip>
+          {categorias.map((c) => (
+            <Chip key={c} pressed={categoria === c} onToggle={() => elegirCategoria(categoria === c ? null : c)}>
+              {mayuscula(c)}
+            </Chip>
+          ))}
+        </div>
+      )}
       {dudas && dudas.length > 0 && (
         <DecisionList<string>
           tile
           label="Dudas posibles"
           value={sel}
           onChange={setSel}
-          options={(orden ?? dudas).slice(0, todas ? undefined : VISIBLES).map((d) => ({
+          options={mostradas.slice(0, todas ? undefined : VISIBLES).map((d) => ({
             id: d.decision,
             art: <DecisionArt kind={arteDuda(d.decision, d.categoria)} llenar />,
             title: d.nombre,
@@ -139,7 +162,7 @@ export function DudaPicker({
           <Text size="sm">{porQue.get(sel)}</Text>
         </div>
       )}
-      {dudas && !todas && dudas.length > VISIBLES && (
+      {dudas && !todas && categoria === null && dudas.length > VISIBLES && (
         <Button variant="quiet" onClick={() => setTodas(true)}>
           Ver las otras {dudas.length - VISIBLES}
         </Button>
