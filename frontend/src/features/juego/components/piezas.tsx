@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Avatar, Button, Tag, cx } from "@/shared/ui";
+import { Button, Tag, cx } from "@/shared/ui";
 import { CALIDAD, CAMPOS_PERFIL, enLista, plata } from "../textos";
 import type { Calidad, Rango } from "../types";
 import { Espera } from "./Apuesta";
@@ -108,7 +108,6 @@ export function AvisoPerfil({ fuentes }: { fuentes: Record<string, string> | nul
 export function Noticia({ titulo, texto, lado, className }: { titulo: string; texto: string; lado?: string; className?: string }) {
   return (
     <div className={cx("vd-noti", "jg-noti", className)}>
-      <Avatar name={titulo} />
       <span className="vd-noti-texto">
         <span className="vd-noti-quien">{titulo}</span>
         <span className="vd-noti-msg">{texto}</span>
