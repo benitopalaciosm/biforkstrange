@@ -235,16 +235,33 @@ def test_una_duda_que_no_se_puede_jugar_da_un_error_claro(duda):
 
 
 # ------------------------------------------------------------------ gemelos y políticas
-@pytest.mark.xfail(strict=True, reason="comparar(cesantia): la opción 'bootcamp' encadena la decisión bootcamp y ahí los "
-                   "gemelos (Inercia, sin pesos para esa decisión) eligen siempre 'no'. La columna 'bootcamp' que ve la "
-                   "persona es en realidad 'no hacer nada este año'")
 def test_los_gemelos_que_eligen_bootcamp_en_la_cesantia_hacen_el_bootcamp():
+    """Corregido. comparar(cesantia): la opción 'bootcamp' encadena la decisión bootcamp y ahí los gemelos
+    (Inercia, sin pesos para esa decisión) elegían siempre 'no': la columna 'bootcamp' era en realidad 'no
+    hacer nada este año'. Ahora la decisión encadenada respeta lo que ya eligieron (PESOS_ENCADENADAS)."""
     hicieron = 0
     for g in range(40):
         v = vida(CESANTE, Dados(0, g), tipo_empleador="pyme", rubro="Comercio")
         v.vivir_anio(Fija("cesantia", "bootcamp"), carta="cesantia")
         hicieron += ("bootcamp", "hacer") in [(d["decision"], d["opcion"]) for d in v.historia[0]["decisiones"]]
-    assert hicieron > 0
+    assert hicieron == 40
+
+
+def test_el_bootcamp_como_carta_suelta_sigue_respondiendose_con_su_peso_de_carta():
+    """Lo encadenado no se filtra a la carta: si el bootcamp sale como carta, Inercia no lo busca (no hace
+    nada) y la población lo hace con su peso de carta."""
+    from app.sim.motor.politicas import Inercia, Poblacion
+
+    v = vida(CESANTE, Dados(0, 0), tipo_empleador="pyme", rubro="Comercio")
+    v.iniciar_anio(False, carta="bootcamp")
+    d = pq().decisiones["bootcamp"]
+    assert Inercia().elegir(v, d, v.opciones("bootcamp"))[0] == "no"
+    hacen = 0
+    for g in range(400):
+        v = vida(CESANTE, Dados(0, g), tipo_empleador="pyme", rubro="Comercio")
+        v.iniciar_anio(True, carta="bootcamp")
+        hacen += Poblacion().elegir(v, d, v.opciones("bootcamp"))[0] == "hacer"
+    assert 0.03 < hacen / 400 < 0.15  # PESOS_CARTAS: 0,08
 
 
 @pytest.mark.xfail(strict=True, reason="politicas.py _pesos: el peso escrito para la última opción se ignora y se "
