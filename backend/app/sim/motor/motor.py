@@ -589,7 +589,10 @@ class Vida:
             if e["semestres_restantes"] <= 0:
                 titulo = EDU_AL_TITULARSE.get(e["tipo_institucion"]) or estudio_sin_carrera(
                     e["edu"], tipo_institucion_de(self.pq, e.get("universidad_id", "")))[0]
-                e.update(edu=titulo, estado="buscando",
+                # recién titulado de pregrado: su primera pega parte en Junior (el cargo que traía era el del
+                # perfil, por omisión semi senior). Quien termina un postgrado conserva el cargo que declaró.
+                nivel = e["nivel"] if titulo == "postgrado" else 0
+                e.update(edu=titulo, estado="buscando", nivel=nivel,
                          primer_empleo=1, anos_titulado=0, semestres_restantes=0, anos_en_carrera=0)
         elif e["estado"] != "estudiando":
             e["anos_titulado"] = self._acotar("anos_titulado", e["anos_titulado"] + 1)

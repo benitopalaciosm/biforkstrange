@@ -338,6 +338,11 @@ def test_quien_busca_su_primera_pega_parte_en_primera_pega_y_con_su_practica():
         v = partida.vista(Perfil(**r["perfil"]), 1, None, [], 0)
         assert v["pendiente"]["decision"] == "primera_pega"
     assert perfil_ia.completar(nuevo.model_copy(update={"practica": "publico"}))["perfil"]["practica"] == "publico"
+    # sin cargo en el CV, quien busca su primera pega o estudia parte en Junior; con dato, el dato
+    assert perfil_ia.completar(nuevo)["perfil"]["nivel"] == 0
+    assert perfil_ia.completar(nuevo.model_copy(update={"situacion": "estudiando"}))["perfil"]["nivel"] == 0
+    assert perfil_ia.completar(nuevo.model_copy(update={"nivel": 2}))["perfil"]["nivel"] == 2
+    assert perfil_ia.completar(LEIDO.model_copy(update={"nivel": None}))["perfil"]["nivel"] == 1  # empleado
     # con experiencia, o empleado, no se marca
     assert perfil_ia.completar(nuevo.model_copy(update={"anios_experiencia": 4}))["perfil"]["primer_empleo"] == 0
     assert perfil_ia.completar(LEIDO.model_copy(update={"anios_experiencia": 0}))["perfil"]["primer_empleo"] == 0
