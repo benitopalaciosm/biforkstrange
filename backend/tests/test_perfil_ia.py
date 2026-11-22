@@ -15,7 +15,7 @@ def test_completar_usa_lo_leido_y_marca_lo_que_falta():
     r = perfil_ia.completar(LEIDO)
     assert r["perfil"]["edad"] == 33 and r["perfil"]["carrera_id"] == 166 and r["perfil"]["sueldo"] == 2_624_000
     assert r["perfil"]["riesgo"] == 5  # el texto no lo dice: valor por defecto
-    assert [s["campo"] for s in r["supuestos"]] == ["riesgo"]
+    assert [s["campo"] for s in r["supuestos"]] == ["riesgo", "ingles"]  # el CV no habla de idiomas
     assert r["inferido"] == LEIDO.inferido
 
 
@@ -125,7 +125,7 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
     assert r["perfil"] | {"ahorro": None} == {
         "edad": 33, "sexo": "m", "edu": "universitaria", "carrera_id": 166, "rubro": "Finanzas y seguros",
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
-        "antiguedad": 3, "region": "rm", "ahorro": None}
+        "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -183,3 +183,26 @@ def test_las_dudas_sugeridas_se_filtran_por_el_perfil():
     assert [d["decision"] for d in r["dudas_sugeridas"]] == ["emprender"]
     assert r["dudas_sugeridas"][0]["por_que"] == "Llevas años pensando en tu idea."
     assert r["retrato"] == "Eres contadora en una startup."
+
+
+def test_ingles_experiencia_y_empresa_del_sii():
+    leido = LEIDO.model_copy(update={"ingles": True, "anios_experiencia": 8, "empleadores": 3,
+                                     "tipo_empleador": None, "rubro": None,
+                                     "empresa_actual": "I. Municipalidad de Curicó"})
+    r = perfil_ia.completar(leido)
+    p = r["perfil"]
+    assert (p["ingles"], p["skill"], p["red"]) == (1, 55, 35)
+    # la empresa está en el SII: tamaño y rubro son dato, no supuesto
+    assert r["empresa"]["tamano"] == "grande" and p["tipo_empleador"] == "grande"
+    assert p["rubro"] == "Administración pública"
+    assert not {"tipo_empleador", "rubro", "ingles"} & {s["campo"] for s in r["supuestos"]}
+
+
+def test_sin_datos_nuevos_el_motor_usa_los_supuestos_de_siempre():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    e = estado_inicial(Perfil(), paquete())
+    assert (e["ingles"], e["skill"], e["red"]) == (0, 50, 30)
+    e = estado_inicial(Perfil(ingles=1, skill=70, red=50), paquete())
+    assert (e["ingles"], e["skill"], e["red"]) == (1, 70, 50)

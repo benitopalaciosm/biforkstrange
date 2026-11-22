@@ -4,7 +4,7 @@ import {
 } from "@/shared/ui";
 import { ErrorApi, leerPerfil } from "../api";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
-import type { Catalogo, DudaSugerida, Perfil, Sexo } from "../types";
+import type { Catalogo, DudaSugerida, Perfil, PerfilLeido, Sexo } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 import { Trayectoria, type EstadoLectura } from "./Trayectoria";
 
@@ -36,7 +36,7 @@ function Revisa({ si }: { si: boolean }) {
 }
 
 /** El atajo: subes tu CV o el PDF de tu LinkedIn y Claude llena el formulario. */
-function SubirCv({ estado, onPdf }: { estado: EstadoLectura; onPdf: (pdfBase64: string) => void }) {
+function SubirCv({ estado, empresa, onPdf }: { estado: EstadoLectura; empresa: PerfilLeido["empresa"]; onPdf: (pdfBase64: string) => void }) {
   const entrada = useRef<HTMLInputElement>(null);
   const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
   const leyendo = estado.fase === "leyendo";
@@ -94,6 +94,7 @@ function SubirCv({ estado, onPdf }: { estado: EstadoLectura; onPdf: (pdfBase64: 
       {estado.fase === "listo" && (
         <Text size="sm" role="status">
           <strong>Listo, llenamos lo que decía tu CV.</strong>{" "}
+          {empresa && `Encontramos ${empresa.nombre} en el SII: ${empresa.tamano === "grande" ? "empresa grande" : "pyme"} de ${empresa.trabajadores.toLocaleString("es-CL")} personas. `}
           {estado.supuestos.length > 0 ? `Falta lo que un CV no dice: ${estado.supuestos.join(", ")}. Lo marcamos abajo.` : "Revisa que calce."}
         </Text>
       )}
@@ -140,6 +141,7 @@ export function PerfilForm({
   const pedido = useRef(0);
   /** "Lo que tu gemelo sabe de ti": una línea que arma Claude con hechos del CV. */
   const [retrato, setRetrato] = useState<string | null>(null);
+  const [empresa, setEmpresa] = useState<PerfilLeido["empresa"]>(null);
   /** De dónde vino lo que se está leyendo: el PDF de arriba o el texto del panel de Claude. */
   const [origen, setOrigen] = useState<"pdf" | "texto">("pdf");
   useEffect(() => () => void pedido.current++, []);
@@ -167,6 +169,7 @@ export function PerfilForm({
       setMarcados(new Set(pendientes.map((x) => x.campo)));
       setSugeridas(r.dudas_sugeridas?.length ? r.dudas_sugeridas : r.duda ? [{ decision: r.duda, por_que: "La trajo tu Claude." }] : []);
       setRetrato(r.retrato ?? null);
+      setEmpresa(r.empresa ?? null);
       setLectura({
         fase: "listo", inferido: r.inferido, supuestos: pendientes.map((x) => x.nombre), avisos: r.avisos ?? [],
         documento: r.via === "documento", duda: r.duda,
@@ -214,7 +217,7 @@ export function PerfilForm({
         </SunCard>
       )}
 
-      <SubirCv estado={origen === "pdf" ? lectura : { fase: "nada" }} onPdf={(pdf) => void llenarConClaude({ pdf })} />
+      <SubirCv estado={origen === "pdf" ? lectura : { fase: "nada" }} empresa={empresa} onPdf={(pdf) => void llenarConClaude({ pdf })} />
 
       <details className="jg-plegable" open={origen === "texto" && lectura.fase !== "nada"}>
         <summary>¿Usas Claude o tienes tu CV en texto? Pégalo aquí</summary>
@@ -300,6 +303,20 @@ export function PerfilForm({
               </>
             )}
           </Panel>
+
+          <Stack as="section" className={marca("ingles")}>
+            <span className="jg-etiqueta">¿Podrías trabajar en inglés?</span>
+            <Revisa si={marcados.has("ingles")} />
+            <Segmented<string>
+              label="Inglés"
+              value={String(p.ingles ?? 0)}
+              onChange={(v) => set("ingles", v === "1" ? 1 : 0)}
+              options={[
+                { value: "0", label: "No" },
+                { value: "1", label: "Sí, intermedio o más" },
+              ]}
+            />
+          </Stack>
 
           <Stack as="section" className={marca("rubro")}>
             <label htmlFor={idRubro} className="jg-etiqueta">

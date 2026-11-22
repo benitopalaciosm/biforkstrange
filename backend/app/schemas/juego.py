@@ -21,6 +21,9 @@ class PerfilIn(BaseModel):
     antiguedad: int = Field(2, ge=0, le=40)
     region: Literal["rm", "otra"] = "rm"
     ahorro: float | None = None
+    ingles: int = Field(0, ge=0, le=1)
+    skill: int | None = Field(None, ge=0, le=100)
+    red: int | None = Field(None, ge=0, le=100)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())

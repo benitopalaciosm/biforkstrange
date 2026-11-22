@@ -76,6 +76,10 @@ def prompt(pq: Paquete | None = None) -> str:
         "ocupacion: <número de la lista de tipos de trabajo: lo que HAGO>",
         "antiguedad: <años completos en mi empleador actual>",
         "region: <rm si trabajo en la Región Metropolitana, otra si no>",
+        "ingles: <si, si trabajo o podría trabajar en inglés (intermedio o más); no, si no>",
+        "experiencia: <años de experiencia laboral desde mi primer trabajo formal>",
+        "empleadores: <cuántos empleadores distintos he tenido, contando el actual>",
+        "empresa: <el nombre de mi empleador actual>",
         "duda: <el código de la duda que más me da vueltas hoy, de la lista de dudas>",
         "```",
         "",
@@ -181,6 +185,11 @@ def leer_documento(texto: str, pq: Paquete | None = None) -> dict | None:
     opcion("estudios", "edu", ESTUDIOS, "estudios")
     opcion("tipo_empresa", "tipo_empleador", TIPOS, "tipo de empresa")
     opcion("region", "region", REGIONES, "región")
+    opcion("ingles", "ingles", {"si": True, "no": False}, "inglés")
+    numero("experiencia", "anios_experiencia", "experiencia")
+    numero("empleadores", "empleadores", "empleadores")
+    if c.get("empresa") and _normal(c["empresa"]) not in _VACIO:
+        leido["empresa_actual"] = c["empresa"]
     for campo, destino, nombre in (("cargo", "nivel", "cargo"), ("sueldo_liquido", "sueldo", "sueldo"),
                                    ("riesgo", "riesgo", "riesgo"), ("ocupacion", "ocupacion", "tipo de trabajo"),
                                    ("antiguedad", "antiguedad", "antigüedad")):

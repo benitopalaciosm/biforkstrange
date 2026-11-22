@@ -91,6 +91,10 @@ class PerfilLeido(BaseModel):
     inferido: list[str] = Field(
         default_factory=list,
         description="Una frase corta por cada campo que dedujiste sin que el texto lo dijera literal, con el porqué.")
+    ingles: bool | None = Field(None, description="true si el texto dice inglés intermedio, avanzado o nativo; false si dice básico o nada.")
+    anios_experiencia: int | None = Field(None, description="Años de experiencia laboral desde su primer trabajo formal.")
+    empleadores: int | None = Field(None, description="Cuántos empleadores distintos ha tenido, contando el actual.")
+    empresa_actual: str | None = Field(None, description="Su empleador de hoy: el nombre legal en Chile si lo conoces.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -130,6 +134,12 @@ sueldo a partir del cargo.
 - ocupacion: el grupo del trabajo que HACE (su oficio), según la lista de grupos.
 - inferido: una frase corta por cada campo que no estaba literal en el texto, diciendo de dónde lo \
 sacaste. Si todo estaba literal, lista vacía.
+- ingles: true solo si el texto declara inglés intermedio o más (o un certificado, o trabajo en \
+inglés); false si dice básico; null si no habla de idiomas.
+- anios_experiencia y empleadores: cuéntalos de la sección de experiencia. Prácticas y ayudantías \
+no cuentan como empleador.
+- empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
+ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
 está haciendo, según su momento (años en la pega, cargo, estudios, idiomas, rubro). Cada una con un \
 por_que corto que cite algo concreto del texto ("Llevas 4 años en BancoEstado y ya eres senior"). Si \
@@ -255,7 +265,8 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
     base = PerfilIn().model_dump()
     rubros = [r for r in pq.variables["rubro"]["dominio"] if r]
     perfil, supuestos = dict(base), []
-    datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"})
+    extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual"}
+    datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
     if datos["carrera_id"] is not None and not 0 <= datos["carrera_id"] <= 251:
@@ -276,15 +287,57 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
         # sin sueldo declarado: el del medio para su edad y estudios (ESI), para no partir de un número ajeno
         estado = pq.derivar({"edad": perfil["edad"], "sexo": perfil["sexo"], "edu": perfil["edu"], "sueldo": 0})
         perfil["sueldo"] = round(pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]))
+    inferido = list(leido.inferido)
+    if leido.ingles is not None:
+        perfil["ingles"] = int(leido.ingles)
+    else:
+        supuestos.append("ingles")
+        nombres["ingles"] = "inglés"
+    # Fórmulas del equipo (supuesto): skill y red están centradas en 50 y 30 en el paquete
+    if leido.anios_experiencia is not None:
+        perfil["skill"] = max(20, min(90, 35 + round(2.5 * leido.anios_experiencia)))
+        inferido.append(f"Habilidad {perfil['skill']} de 100 por {leido.anios_experiencia} años de experiencia "
+                        "(fórmula del equipo).")
+    if leido.empleadores is not None:
+        perfil["red"] = max(10, min(70, 20 + 5 * leido.empleadores + (5 if perfil["nivel"] >= 3 else 0)))
+        inferido.append(f"Red de contactos {perfil['red']} de 100 por {leido.empleadores} empleadores "
+                        "(fórmula del equipo).")
+    empresa = _empresa_sii(leido.empresa_actual)
+    if empresa:
+        if datos["tipo_empleador"] in (None, "grande", "pyme"):
+            if datos["tipo_empleador"] is None:
+                supuestos.remove("tipo_empleador")
+            perfil["tipo_empleador"] = empresa["tamano"]
+        if datos["rubro"] is None and empresa["rubro"] in rubros:
+            supuestos.remove("rubro")
+            perfil["rubro"] = empresa["rubro"]
+        inferido.append(f"{empresa['nombre']}: {empresa['tamano']}, {empresa['rubro']}, "
+                        f"{empresa['trabajadores']} trabajadores según el SII.")
     final = PerfilIn(**perfil).model_dump()
     return {
         "perfil": final,
         "leido": leido.model_dump(),
         "supuestos": [{"campo": c, "nombre": nombres[c]} for c in supuestos],
-        "inferido": leido.inferido,
+        "inferido": inferido,
+        "empresa": empresa,
         "dudas_sugeridas": _sugeridas_posibles(leido.dudas_sugeridas, final, pq),
         "retrato": (leido.retrato or "").strip() or None,
     }
+
+
+def _empresa_sii(nombre: str | None) -> dict | None:
+    """La empresa actual en la nómina del SII (grandes y pymes): su tamaño y su rubro son dato, no adivinanza."""
+    if not nombre or len(nombre.strip()) < 3:
+        return None
+    from app.services.perfil_doc import _normal
+    from app.sim.motor.empresas import _filas
+
+    buscado = _normal(nombre).replace(" ", "")
+    for f in _filas("sii_empleadores.csv"):
+        if buscado in (_normal(f["nombre"]).replace(" ", ""), _normal(f["razon_social"]).replace(" ", "")):
+            return {"nombre": f["nombre"], "tamano": f["tamano"], "rubro": f["rubro"],
+                    "trabajadores": int(f["trabajadores"]), "fuente": "SII, nómina de empresas 2024"}
+    return None
 
 
 def _sugeridas_posibles(sugeridas: list[DudaSugerida], perfil: dict, pq: Paquete) -> list[dict]:

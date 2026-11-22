@@ -21,6 +21,11 @@ export type Perfil = {
   antiguedad?: number;
   region?: "rm" | "otra";
   ahorro?: number | null;
+  /** 1 si trabaja en inglés (intermedio o más). Mueve remoto y emigrar. */
+  ingles?: 0 | 1;
+  /** Habilidad y red de contactos (0 a 100), deducidas del CV. Sin dato, el motor usa 50 y 30. */
+  skill?: number | null;
+  red?: number | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
@@ -38,6 +43,8 @@ export type PerfilLeido = {
   duda: string | null;
   /** Hasta 3 dudas que le calzan a esta persona según su CV, con el porqué. Solo si Claude leyó un texto o PDF. */
   dudas_sugeridas?: DudaSugerida[];
+  /** Su empleador actual, si está en la nómina del SII. */
+  empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
   /** Lo que su gemelo sabe de ella, en una línea. */
   retrato?: string | null;
   /** "documento" si venía en el formato del prompt; "api" o "comando" si Claude leyó un texto libre. */
