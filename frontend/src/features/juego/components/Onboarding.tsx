@@ -153,6 +153,13 @@ export function Onboarding({
     if (ultimo) onElegirDuda(p, sugeridas);
     else setPaso(faltan[i + 1]);
   };
+  /** Saltar: a tus dudas con lo que ya sabemos; lo que falta queda como supuesto. */
+  const saltarTodo = () => {
+    pedido.current++; // si Claude estaba leyendo, esa respuesta ya no se usa
+    onElegirDuda(p, sugeridas);
+  };
+  /** Saltar esta pregunta: sigue sin elegir; el valor queda como supuesto. */
+  const saltarEsta = () => (ultimo ? onElegirDuda(p, sugeridas) : setPaso(faltan[i + 1]));
   const elegido = (k: keyof Perfil) => sabidos.has(k);
   const faltaElegir = (ELEGIR[paso] ?? []).some((k) => !elegido(k));
   const ref = catalogo?.sueldos_ref?.find((f) => f.educacion === p.edu && f.banda === banda(p.edad));
@@ -166,15 +173,20 @@ export function Onboarding({
           </IconButton>
         }
         right={
-          i >= 0 ? (
-            <div className="ob-puntos" aria-label={`Paso ${i + 1} de ${faltan.length}`}>
-              {faltan.map((f, k) => (
-                <i key={f} data-hecho={k <= i || undefined} />
-              ))}
-            </div>
-          ) : (
-            <Pill>Tu gemelo</Pill>
-          )
+          <Row gap={10} style={{ alignItems: "center" }}>
+            {i >= 0 ? (
+              <div className="ob-puntos" aria-label={`Paso ${i + 1} de ${faltan.length}`}>
+                {faltan.map((f, k) => (
+                  <i key={f} data-hecho={k <= i || undefined} />
+                ))}
+              </div>
+            ) : (
+              <Pill>Tu gemelo</Pill>
+            )}
+            <button type="button" className="ob-saltar" onClick={saltarTodo} disabled={cargando}>
+              Saltar
+            </button>
+          </Row>
         }
       />
 
@@ -314,9 +326,14 @@ export function Onboarding({
           <Button onClick={siguiente} disabled={!catalogo || cargando || faltaElegir}>
             {ultimo ? (sugeridas.length ? "Ver mis dudas" : "Elegir mi duda") : "Siguiente"}
           </Button>
-          <button type="button" className="ob-link" onClick={() => setCompleto(true)}>
-            Revisar todos mis datos
-          </button>
+          <Row gap={4} style={{ justifyContent: "center" }}>
+            <button type="button" className="ob-link" onClick={saltarEsta} disabled={cargando}>
+              Saltar esta pregunta
+            </button>
+            <button type="button" className="ob-link" onClick={() => setCompleto(true)}>
+              Revisar todos mis datos
+            </button>
+          </Row>
         </ScreenFooter>
       )}
     </Screen>

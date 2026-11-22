@@ -103,3 +103,7 @@
 @media (prefers-reduced-motion: reduce) { .ob-claude-chispa, .ob-claude { animation: none; } }
 .ob-ficha > * { min-width: 0; }
 .ob-ficha .ob-tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+
+.ob-saltar { border: 0; background: none; padding: 6px 2px; font: 600 13px/18px var(--font); color: var(--suave); cursor: pointer; text-decoration: underline; }
+.ob-saltar:hover { color: var(--tinta); }
+.ob-saltar:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; border-radius: 6px; }
