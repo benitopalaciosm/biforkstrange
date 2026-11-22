@@ -151,7 +151,7 @@ class PerfilLeido(BaseModel):
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
     retrato: str | None = Field(
-        None, description="Lo que su gemelo sabe de ella: máximo 25 palabras, en segunda persona, solo hechos del texto.")
+        None, description="Lo que su copia sabe de ella: máximo 25 palabras, en segunda persona, solo hechos del texto.")
 
 
 INSTRUCCIONES = """\
@@ -234,7 +234,7 @@ ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como apa
 está haciendo, según su momento (años en el trabajo, cargo, estudios, idiomas, rubro). Cada una con un \
 por_que corto que cite algo concreto del texto ("Llevas 4 años en BancoEstado y ya eres senior"). Si \
 el texto dice qué duda tiene, esa va primera.
-- retrato: lo que su gemelo sabe de ella, en segunda persona y en máximo 25 palabras, solo con hechos \
+- retrato: lo que su copia sabe de ella, en segunda persona y en máximo 25 palabras, solo con hechos \
 del texto ("Ingeniera comercial de 30, senior en riesgo en BancoEstado, con inglés avanzado"). Sin \
 adjetivos que el texto no use, sin halagos.
 
@@ -571,7 +571,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
 
         perfil["anos_por_empleo"] = max(0.1, min(40.0, round(leido.anios_experiencia / leido.empleadores, 1)))
         cambiar = pesos_personales({"anos_por_empleo": perfil["anos_por_empleo"]})["oferta_externa"]["cambiar"]
-        inferido.append(f"Te cambias de trabajo cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
+        inferido.append(f"Te cambias de trabajo cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus copias aceptan una oferta "
                         f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
     inferido += _avance_en_carrera(leido, perfil, pq, hoy)
     inferido += _historia(leido, perfil)
@@ -617,16 +617,16 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
 # El campo se llama igual en PerfilLeido y en el perfil; el efecto sale de politicas.pesos_personales.
 HISTORIA_LEIDA = {
     "volvio_a_su_nivel": ("cesantia", "nivel", "Ya pasaste por una cesantía larga y volviste a tu nivel: si quedan "
-                          "cesantes, tus gemelos esperan un cargo como el tuyo"),
+                          "cesantes, tus copias esperan un cargo como el tuyo"),
     "freelance_entre_pegas": ("cesantia", "informal", "Entre un trabajo y otro trabajaste por tu cuenta: si quedan "
-                              "cesantes, tus gemelos hacen boletas"),
-    "emprendio_antes": ("cesantia", "emprender", "Ya tuviste una empresa propia: si quedan cesantes, tus gemelos "
+                              "cesantes, tus copias hacen boletas"),
+    "emprendio_antes": ("cesantia", "emprender", "Ya tuviste una empresa propia: si quedan cesantes, tus copias "
                         "emprenden"),
 }
 
 
 def _historia(leido: PerfilLeido, perfil: dict) -> list[str]:
-    """Su historia laboral pasa al perfil tal cual; la frase dice en simple qué cambia en sus gemelos."""
+    """Su historia laboral pasa al perfil tal cual; la frase dice en simple qué cambia en sus copias."""
     from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
 
     frases = []
@@ -651,7 +651,7 @@ def _independiente(leido: PerfilLeido, perfil: dict) -> list[str]:
                                          if perfil[k]})
     if suya == P_INDEPENDIENTE_BUSCA_EMPLEO:
         return []
-    cada = (f"{suya * 100:.1f}% de tus gemelos por año (la gente, {P_INDEPENDIENTE_BUSCA_EMPLEO * 100:.1f}%; "
+    cada = (f"{suya * 100:.1f}% de tus copias por año (la gente, {P_INDEPENDIENTE_BUSCA_EMPLEO * 100:.1f}%; "
             "supuesto del equipo)").replace(".", ",")
     if perfil["freelance_entre_pegas"]:
         return [f"Ya volviste una vez de trabajar por tu cuenta a un empleo: vuelven a buscar empleo {cada}."]
@@ -671,7 +671,7 @@ def _practica(leido: PerfilLeido, perfil: dict) -> list[str]:
     opcion = PRIMERA_PEGA_POR_PRACTICA[leido.practica][0]
     suyo = pesos_personales({"practica": leido.practica})["primera_pega"][opcion]
     donde = "una empresa grande" if leido.practica == "grande" else "el Estado"
-    return [f"Hiciste tu práctica en {donde}: al buscar su primer trabajo, tus gemelos postulan ahí {round(suyo * 100)}% "
+    return [f"Hiciste tu práctica en {donde}: al buscar su primer trabajo, tus copias postulan ahí {round(suyo * 100)}% "
             f"de las veces (la gente, {round(PESOS_FORZADAS['primera_pega'][opcion] * 100)}%; supuesto del equipo)."]
 
 
@@ -684,11 +684,11 @@ def _toda_su_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]
     perfil["toda_su_carrera_en"] = leido.toda_su_carrera_en
     propios = parametros_propios(Perfil(toda_su_carrera_en=leido.toda_su_carrera_en), pq)
     if leido.toda_su_carrera_en == "publico":
-        return [f"Toda tu carrera ha sido en el Estado: cuando tus gemelos cambian de trabajo, vuelven al Estado "
+        return [f"Toda tu carrera ha sido en el Estado: cuando tus copias cambian de trabajo, vuelven al Estado "
                 f"al menos {round(propios['PISO_REEMPLEO_PUBLICO'] * 100)}% de las veces (la gente, "
                 f"{round(pq.k('P_REEMPLEO_PUBLICO') * 100)}%; supuesto del equipo)."]
     privado = 1 - pq.k("P_REEMPLEO_PUBLICO")
-    return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de trabajo en el sector privado, "
+    return [f"Toda tu carrera ha sido en startups: cuando tus copias cambian de trabajo en el sector privado, "
             f"al menos {round(propios['PISO_STARTUP'] / privado * 100)}% de las veces es otra startup (la gente, "
             f"{round(pq.k('MIX_EMPLEADOR', 'startup') * 100)}%; supuesto del equipo)."]
 
@@ -702,7 +702,7 @@ def _empresas_cerradas(leido: PerfilLeido, perfil: dict) -> list[str]:
     perfil["empresas_cerradas"] = min(10, leido.empresas_cerradas)
     cerrar = pesos_personales({"empresas_cerradas": perfil["empresas_cerradas"]})["seguir_con_tu_empresa"]["cerrar"]
     cuantas = "una empresa" if perfil["empresas_cerradas"] == 1 else f"{perfil['empresas_cerradas']} empresas"
-    return [f"Ya cerraste {cuantas}: cuando tus gemelos tienen empresa y deciden si seguir, la cierran "
+    return [f"Ya cerraste {cuantas}: cuando tus copias tienen empresa y deciden si seguir, la cierran "
             f"{round(cerrar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['seguir_con_tu_empresa']['cerrar'] * 100)}%; "
             "supuesto del equipo)."]
 
@@ -711,7 +711,7 @@ ANOS_PARA_RITMO = 2  # con menos años de experiencia, el ritmo de ascensos no d
 
 
 def _ritmo_de_ascensos(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]:
-    """Ascensos dentro de una misma empresa por año: si supera al del paquete, sus gemelos ascienden más."""
+    """Ascensos dentro de una misma empresa por año: si supera al del paquete, sus copias ascienden más."""
     if leido.ascensos_internos is None or not leido.anios_experiencia or leido.anios_experiencia < ANOS_PARA_RITMO:
         return []
     from app.sim.motor.perfil import ascenso_extra
@@ -721,7 +721,7 @@ def _ritmo_de_ascensos(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[st
     if not extra:
         return []
     return [f"Te han ascendido {leido.ascensos_internos} veces en {leido.anios_experiencia} años, más rápido que lo "
-            f"típico para tu cargo: tus gemelos tienen {round(extra * 100)} puntos más de chance de ascenso cada año "
+            f"típico para tu cargo: tus copias tienen {round(extra * 100)} puntos más de chance de ascenso cada año "
             "(supuesto del equipo)."]
 
 
@@ -742,11 +742,11 @@ def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str |
     anios_que_faltan = (restantes + 1) // 2
     plazo = "un año más" if anios_que_faltan == 1 else f"{anios_que_faltan} años más"
     if leido.anio_egreso_esperado is not None:
-        return [f"Esperas titularte en {leido.anio_egreso_esperado}: tus gemelos estudian {plazo} antes de buscar su primer trabajo."]
+        return [f"Esperas titularte en {leido.anio_egreso_esperado}: tus copias estudian {plazo} antes de buscar su primer trabajo."]
     if leido.anio_que_cursa is not None:
-        return [f"Vas en {leido.anio_que_cursa}° año: según la duración real de tu carrera, tus gemelos estudian {plazo}."]
+        return [f"Vas en {leido.anio_que_cursa}° año: según la duración real de tu carrera, tus copias estudian {plazo}."]
     return [f"No sabemos cuánto te falta para titularte: suponemos que entraste a los 18 y vas al día, así que "
-            f"tus gemelos estudian {plazo} (supuesto del equipo)."]
+            f"tus copias estudian {plazo} (supuesto del equipo)."]
 
 
 RUBRO_ESTADO = "Administración pública"

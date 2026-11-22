@@ -12,7 +12,7 @@ Los pesos son supuestos del equipo, calibrados contra las frecuencias de las
 encuestas (ver `validacion.py`); no son datos.
 """
 
-from app.sim.motor.motor import FaltaEleccion, Opcion, Vida
+from app.sim.motor.motor import TRANQUILO, FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import ref as referencia
 
 # Respuesta cuando la vida obliga a elegir: {decisión: {opción: peso}}
@@ -276,6 +276,9 @@ class _PorPesos:
 
     def elegir(self, vida: Vida, decision: dict, opciones: list[Opcion]) -> tuple[str, dict]:
         id_ = decision["id"]
+        if id_ == TRANQUILO:
+            # como la gente real: considera lo que suele buscar alguien como él, y esa decisión la responde con sus pesos
+            return (vida.sugerida if any(o.id == vida.sugerida for o in opciones) else "seguir"), {}
         ocurrencia = sum(1 for x in (vida.registro or {}).get("decisiones", []) if x["decision"] == id_)
         sitio = f"elige:{id_}" + (f":{ocurrencia}" if ocurrencia else "")
         if decision.get("opciones_desde_tabla") and not decision["opciones"]:

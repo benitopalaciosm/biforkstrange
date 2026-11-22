@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from app.sim.motor import empresas, gemelos
 from app.sim.motor.azar import Dados
-from app.sim.motor.motor import REPETIR_CARTA, FaltaEleccion, Opcion, Vida
+from app.sim.motor.motor import LLEGAN, REPETIR_CARTA, TRANQUILO, FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import Perfil, estado_inicial
 from app.sim.motor.narrativa import narrar
@@ -25,10 +25,15 @@ class Partida:
     vida: Vida
     pendiente: FaltaEleccion | None  # decisión que espera respuesta; None si terminó
     anios: int
+    edad_final: int = 0  # hasta qué edad se juega; los mundos miran hasta esa misma edad
 
     @property
     def terminada(self) -> bool:
         return self.pendiente is None
+
+    def horizonte(self) -> int:
+        """Cuántos años miran los mundos desde la decisión pendiente: hasta la edad final de la partida."""
+        return max(1, self.edad_final - self.vida.e["edad"]) if self.edad_final else gemelos.HORIZONTE
 
 
 def dudas_posibles(perfil: Perfil, pq: Paquete | None = None) -> list[dict]:
@@ -55,10 +60,10 @@ def jugar(perfil: Perfil, semilla: int, elecciones: list[dict], duda: str | None
         while vida.e["edad"] < edad_final and not vida.terminada():
             vida.vivir_anio(jugador, carta=duda if vida.anio == 0 and not vida.cola else None)
     except FaltaEleccion as falta:
-        return Partida(vida, falta, anios)
+        return Partida(vida, falta, anios, edad_final)
     if jugador.usadas < len(elecciones):
         raise ValueError(f"sobran elecciones: la partida usó {jugador.usadas} de {len(elecciones)}")
-    return Partida(vida, None, anios)
+    return Partida(vida, None, anios, edad_final)
 
 
 MAX_OPCIONES_COMPARAR = 6  # elegir carrera tiene 252 opciones: ahí no se simulan gemelos
@@ -67,9 +72,10 @@ MAX_OPCIONES_COMPARAR = 6  # elegir carrera tiene 252 opciones: ahí no se simul
 def comparar_pendiente(partida: Partida, semilla: int, n: int = gemelos.N_GEMELOS,
                        parametros: dict[str, dict] | None = None, crudo: bool = False) -> dict | None:
     """Lo que vivirían los gemelos con cada opción de la decisión pendiente."""
-    if partida.pendiente is None or len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR or n <= 0:
+    if (partida.pendiente is None or partida.pendiente.decision["id"] == TRANQUILO
+            or len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR or n <= 0):
         return None
-    return gemelos.comparar(partida.vida, partida.pendiente.decision["id"], n=n, anios=gemelos.HORIZONTE,
+    return gemelos.comparar(partida.vida, partida.pendiente.decision["id"], n=n, anios=partida.horizonte(),
                             semilla=semilla, parametros=parametros, crudo=crudo)
 
 
@@ -79,21 +85,25 @@ def mundo_pendiente(perfil: Perfil, semilla: int, duda: str | None, elecciones: 
     partida = jugar(perfil, semilla, elecciones, duda, anios, pq or paquete())
     if partida.pendiente is None:
         raise ValueError("la partida no tiene una decisión pendiente")
-    if len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR:
-        raise ValueError("esta decisión tiene demasiadas opciones para simular mundos")
-    return gemelos.mundo(partida.vida, partida.pendiente.decision["id"], numero, anios=gemelos.HORIZONTE,
+    if len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR or partida.pendiente.decision["id"] == TRANQUILO:
+        raise ValueError("esta decisión no tiene mundos para comparar")
+    return gemelos.mundo(partida.vida, partida.pendiente.decision["id"], numero, anios=partida.horizonte(),
                          semilla=semilla, parametros=parametros)
 
 
 def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], partida: Partida,
             n: int, pq: Paquete) -> dict:
-    """Tu vida frente a los gemelos de la primera decisión."""
+    """Tu vida frente a los gemelos de la primera decisión que tuvo mundos (un año tranquilo no tiene)."""
     cierre = {"sueldo_final": round(partida.vida.sueldo_o_ultimo()), "estado": partida.vida.resumen(),
               "anios_sin_trabajo": partida.vida.anios_buscando, "primera_decision": None}
-    inicio = jugar(perfil, semilla, [], duda, partida.anios, pq)
-    comparacion = comparar_pendiente(inicio, semilla, n, crudo=True) if elecciones else None
+    comparacion, elegida = None, None
+    for k in range(len(elecciones)):
+        hasta = jugar(perfil, semilla, elecciones[:k], duda, partida.anios, pq)
+        comparacion = comparar_pendiente(hasta, semilla, n, crudo=True)
+        if comparacion:
+            elegida = str(elecciones[k]["opcion"])
+            break
     if comparacion:
-        elegida = str(elecciones[0]["opcion"])
         for o in comparacion["opciones"]:
             sueldos = o.pop("sueldos")
             if o["opcion"] == elegida:
@@ -122,6 +132,18 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         salida["cierre"] = _cierre(perfil, semilla, duda, elecciones, partida, n_gemelos, pq)
         return salida
     d = falta.decision
+    if d["id"] == TRANQUILO:
+        salida["pendiente"] = {
+            "por_que": {"tipo": "tranquilo"}, "narrativa": None,
+            "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
+            "calidad": d["calidad"], "creencia_vs_dato": None, "evidencia": [],
+            "sugerida": vida.sugerida,  # lo que más suele buscar la gente como tú este año
+            # la propuesta del año: la decisión sugerida, con un dato del paquete que la respalda
+            "sugerencia": _sugerencia(pq, vida.sugerida),
+            "opciones": [{**opcion_a_dict(o), "elecciones_internas": [], "ejemplo_real": None} for o in falta.opciones],
+            "comparacion": None,
+        }
+        return salida
     ocurrencia = sum(1 for x in vida.registro["decisiones"] if x["decision"] == d["id"]) if vida.registro else 0
     contexto = {k: vida.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad")}
     contexto.update(vida.contexto_empleo())
@@ -133,17 +155,24 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
     origen = vida.cola[0][2] if vida.cola and vida.cola[0][0] == "decision" and vida.cola[0][1] == d["id"] else None
     if d["aparicion"]["tipo"] == "forzada":
         por_que = {"tipo": "obligada"}
+    elif origen == "luego" and d["id"] in LLEGAN:
+        por_que = {"tipo": "llega"}  # una oferta que llegó sin buscarla
     elif origen == "luego":
         por_que = {"tipo": "consecuencia"}
+    elif origen == "buscada":
+        por_que = {"tipo": "buscada"}
     elif vida.reparto and vida.reparto["carta"] == d["id"]:
-        por_que = {"tipo": "sorteo", "prob": vida.reparto["prob"], "posibles": vida.reparto["posibles"]}
+        por_que = {"tipo": "llega", "prob": vida.reparto["prob"], "posibles": vida.reparto["posibles"]}
     elif duda is not None and d["id"] == duda and vida.anio == 0:
         por_que = {"tipo": "elegida"}
     else:
         por_que = {"tipo": "consecuencia"}
     salida["pendiente"] = {
         "por_que": por_que,
-        "narrativa": narrar(d["id"], contexto, semilla, vida.anio, ocurrencia),
+        # lo que buscaste tú no se cuenta como algo que te llegó ("te llega la convocatoria..."): se cuenta como tu idea
+        "narrativa": ({"situacion": f"Es un año tranquilo y decides mirar en serio una idea: {d['nombre'].lower()}. "
+                                    f"Nadie te lo propuso: lo buscaste tú."}
+                      if por_que["tipo"] == "buscada" else narrar(d["id"], contexto, semilla, vida.anio, ocurrencia)),
         "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
         "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"), "evidencia": d.get("evidencia", []),
         "opciones": [{**opcion_a_dict(o), "elecciones_internas": elecciones_internas(vida, o),
@@ -152,6 +181,23 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         "comparacion": comparar_pendiente(partida, semilla, n_gemelos, parametros),
     }
     return salida
+
+
+def _sugerencia(pq: Paquete, decision_id: str | None) -> dict | None:
+    """La propuesta de un año tranquilo. No es un modelo nuevo: es la decisión que el motor ya sorteó según qué tan
+    seguido le pasa a gente como tú (el peso del paquete), con la primera cifra de su evidencia."""
+    if not decision_id:
+        return None
+    d = pq.decisiones[decision_id]
+    evidencia = d.get("evidencia") or []
+    # primero la estadística oficial de qué tan seguido la gente hace esto (evidencia con uso "frecuencia");
+    # si no hay, la primera cifra de su evidencia
+    frecuencias = [e for e in evidencia if str(e.get("uso", "")).lower().startswith("frecuencia")]
+    dato = (frecuencias or evidencia or [None])[0]
+    fuente = pq.fuentes.get(dato["fuente"], {}) if dato else {}
+    return {"decision": decision_id, "nombre": d["nombre"], "pregunta": d["pregunta"],
+            "dato": dato["cifra"] if dato else None, "fuente": fuente.get("cita") if dato else None,
+            "es_frecuencia": bool(frecuencias), "creencia_vs_dato": d.get("creencia_vs_dato")}
 
 
 def _narrar_historia(salida: dict, semilla: int) -> None:
