@@ -114,6 +114,8 @@ class PerfilLeido(BaseModel):
         None, description="true si entre dos empleos trabajó por su cuenta (freelance, consultorías, boletas).")
     emprendio_antes: bool | None = Field(
         None, description="true si antes de su situación de hoy tuvo una empresa o emprendimiento propio.")
+    anos_independiente: int | None = Field(
+        None, description="Si hoy trabaja por su cuenta (freelance, boletas): hace cuántos años, según las fechas.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -172,6 +174,8 @@ false si es menor. Sin un hueco así, null.
   - freelance_entre_pegas: true si entre dos empleos aparece trabajo por su cuenta (freelance, \
 consultor independiente, boletas).
   - emprendio_antes: true si tuvo una empresa o emprendimiento propio que ya no es su situación de hoy.
+  - anos_independiente: solo si su situación es "independiente": años completos desde que empezó a \
+trabajar por su cuenta sin interrupción, según la fecha de inicio.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -302,7 +306,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     perfil, supuestos = dict(base), []
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
-              "anio_egreso_esperado", "anio_que_cursa", *HISTORIA_LEIDA}
+              "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -360,6 +364,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
                         f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
     inferido += _avance_en_carrera(leido, perfil, pq, hoy)
     inferido += _historia(leido, perfil)
+    inferido += _independiente(leido, perfil)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -407,6 +412,26 @@ def _historia(leido: PerfilLeido, perfil: dict) -> list[str]:
             frases.append(f"{frase} {round(suyo * 100)}% de las veces (la gente, "
                           f"{round(PESOS_FORZADAS[decision][opcion] * 100)}%; supuesto del equipo).")
     return frases
+
+
+def _independiente(leido: PerfilLeido, perfil: dict) -> list[str]:
+    """Si hoy trabaja por su cuenta: si es de paso o ya es su forma de trabajar (motor.p_independiente_busca_empleo)."""
+    if perfil["estado"] != "independiente":
+        return []
+    from app.sim.motor.motor import P_INDEPENDIENTE_BUSCA_EMPLEO, p_independiente_busca_empleo
+
+    if leido.anos_independiente is not None:
+        perfil["anos_independiente"] = max(0, min(40, leido.anos_independiente))
+    suya = p_independiente_busca_empleo({k: perfil[k] for k in ("freelance_entre_pegas", "anos_independiente")
+                                         if perfil[k]})
+    if suya == P_INDEPENDIENTE_BUSCA_EMPLEO:
+        return []
+    cada = (f"{suya * 100:.1f}% de tus gemelos por año (la gente, {P_INDEPENDIENTE_BUSCA_EMPLEO * 100:.1f}%; "
+            "supuesto del equipo)").replace(".", ",")
+    if perfil["freelance_entre_pegas"]:
+        return [f"Ya volviste una vez de trabajar por tu cuenta a un empleo: vuelven a buscar empleo {cada}."]
+    return [f"Llevas {perfil['anos_independiente']} años por tu cuenta: es tu forma de trabajar, y solo vuelven a "
+            f"buscar empleo {cada}."]
 
 
 def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:

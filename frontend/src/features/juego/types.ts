@@ -43,6 +43,8 @@ export type Perfil = {
   volvio_a_su_nivel?: 0 | 1;
   freelance_entre_pegas?: 0 | 1;
   emprendio_antes?: 0 | 1;
+  /** Si trabaja por su cuenta: hace cuántos años. Con 5 o más, sus gemelos vuelven menos a un empleo. */
+  anos_independiente?: number | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

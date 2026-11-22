@@ -278,6 +278,30 @@ def test_en_la_cesantia_tus_gemelos_salen_como_saliste_tu(rasgo, opcion):
     assert r["perfil"][rasgo] == 0 and not any("si quedan cesantes" in f for f in r["inferido"])
 
 
+def test_independiente_veterano_o_de_paso():
+    from app.sim.motor.motor import P_INDEPENDIENTE_BUSCA_EMPLEO, p_independiente_busca_empleo
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    def p(**perfil):
+        return p_independiente_busca_empleo(estado_inicial(Perfil(estado="independiente", **perfil), paquete()))
+
+    assert P_INDEPENDIENTE_BUSCA_EMPLEO == 0.055 and p() == 0.055  # sin historia, la tasa calibrada de siempre
+    assert p(anos_independiente=4) == 0.055 and p(anos_independiente=5) == pytest.approx(0.0275)
+    assert p(freelance_entre_pegas=1) == pytest.approx(0.11)
+    assert p(freelance_entre_pegas=1, anos_independiente=8) == pytest.approx(0.11)  # ya volvió una vez: manda eso
+    # los años por su cuenta solo describen a quien hoy es independiente
+    assert "anos_independiente" not in estado_inicial(Perfil(anos_independiente=8), paquete())
+
+    indep = LEIDO.model_copy(update={"situacion": "independiente", "anos_independiente": 8})
+    r = perfil_ia.completar(indep)
+    assert r["perfil"]["anos_independiente"] == 8 and any("Llevas 8 años por tu cuenta" in f for f in r["inferido"])
+    r = perfil_ia.completar(indep.model_copy(update={"anos_independiente": 2}))
+    assert r["perfil"]["anos_independiente"] == 2 and not any("por tu cuenta" in f for f in r["inferido"])
+    r = perfil_ia.completar(LEIDO.model_copy(update={"anos_independiente": 8}))  # empleado: no aplica
+    assert r["perfil"]["anos_independiente"] is None
+
+
 def test_los_gemelos_se_cambian_como_tu():
     from app.sim.motor.politicas import pesos_personales
 

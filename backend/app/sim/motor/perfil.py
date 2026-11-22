@@ -15,8 +15,9 @@ OCUPACION_POR_EDU = {"media": 5, "tecnica": 3, "universitaria": 2, "postgrado": 
 RUBROS_DESTINO = "Comercio"
 TRABAJA = ("empleado", "independiente", "fundador")
 EDAD_INGRESO_CARRERA = 18  # supuesto: sin dato del CV, entró a la carrera al salir del colegio
-# Rasgos de su historia que pasan tal cual al estado para que los lea `politicas.pesos_personales`
-HISTORIA = ("anos_por_empleo", "volvio_a_su_nivel", "freelance_entre_pegas", "emprendio_antes")
+# Rasgos de su historia que pasan tal cual al estado, solo si el CV los trae. No son del paquete: los leen
+# `politicas.pesos_personales` (cómo deciden sus gemelos) y `motor.p_independiente_busca_empleo`.
+HISTORIA = ("anos_por_empleo", "volvio_a_su_nivel", "freelance_entre_pegas", "emprendio_antes", "anos_independiente")
 
 
 def skill_por_experiencia(anios: int) -> int:
@@ -62,6 +63,7 @@ class Perfil:
     volvio_a_su_nivel: int = 0            # tras un hueco de más de 6 meses, volvió a un cargo igual o mayor
     freelance_entre_pegas: int = 0        # trabajó por su cuenta entre una pega y otra
     emprendio_antes: int = 0              # ya tuvo una empresa propia antes de la de hoy
+    anos_independiente: int | None = None  # si hoy trabaja por su cuenta: hace cuántos años
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -148,6 +150,8 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
     for rasgo in HISTORIA:
         if getattr(perfil, rasgo):
             e[rasgo] = getattr(perfil, rasgo)
+    if perfil.estado != "independiente":
+        e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)
         e["tipo_institucion"] = pq.tabla("mifuturo_carreras", "tipo_institucion", "carrera_id", perfil.carrera_id)
