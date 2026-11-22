@@ -15,8 +15,33 @@ def test_completar_usa_lo_leido_y_marca_lo_que_falta():
     r = perfil_ia.completar(LEIDO)
     assert r["perfil"]["edad"] == 33 and r["perfil"]["carrera_id"] == 166 and r["perfil"]["sueldo"] == 2_624_000
     assert r["perfil"]["riesgo"] == 5  # el texto no lo dice: valor por defecto
-    assert [s["campo"] for s in r["supuestos"]] == ["riesgo", "ingles"]  # el CV no habla de idiomas
+    # el CV no habla de idiomas ni dice si hoy trabaja: "empleado" lo pone la app
+    assert [s["campo"] for s in r["supuestos"]] == ["riesgo", "ingles", "estado"]
     assert r["inferido"] == LEIDO.inferido
+    assert {"edad", "sueldo", "carrera_id", "region", "antiguedad"} <= set(r["dados"])
+    assert not {"riesgo", "ingles", "estado"} & set(r["dados"])
+
+
+def test_con_un_cv_vacio_todo_lo_que_puso_la_app_es_supuesto():
+    r = perfil_ia.completar(PerfilLeido())
+    assert r["dados"] == []
+    assert [s["campo"] for s in r["supuestos"]] == list(perfil_ia.VISIBLES)  # nada parece dato
+    # quien solo tiene enseñanza media no tiene carrera que suponer
+    r = perfil_ia.completar(PerfilLeido(edu="media"))
+    assert r["dados"] == ["edu"] and "carrera_id" not in {s["campo"] for s in r["supuestos"]}
+
+
+def test_la_via_de_claude_devuelve_dados(monkeypatch):
+    leido = PerfilLeido(edad=28, situacion="buscando", meses_sin_trabajo=4, empresa_actual="I. Municipalidad de Curicó",
+                        emprendio_antes=False)
+    monkeypatch.setattr(perfil_ia, "leer", lambda *a, **k: (leido, "api"))
+    r = perfil_ia.perfil_desde_texto("Tengo 28 años y estoy buscando pega.", "2026-11-21")
+    assert r["via"] == "api"
+    # lo del texto, más lo que el SII sabe de la empresa
+    assert r["dados"] == ["edad", "emprendio_antes", "estado", "meses_cesante", "rubro", "tipo_empleador"]
+    supuestos = {s["campo"] for s in r["supuestos"]}
+    assert {"sueldo", "region", "antiguedad", "carrera_id", "nivel"} <= supuestos
+    assert not supuestos & set(r["dados"])
 
 
 def test_sin_sueldo_se_usa_la_mediana_de_su_edad_y_estudios():
@@ -121,7 +146,8 @@ def test_el_prompt_trae_el_formato_y_las_listas_validas():
 def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
     monkeypatch.setattr(perfil_ia, "leer", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no debe llamar al modelo")))
     r = perfil_ia.perfil_desde_texto(EJEMPLO, "2026-11-21")
-    assert r["via"] == "documento" and r["duda"] == "emprender" and r["avisos"] == [] and r["supuestos"] == []
+    assert r["via"] == "documento" and r["duda"] == "emprender" and r["avisos"] == []
+    assert r["supuestos"] == [{"campo": "estado", "nombre": "situación"}]  # el documento no dice su situación
     from app.schemas.juego import PerfilIn
 
     # lo que el documento no trae (su historia del CV, cuánto le falta si estudia) queda en el valor por defecto

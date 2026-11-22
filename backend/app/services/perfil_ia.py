@@ -403,6 +403,25 @@ EUR = 1_050
 UF = 40_000
 
 
+# Los campos del formulario que, si el texto no los dice, quedan con un valor que puso la app (campo: nombre)
+VISIBLES = {"edad": "edad", "sexo": "sexo", "edu": "estudios", "rubro": "rubro", "tipo_empleador": "tipo de empresa",
+            "nivel": "cargo", "sueldo": "sueldo líquido", "riesgo": "tolerancia al riesgo", "ingles": "inglés",
+            "estado": "situación", "region": "región", "antiguedad": "años en tu pega", "carrera_id": "carrera",
+            "ocupacion": "tipo de trabajo"}
+
+
+class _Anotado(dict):
+    """El perfil en construcción: recuerda qué campos se escribieron desde lo leído (`escritos`)."""
+
+    def __init__(self, base: dict):
+        super().__init__(base)
+        self.escritos: set[str] = set()
+
+    def __setitem__(self, campo, valor):
+        self.escritos.add(campo)
+        super().__setitem__(campo, valor)
+
+
 def _anio(hoy: str | None) -> int:
     from datetime import date
 
@@ -453,16 +472,19 @@ def sueldo_liquido_mensual(leido: PerfilLeido, pq: Paquete) -> tuple[int | None,
 def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = None) -> dict:
     """Arma el perfil que entra al juego: lo leído, más un valor por defecto donde el texto no dijo nada.
 
-    Devuelve {"perfil", "leido", "supuestos", "inferido"}; `supuestos` nombra cada campo que la
-    persona tiene que revisar porque lo puso la app. `hoy` (AAAA-MM-DD) sirve para contar cuánto le
-    falta a quien estudia; sin él, se usa la fecha del servidor.
+    Devuelve {"perfil", "leido", "dados", "supuestos", "inferido", ...}:
+    - `dados`: los campos del perfil que salen del texto (o de la empresa en el SII). Todo campo que no
+      está aquí lo puso la app con su valor por defecto.
+    - `supuestos`: de esos valores por defecto, los que la persona ve en el formulario y tiene que revisar.
+    `hoy` (AAAA-MM-DD) sirve para la edad desde el año de nacimiento y para contar cuánto le falta a
+    quien estudia; sin él, se usa la fecha del servidor.
     """
     from app.schemas.juego import PerfilIn
 
     pq = pq or paquete()
     base = PerfilIn().model_dump()
     rubros = [r for r in pq.variables["rubro"]["dominio"] if r]
-    perfil, supuestos = dict(base), []
+    perfil = _Anotado(base)  # anota cada campo que se escribe desde lo leído
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
               "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
@@ -494,22 +516,15 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     for campo, valor in datos.items():
         if valor is not None:
             perfil[campo] = valor
-    nombres = {"edad": "edad", "sexo": "sexo", "edu": "estudios", "rubro": "rubro", "tipo_empleador": "tipo de empresa",
-               "nivel": "cargo", "sueldo": "sueldo líquido", "riesgo": "tolerancia al riesgo"}
-    for campo, nombre in nombres.items():
-        if datos[campo] is None:
-            supuestos.append(campo)
     if datos["sueldo"] is None:
         # sin sueldo declarado: el del medio para su edad y estudios (ESI), para no partir de un número ajeno
         estado = pq.derivar({"edad": perfil["edad"], "sexo": perfil["sexo"], "edu": perfil["edu"], "sueldo": 0})
         # la institución mueve ese sueldo solo aquí: si lo declaró, su prima ya está adentro
         prima = prima_universidad(pq, perfil.get("universidad_id") or "")
-        perfil["sueldo"] = round(prima * pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]), -4)
+        dict.__setitem__(perfil, "sueldo", round(prima * pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"],
+                                                                  "banda", estado["banda7"]), -4))  # no es un dato
     if leido.ingles is not None:
         perfil["ingles"] = int(leido.ingles)
-    else:
-        supuestos.append("ingles")
-        nombres["ingles"] = "inglés"
     # Fórmulas del equipo (supuesto): skill y red están centradas en 50 y 30 en el paquete
     if leido.anios_experiencia is not None:
         from app.sim.motor.perfil import skill_por_experiencia
@@ -548,20 +563,21 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
-            if datos["tipo_empleador"] is None:
-                supuestos.remove("tipo_empleador")
             perfil["tipo_empleador"] = empresa["tipo_empleador"]
         if datos["rubro"] is None and empresa["rubro"] in rubros:
-            supuestos.remove("rubro")
             perfil["rubro"] = empresa["rubro"]
         tipo = "organismo del Estado" if empresa["tipo_empleador"] == "publico" else empresa["tamano"]
         inferido.append(f"{empresa['nombre']}: {tipo}, {empresa['rubro']}, "
                         f"{empresa['trabajadores']} trabajadores según el SII.")
     final = PerfilIn(**perfil).model_dump()
+    # lo que dijo de su historia, aunque sea "no" (que es también el valor por defecto)
+    dados = perfil.escritos | {c for c in HISTORIA_LEIDA if getattr(leido, c) is not None}
+    supuestos = [c for c in VISIBLES if c not in dados and not (c == "carrera_id" and final["edu"] == "media")]
     return {
         "perfil": final,
         "leido": leido.model_dump(),
-        "supuestos": [{"campo": c, "nombre": nombres[c]} for c in supuestos],
+        "dados": sorted(dados & set(final)),
+        "supuestos": [{"campo": c, "nombre": VISIBLES[c]} for c in supuestos],
         "inferido": inferido,
         "empresa": empresa,
         "dudas_sugeridas": _sugeridas_posibles(leido.dudas_sugeridas, final, pq),
