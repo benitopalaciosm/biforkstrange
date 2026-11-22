@@ -22,7 +22,7 @@ const SITUACION: Record<string, string> = {
 const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
 
 /**
- * Onboarding en 3 pantallas: subes tu CV (o el PDF de LinkedIn) o contestas 3 tarjetas, después solo
+ * Onboarding en 3 pantallas: subes tu CV (o el PDF de LinkedIn) o contestas unas pocas preguntas, después solo
  * lo que falta, y vas a tu duda. Arriba, la ficha de tu gemelo se arma con cada dato.
  * El formulario completo queda detrás de "Revisar todos mis datos".
  */
@@ -386,7 +386,7 @@ function Entrada({ error, onPdf, onManual, claude }: { error: string | null; onP
       {claude}
 
       <button type="button" className="ob-link ob-entra" onClick={onManual}>
-        Prefiero contestar 3 preguntas
+        Prefiero contestar unas pocas preguntas
       </button>
     </>
   );
