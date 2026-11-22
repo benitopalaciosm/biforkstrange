@@ -41,6 +41,7 @@ MAX_CARACTERES = 60_000  # un currículum largo tiene unos 15.000
 
 
 PDF_MAX = 10_000_000  # bytes
+MIN_CARACTERES_PDF = 20  # con menos texto extraíble (sin espacios), el PDF es una imagen: un escaneo o una foto
 
 
 def pdf_desde_base64(datos: str) -> bytes:
@@ -386,7 +387,12 @@ def leer(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = No
             raise traducir_error(error, ModeloNoDisponible) from error
     if shutil.which("claude"):
         if pdf:
-            texto = f"{texto}\n\n{_texto_del_pdf(pdf)}".strip()
+            del_pdf = _texto_del_pdf(pdf)
+            # un PDF escaneado no trae texto: sin esto, Claude recibía un texto vacío y el perfil salía
+            # entero con valores por defecto, con 200, como si el CV no dijera nada
+            if len("".join(del_pdf.split())) < MIN_CARACTERES_PDF and not texto:
+                raise ValueError("Ese PDF es una imagen: súbelo como texto o usa tu Claude.")
+            texto = f"{texto}\n\n{del_pdf}".strip()
         return _por_comando(texto, hoy, pq), "comando"
     raise ModeloNoDisponible(
         "No hay credenciales para llamar a Claude. Define ANTHROPIC_API_KEY o llena el perfil a mano.")

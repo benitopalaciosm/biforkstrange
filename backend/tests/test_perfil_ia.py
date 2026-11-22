@@ -586,6 +586,32 @@ def test_desde_api_trae_el_sueldo_literal():
             leido.anio_nacimiento) == (None, 3_200_000, "CLP", None, "bruto", 1990)
 
 
+def _pdf_sin_texto() -> bytes:
+    """Un PDF de verdad sin texto extraíble, como un CV escaneado."""
+    import io
+
+    from pypdf import PdfWriter
+
+    escritor, salida = PdfWriter(), io.BytesIO()
+    escritor.add_blank_page(width=595, height=842)
+    escritor.write(salida)
+    return salida.getvalue()
+
+
+def test_un_pdf_escaneado_en_el_comando_local_da_un_error_claro(client, monkeypatch):
+    monkeypatch.setattr(perfil_ia, "_hay_credenciales", lambda: False)
+    monkeypatch.setattr(perfil_ia.shutil, "which", lambda _: "/usr/local/bin/claude")
+    monkeypatch.setattr(perfil_ia, "_por_comando", lambda *a: (_ for _ in ()).throw(AssertionError("no debe llamar a Claude")))
+    pdf = _pdf_sin_texto()
+    with pytest.raises(ValueError, match="Ese PDF es una imagen"):
+        perfil_ia.leer("", "2026-11-21", pdf=pdf)
+    r = client.post("/api/juego/perfil", json={"pdf": base64.b64encode(pdf).decode()})
+    assert r.status_code == 422 and "súbelo como texto o usa tu Claude" in r.json()["detail"]
+    # si además escribió algo, se lee eso
+    monkeypatch.setattr(perfil_ia, "_por_comando", lambda texto, hoy, pq: PerfilLeido(edad=30))
+    assert perfil_ia.leer("Tengo 30 años", "2026-11-21", pdf=pdf) == (PerfilLeido(edad=30), "comando")
+
+
 def _respuesta_vacia_del_esquema() -> dict:
     """Lo que devolvería Claude con un texto que no dice nada: "no se sabe" en cada campo."""
     datos = {}
