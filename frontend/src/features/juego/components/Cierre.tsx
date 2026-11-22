@@ -4,7 +4,7 @@ import type { Anio, Vista } from "../types";
 import type { VidaAnterior } from "../hooks/usePartida";
 import { GEMELOS } from "../api";
 import { Abanico, EjeX, Info, LIENZO, RangosOpciones, escalaSueldo, rotuloSueldo } from "./graficos";
-import { coloresDe } from "./Carta";
+import { coloresDe, diferenciaDe } from "./Carta";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
 import { Cargando, ErrorCaja, Salir } from "./piezas";
@@ -121,8 +121,11 @@ function DecisionOSuerte({
   elegida, otra, sueldoFinal, gemelos,
 }: {
   elegida: { nombre: string; p50: number };
-  /** La otra opción y la mediana de la diferencia mundo a mundo (con la misma suerte), la misma cifra de la carta. */
-  otra: { nombre: string; diferencia: number | null } | null;
+  /**
+   * La otra opción y la diferencia típica mundo a mundo (con la misma suerte), con el mismo criterio de la carta:
+   * con muchos empates, solo entre los mundos donde cambia algo (`cuandoCambia`).
+   */
+  otra: { nombre: string; diferencia: number | null; cuandoCambia: boolean } | null;
   sueldoFinal: number;
   gemelos: number;
 }) {
@@ -140,7 +143,7 @@ function DecisionOSuerte({
           ¿Fue la decisión o la suerte?
         </Heading>
         <Text size="sm">
-          Tus {gemelos} copias eligieron «{elegida.nombre}», igual que tú, y después decidieron como la mayoría. Tú, a tu manera.
+          En tus {gemelos} mundos, tu copia eligió «{elegida.nombre}», igual que tú, y después decidió como la mayoría. Tú, a tu manera.
         </Text>
       </Stack>
       <div className="jg-datos jg-cierre-partes">
@@ -149,7 +152,8 @@ function DecisionOSuerte({
             <span>
               Tu decisión
               <small>
-                «{elegida.nombre}» en vez de «{otra.nombre}», en el mismo mundo.
+                Elegir «{elegida.nombre}» en vez de «{otra.nombre}» {chica(porDecision) ? "casi no cambiaba" : porDecision > 0 ? "subía" : "bajaba"} el sueldo
+                del mismo mundo, típico (comparando cada mundo consigo mismo{otra.cuandoCambia ? ", en los mundos donde no da lo mismo" : ""}).
               </small>
             </span>
             <span data-tono={chica(porDecision) ? "igual" : porDecision > 0 ? "mas" : "menos"}>{conSignoPlata(porDecision)}</span>
@@ -158,7 +162,9 @@ function DecisionOSuerte({
         <div className="jg-dato">
           <span>
             Tu suerte y lo que decidiste después
-            <small>Frente a lo típico de tus copias ({plata(elegida.p50)}).</small>
+            <small>
+              Lo que te separó de lo típico de tu copia en tus {gemelos} mundos ({plata(elegida.p50)}).
+            </small>
           </span>
           <span data-tono={chica(porLoDemas) ? "igual" : porLoDemas > 0 ? "mas" : "menos"}>{conSignoPlata(porLoDemas)}</span>
         </div>
@@ -269,6 +275,8 @@ export function CierrePantalla({
   // contra qué se mide tu decisión: la otra opción con mejor sueldo típico (el backend la elige igual y trae la
   // diferencia mundo a mundo en `contra`)
   const otraTipica = otras.find((o) => o.opcion === primera?.contra?.opcion) ?? [...otras].sort((a, b) => b.sueldo.p50 - a.sueldo.p50)[0] ?? null;
+  // la diferencia que movió tu decisión, con el mismo criterio que la carta
+  const dif = primera?.contra ? diferenciaDe(primera.contra) : { d: null, cuandoCambia: false };
   // los mismos colores de opción que en la carta: «Irte» es verde allá y aquí
   const colores = coloresDe(opciones);
   const conCeros = opciones.some((o) => o.sin_trabajo_al_final > 0);
@@ -303,7 +311,7 @@ export function CierrePantalla({
         <Stack as="section" gap={12}>
           <Stack gap={4}>
             <Heading level={3} as="h2">
-              Tú contra tus {GEMELOS} copias
+              Tú contra tus {GEMELOS} mundos
             </Heading>
             <Text size="sm">{primera.pregunta}</Text>
           </Stack>
@@ -319,18 +327,18 @@ export function CierrePantalla({
           />
           {cierre.mejor_que_gemelos !== undefined && (
             <Text className="jg-destacado">
-              Terminaste ganando más que {Math.round(cierre.mejor_que_gemelos * primera.comparacion.gemelos)} de tus {primera.comparacion.gemelos} copias.
+              Terminaste ganando más que tu copia en {Math.round(cierre.mejor_que_gemelos * primera.comparacion.gemelos)}{" "}de{" "}{primera.comparacion.gemelos} mundos.
             </Text>
           )}
           <Info pregunta="¿Cómo leo este gráfico?">
-            La línea amarilla es tu sueldo. La franja va del 10% al 90% de los {primera.comparacion.gemelos} mundos donde elegiste «{elegida.nombre}», y
-            la línea gruesa es la mediana.{otraTipica && ` La punteada es la mediana si hubieras elegido «${otraTipica.nombre}».`} Si tu línea sale de la
-            franja, te fue mejor (o peor) que a casi todas tus copias, por tu dado o por tus decisiones de después.
+            La línea amarilla es tu sueldo. La franja va de «si te va mal» a «si te va bien» (8 de cada 10 de tus {primera.comparacion.gemelos} mundos) con
+            «{elegida.nombre}», y la línea gruesa es lo típico.{otraTipica && ` La punteada es lo típico si hubieras elegido «${otraTipica.nombre}».`} Si
+            tu línea sale de la franja, te fue mejor (o peor) que a tu copia en casi todos los mundos, por tu dado o por tus decisiones de después.
           </Info>
           <details>
             <summary className="jg-ayuda">Ver el sueldo final de cada opción</summary>
             <Stack gap={10} className="jg-vivido">
-              <Meta>Del 10% al 90% de los mundos</Meta>
+              <Meta>De «si te va mal» a «si te va bien»</Meta>
               <RangosOpciones
                 tu={cierre.sueldo_final}
                 opciones={[elegida, ...otras].map((o) => ({
@@ -350,7 +358,7 @@ export function CierrePantalla({
       {primera && elegida && (
         <DecisionOSuerte
           elegida={{ nombre: elegida.nombre, p50: elegida.sueldo.p50 }}
-          otra={otraTipica ? { nombre: otraTipica.nombre, diferencia: primera.contra?.diferencia_tipica ?? null } : null}
+          otra={otraTipica ? { nombre: otraTipica.nombre, diferencia: dif.d, cuandoCambia: dif.cuandoCambia } : null}
           sueldoFinal={cierre.sueldo_final}
           gemelos={primera.comparacion.gemelos}
         />
@@ -373,7 +381,7 @@ export function CierrePantalla({
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
         {cargando && <Cargando>Preparando tu otra vida…</Cargando>}
         <Button onClick={onRevivir} disabled={cargando}>Vivir este mismo mundo eligiendo distinto</Button>
-        <Text size="sm">Vuelves al año 1 con la misma primera carta y la misma suerte del país. Al final ves tus dos vidas juntas.</Text>
+        <Text size="sm">Vuelves al año 1 con la misma primera decisión y la misma suerte del país. Al final ves tus dos vidas juntas.</Text>
       </Stack>
       {primera && (
         <CompartirResultado comparacion={primera.comparacion} elegida={primera.elegida} sueldoFinal={cierre.sueldo_final} retrato={retrato} />
