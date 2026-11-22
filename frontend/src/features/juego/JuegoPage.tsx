@@ -33,7 +33,7 @@ function Juego() {
   const { paso, completo } = j.onboarding.borrador;
   const enOnboarding = j.fase === "perfil" ? `${paso}:${completo}` : "";
   const punto = `${tutorial}:${j.fase}:${enOnboarding}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
-  const pantalla = useRef<HTMLDivElement>(null);
+  const pantalla = useRef<HTMLElement>(null);
   const primera = useRef(true);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -49,9 +49,9 @@ function Juego() {
   }, [punto]);
 
   return (
-    <div ref={pantalla} className="jg-pantalla">
+    <main ref={pantalla} className="jg-pantalla">
       <Fase j={j} tutorial={tutorial} setTutorial={setTutorial} catalogo={catalogo} errorCatalogo={errorCatalogo} reintentarCatalogo={reintentarCatalogo} />
-    </div>
+    </main>
   );
 }
 

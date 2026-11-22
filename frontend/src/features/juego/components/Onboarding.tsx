@@ -577,7 +577,7 @@ function Ficha({
 function Tarjeta({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <Stack gap={18} className="ob-tarjeta">
-      <Heading level={2}>{titulo}</Heading>
+      <Heading level={2} as="h1">{titulo}</Heading>
       {children}
     </Stack>
   );

@@ -701,6 +701,9 @@ function Simulacion({
   const pedido = useRef(0);
   const sorteo = useRef<number[]>([]);
   const panel = useRef<HTMLDivElement>(null);
+  // la grilla es un solo tab stop: se entra con Tab y se recorre con flechas (roving tabindex)
+  const [foco, setFoco] = useState(0);
+  const grilla = useRef<HTMLDivElement>(null);
   const clave = ganadores.join(",");
   const pararSorteo = () => {
     sorteo.current.forEach((t) => clearTimeout(t));
@@ -806,11 +809,31 @@ function Simulacion({
         </Text>
       </Stack>
       <div className="jg-duelo">
-        <div className="jg-mundos" role="group" aria-label="Los mundos, uno por punto" data-sorteando={sorteando}>
+        <div
+          ref={grilla}
+          className="jg-mundos"
+          role="group"
+          aria-label="Los mundos, uno por punto. Usa las flechas para moverte entre ellos"
+          data-sorteando={sorteando}
+          onKeyDown={(e) => {
+            const salto: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 10, ArrowUp: -10 };
+            let n: number;
+            if (e.key in salto) n = foco + salto[e.key];
+            else if (e.key === "Home") n = 0;
+            else if (e.key === "End") n = puntos.length - 1;
+            else return;
+            e.preventDefault();
+            n = Math.max(0, Math.min(puntos.length - 1, n));
+            setFoco(n);
+            grilla.current?.querySelectorAll<HTMLButtonElement>(".jg-mundo-punto")[n]?.focus();
+          }}
+        >
           {puntos.map(({ g, i }, k) => (
             <button
               type="button"
               key={i}
+              tabIndex={k === foco ? 0 : -1}
+              onFocus={() => setFoco(k)}
               className="jg-mundo-punto"
               aria-pressed={abierto === i}
               aria-label={`Mundo ${i + 1}: ${g ? `gana «${nombreDe(g)}»` : "empate"}`}
