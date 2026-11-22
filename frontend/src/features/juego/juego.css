@@ -67,6 +67,8 @@ select.jg-campo { appearance: none; background-image: linear-gradient(45deg, tra
 @keyframes jg-pulso { from { transform: scale(.6); opacity: .4; } to { transform: scale(1); opacity: 1; } }
 .jg-error { padding: 12px 14px; border: 2px dashed var(--tinta); border-radius: 14px; font: 500 14px/20px var(--font); }
 /* Pie con la acción principal siempre a la vista en pantallas largas */
+/* el foco no queda tapado por el pie fijo (WCAG 2.4.11) */
+html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-pie-fijo { position: sticky; bottom: 0; z-index: 2; margin-top: auto; padding: 12px 0 16px; margin-bottom: -16px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to bottom, transparent, var(--papel) 14px); }
 @media (min-width: 760px) { .jg-ancha .jg-pie-fijo > * { max-width: 420px; width: 100%; margin-left: auto; margin-right: auto; } }
 /* Fondo detrás de la columna de la pantalla */
@@ -296,7 +298,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-duelo .jg-nube { max-width: 240px; gap: 4px; }
 .jg-duelo .jg-leyenda { font-size: 14px; }
 .jg-simulacion .jg-partes-barra { background: var(--papel); }
-.jg-duelo { display: grid; grid-template-columns: minmax(110px, 200px) minmax(0, 1fr); gap: 8px 16px; align-items: center; }
+.jg-duelo { display: grid; grid-template-columns: minmax(110px, 280px) minmax(0, 1fr); gap: 8px 16px; align-items: center; }
 .jg-duelo > * { grid-column: 1 / -1; }
 .jg-duelo > .jg-nube { grid-column: 1; }
 .jg-duelo > .jg-nube + .jg-leyenda { grid-column: 2; }
@@ -362,7 +364,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 
 /* Mundos explorables: un punto por mundo, del color de la opción que gana en él */
 .jg-color { display: inline-block; width: 11px; height: 11px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; }
-.jg-mundos { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; max-width: 220px; }
+.jg-mundos { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; max-width: 280px; } /* puntos de 24 px (WCAG 2.5.8) */
 .jg-mundo-punto { aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: var(--jg-igual); cursor: pointer; animation: jg-punto .45s var(--rebote) calc(var(--jg-i, 0) * 28ms + 120ms) both; transition: transform .15s var(--ease), box-shadow .15s ease; }
 .jg-mundo-punto:hover { transform: scale(1.25); }
 .jg-mundo-punto:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
