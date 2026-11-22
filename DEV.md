@@ -13,6 +13,39 @@ make test
 
 Sin credenciales de Supabase el backend guarda las corridas en memoria.
 
+## Producción (Render)
+
+`make back` es para desarrollo: un solo proceso con `--reload`, que atiende las partidas en fila (diez
+`/partida` a la vez esperan ~2 s cada una). En producción corre `backend/scripts/prod.sh` (o `make prod`
+en local): uvicorn con `--workers`, sin `--reload`, en `0.0.0.0:$PORT`.
+
+**Comando de arranque del servicio de la API** (Render → Settings → Start Command), con *Root Directory*
+`backend`:
+
+```bash
+sh scripts/prod.sh
+```
+
+Si el servicio no usa `backend` como raíz, `sh backend/scripts/prod.sh`. El script usa `uv run` si `uv` está
+instalado y si no `python -m uvicorn` con las dependencias ya instaladas en el build.
+
+Variables de entorno:
+
+| Servicio | Variable | Ejemplo | Para qué |
+|---|---|---|---|
+| API | `ANTHROPIC_API_KEY` | `sk-ant-...` | Leer el CV con Claude y narrar. Sin ella, el perfil se llena a mano y los textos salen de plantillas |
+| API | `CORS_ORIGINS` | `["https://agarrar-la-pala.onrender.com"]` | Orígenes que pueden llamar a la API. Va en **formato JSON** (una lista entre corchetes con comillas dobles); una URL suelta no se lee |
+| API | `WEB_CONCURRENCY` | `2` | Procesos de uvicorn. Cada uno usa ~170 MB después de jugar: 2 caben en 512 MB. Más procesos solo ayudan si el plan tiene más CPUs |
+| API | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | | Opcionales: guardar las corridas de `/api/simulations` |
+| Front | `VITE_API_URL` | `https://agarrar-la-pala-api.onrender.com` | URL de la API. Vite la mete en el build: si cambia, hay que volver a construir el front |
+
+`PORT` lo pone Render. En local, el backend lee estas mismas variables de `backend/.env` (incluida
+`ANTHROPIC_API_KEY`); una variable de entorno pesa más que el `.env`.
+
+El juego no guarda estado entre llamadas, así que cualquier proceso puede atender cualquier request. Lo
+único en memoria por proceso es el historial de `/api/simulations` sin Supabase: con varios procesos, una
+corrida guardada en uno no aparece en otro. Para eso, configura Supabase.
+
 ## Backend (`backend/app`)
 
 Las dependencias van en una sola dirección: `api → services → (sim, repositories)`.
