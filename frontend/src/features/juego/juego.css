@@ -380,7 +380,7 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 /* Oferta en corto: dos botones del mismo peso, para que la pantalla no empuje a quedarse */
 .jg-dos-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* Los 100 mundos: atajos para abrir uno, el cursor que sortea y el duelo de un mundo abierto */
+/* Los mundos: atajos para abrir uno, el cursor que sortea y el duelo de un mundo abierto */
 .jg-atajos { display: flex; flex-wrap: wrap; gap: 8px; }
 .jg-atajo { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1.5px solid var(--linea); border-radius: 999px; background: var(--papel); color: var(--tinta); font: 600 13px/16px var(--font); cursor: pointer; transition: transform .15s var(--ease), border-color .15s ease; }
 .jg-atajo:hover:not(:disabled) { border-color: var(--tinta); transform: translateY(-1px); }

@@ -179,7 +179,7 @@ function DecisionOSuerte({
       )}
       {mejorQue !== undefined && (
         <Text size="sm">
-          Terminaste ganando más que {Math.round(mejorQue * 100)} de tus 100 copias.
+          Terminaste ganando más que {Math.round(mejorQue * gemelos)} de tus {gemelos} copias.
         </Text>
       )}
     </Stack>

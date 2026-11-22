@@ -19,7 +19,7 @@ export function loNuevo(previa: Vista | null, vista: Vista): Anio[] {
     .map((a, i) => (i === 0 ? { ...a, decisiones: a.decisiones.slice(yaDecisiones), eventos: a.eventos.slice(yaEventos) } : a));
 }
 
-// lo que puede pasarte en el año va en porcentaje; "de 100" queda solo para contar mundos
+// lo que puede pasarte en el año va en porcentaje; "X de 50" queda solo para contar mundos
 const queTanProbable = (prob: number) => (prob >= 0.995 ? "Seguro" : porciento(prob));
 
 /** Por qué bajó el sueldo, según lo que de verdad pasó: un despido, otro empleador o el mismo trabajo. */
@@ -252,8 +252,8 @@ export function QuePaso({
       {conProbabilidad && !yaVioPorcentaje && (
         <Info pregunta="¿Qué es el % junto a cada noticia?">
           Qué tan probable era que te pasara eso, a alguien en tu situación. Por ejemplo, «4% al año» junto a un despido: de cada 100 personas como tú, a
-          unas 4 las despiden en un año. Junto a una decisión, es qué tan probable era el resultado que te tocó. Los «de 100 mundos», en cambio, cuentan en
-          cuántos de tus 100 mundos simulados pasó algo.
+          unas 4 las despiden en un año. Junto a una decisión, es qué tan probable era el resultado que te tocó. Los «de {GEMELOS} mundos», en cambio, cuentan en
+          cuántos de tus {GEMELOS} mundos simulados pasó algo.
         </Info>
       )}
 
