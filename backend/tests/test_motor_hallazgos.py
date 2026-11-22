@@ -44,6 +44,23 @@ def test_bootcamp_desde_la_cesantia_no_revienta_el_anio():
     assert v.e["estado"] == "empleado" and v.e["tipo_empleador"] != ""
 
 
+def test_mas_meses_cesante_nunca_ayuda_a_encontrar_trabajo():
+    """Corregido. cesantia/rapido sumaba 0,1 x min(3, meses/12): con 7 meses encontraba más rápido (0,84) que
+    recién despedido (0,78), con 8 caía a 0,51 por el hueco y con 36 volvía a 0,75. MESES_CESANTIA es una
+    exponencial (salida constante, EPS) y el hueco de 8 meses es el único castigo por duración (Kroft)."""
+    from dataclasses import replace
+
+    base = Perfil(edad=30, estado="buscando", sueldo=1_400_000)
+    for opcion in ("rapido", "nivel"):
+        prob = next(o for o in pq().decisiones["cesantia"]["opciones"] if o["id"] == opcion)["resultados"][0]["prob"]
+        ps = [pq().evaluar(prob, vida(replace(base, meses_cesante=m)).e) for m in range(0, 61)]
+        assert all(b <= a for a, b in zip(ps, ps[1:])), opcion
+        # dentro de la simulación (sin hueco), los meses que ya lleva tampoco cambian nada
+        assert pq().evaluar(prob, vida(base, meses_cesante=36).e) == pytest.approx(ps[0])
+    rapido = pq().decisiones["cesantia"]["opciones"][0]["resultados"][0]["prob"]
+    assert pq().evaluar(rapido, vida(base).e) == pytest.approx(0.783, abs=1e-3)  # recién despedido, como antes
+
+
 @pytest.mark.parametrize("estado", ["fundador", "independiente", "buscando"])
 def test_emigrar_es_para_quien_se_va_con_trabajo(estado):
     """Corregido. emigrar no pedía estar empleado: a un fundador "irse" le multiplicaba por 3,5 el sueldo y lo
@@ -106,8 +123,8 @@ def test_al_cerrar_la_startup_la_antiguedad_vuelve_a_cero():
 
 
 @pytest.mark.xfail(strict=True, reason="meses_cesante solo se reinicia en cesantia/encuentra. Quien falla una "
-                   "primera_pega (+12) y después consigue trabajo queda empleado con meses_cesante > 0; años después, "
-                   "si queda cesante, parte con +0,1 de probabilidad de encontrar rápido por cada 12 meses viejos")
+                   "primera_pega (+12) y después consigue trabajo queda empleado con meses_cesante > 0. Desde que "
+                   "cesantia/rapido no lee meses_cesante ya no mueve ninguna probabilidad, pero el estado queda incoherente")
 def test_al_conseguir_trabajo_los_meses_cesante_vuelven_a_cero():
     d = DadosGuion({(1, "dec:primera_pega:pyme"): 0.0})
     v = vida(Perfil.a_los_18(), d)
