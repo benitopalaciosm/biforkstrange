@@ -31,13 +31,13 @@ CUADRAN = [
     "publico_25-29", "empresa_grande", "startup_anos",
     "separacion_18_29", "separacion_30_44", "separacion_45_59",
     "cambio_18_29", "cambio_30_44", "sigue_cesante_12m",
-    "ingreso_p75_25-29",
+    "ingreso_p75_25-29", "ingreso_p50_35-39",
 ]
 BRECHAS = {
     # ingreso_p50_30-34 quedó fuera: tras corregir los sueldos en cero está al borde de la tolerancia
     # (con 5.000 personas falla por 3 puntos; con la cohorte chica de este test a veces cuadra)
-    "ingreso_p50_35-39": "sueldos: quien no estudió no recibe alza sus primeros 4 años y cada cesantía baja el sueldo para siempre",
-    "ingreso_p50_40-44": "ídem",
+    # ingreso_p50_35-39 ya cuadra: sin carrera elegida, el alza usa el perfil ESI desde el primer año
+    "ingreso_p50_40-44": "sueldos: cada cesantía baja el sueldo para siempre",
     "ingreso_p50_45-49": "ídem",
     "ingreso_p25_25-29": "todos los independientes ganan la mediana informal (300 mil), sin dispersión ni alza",
     "ingreso_p25_35-39": "ídem",

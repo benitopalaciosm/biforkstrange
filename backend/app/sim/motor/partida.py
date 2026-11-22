@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from app.sim.motor import empresas, gemelos
 from app.sim.motor.azar import Dados
-from app.sim.motor.motor import FaltaEleccion, Opcion, Vida
+from app.sim.motor.motor import REPETIR_CARTA, FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import Perfil, estado_inicial
 from app.sim.motor.narrativa import narrar
@@ -46,6 +46,7 @@ def jugar(perfil: Perfil, semilla: int, elecciones: list[dict], duda: str | None
           pq: Paquete | None = None) -> Partida:
     pq = pq or paquete()
     vida = Vida(estado_inicial(perfil, pq), Dados(semilla, JUGADOR), pq)
+    vida.variedad = REPETIR_CARTA  # tu vida no te repite la misma pregunta año tras año
     if duda is not None and not vida.aplica(duda):
         raise ValueError(f"la decisión {duda!r} no aplica a este perfil")
     jugador = Jugador(elecciones)

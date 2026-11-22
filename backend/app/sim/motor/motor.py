@@ -37,7 +37,9 @@ EDAD_MAXIMA = 60
 # Reglas del cierre de año que el paquete deja al simulador. Supuestos del equipo.
 SKILL_POR_ANIO = 1.5            # oficio que suma un año trabajado
 PAGO_DEUDA_ESTUDIOS = 0.10      # parte del sueldo que paga el crédito (regla del CAE)
-ANIOS_HUECO = 2                 # cuánto pesa una pausa elegida al buscar trabajo
+PRIMA_MIN, PRIMA_MAX = 0.6, 3.0  # supuesto: cuánto de tu nivel viaja contigo a una pega nueva
+REPETIR_CARTA = 0.3             # supuesto: en tu partida, cada vez que ya te tocó una carta pesa 0,3 veces
+ANIOS_HUECO = 2                # cuánto pesa una pausa elegida al buscar trabajo
 EDU_AL_TITULARSE = {"U": "universitaria", "IP": "tecnica", "CFT": "tecnica"}
 # Decisiones donde el modificador p_encontrar multiplica la probabilidad de quedar
 BUSQUEDAS = frozenset({"cesantia", "primera_pega"})
@@ -88,6 +90,7 @@ class Vida:
         self.anios_buscando = 0
         self.ingreso_total = 0.0
         self._anios_con_hueco = 0
+        self.variedad = 1.0               # peso de una carta ya vista; la partida de la persona usa REPETIR_CARTA
         self._derivar(inicio=True)
         self.reparto: dict | None = None
 
@@ -114,11 +117,31 @@ class Vida:
     def _derivar(self, inicio: bool = False) -> None:
         previa = self.e.get("pareja_previa")
         self.e = self.pq.derivar(self.e)
+        self.e["prima_personal"] = self._prima_personal()
         if not inicio and previa is not None:
             self.e["pareja_previa"] = previa  # es la situación al inicio del año
         ascenso = self.pq.eventos["ascenso"]
         aplica = self.pq.evaluar(ascenso["cuando"], self.e)
         self.e["prob_ascenso"] = self.pq.evaluar(ascenso["prob_anual"], self.e) if aplica else 0.0
+
+    def _prima_personal(self) -> float:
+        """Cuánto gana la persona sobre la mediana de su edad y educación. Las reglas que fijan
+        un sueldo desde una tabla nacional (informal, otra ocupación, por tu cuenta) la usan para
+        que alguien que ya gana bien no caiga a la mediana del país. Supuesto del equipo."""
+        e = self.e
+        if e["sueldo_ref"] <= 0:
+            return 1.0
+        try:
+            p50 = self.pq.evaluar(
+                "tabla_o(tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7), "
+                "'esi_ingreso_sexo_edad_edu', 'p50', 'sexo', sexo_txt, 'banda_edad', banda7, 'educacion', edu_esi)", e)
+        except Exception:
+            return 1.0
+        return min(PRIMA_MAX, max(PRIMA_MIN, e["sueldo_ref"] / p50)) if p50 else 1.0
+
+    def _veces_vista(self, decision_id: str) -> int:
+        anios = self.historia + ([self.registro] if self.registro else [])
+        return sum(1 for a in anios for d in a["decisiones"] if d["decision"] == decision_id and d.get("origen") == "carta")
 
     def terminada(self) -> bool:
         return self.e["edad"] >= EDAD_MAXIMA
@@ -195,6 +218,8 @@ class Vida:
             peso = self.pq.evaluar(d["aparicion"]["peso"], self.e)
             if id_ == "renunciar":
                 peso *= self.e["p_renuncia"]
+            if self.variedad != 1.0:  # solo en tu partida: la población calibrada no se toca
+                peso *= self.variedad ** self._veces_vista(id_)
             if peso > 0:
                 salida.append((id_, float(peso)))
         return salida

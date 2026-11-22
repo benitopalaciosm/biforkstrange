@@ -1776,7 +1776,7 @@
         {
          "var": "sueldo",
          "op": "fija",
-         "valor": "tabla_o(tabla('esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', '18-54', 'formalidad', 'informal'), 'esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', banda7, 'formalidad', 'informal')"
+         "valor": "(tabla_o(tabla('esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', '18-54', 'formalidad', 'informal'), 'esi_ingreso_categoria_formalidad', 'p50', 'categoria', 'cuenta_propia', 'banda_edad', banda7, 'formalidad', 'informal')) * prima_personal"
         }
        ]
       }
@@ -2908,7 +2908,7 @@
         {
          "var": "sueldo",
          "op": "fija",
-         "valor": "tabla_o(tabla('esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', '18-54'), 'esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', banda7) * 0.9"
+         "valor": "(tabla_o(tabla('esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', '18-54'), 'esi_ingreso_ocupacion', 'p50', 'ciuo08_1d', si(ocupacion_destino == 0, 10, ocupacion_destino), 'banda_edad', banda7) * 0.9) * prima_personal"
         },
         {
          "var": "nivel",
