@@ -242,14 +242,18 @@ class Vida:
         else:
             if not decisiones and con_cartas:
                 sorteada = self._sortear_carta()
-                if sorteada and sorteada not in LLEGAN and self.primer_anio_con_propuesta and self.anio == 0:
+                if sorteada and sorteada not in LLEGAN | self._huecos() and self.primer_anio_con_propuesta and self.anio == 0:
                     # la partida no parte con un año tranquilo: el primer año te llega algo que decidir
                     llegan = [(id_, peso) for id_, peso in self.cartas_posibles() if id_ in LLEGAN]
                     if llegan:
                         sorteada = llegan[self.dados.elegir(self.anio, "carta:primera", [p for _, p in llegan])][0]
                         self.reparto = {"carta": sorteada, "prob": dict(llegan)[sorteada] / sum(p for _, p in llegan),
                                         "posibles": len(llegan)}
-                if sorteada and sorteada not in LLEGAN:
+                if sorteada in self._huecos() and not (self.primer_anio_con_propuesta and self.anio == 0):
+                    # una carta que solo llega por su evento (la oferta): ocupa su lugar en el sorteo, para no
+                    # inflar a las demás, pero como carta no trae nada: año tranquilo sin sugerencia
+                    decisiones = [TRANQUILO]
+                elif sorteada and sorteada not in LLEGAN:
                     self.sugerida = sorteada  # no te llegó nada: año tranquilo, puedes buscar algo
                     decisiones = [TRANQUILO]
                 else:
@@ -322,6 +326,10 @@ class Vida:
             if peso > 0:
                 salida.append((id_, float(peso)))
         return salida
+
+    def _huecos(self) -> frozenset[str]:
+        """Cartas que solo ocupan su lugar en el sorteo: lo que traen llega por un evento (ver `solo_por_evento`)."""
+        return frozenset(id_ for id_, d in self.pq.decisiones.items() if d["aparicion"].get("solo_por_evento"))
 
     def _sortear_carta(self) -> str | None:
         cartas = self.cartas_posibles()
@@ -545,7 +553,7 @@ class Vida:
         else:
             rubro = empresas.rubro_actual(e)
         sitio = empresas.sitio_empresa(self._origen)
-        emp = empresas.sortear_empresa(self.pq, self.dados, self.anio, sitio, e["tipo_empleador"], rubro)
+        emp = empresas.sortear_empresa(self.pq, self.dados, self.anio, sitio, e["tipo_empleador"], rubro, e)
         if emp is not None and e["tipo_empleador"] != "publico":
             e["rubro"] = emp["rubro"]  # sin rubro, o startup/remota de otro rubro: la empresa lo fija
         car = empresas.sortear_cargo(self.pq, self.dados, self.anio, sitio + ":cargo", emp, e)

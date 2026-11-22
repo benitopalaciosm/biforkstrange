@@ -1924,7 +1924,8 @@
    "aparicion": {
     "tipo": "carta",
     "peso": "8 * k('P_CAMBIO_EMPLEADOR', banda3) * (1 + red / 100)",
-    "proactiva": false
+    "proactiva": false,
+    "solo_por_evento": true
    },
    "opciones": [
     {

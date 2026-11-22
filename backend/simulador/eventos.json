@@ -174,7 +174,7 @@
    "nombre": "Te llega una oferta sin buscarla",
    "categoria": "trabajo",
    "cuando": "estado == 'empleado'",
-   "prob_anual": "k('P_CAMBIO_EMPLEADOR', banda3) * 1.5 * (1 + red / 100)",
+   "prob_anual": "k('P_CAMBIO_EMPLEADOR', banda3) * 2.0 * (1 + red / 100)",
    "resultados": [
     {
      "id": "oferta",
@@ -190,7 +190,7 @@
     "nyfed_sce"
    ],
    "calidad": "mixto",
-   "notas": "Llegan más ofertas de las que se aceptan; el 1,5 lo ajusta. Ver sce_ofertas para la tasa de ofertas en EE.UU."
+   "notas": "Llegan más ofertas de las que se aceptan; el 2,0 lo ajusta para que los cambios de empleador por edad cuadren con la EPS 2024 (20,5/14,0/10,1% contra 21,8/13,8/10,2%). Es el único camino por el que llega una oferta: la carta oferta_externa conserva su lugar en el sorteo (para no inflar a las demás) pero tiene solo_por_evento, así que como carta no trae nada. Antes, como carta, salía de más desde los 45, cuando hay menos cartas posibles con quien competir. Ver sce_ofertas para la tasa de ofertas en EE.UU."
   },
   {
    "id": "recesion",
