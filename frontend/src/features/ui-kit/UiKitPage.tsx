@@ -41,7 +41,7 @@ export function UiKitPage() {
   const [tab, setTab] = useState<"pantallas" | "componentes">("pantallas");
   return (
     <div className="vd" style={{ minHeight: "100dvh", background: "var(--niebla)" }}>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 20px", display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "56px 20px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
         <Stack gap={12}>
           <Row gap={12} style={{ alignItems: "center", justifyContent: "space-between" }}>
             <Pill>Agarrar la pala · UI kit</Pill>
@@ -95,11 +95,11 @@ function ScreensGallery() {
         style={{
           width: 390,
           maxWidth: "100%",
-          border: "2px solid #1D1E22",
+          border: "2px solid var(--tinta)",
           borderRadius: 28,
           overflow: "hidden",
-          boxShadow: "0 6px 0 #1D1E22",
-          background: "#fff",
+          boxShadow: "0 6px 0 var(--sombra)",
+          background: "var(--papel)",
         }}
       >
         <Current key={`${id}-${run}`} go={go} />

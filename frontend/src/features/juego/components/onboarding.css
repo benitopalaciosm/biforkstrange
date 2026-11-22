@@ -21,7 +21,7 @@
   cursor: pointer; transition: transform .2s, background .2s;
 }
 .ob-zona strong { font: 700 17px/24px var(--font); }
-.ob-zona:hover, .ob-zona[data-encima] { transform: scale(1.02); background: #dfe5ff; }
+.ob-zona:hover, .ob-zona[data-encima] { transform: scale(1.02); background: color-mix(in srgb, var(--acento) 6%, var(--acento-suave)); }
 .ob-zona:focus-visible { outline: 3px solid var(--acento); outline-offset: 3px; }
 
 /* LinkedIn → PDF → gemelo, en loop */
@@ -54,13 +54,13 @@
 .ob-leyendo { align-items: center; padding: 18px 0; }
 .ob-hoja {
   position: relative; width: 150px; height: 190px; padding: 22px 16px; border: 2px solid var(--tinta); border-radius: 10px;
-  background: var(--papel); display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-shadow: 6px 6px 0 var(--tinta);
+  background: var(--papel); display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-shadow: 6px 6px 0 var(--sombra);
 }
 .ob-hoja i { height: 7px; border-radius: 4px; background: var(--linea); }
 .ob-hoja i:first-child { background: #0A66C2; }
 .ob-scan {
   position: absolute; left: 0; right: 0; height: 34px; top: -34px;
-  background: linear-gradient(to bottom, transparent, rgba(36, 71, 249, .28), transparent);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--acento) 28%, transparent), transparent);
   border-bottom: 2px solid var(--acento); animation: ob-escanear 1.6s ease-in-out infinite;
 }
 @keyframes ob-escanear { from { top: -34px; } to { top: 100%; } }
@@ -69,7 +69,9 @@
 /* La ficha del gemelo */
 .ob-ficha {
   display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 18px;
-  background: var(--sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
+  background: var(--sol); color: var(--sobre-sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
+  /* superficie amarilla: tinta oscura y blanco adentro también en modo oscuro */
+  --tinta: #1D1E22; --media: #2A2B30; --suave: #3A3B40; --papel: #FFFFFF; --niebla: #F2F2EF; --acento: #2447F9; --sombra: #1D1E22;
 }
 .ob-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .ob-tag { animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both; background: var(--papel); }

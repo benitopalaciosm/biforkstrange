@@ -194,7 +194,7 @@ function OpcionConGemelos({
 }
 
 /** Un color por opción: la base siempre naranja; las demás en este orden. El gris es el empate. */
-const COLORES = ["var(--jg-mas)", "var(--acento)", "var(--vida)", "#7C5CD6", "#0E9AA7"];
+const COLORES = ["var(--jg-mas)", "var(--acento)", "var(--vida)", "var(--violeta)", "var(--turquesa)"];
 export function coloresDe(comparadas: OpcionComparada[]): Record<string, string> {
   const salida: Record<string, string> = {};
   let i = 0;
