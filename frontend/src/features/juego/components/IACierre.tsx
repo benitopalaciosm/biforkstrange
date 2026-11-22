@@ -25,18 +25,20 @@ export function IACierre({ ia, elegida, nombreElegida }: { ia: CierreIA; elegida
           ))}
         </div>
       )}
-      <Meta>Quién dice qué</Meta>
-      <Stack gap={8}>
-        {ia.voces.map((v) => (
-          <div className="jg-ia-voz" key={v.quien}>
-            <Text size="sm">
-              <b>{v.quien}</b> <i className="jg-chico">({v.tipo})</i>: {v.dice}{" "}
-              <a href={v.url} target="_blank" rel="noreferrer" className="jg-chico">Fuente</a>
-            </Text>
-          </div>
-        ))}
-      </Stack>
-      <Text size="sm" className="jg-chico">{ia.fuera_del_juego}</Text>
+      <details>
+        <summary className="jg-ayuda">Quién dice qué de la IA ({ia.voces.length} fuentes)</summary>
+        <Stack gap={8} className="jg-vivido">
+          {ia.voces.map((v) => (
+            <div className="jg-ia-voz" key={v.quien}>
+              <Text size="sm">
+                <b>{v.quien}</b> <i className="jg-chico">({v.tipo})</i>: {v.dice}{" "}
+                <a href={v.url} target="_blank" rel="noreferrer" className="jg-chico">Fuente</a>
+              </Text>
+            </div>
+          ))}
+          <Text size="sm" className="jg-chico">{ia.fuera_del_juego}</Text>
+        </Stack>
+      </details>
     </Stack>
   );
 }
