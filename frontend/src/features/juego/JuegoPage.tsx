@@ -1,6 +1,7 @@
 import "./juego.css";
 import { useEffect, useRef, useState } from "react";
 import { Button, Heading, Screen, ScreenFooter, Stack, Text } from "@/shared/ui";
+import { AnioTranquilo } from "./components/AnioTranquilo";
 import { Carta } from "./components/Carta";
 import { CierrePantalla } from "./components/Cierre";
 import { ComoFunciona } from "./components/ComoFunciona";
@@ -82,6 +83,9 @@ function Fase({
     return (
       <DudaPicker fuentes={j.fuentes} origenSugeridas={j.origenSugeridas} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} />
     );
+  }
+  if (j.fase === "carta" && j.vista?.pendiente?.decision === "anio_tranquilo") {
+    return <AnioTranquilo vista={j.vista} cargando={j.cargando} error={j.error} onElegir={j.elegir} />;
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
     return (

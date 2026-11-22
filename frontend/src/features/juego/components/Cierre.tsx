@@ -67,7 +67,8 @@ function Recorrido({ historia }: { historia: Anio[] }) {
 function resumenDelAnio(a: Anio): string {
   const partes: string[] = [];
   // las que elegiste tú; los sorteos automáticos (a qué empleador entras) no van en el resumen
-  for (const d of a.decisiones) if (d.opcion !== "sorteo") partes.push(`${d.opcion_nombre}: ${d.texto}`);
+  // un año tranquilo no va en el resumen: si buscaste algo, ya aparece la decisión que abriste
+  for (const d of a.decisiones) if (d.opcion !== "sorteo" && d.decision !== "anio_tranquilo") partes.push(`${d.opcion_nombre}: ${d.texto}`);
   for (const e of a.eventos) if (!e.rutina) partes.push(e.texto);
   if (partes.length === 0) partes.push("Un año sin noticias.");
   return `${partes.join(" ")}${a.fin ? ` Cierras con: ${cargoYSueldo(a.fin, true)}.` : ""}`;
@@ -137,7 +138,7 @@ export function CierrePantalla({
           <Abanico puntos={elegida.trayectoria} hoy={{ edad: edadInicial, sueldo: sueldoInicial }} tu={recorrido} alto={190} />
           <Info pregunta="¿Cómo leo este gráfico?">
             La línea amarilla es tu sueldo. La franja celeste va del 10% al 90% de los {primera.comparacion.gemelos} mundos donde elegiste «{elegida.nombre}», y
-            la línea azul es la mediana. Si tu línea sale de la franja, te fue mejor (o peor) que a casi todos tus gemelos, por tu dado o por tus
+            la línea azul es la mediana. Si tu línea sale de la franja, te fue mejor (o peor) que a casi todas tus copias, por tu dado o por tus
             decisiones de después.
           </Info>
           <Meta>Sueldo final por opción · 10% a 90%</Meta>
@@ -171,8 +172,8 @@ export function CierrePantalla({
             ))}
           </Stack>
           <Info pregunta="¿Es justa la comparación?">
-            No del todo: tú tomaste más decisiones en estos 10 años. Tus gemelos solo tomaron la primera y después dejaron que la vida siguiera sin
-            buscar más cambios.
+            No del todo. En esos mundos tus copias tomaron la primera decisión como tú, y después decidieron lo que les fue llegando como decide
+            la gente real. Tú decidiste el resto a tu manera.
           </Info>
         </Stack>
       )}

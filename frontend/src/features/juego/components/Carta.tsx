@@ -60,9 +60,10 @@ export function contraBase(c: ContraBase, base: OpcionComparada | undefined, con
 /** Por qué te tocó esta decisión, en dos o tres palabras: va junto al nombre de la carta. */
 function porQueCorto(p: PorQue | undefined): string | null {
   if (!p) return null;
-  if (p.tipo === "sorteo") return "salió al azar";
   if (p.tipo === "obligada") return "por tu situación";
   if (p.tipo === "elegida") return "la elegiste tú";
+  if (p.tipo === "llega") return "te llegó sin buscarla";
+  if (p.tipo === "buscada") return "la buscaste tú";
   return "por algo que te pasó";
 }
 
@@ -803,11 +804,6 @@ export function Carta({
                   {ev.cifra}
                 </Text>
               ))}
-              {pendiente.por_que?.tipo === "sorteo" && (
-                <span className="jg-chico">
-                  Salió al azar: {Math.max(1, Math.round(pendiente.por_que.prob * 100))} de 100, entre {pendiente.por_que.posibles} cartas posibles.
-                </span>
-              )}
             </Stack>
           </details>
         </Stack>
