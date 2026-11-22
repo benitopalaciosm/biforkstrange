@@ -626,6 +626,8 @@ export function Carta({
   // los mundos se muestran después de apostar (o saltarse la apuesta) en esta carta
   const [vistoEn, setVistoEn] = useState<string | null>(null);
   const revelado = !ganadores || vistoEn === llave;
+  /** "Lo que vale cada línea de tu CV" solo tiene sentido si hubo CV o tu Claude: sin ellos, no hay líneas tuyas. */
+  const conFuentes = fuentes !== null && Object.values(fuentes).some((f) => f === "cv" || f === "claude");
 
   return (
     <Screen gap={16} className={comparadas.length > 4 ? "jg-ancha jg-muy-ancha" : "jg-ancha"}>
@@ -790,7 +792,7 @@ export function Carta({
               />
             </ApuestaAntesDeMirar>
           )}
-          {partida && pendiente.por_que?.tipo === "elegida" && (
+          {partida && pendiente.por_que?.tipo === "elegida" && revelado && conFuentes && (
             <PesoDelCv perfil={partida.perfil} duda={pendiente.decision} semilla={partida.semilla} />
           )}
           <section className="jg-seccion" key={`abanico:${foco.opcion}`}>
