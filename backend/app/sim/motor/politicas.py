@@ -235,11 +235,11 @@ def _tipo_institucion(opcion: Opcion) -> str | None:
 def _universidad(f: dict) -> str:
     """Nombre corto para el selector: sigla o nombre, arancel y si es selectiva.
 
-    El arancel dice que es arancel y va en millones: al lado de los sueldos de la carta, "$8.546.030 al año"
+    El arancel dice que es arancel y va en millones, escrito como los textos del paquete ("$9 millones"): al lado de los sueldos de la carta, "$8.546.030 al año"
     se leía como lo que ibas a ganar."""
     nombre = f["sigla"] or f["universidad"].replace("Universidad ", "U. ")
     millones = f"{float(f['arancel_anual']) / 1e6:.1f}".replace(".", ",")
-    return f"{nombre} · arancel ${millones} M al año" + (" · selectiva" if f["selectiva"] == "1" else "")
+    return f"{nombre} · arancel ${millones} millones al año" + (" · selectiva" if f["selectiva"] == "1" else "")
 
 
 _USADAS: dict[int, frozenset[str]] = {}

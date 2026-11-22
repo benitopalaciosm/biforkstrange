@@ -134,7 +134,7 @@ def test_comparacion_de_la_pendiente(client):
     assert len(bases) == 1 and bases[0]["opcion"] == comp["base"]
     for o in comp["opciones"]:
         s = o["sueldo"]
-        assert 0 < s["p10"] <= s["p50"] <= s["p90"]
+        assert 0 <= s["p10"] <= s["p50"] <= s["p90"] and s["p90"] > 0  # 0: terminó sin trabajo
         assert o["ingreso_total"]["p10"] <= o["ingreso_total"]["p50"] <= o["ingreso_total"]["p90"]
         for fraccion in ("paso_por_cesantia", "sin_trabajo_al_final"):
             assert 0 <= o[fraccion] <= 1

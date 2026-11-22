@@ -109,7 +109,9 @@ def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dic
         for o in comparacion["opciones"]:
             sueldos = o.pop("sueldos")
             if o["opcion"] == elegida:
-                cierre["mejor_que_gemelos"] = sum(1 for x in sueldos if x < cierre["sueldo_final"]) / len(sueldos)
+                # se compara lo que ganas al final (0 si terminas sin trabajo), igual que entre los gemelos
+                hoy = partida.vida.sueldo_al_final()
+                cierre["mejor_que_gemelos"] = sum(1 for x in sueldos if x < hoy) / len(sueldos)
         cierre["primera_decision"] = {"decision": comparacion["decision"], "pregunta": comparacion["pregunta"],
                                       "elegida": elegida, "comparacion": comparacion}
     return cierre

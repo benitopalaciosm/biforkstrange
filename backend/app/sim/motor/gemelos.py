@@ -110,11 +110,11 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
         return None
 
     base = opcion_base(decision, opciones)
-    sueldos_base = [round(v.sueldo_o_ultimo()) for v in finales[base]]
+    sueldos_base = [round(v.sueldo_al_final()) for v in finales[base]]
     salida = []
     for o in opciones:
         vidas = finales[o.id]
-        sueldos = [round(v.sueldo_o_ultimo()) for v in vidas]  # en pesos, igual que la trayectoria
+        sueldos = [round(v.sueldo_al_final()) for v in vidas]  # en pesos, igual que la trayectoria
         niveles = Counter(v.e["nivel"] for v in vidas)
         es_base = o.id == base
         resultados = [primer_resultado(v) for v in vidas]
@@ -138,7 +138,7 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
                 break
             trayectoria.append({
                 "edad": round(median(f["edad"] for f in del_anio)),
-                **_rango([f["sueldo"] or f["sueldo_ref"] for f in del_anio]),
+                **_rango([f["sueldo"] for f in del_anio]),
                 "sin_trabajo": sum(1 for f in del_anio if f["estado"] == "buscando") / len(del_anio),
             })
         salida.append({
@@ -156,7 +156,7 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
             "trayectoria": trayectoria,
             **({"sueldos": sorted(round(x) for x in sueldos)} if crudo else {}),
         })
-    finales_por_mundo = [{o.id: finales[o.id][g].sueldo_o_ultimo() for o in opciones} for g in range(n)]
+    finales_por_mundo = [{o.id: finales[o.id][g].sueldo_al_final() for o in opciones} for g in range(n)]
     return {
         "decision": decision_id, "nombre": decision["nombre"], "pregunta": decision["pregunta"],
         "calidad": decision["calidad"], "creencia_vs_dato": decision.get("creencia_vs_dato"),
@@ -211,9 +211,9 @@ def mundo(vida: Vida, decision_id: str, numero: int, *, anios: int = HORIZONTE, 
         "ia": {"adopcion": round(next(iter(vidas.values()))[1].e.get("ia_adopcion", 0.5), 3),
                "escenario": escenario_ia(next(iter(vidas.values()))[1].e.get("ia_adopcion", 0.5)),
                "castigo_joven": round(next(iter(vidas.values()))[1].e.get("ia_castigo_joven", 0.81), 3)},
-        "ganador": _ganador({k: v.sueldo_o_ultimo() for k, (_, v) in vidas.items()}),
+        "ganador": _ganador({k: v.sueldo_al_final() for k, (_, v) in vidas.items()}),
         "opciones": [
-            {"opcion": o.id, "nombre": o.nombre, "sueldo_final": round(v.sueldo_o_ultimo()), "estado_final": v.e["estado"],
+            {"opcion": o.id, "nombre": o.nombre, "sueldo_final": round(v.sueldo_al_final()), "estado_final": v.e["estado"],
              "empresa_final": v.resumen()["empresa"], "rol_final": v.resumen()["rol"],
              "anios": _anios_vividos(v, anio0, antes)}
             for o, v in vidas.values()

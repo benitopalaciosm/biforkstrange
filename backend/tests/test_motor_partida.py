@@ -189,11 +189,12 @@ def test_vista_al_cierre():
     comparacion = primera["comparacion"]
     assert comparacion["gemelos"] == n(60) and all("sueldos" not in o for o in comparacion["opciones"])
     assert 0.0 <= c["mejor_que_gemelos"] <= 1.0
-    # mejor_que_gemelos: parte de los gemelos que eligieron lo mismo y terminaron con menos sueldo
+    # mejor_que_gemelos: parte de los gemelos que eligieron lo mismo y terminaron con menos sueldo. Se compara lo
+    # que ganas al final (0 si terminas sin trabajo), no el último sueldo que muestra el cierre
     detenida = partida.jugar(Perfil(), 3, [], duda="unirse_a_startup").vida  # el punto en que se decidió
     cruda = gemelos.comparar(detenida, "unirse_a_startup", n=n(60), semilla=3, crudo=True)
     sueldos = next(o["sueldos"] for o in cruda["opciones"] if o["opcion"] == "ir")
-    assert c["mejor_que_gemelos"] == pytest.approx(sum(1 for s in sueldos if s < c["sueldo_final"]) / n(60))
+    assert c["mejor_que_gemelos"] == pytest.approx(sum(1 for s in sueldos if s < c["estado"]["sueldo"]) / n(60))
 
 
 def test_vista_al_cierre_sin_elecciones_no_inventa_comparacion():
@@ -442,3 +443,12 @@ def test_la_historia_no_mueve_los_numeros():
         for d in a["decisiones"]:
             d.pop("narrativa", None)
     assert [a["fin"] for a in con["historia"]] == [a["fin"] for a in sin["historia"]]
+
+
+def test_terminar_sin_trabajo_cuenta_cero_en_la_comparacion():
+    """Antes, una copia que terminaba cesante contaba con su último sueldo y empataba con una que seguía
+    empleada. Ahora cuenta lo que gana al final: 0."""
+    c = gemelos.comparar(_al_inicio(), "unirse_a_startup", n=n(60), anios=5, semilla=2, crudo=True)
+    for o in c["opciones"]:
+        sin_trabajo = round(o["sin_trabajo_al_final"] * len(o["sueldos"]))
+        assert sum(1 for s in o["sueldos"] if s == 0) >= sin_trabajo
