@@ -9,7 +9,7 @@ import { Logo } from "./Logo";
 import { BarraPartes, Info, ProgresoAnios, sinMovimiento, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo, Salir } from "./piezas";
 import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -886,7 +886,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
@@ -896,6 +896,8 @@ export function Carta({
   onReintentar?: () => void;
   onNarrar?: Narrar;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
+  /** Volver a la portada sin perder la partida. */
+  onSalir?: () => void;
   vista: Vista;
   riesgo: number;
   cargando: boolean;
@@ -1013,7 +1015,7 @@ export function Carta({
 
   return (
     <Screen gap={16}>
-      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
+      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
       {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
       {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
@@ -1022,26 +1024,30 @@ export function Carta({
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
-      <Text size="sm">
-        <strong>Hoy:</strong>{" "}
-        {sinSueldo(e) ? (
-          `${situacion(e.estado)} · antes ${plata(e.sueldo_ref)}`
-        ) : (
-          <>
-            {e.rol || e.cargo}
-            {e.empresa && (
-              <>
-                {" en "}
-                {e.empresa}{" "}
-                <span className="jg-hoy-logo">
-                  <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
-                </span>
-              </>
-            )}
-            {` · ${plata(e.sueldo)}/mes`}
-          </>
-        )}
-      </Text>
+      <div className="jg-hoy">
+        <Text size="sm">
+          <strong>Hoy:</strong>{" "}
+          {sinSueldo(e) ? (
+            situacion(e.estado)
+          ) : (
+            <>
+              {e.rol || e.cargo}
+              {e.empresa && (
+                <>
+                  {" en "}
+                  {e.empresa}{" "}
+                  <span className="jg-hoy-logo">
+                    <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
+                  </span>
+                </>
+              )}
+            </>
+          )}
+        </Text>
+        <Text size="sm" className="jg-hoy-sueldo">
+          {sinSueldo(e) ? `Antes ganabas ${plata(e.sueldo_ref)}/mes` : `${plata(e.sueldo)}/mes`}
+        </Text>
+      </div>
       <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>

@@ -110,6 +110,15 @@ export function AvisoPerfil({ fuentes }: { fuentes: Record<string, string> | nul
   );
 }
 
+/** Salir de la partida: vuelve a la portada, donde se puede continuar o empezar otra. La partida no se borra. */
+export function Salir({ onSalir }: { onSalir: () => void }) {
+  return (
+    <button type="button" className="jg-ayuda jg-salir" onClick={onSalir}>
+      Salir
+    </button>
+  );
+}
+
 /** Algo que pasó en el año. Es la <Notification> del kit, con el texto completo en vez de cortado. */
 export function Noticia({ titulo, texto, lado, className }: { titulo: string; texto: string; lado?: string; className?: string }) {
   return (
