@@ -4,6 +4,64 @@ import type { Anio, Rango, Vista } from "../types";
 import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { CompartirResultado } from "./Compartir";
+import { Logo } from "./Logo";
+
+type Tramo = { titulo: string; empresa: string | null; empresaId: number | null; rubro: string; desde: number; hasta: number; sueldo: number };
+
+/** Tu recorrido como en un perfil laboral: los años seguidos en el mismo cargo y la misma empresa son un tramo. Lo último arriba. */
+function recorridoLaboral(historia: Anio[]): Tramo[] {
+  const tramos: Tramo[] = [];
+  for (const a of historia) {
+    const f = a.fin;
+    if (!f) continue;
+    const trabaja = !sinSueldo(f);
+    const titulo = trabaja ? f.rol || f.cargo : situacion(f.estado);
+    const empresa = trabaja ? f.empresa ?? null : null;
+    const ultimo = tramos.at(-1);
+    if (ultimo && ultimo.titulo === titulo && ultimo.empresa === empresa) {
+      ultimo.hasta = f.edad;
+      ultimo.sueldo = f.sueldo;
+    } else {
+      const empresaId = empresa && (f.empresa_id ?? -1) >= 0 ? f.empresa_id! : null;
+      tramos.push({ titulo, empresa, empresaId, rubro: f.rubro, desde: a.edad, hasta: f.edad, sueldo: f.sueldo });
+    }
+  }
+  return tramos.reverse();
+}
+
+function Recorrido({ historia }: { historia: Anio[] }) {
+  const tramos = recorridoLaboral(historia);
+  if (tramos.length === 0) return null;
+  return (
+    <Stack as="section" gap={10}>
+      <Heading level={3} as="h2">
+        Tu recorrido
+      </Heading>
+      <ol className="jg-recorrido">
+        {tramos.map((t, i) => {
+          const anios = Math.max(1, t.hasta - t.desde);
+          return (
+            <li key={i} className="jg-tramo">
+              {t.empresa ? (
+                <Logo carpeta="empresas" id={t.empresaId ?? t.empresa} nombre={t.empresa} grupo={t.rubro} hay={t.empresaId !== null} tamano={40} />
+              ) : (
+                <span className="jg-tramo-vacio" aria-hidden="true" />
+              )}
+              <div className="jg-tramo-texto">
+                <strong>{t.titulo}</strong>
+                {t.empresa && <span>{t.empresa}</span>}
+                <Meta>
+                  {t.desde} a {t.hasta} años · {anios} {anios === 1 ? "año" : "años"}
+                  {t.sueldo > 0 && ` · ${plata(t.sueldo)}/mes`}
+                </Meta>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </Stack>
+  );
+}
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
 function resumenDelAnio(a: Anio): string {
@@ -120,6 +178,8 @@ export function CierrePantalla({
       )}
       {!primera && <Text size="sm">Tu primera decisión no se pudo simular: no hay con quién compararte.</Text>}
 
+
+      <Recorrido historia={vista.historia} />
 
       <Stack as="section" gap={10}>
         <Heading level={3} as="h2">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, plata, primeraFrase, sinSueldo } from "../textos";
+import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, conSigno, plata, primeraFrase, sinSueldo, situacion } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
@@ -539,13 +539,6 @@ export function Carta({
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
   // la situación y las ofertas que escribe Claude se muestran cuando llegan, nunca antes la plantilla
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
-  // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
-  const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
-  const quienEscribe = oferta
-    ? { id: oferta.empresa_id, nombre: oferta.nombre, rubro: oferta.rubro, logo: oferta.logo }
-    : vista.estado.empresa && (vista.estado.empresa_id ?? -1) >= 0
-      ? { id: vista.estado.empresa_id!, nombre: vista.estado.empresa, rubro: vista.estado.rubro, logo: true }
-      : null;
 
   useEffect(() => {
     setSel(null);
@@ -655,10 +648,15 @@ export function Carta({
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
-      <Text size="sm">
-        <strong>Hoy:</strong> {cargoYSueldo(e, true)}
-        {sinSueldo(e) ? ` · antes ${plata(e.sueldo_ref)}` : "/mes"}
-      </Text>
+      <Row gap={8} style={{ alignItems: "center" }}>
+        {!sinSueldo(e) && e.empresa && (
+          <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={28} />
+        )}
+        <Text size="sm">
+          <strong>Hoy:</strong> {sinSueldo(e) ? situacion(e.estado) : `${e.rol || e.cargo}${e.empresa ? ` en ${e.empresa}` : ""} · ${plata(e.sueldo)}`}
+          {sinSueldo(e) ? ` · antes ${plata(e.sueldo_ref)}` : "/mes"}
+        </Text>
+      </Row>
       <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>
@@ -667,10 +665,7 @@ export function Carta({
           {porQueCorto(pendiente.por_que) && ` · ${porQueCorto(pendiente.por_que)}`}
         </Meta>
         {pendiente.narrativa && listo && (
-          <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
-            {quienEscribe && (
-              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={40} />
-            )}
+          <div className="jg-mensaje" key={llave}>
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />
               <i />
