@@ -97,11 +97,12 @@ function Fase({
         onReintentar={j.reintentar}
         onComparar={j.compararCon}
         onVerMundo={j.verMundo}
+        onSalir={j.irAInicio}
         onNarrar={j.narrar}
       />
     );
   }
-  if (j.fase === "paso" && j.vista) return <QuePaso previa={j.previa} vista={j.vista} sueldoInicial={sueldoInicial} onSeguir={j.seguir} onNarrar={j.narrar} />;
+  if (j.fase === "paso" && j.vista) return <QuePaso previa={j.previa} vista={j.vista} sueldoInicial={sueldoInicial} onSeguir={j.seguir} onNarrar={j.narrar} onSalir={j.irAInicio} />;
   if (j.fase === "cierre" && j.vista?.cierre)
     return (
       <CierrePantalla

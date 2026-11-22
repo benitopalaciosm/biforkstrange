@@ -4,7 +4,7 @@ import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
 import { Info, LineaSueldo, Ruleta, sinMovimiento, type Casilla } from "./graficos";
-import { Noticia, Pensando } from "./piezas";
+import { Noticia, Pensando, Salir } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
 export function loNuevo(previa: Vista | null, vista: Vista): Anio[] {
@@ -69,12 +69,14 @@ function Quedaste({ antes, ahora, recorrido, espera }: { antes: Estado | undefin
  * Viene de "4 · Work and travel" / "5 · Las noches largas" (resultado del año) y "6 · Años sin decidir" (años que pasan) del kit.
  */
 export function QuePaso({
-  previa, vista, sueldoInicial, onSeguir, onNarrar,
+  previa, vista, sueldoInicial, onSeguir, onNarrar, onSalir,
 }: {
   previa: Vista | null;
   vista: Vista;
   sueldoInicial: number;
   onSeguir: () => void;
+  /** Volver a la portada sin perder la partida. */
+  onSalir?: () => void;
   /** Los eventos de cada año contados por Claude; sin él (o si falla) queda el texto del paquete. */
   onNarrar?: (que: "historia", signal: AbortSignal) => Promise<{ items: Narrado[] }>;
 }) {
@@ -112,7 +114,7 @@ export function QuePaso({
     <Screen tone={noche ? "noche" : "dia"} gap={16} className="jg-quepaso" key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>
       <ScreenHeader
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
-        right={<Meta>Mundo {GEMELOS + 1}</Meta>}
+        right={onSalir && <Salir onSalir={onSalir} />}
       />
       <h1 className="vd-sr">{dado ? `Qué te pasó al elegir «${dado.opcion_nombre}»` : "Qué te pasó"}</h1>
 

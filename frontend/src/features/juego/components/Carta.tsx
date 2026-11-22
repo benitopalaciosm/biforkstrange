@@ -9,7 +9,7 @@ import { Logo } from "./Logo";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo, Salir } from "./piezas";
 import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -510,7 +510,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
@@ -520,6 +520,8 @@ export function Carta({
   onReintentar?: () => void;
   onNarrar?: Narrar;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
+  /** Volver a la portada sin perder la partida. */
+  onSalir?: () => void;
   vista: Vista;
   riesgo: number;
   cargando: boolean;
@@ -637,7 +639,7 @@ export function Carta({
 
   return (
     <Screen gap={16}>
-      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
+      <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
       {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
       {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
