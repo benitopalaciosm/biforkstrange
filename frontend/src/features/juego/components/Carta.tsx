@@ -221,7 +221,7 @@ function OpcionConGemelos({
           {ganadas !== null && (
             <span className="jg-marcador" data-lider={lider}>
               <span className="jg-marcador-num">
-                <b>{ganadas}</b> de {de} mundos es la mejor
+                {ganadas === 0 ? "En ningún mundo es la mejor" : <><b>{ganadas}</b> de {de} mundos es la mejor</>}
               </span>
               <MiniMundos ganadas={ganadas} total={de} color={color} />
             </span>
@@ -514,7 +514,13 @@ function MundoAbierto({
     comunes.push(sinRepetir(listas[0] ?? []).filter((x) => listas.every((l) => l.some((y) => claveSuceso(y) === claveSuceso(x)))));
   }
   // lo que se muestra como "del mundo" son solo los eventos: que dos copias decidan lo mismo un año no es suerte compartida
-  const eventosDelMundo: Suceso[][] = comunes.map((l) => l.filter((x) => x.tipo === "evento"));
+  // la recesión no viene como suceso sino como marca del año: se suma aquí para que la lista diga lo mismo que el gráfico
+  const RECESION: Suceso = { tipo: "evento", nombre: "Recesión", texto: "Recesión en el país.", tono: "malo" };
+  const eventosDelMundo: Suceso[][] = comunes.map((l, i) => {
+    const eventos = l.filter((x) => x.tipo === "evento");
+    const recesion = vidas.some((v) => v.anios[i]?.recesion) && !eventos.some((x) => x.nombre === RECESION.nombre);
+    return recesion ? [RECESION, ...eventos] : eventos;
+  });
   const esComun = (i: number, x: Suceso) => eventosDelMundo[i].some((y) => claveSuceso(y) === claveSuceso(x));
   const anioDe = (i: number) => anioInicial + i;
   const delMundo = eventosDelMundo.map((l, i) => ({ i, l })).filter((x) => x.l.length > 0);
@@ -523,19 +529,15 @@ function MundoAbierto({
     opcion: v.opcion,
     nombre: v.nombre,
     color: colores[v.opcion],
-    puntos: v.anios.filter((a) => a.fin).map((a) => ({ edad: a.edad, sueldo: a.fin!.estado === "buscando" ? 0 : a.fin!.sueldo })),
+    // la edad al cerrar el año, como en el resto del juego: con la de partida el último punto quedaba en 39 y no en 40
+    puntos: v.anios.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.estado === "buscando" ? 0 : a.fin!.sueldo })),
   }));
-  const recesiones = (vidas[0]?.anios ?? []).filter((a) => a.recesion).map((a) => a.edad);
+  const recesiones = (vidas[0]?.anios ?? []).filter((a) => a.recesion).map((a) => a.fin?.edad ?? a.edad + 1);
 
   return (
     <div className="jg-mundo" role="region" aria-label={`Mundo ${mundo.mundo + 1}`} key={mundo.mundo}>
       <div className="jg-mundo-cabeza">
         <span className="jg-fuerte">Mundo {mundo.mundo + 1}</span>
-        {mundo.ia && (
-          <span className="jg-chip-ia" title="Cada mundo sortea qué tan rápido llega la IA, dentro del rango medido por Brynjolfsson y otros (2025).">
-            La IA llega {ESCENARIO_IA[mundo.ia.escenario]}
-          </span>
-        )}
         <span className="jg-mundo-acciones">
           {onOtro && (
             <button type="button" className="jg-ayuda" onClick={onOtro}>
@@ -572,8 +574,14 @@ function MundoAbierto({
 
       <div className="jg-mundo-comun">
         <span className="jg-chico">Lo que pasa en este mundo con cualquier opción</span>
+        {/* la IA va aquí y no como chip suelto: así "sin sorpresas" no la contradice */}
+        {mundo.ia && (
+          <span className="jg-chico" title="Cada mundo sortea qué tan rápido llega la IA, dentro del rango medido por Brynjolfsson y otros (2025).">
+            La IA llega {ESCENARIO_IA[mundo.ia.escenario]}: cada mundo sortea a qué ritmo cambia el trabajo.
+          </span>
+        )}
         {delMundo.length === 0 ? (
-          <span className="jg-chico">Nada fuera de lo normal: sin recesión ni sorpresas.</span>
+          <span className="jg-chico">{mundo.ia ? "Fuera de eso, ni recesión ni sorpresas." : "Ni recesión ni sorpresas."}</span>
         ) : (
           <ol className="jg-mundo-anios">
             {delMundo.map(({ i, l }) => (
@@ -797,13 +805,14 @@ function Simulacion({
           {comparadas.map((o) => (
             <span key={o.opcion}>
               <i style={{ background: colores[o.opcion] }} />
-              {o.nombre} gana en <b>{cuenta.get(o.opcion) ?? 0}</b> mundos
+              {/* el número primero, para que encolumne; el nombre entre comillas, para que «No» no se lea como negación */}
+              <b>{cuenta.get(o.opcion) ?? 0}</b> mundos: gana «{o.nombre}»
             </span>
           ))}
           {empates > 0 && (
             <span>
               <i data-tipo="igual" />
-              Empate en <b>{empates}</b> mundos
+              <b>{empates}</b> mundos: empate
             </span>
           )}
         </span>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
+import { deCien } from "../textos";
 import type { Eleccion, Vista } from "../types";
-import { Salir } from "./piezas";
+import { Noticia, Salir } from "./piezas";
 
 /**
  * Un año en que no te llegó nada. No te obliga a decidir ni te pone una lista: te hace una propuesta,
@@ -21,17 +22,31 @@ export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir }: {
   const anio = Math.min(vista.anio + 1, vista.anios);
   const otras = p.opciones.filter((o) => o.opcion !== "seguir" && o.opcion !== s?.decision);
   const elegir = (opcion: string) => onElegir({ decision: p.decision, opcion });
+  // lo que ya pasó este año sin que lo eligieras (una recesión, un ascenso): no es un año "sin sobresaltos"
+  const eventos = (vista.anio_en_curso?.eventos ?? []).filter((e) => !e.rutina);
 
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
       <Stack gap={8} className="vd-subir">
-        <Meta>Un año tranquilo</Meta>
+        <Meta>{eventos.length > 0 ? "Sin propuestas" : "Un año tranquilo"}</Meta>
         <Heading level={2} as="h1">
-          Un año sin sobresaltos.
+          {eventos.length > 0 ? "No te llegó ninguna propuesta." : "Un año sin sobresaltos."}
         </Heading>
-        <Text>No te llegó ninguna propuesta. Puedes seguir igual, o mirar algo por tu cuenta.</Text>
+        <Text>
+          {eventos.length > 0
+            ? "Pero el año trae esto. Puedes seguir igual, o mirar algo por tu cuenta."
+            : "No te llegó ninguna propuesta. Puedes seguir igual, o mirar algo por tu cuenta."}
+        </Text>
       </Stack>
+
+      {eventos.length > 0 && (
+        <Stack gap={8} className="vd-subir">
+          {eventos.map((e, i) => (
+            <Noticia key={i} titulo={e.nombre} texto={e.texto} lado={e.directo ? undefined : deCien(e.prob)} />
+          ))}
+        </Stack>
+      )}
 
       {/* La sugerencia es opcional: va como una idea suave, no como la acción principal */}
       {s && (

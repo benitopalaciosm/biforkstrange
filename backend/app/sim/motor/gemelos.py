@@ -185,7 +185,7 @@ def _anios_vividos(v: Vida, anio0: int, antes: tuple[int, int]) -> list[dict]:
                 *({"tipo": "evento", "nombre": e["nombre"], "texto": e["texto"], "tono": e["tono"]}
                   for e in eventos if not e.get("rutina")),
             ],
-            "fin": None if fin is None else {"sueldo": fin["sueldo"], "sueldo_ref": fin["sueldo_ref"], "cargo": fin["cargo"],
+            "fin": None if fin is None else {"edad": fin["edad"], "sueldo": fin["sueldo"], "sueldo_ref": fin["sueldo_ref"], "cargo": fin["cargo"],
                                              "estado": fin["estado"], "tipo_empleador": fin["tipo_empleador"],
                                              "empresa": fin.get("empresa"), "rol": fin.get("rol"), "rubro": fin.get("rubro")},
         })

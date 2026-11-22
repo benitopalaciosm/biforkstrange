@@ -246,6 +246,8 @@ export type AnioMundo = {
   recesion: boolean;
   sucesos: Suceso[];
   fin: {
+    /** Edad al cerrar el año (una ronda puede durar más de un año). */
+    edad: number;
     sueldo: number; sueldo_ref: number; cargo: string; estado: string; tipo_empleador: string;
     empresa?: string | null; rol?: string | null; rubro?: string;
   } | null;
