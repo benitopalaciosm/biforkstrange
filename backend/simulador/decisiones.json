@@ -1600,6 +1600,11 @@
          "var": "empresa_anos",
          "op": "fija",
          "valor": 0
+        },
+        {
+         "var": "base_empresa",
+         "op": "fija",
+         "valor": 0
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -1838,6 +1843,11 @@
         },
         {
          "var": "empresa_anos",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "base_empresa",
          "op": "fija",
          "valor": 0
         }
@@ -3449,6 +3459,11 @@
          "var": "empresa_anos",
          "op": "fija",
          "valor": 0
+        },
+        {
+         "var": "base_empresa",
+         "op": "fija",
+         "valor": 0
         }
        ],
        "luego": "seguir_con_tu_empresa"
@@ -3574,7 +3589,7 @@
         {
          "var": "sueldo",
          "op": "fija",
-         "valor": "k('MICRO_MEDIANA') * azar_lognormal(0.3, 1, 4) * (1 + empresa_anos / 4)"
+         "valor": "si(base_empresa > 0, base_empresa, k('MICRO_MEDIANA')) * azar_lognormal(0.3, 1, 4) * (1 + empresa_anos / 4)"
         }
        ]
       },
@@ -3739,7 +3754,7 @@
     {
      "fuente": "ine_eme_2025",
      "cifra": "Mediana de $400 mil al mes",
-     "uso": "ingreso del fundador"
+     "uso": "ingreso de quien recién emprende"
     }
    ],
    "calidad": "mixto",

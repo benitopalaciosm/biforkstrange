@@ -1,21 +1,24 @@
 """Decisiones del modelo que tomó el equipo (ver `docs/motor/TICKETS.md`).
 
 1. El alza anual descuenta el ascenso promedio de la población, no el de la persona: ascender más paga.
+2. Al fundador que ya tenía empresa se le respeta su sueldo declarado; MICRO_MEDIANA es para quien recién emprende.
 """
 
 import math
+from dataclasses import replace
 
 import pytest
-from _motor_util import n, pq, vida
+from _motor_util import DadosGuion, Guion, n, pq, vida
 
 from app.sim.motor.azar import Dados
-from app.sim.motor.perfil import Perfil
+from app.sim.motor.perfil import Perfil, estado_inicial
 from app.sim.motor.politicas import Inercia
 
 # Literales de parametros.json (no se importan del código bajo prueba)
 ASCENSO_POBLACION = {"18-24": 0.056, "25-29": 0.061, "30-34": 0.061, "35-39": 0.055, "40-44": 0.05,
                      "45-49": 0.045, "50-54": 0.045}
 ALZA_ASCENSO_MEDIA = (0.05 + 0.1) / 2
+MICRO_MEDIANA = 400_000
 
 
 # ------------------------------------------------------------------ 1. ascender más paga
@@ -59,3 +62,49 @@ def test_quien_asciende_mas_termina_ganando_mas():
             diferencias.append(math.log(finales[1] / finales[0]))
     assert ascensos[1] > ascensos[0]
     assert sum(diferencias) / len(diferencias) > 0.01
+
+
+# ------------------------------------------------------------------ 2. el sueldo declarado del fundador
+FUNDADOR = Perfil(estado="fundador", empresa_anos=2, sueldo=1_400_000, tipo_empleador="")
+
+
+def _sueldo_sobrevive() -> str:
+    seguir = next(o for o in pq().decisiones["seguir_con_tu_empresa"]["opciones"] if o["id"] == "seguir")
+    sobrevive = next(r for r in seguir["resultados"] if r["id"] == "sobrevive")
+    return next(ef["valor"] for ef in sobrevive["efectos"] if ef["var"] == "sueldo")
+
+
+def test_el_fundador_parte_de_su_sueldo_declarado_y_no_de_la_mediana():
+    e = estado_inicial(FUNDADOR, pq())
+    assert e["base_empresa"] == pytest.approx(1_400_000 / (1 + 2 / 4))
+    assert estado_inicial(Perfil(), pq())["base_empresa"] == 0  # quien no es fundador no trae empresa
+    # con la misma suerte, su empresa gana lo que declaró sobre lo que gana la de un microemprendedor mediano
+    for g in range(10):
+        dado = lambda: Dados(0, g).flujo(0, "dec:seguir_con_tu_empresa:seguir:sobrevive")  # noqa: E731
+        suyo = pq().evaluar(_sueldo_sobrevive(), e, dado())
+        mediano = pq().evaluar(_sueldo_sobrevive(), {**e, "base_empresa": 0}, dado())
+        assert suyo / mediano == pytest.approx(1_400_000 / (1 + 2 / 4) / MICRO_MEDIANA)
+
+
+def test_el_primer_anio_el_fundador_gana_en_la_mediana_lo_que_declaro():
+    """Antes, declarar 1,4 o 4 millones daba lo mismo: unos 700 mil desde el primer año."""
+    for sueldo in (1_400_000, 4_000_000):
+        sueldos = []
+        for g in range(n(200)):
+            v = vida(replace(FUNDADOR, sueldo=sueldo), Dados(0, g))
+            v.vivir_anio(Guion({"seguir_con_tu_empresa": "seguir"}))
+            if v.historia[0]["decisiones"][0]["resultado"] == "sobrevive":
+                sueldos.append(v.e["sueldo"])
+        assert sorted(sueldos)[len(sueldos) // 2] == pytest.approx(sueldo, rel=0.15)
+
+
+def test_quien_recien_emprende_gana_como_un_microemprendedor_aunque_ya_haya_tenido_empresa():
+    """Partir una empresa nueva vuelve base_empresa a 0: su ganancia sale de MICRO_MEDIANA, no de la anterior."""
+    guion = Guion({"emprender": "emprender", "seguir_con_tu_empresa": "seguir"})
+    sueldos = []
+    for base in (0, 2_000_000):
+        v = vida(Perfil(edad=35), DadosGuion({"dec:seguir_con_tu_empresa:seguir": 0.0}), base_empresa=base)
+        v.vivir_anio(guion, carta="emprender")
+        assert v.e["estado"] == "fundador" and v.e["base_empresa"] == 0
+        sueldos.append(v.e["sueldo"])
+    assert sueldos[0] == sueldos[1] > 0

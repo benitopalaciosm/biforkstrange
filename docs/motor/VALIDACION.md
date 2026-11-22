@@ -20,10 +20,12 @@ Reproducir, desde `backend/`: `python -m app.sim.motor.validacion [n] [semilla]`
    |---|---|---|---|
    | Antes | 33 / 31 | 5 / 5 | 708 / 807 mil (−3% / +3%) |
    | 1. El alza anual descuenta el ascenso promedio (`ASCENSO_POBLACION`), no el tuyo | 33 / 31 | 5 / 5 | 707 / 805 mil (−3% / +3%) |
+   | 2. El fundador que ya tenía empresa parte de su sueldo declarado (`base_empresa`) | 33 / 31 | 5 / 5 | igual (la cohorte parte a los 18: nadie trae empresa) |
 
    ELSOC 5 de 6 no es nuevo: la salida de la cesantía a los 30-44 da 69,1% y 67,8% contra un techo de 67,7% (59,7 + 8), igual que antes de estos cambios.
 
    - **1.** En promedio el alza no cambia (el descuento promedio es el mismo), así que los sueldos de la cohorte se mueven menos de 1% y ninguna meta cambia. Lo que cambia es quién gana: con los mismos dados, el sueldo final medio con oficio 80 queda 2,0% sobre el de oficio 30 a 10 años (antes, 0,8%, y solo porque el piso de cero del alza corta la resta). `ASCENSO_POBLACION` es la `prob_ascenso` promedio de los años de empleado de esta cohorte por tramo de edad (0,045 a 0,061); `tests/test_motor_validacion.py` revisa que siga siendo el promedio.
+   - **2.** La validación da exactamente lo mismo: en la cohorte nadie parte con empresa y quien emprende sigue ganando según `MICRO_MEDIANA`. En el juego, un fundador con 2 años de empresa que declara 1,4 millones ganaba ~690 mil el primer año (mediana de 400 gemelos) y uno con 3 años que declara 4 millones, ~830 mil; ahora 1,40 y 4,00 millones, y desde ahí crecen con la regla de siempre (× (1 + años de empresa / 4), con la misma suerte del año).
 
 ## Cómo se midió
 
