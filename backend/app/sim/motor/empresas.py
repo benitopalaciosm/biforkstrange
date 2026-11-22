@@ -228,7 +228,8 @@ def sitio_empresa(origen: str) -> str:
 def _tipo_y_rubro(vida, decision_id: str, opcion_id: str) -> tuple[str, str | None] | None:
     """Con qué tipo de empleador y rubro termina la opción si sale bien; None si no lleva a un empleador.
 
-    Se lee de los efectos del primer resultado que emplea. Si el resultado sigue en `tipo_de_empleador`
+    Se lee del resultado principal (el primero): "Usarla para negociar" no trae la empresa, aunque uno de
+    sus resultados sea irte a ella. Si el resultado sigue en `tipo_de_empleador`
     (cesantía, oferta externa), se predice con los mismos dados que usará el motor: sus probabilidades son
     constantes del paquete, así que la predicción es exacta.
     """
@@ -236,7 +237,7 @@ def _tipo_y_rubro(vida, decision_id: str, opcion_id: str) -> tuple[str, str | No
     opcion = next((o for o in vida.opciones(decision_id) if o.id == opcion_id), None)
     if opcion is None:
         return None
-    for r in opcion.resultados:
+    for r in opcion.resultados[:1]:
         tipo, rubro, emplea = None, None, False
         for ef in r.get("efectos", []):
             v = str(ef.get("valor", ""))
