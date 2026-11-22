@@ -30,6 +30,7 @@ from pydantic import BaseModel, Field, ValidationError, create_model
 from app.services.claude_comun import ERRORES_API, ClaudeNoDisponible, cliente, traducir_error
 from app.services.claude_comun import hay_credenciales as _hay_credenciales
 from app.sim.motor.paquete import Paquete, paquete
+from app.sim.motor import empresas
 from app.sim.motor.empresas import universidades
 from app.sim.motor.perfil import NIVELES, prima_universidad
 
@@ -462,12 +463,15 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         inferido.append(f"{empresa['nombre']}: {empresa['tamano']}, {empresa['rubro']}, "
                         f"{empresa['trabajadores']} trabajadores según el SII.")
     final = PerfilIn(**perfil).model_dump()
+    # para mostrar su logo: la empresa del CV en el catálogo, si está (no mueve números: su empleo actual es neutro)
+    catalogo = empresas.buscar(pq, leido.empresa_actual) or (empresas.buscar(pq, empresa["nombre"]) if empresa else None)
     return {
         "perfil": final,
         "leido": leido.model_dump(),
         "supuestos": [{"campo": c, "nombre": nombres[c]} for c in supuestos],
         "inferido": inferido,
         "empresa": empresa,
+        "empresa_catalogo": {k: catalogo[k] for k in ("empresa_id", "nombre", "rubro", "logo")} if catalogo else None,
         "dudas_sugeridas": _sugeridas_posibles(leido.dudas_sugeridas, final, pq),
         "retrato": (leido.retrato or "").strip() or None,
     }
