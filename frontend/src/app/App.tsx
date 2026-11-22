@@ -23,7 +23,7 @@ function Ruta() {
   if (ruta.startsWith("/simulacion")) {
     return (
       <main style={{ fontFamily: "system-ui", maxWidth: 720, margin: "2rem auto", padding: "0 1rem" }}>
-        <h1>Agarrar la pala</h1>
+        <h1>Bifurca</h1>
         <p>
           <a href="/">Ir al juego</a> · <a href="/ui">Ver el kit de UI</a>
         </p>

@@ -1,12 +1,12 @@
-# Agarra la pala
+# Bifurca
 
-<img src="./project-logo.png" alt="Agarra la pala" width="200" />
+<img src="./project-logo.png" alt="Bifurca" width="200" />
 
-> ¿Me cambio de pega? ¿Hago el magíster? ¿Emprendo? Que la crisis existencial la tenga tu gemelo y no tú.
+> Simula tu próxima decisión de carrera en 100 vidas paralelas, con datos reales del trabajo en Chile, antes de tomarla.
 
 Track: Simulations · Platanus Hack 26 Santiago, team 32
 
-Las decisiones de carrera se toman una sola vez y nunca sabes cómo te habría ido con la otra. **Agarra la pala** se las pasa a tu gemelo digital: él prueba cada opción en 100 mundos distintos, con la misma suerte en todos, y recién ahí eliges tú.
+Las decisiones de carrera se toman una sola vez y nunca sabes cómo te habría ido con la otra. **Bifurca** es un simulador para ensayarlas antes: vive cada opción en 100 mundos paralelos con la misma suerte en todos, así que la diferencia entre caminos es efecto de la decisión y no del azar. Te muestra en cuántos mundos gana cada opción, el rango de sueldos posible y el riesgo de cesantía, y recién ahí eliges tú.
 
 ## Cómo funciona
 
