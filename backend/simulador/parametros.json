@@ -501,11 +501,11 @@
    "id": "P_BOOTCAMP_COLOCA",
    "valor": 0.6,
    "unidad": "probabilidad",
-   "descripcion": "Colocación tras un bootcamp. Las escuelas declaran 75% a 85% sin auditoría; se descuenta.",
-   "fuente": "bootcamps",
-   "calidad": "supuesto",
+   "descripcion": "Colocación en un trabajo del área tras un bootcamp pagado. Talento Digital (Chile, programa público, DIPRES 2024): 23% de los egresados declara un cargo tech en LinkedIn después del curso y, de los encuestados que encontraron trabajo, 30% lo hizo en su sub-área; CIRR (EE.UU., primer semestre 2016): 80% de colocación en el área a 3-6 meses. Las escuelas chilenas declaran 75% a 85% sin auditoría.",
+   "fuente": "dipres_talento_digital_2024",
+   "calidad": "mixto",
    "rango": [
-    0.4,
+    0.25,
     0.8
    ]
   },
