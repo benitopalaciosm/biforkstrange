@@ -121,6 +121,7 @@ const ARTE_DUDA: Record<string, DecisionArtKind> = {
   bootcamp: "laptop",
   remoto_para_afuera: "laptop",
   buscar_estando_empleado: "lupa",
+  volver_a_contrato: "lupa",
   cesantia: "lupa",
   invertir_en_red: "negociar",
   pedir_hibrido: "casa",

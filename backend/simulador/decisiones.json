@@ -1829,12 +1829,12 @@
     {
      "id": "informal",
      "nombre": "Trabajar informal mientras buscas",
-     "detalle": "Sin contrato ni cotizaciones. El asalariado informal gana 62% del formal.",
+     "detalle": "Sin contrato ni cotizaciones. Ganas como la mitad de quienes trabajan por su cuenta sin boleta a tu edad (ESI); puedes seguir buscando algo con contrato.",
      "resultados": [
       {
        "id": "trabaja",
        "prob": 1,
-       "texto": "Trabajas sin contrato mientras sigues postulando.",
+       "texto": "Trabajas sin contrato. Puedes seguir buscando algo con contrato.",
        "tono": "neutro",
        "efectos": [
         {
@@ -3515,6 +3515,113 @@
    "calidad": "mixto",
    "en_juego": null,
    "notas": "Nueva: el motor actual no modela el trabajo por cuenta propia; es la mayor brecha del benchmark (13% a 24% en Chile, 3% a 4% en el juego)."
+  },
+  {
+   "id": "volver_a_contrato",
+   "nombre": "Volver a un trabajo con contrato",
+   "categoria": "trabajo",
+   "pregunta": "¿Buscas un trabajo con contrato?",
+   "cuando": "estado == 'independiente'",
+   "aparicion": {
+    "tipo": "carta",
+    "peso": 0.03,
+    "proactiva": true
+   },
+   "opciones": [
+    {
+     "id": "buscar",
+     "nombre": "Buscar con contrato",
+     "detalle": "Sigues con tus clientes mientras postulas. Quien vuelve a un empleo suele entrar ganando menos que en su último trabajo con contrato.",
+     "resultados": [
+      {
+       "id": "encuentra",
+       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95), 0, 0.9)",
+       "texto": "Vuelves a un trabajo con contrato.",
+       "tono": "bueno",
+       "efectos": [
+        {
+         "var": "estado",
+         "op": "fija",
+         "valor": "'empleado'"
+        },
+        {
+         "var": "formal",
+         "op": "fija",
+         "valor": 1
+        },
+        {
+         "var": "sueldo",
+         "op": "fija",
+         "valor": "max(si(sueldo_ref > 0, sueldo_ref, tabla('esi_perfil_edad_edu', 'p50', 'educacion', edu, 'banda', banda7)) * azar_uniforme(0.78, 0.9), sueldo)"
+        },
+        {
+         "var": "antiguedad",
+         "op": "fija",
+         "valor": 0
+        },
+        {
+         "var": "animo",
+         "op": "suma",
+         "valor": "k('ANIMO_REEMPLEO')"
+        }
+       ],
+       "luego": "tipo_de_empleador"
+      },
+      {
+       "id": "nada",
+       "prob": "resto",
+       "texto": "No sale nada este año: sigues por tu cuenta.",
+       "tono": "neutro",
+       "efectos": [
+        {
+         "var": "energia",
+         "op": "suma",
+         "valor": -4
+        }
+       ]
+      }
+     ],
+     "fuentes": [
+      "eps_2024",
+      "couch_placzek_2010",
+      "equipo"
+     ],
+     "calidad": "mixto"
+    },
+    {
+     "id": "no",
+     "nombre": "Seguir por tu cuenta",
+     "detalle": "",
+     "resultados": [
+      {
+       "id": "no",
+       "prob": 1,
+       "texto": "Sigues por tu cuenta.",
+       "tono": "neutro",
+       "efectos": []
+      }
+     ],
+     "fuentes": [
+      "equipo"
+     ],
+     "calidad": "supuesto"
+    }
+   ],
+   "evidencia": [
+    {
+     "fuente": "eps_2024",
+     "cifra": "A los 12 meses de buscar, 70% de los cesantes de 18-44 años ya encontró trabajo",
+     "uso": "probabilidad de encontrar en un año (la misma que la cesantía; supuesto: buscar trabajando por tu cuenta rinde igual)"
+    },
+    {
+     "fuente": "couch_placzek_2010",
+     "cifra": "Quien vuelve a un empleo entra ganando menos que antes",
+     "uso": "sueldo al volver: 78% a 90% del último sueldo con contrato, como «tomar lo primero que salga»"
+    }
+   ],
+   "calidad": "mixto",
+   "en_juego": "buscar",
+   "notas": "Sin ella, trabajar por tu cuenta (o informal) era una puerta de un solo sentido. El peso (0,03) es un supuesto del equipo calibrado para que la cohorte siga reproduciendo la cuenta propia por edad de la ENE (make validar); en tu partida aparece siempre entre lo que puedes buscar en un año tranquilo."
   },
   {
    "id": "emprender",

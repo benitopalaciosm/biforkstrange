@@ -166,6 +166,9 @@ def narrar(decision: str, contexto: dict, semilla: int, anio: int, ocurrencia: i
     elif decision == "independizarse":
         texto = (f"Un cliente de {aqui.split(',')[0]} te dice que te contrataría directo, a honorarios. "
                  f"Serías independiente: sin jefatura, pero sin contrato.")
+    elif decision == "volver_a_contrato":
+        texto = (f"Llevas un tiempo trabajando por tu cuenta y los meses flojos pesan. {cercano.capitalize()} te cuenta "
+                 f"que en su pega buscan a alguien como tú, con contrato. ¿Postulas?")
     elif decision == "renunciar":
         texto = (f"Llevas semanas llegando sin ganas a {aqui.split(',')[0]} y el ambiente no mejora. "
                  f"Un domingo en la noche, escribes la carta de renuncia en el celular.")

@@ -49,6 +49,7 @@ PESOS_CARTAS: dict[str, dict[str, float]] = {
     "invertir_en_red": {"si": 0.35},
     "unirse_a_startup": {"ir": 0.25},
     "independizarse": {"formal": 0.30},
+    "volver_a_contrato": {"buscar": 0.40},  # supuesto: más que buscar estando empleado (0,30), por el ingreso flojo
     "emprender": {"emprender": 0.08, "lado": 0.12},
     "emigrar": {"irse": 0.04},
     "mudarse_de_region": {"a_santiago": 0.08, "a_region": 0.05},
