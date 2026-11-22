@@ -530,7 +530,7 @@ export function Carta({
 
   // otra carta: se parte sin nada marcado
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
-  // la situación y las ofertas que escribe Sonnet se muestran cuando llegan, nunca antes la plantilla
+  // la situación y las ofertas que escribe Claude se muestran cuando llegan, nunca antes la plantilla
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
   // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
   const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
@@ -639,7 +639,7 @@ export function Carta({
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
       {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
-      {/* mientras Sonnet escribe la carta no hay sorteo: una espera simple, no la apuesta */}
+      {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
         <div className="jg-preparando">
           <Cargando>Preparando tu carta…</Cargando>

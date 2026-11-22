@@ -216,7 +216,7 @@ export function usePartida() {
     return getMundo(partida, mundo, parametrosCarta.current);
   }, [partida]);
 
-  /** Textos de la partida contados por Sonnet (la carta, la historia o un mundo de la carta). */
+  /** Textos de la partida contados por Claude (la carta, la historia o un mundo de la carta). */
   const narrar = useCallback(
     (que: "pendiente" | "historia" | "mundo", signal: AbortSignal, mundo?: number) => {
       if (!partida) return Promise.reject(new Error("No hay partida"));

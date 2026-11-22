@@ -136,9 +136,9 @@ def ver_mundo(body: MundoIn):
 
 @router.post("/narrar")
 def narrar(body: NarrarIn):
-    """Los textos de la partida contados por Sonnet: la carta pendiente, la historia o un mundo.
+    """Los textos de la partida contados por Claude: la carta pendiente, la historia o un mundo.
 
-    Solo texto: ningún número. Si Sonnet no está o falla, cada texto vuelve con su plantilla
+    Solo texto: ningún número. Si Claude no está o falla, cada texto vuelve con su plantilla
     (`via: "plantilla"`), siempre con 200 si la partida es válida. Se rejuega con la misma afinidad
     que `/partida` (si no, la carta pendiente podría ser otra) y con tu relato como trasfondo.
     """

@@ -294,8 +294,8 @@ export type Universidad = {
   selectiva: boolean;
 };
 
-/** Un texto contado por Sonnet (o su plantilla si Sonnet no estaba). */
-export type Narrado = { id: string; texto: string; via: "sonnet" | "plantilla" };
+/** Un texto contado por Claude (o su plantilla si Claude no estaba). */
+export type Narrado = { id: string; texto: string; via: "claude" | "plantilla" };
 
 export type OpcionPendiente = {
   opcion: string;

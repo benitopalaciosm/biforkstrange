@@ -75,7 +75,7 @@ export function QuePaso({
   vista: Vista;
   sueldoInicial: number;
   onSeguir: () => void;
-  /** Los eventos de cada año contados por Sonnet; sin él (o si falla) queda el texto del paquete. */
+  /** Los eventos de cada año contados por Claude; sin él (o si falla) queda el texto del paquete. */
   onNarrar?: (que: "historia", signal: AbortSignal) => Promise<{ items: Narrado[] }>;
 }) {
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("historia", signal) : null, `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`);
@@ -105,7 +105,7 @@ export function QuePaso({
   const mismoAnio = !vista.terminada && cerrados.length === 0;
   const boton = vista.terminada ? "Ver cómo terminaste" : mismoAnio ? "Otra decisión este año" : `Seguir al año ${proximo}`;
 
-  // el dado sigue girando hasta que Sonnet cuenta el año: las noticias se muestran una vez y no cambian
+  // el dado sigue girando hasta que Claude cuenta el año: las noticias se muestran una vez y no cambian
   if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} />;
 
   return (
