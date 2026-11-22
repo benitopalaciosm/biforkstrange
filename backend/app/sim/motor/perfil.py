@@ -69,6 +69,7 @@ class Perfil:
     emprendio_antes: int = 0              # ya tuvo una empresa propia antes de la de hoy
     anos_independiente: int | None = None  # si hoy trabaja por su cuenta: hace cuántos años
     practica: str = ""                    # tipo de empleador de su práctica (grande | pyme | startup | publico)
+    primer_empleo: int = 0                # 1 si busca su primer empleo: nunca ha trabajado después de titularse
     toda_su_carrera_en: str = ""          # publico | startup, si todos sus empleos (dos o más) fueron ahí
     ascensos_por_ano: float | None = None  # ascensos dentro de una misma empresa por año de experiencia
     empresas_cerradas: int = 0            # empresas propias que ya cerró
@@ -171,6 +172,17 @@ def _avance(perfil: Perfil, duracion: int) -> tuple[int, int]:
     return max(1, min(16, restantes)), anos
 
 
+def busca_primer_empleo(perfil: Perfil) -> bool:
+    """Quien estudia (su primera pega viene al titularse) o busca sin haber trabajado: lo dice el flag
+    `primer_empleo` del CV, o una práctica declarada (solo se declara si nunca tuvo empleo tras titularse).
+    No se mira el sueldo: la API lo exige mayor que 0 y `perfil_ia.completar` siempre lo llena, así que
+    "sueldo 0" dejaba en cesantía a todos los que buscaban su primera pega. El sueldo 0 sigue valiendo
+    para los perfiles armados a mano (la cohorte de validación parte con sueldo 0)."""
+    if perfil.estado == "estudiando":
+        return True
+    return perfil.estado == "buscando" and bool(perfil.primer_empleo or perfil.practica or perfil.sueldo == 0)
+
+
 def _literal(inicio: str):
     """Valor inicial de estado.json cuando es un literal ('0', '44', "''", 'chile')."""
     if inicio == "''":
@@ -226,7 +238,7 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         remoto=perfil.remoto if trabaja else 0, usa_ia=perfil.usa_ia,
         empresa_anos=perfil.empresa_anos if perfil.estado == "fundador" else 0,
         empresa_fondos=perfil.empresa_fondos if perfil.estado == "fundador" else 0,
-        primer_empleo=1 if perfil.estado in ("estudiando", "buscando") and perfil.sueldo == 0 else 0,
+        primer_empleo=1 if busca_primer_empleo(perfil) else 0,
         anos_titulado=max(0, min(40, perfil.edad - EDAD_TITULO[perfil.edu])),
         ocupacion=perfil.ocupacion if perfil.ocupacion is not None
         else (1 if perfil.nivel >= 3 else OCUPACION_POR_EDU[perfil.edu]),

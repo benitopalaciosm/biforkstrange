@@ -53,6 +53,23 @@ def test_quien_no_trabaja_parte_sin_sueldo_pero_recuerda_el_ultimo():
     assert joven["anos_titulado"] == 0 and joven["primer_empleo"] == 1
 
 
+def test_quien_busca_su_primer_empleo_no_parte_cesante():
+    """El criterio era sueldo == 0, pero la API exige sueldo > 0 y completar siempre lo llena: quien buscaba
+    su primera pega caía en cesantia (y su práctica no llegaba). Ahora lo dice el flag o la práctica."""
+    for perfil in (Perfil(estado="buscando", primer_empleo=1, sueldo=700_000),
+                   Perfil(estado="buscando", practica="publico", sueldo=700_000)):
+        e = estado_inicial(perfil, pq())
+        assert e["primer_empleo"] == 1
+        v = Vida(e, Dados(0, "t"), pq())
+        assert v._forzadas() == ["primera_pega"]
+    assert estado_inicial(Perfil(estado="buscando", practica="publico", sueldo=700_000), pq())["practica"] == "publico"
+    # quien estudia busca su primera pega al titularse, declare el sueldo que declare
+    assert _e(estado="estudiando", sueldo=900_000)["primer_empleo"] == 1
+    # quien ya trabajó (sin flag ni práctica) sigue siendo cesante
+    assert _e(estado="buscando", sueldo=700_000)["primer_empleo"] == 0
+    assert _e(estado="empleado", primer_empleo=1)["primer_empleo"] == 0
+
+
 def test_la_carrera_trae_su_area_y_tipo_de_institucion():
     fila = pq().filas("mifuturo_carreras")[57]
     e = _e(carrera_id=int(fila["carrera_id"]))

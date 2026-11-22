@@ -48,6 +48,7 @@ class PerfilIn(BaseModel):
     emprendio_antes: int = Field(0, ge=0, le=1)
     anos_independiente: int | None = Field(None, ge=0, le=40)
     practica: Literal["", "grande", "pyme", "startup", "publico"] = ""
+    primer_empleo: int = Field(0, ge=0, le=1)  # 1 si busca su primer empleo (sin experiencia tras titularse)
     toda_su_carrera_en: Literal["", "publico", "startup"] = ""
     ascensos_por_ano: float | None = Field(None, ge=0, le=2)
     empresas_cerradas: int = Field(0, ge=0, le=10)
