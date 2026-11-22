@@ -6,12 +6,12 @@ import {
 import { getPrompt } from "../api";
 import { MANUAL, type Onboarding as OnboardingEstado } from "../hooks/useBorrador";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
-import type { Catalogo, DudaSugerida, Perfil } from "../types";
+import type { Catalogo, DudaSugerida, Perfil, Sexo } from "../types";
 import { ErrorCaja } from "./piezas";
 import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, banda } from "./PerfilForm";
 
 /** Las elecciones de cada tarjeta: parten vacías y hay que tocarlas para seguir. */
-const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["ingles"] };
+const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["sexo", "edu"], pega: ["tipo_empleador", "nivel", "rubro"], plata: ["ingles"] };
 /** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
 const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
 const SITUACION: Record<string, string> = {
@@ -153,6 +153,7 @@ export function Onboarding({
           claude={<TuClaude leyendo={o.leyendoClaude} error={o.errorClaude} onTexto={(t) => void leerTuClaude(t)} />}
           onSeguir={seguir}
           onSaltar={saltarTodo}
+          onRevisar={() => o.verCompleto(true)}
           cargando={cargando}
         />
       )}
@@ -160,6 +161,18 @@ export function Onboarding({
       {catalogo && paso === "tu" && (
         <Tarjeta key="tu" titulo="Primero, tú.">
           <Slider label="Edad" value={p.edad} min={18} max={50} onChange={(n) => set("edad", n)} display={`${p.edad} años`} />
+          <Stack gap={8}>
+            <span className="jg-etiqueta">Sexo</span>
+            <Segmented<string>
+              label="Sexo"
+              value={elegido("sexo") ? p.sexo : ""}
+              onChange={(v) => set("sexo", v as Sexo)}
+              options={[
+                { value: "m", label: "Mujer" },
+                { value: "h", label: "Hombre" },
+              ]}
+            />
+          </Stack>
           <Stack gap={8}>
             <span className="jg-etiqueta">Estudios terminados</span>
             <Row>
@@ -291,7 +304,7 @@ export function Onboarding({
  * después Seguir pregunta solo lo que falta. O juegas sin datos.
  */
 function Entrada({
-  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, cargando,
+  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, onRevisar, cargando,
 }: {
   cv: "nada" | "leyendo" | "listo";
   error: string | null;
@@ -302,6 +315,8 @@ function Entrada({
   claude: React.ReactNode;
   onSeguir: () => void;
   onSaltar: () => void;
+  /** El formulario completo, para corregir lo que leyeron tus fuentes. */
+  onRevisar: () => void;
   cargando: boolean;
 }) {
   const entrada = useRef<HTMLInputElement>(null);
@@ -408,6 +423,11 @@ function Entrada({
             Seguir
           </Button>
         )}
+        {algo && (
+          <button type="button" className="ob-link" onClick={onRevisar} disabled={cv === "leyendo" || cargando}>
+            Revisar todos mis datos
+          </button>
+        )}
         <button type="button" className="ob-link" onClick={onSaltar} disabled={cargando}>
           Jugar sin datos
         </button>
@@ -448,6 +468,7 @@ function Ficha({
   const nivel = catalogo?.niveles.find((n) => n.nivel === p.nivel)?.nombre;
   const datos: [string, string | undefined][] = [
     ["edad", `${p.edad} años`],
+    ["sexo", p.sexo === "h" ? "Hombre" : "Mujer"],
     ["edu", EDUCACION[p.edu] ?? p.edu],
     ["nivel", nivel],
     ["tipo_empleador", TIPO_EMPLEADOR[p.tipo_empleador] ?? p.tipo_empleador],
