@@ -98,32 +98,8 @@
    "prob_anual": "k('P_SEPARACION', banda3) * k('MULT_DESPIDO_TIPO', tipo_empleador) * si(tipo_empleador == 'publico', 1, k('MULT_DESPIDO_RUBRO', rubro, 1)) * si(recesion, 1.4, 1) * tabla_o(1, 'empresas_catalogo', 'mult_despido', 'empresa_id', empresa_id)",
    "resultados": [
     {
-     "id": "reemplea",
-     "prob": "(1 - exp(-9 / k('MESES_CESANTIA', banda3))) * si(recesion, 0.85, 1)",
-     "texto": "Pierdes el trabajo y encuentras otro el mismo año.",
-     "tono": "malo",
-     "efectos": [
-      {
-       "var": "sueldo",
-       "op": "multiplica",
-       "valor": "azar_uniforme(0.85, 1.02)"
-      },
-      {
-       "var": "antiguedad",
-       "op": "fija",
-       "valor": 0
-      },
-      {
-       "var": "animo",
-       "op": "suma",
-       "valor": -2
-      }
-     ],
-     "luego": "tipo_de_empleador"
-    },
-    {
      "id": "cesante",
-     "prob": "resto",
+     "prob": 1,
      "texto": "Pierdes el trabajo.",
      "tono": "malo",
      "efectos": [
@@ -151,13 +127,9 @@
        "var": "animo",
        "op": "suma",
        "valor": "k('ANIMO_CESANTIA')"
-      },
-      {
-       "var": "sueldo_ref",
-       "op": "multiplica",
-       "valor": "1 - k('CAIDA_REEMPLEO')"
       }
-     ]
+     ],
+     "luego": "cesantia"
     }
    ],
    "fuentes": [
@@ -167,7 +139,77 @@
     "couch_placzek_2010"
    ],
    "calidad": "dato",
-   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo."
+   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo. Ya no hay recontrato automático el mismo año: quien encuentra trabajo rápido lo hace por las ofertas mes a mes (oferta_cesante). Tampoco se descuenta CAIDA_REEMPLEO al despedirte: las ofertas ya traen la baja de sueldo (78% a 106% de lo que ganabas, y menos desde el mes 7)."
+  },
+  {
+   "id": "oferta_cesante",
+   "nombre": "Te llega una oferta estando cesante",
+   "categoria": "trabajo",
+   "paso": "mes",
+   "cuando": "y(o(estado == 'buscando', busca_mientras_informal == 1), primer_empleo == 0, oferta_sueldo == 0)",
+   "prob_mensual": "clamp(k('K_OFERTA_CESANTE') / k('MESES_CESANTIA', banda3) * (1 - (1 - k('PENAL_HUECO')) * min(meses_cesante, 8) / 8) * si(hueco, k('PENAL_HUECO'), 1) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.02, 0.6)",
+   "resultados": [
+    {
+     "id": "oferta",
+     "prob": 1,
+     "texto": "Te llega una oferta.",
+     "tono": "neutro",
+     "efectos": [
+      {
+       "var": "oferta_sueldo",
+       "op": "fija",
+       "valor": "sueldo_ref * azar_uniforme(0.78, 1.06) * si(meses_cesante >= 6, 0.93, 1) * si(hueco, 0.93, 1)"
+      }
+     ],
+     "luego": "tipo_de_oferta"
+    }
+   ],
+   "fuentes": [
+    "eps_2024",
+    "kroft_2013",
+    "ine_esi_2025"
+   ],
+   "calidad": "mixto",
+   "notas": "Paso mensual. Se evalúa antes que mes_buscando, así que meses_cesante cuenta los meses ya vividos. Los llamados bajan de forma lineal hasta PENAL_HUECO a los 8 meses (Kroft 2013). El sueldo une los rangos de las antiguas opciones rápido (0,78-0,9) y nivel (0,93-1,06). Quien trabaja informal mientras busca (busca_mientras_informal) también recibe ofertas; sus meses_cesante no avanzan, porque tiene ingreso."
+  },
+  {
+   "id": "mes_buscando",
+   "nombre": "Un mes más buscando",
+   "categoria": "trabajo",
+   "paso": "mes",
+   "cuando": "y(estado == 'buscando', primer_empleo == 0)",
+   "prob_mensual": 1,
+   "resultados": [
+    {
+     "id": "mes",
+     "prob": 1,
+     "texto": "Pasa un mes sin trabajo.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "meses_cesante",
+       "op": "suma",
+       "valor": 1
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "-2 / 12"
+      },
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "sueldo_ref * (k('COBERTURA_SEGURO') - 1) * 0.5"
+      }
+     ]
+    }
+   ],
+   "fuentes": [
+    "cep_788",
+    "elsoc"
+   ],
+   "calidad": "mixto",
+   "notas": "Paso mensual. Reparte por mes lo que antes la carta de cesantía aplicaba de una vez al año (12 meses, ánimo −2 y el gasto neto del seguro)."
   },
   {
    "id": "oferta_llega",

@@ -15,7 +15,7 @@ from app.sim.motor.motor import LLEGAN, REPETIR_CARTA, TRANQUILO, FaltaEleccion,
 from app.sim.motor.paquete import Paquete, paquete
 from app.sim.motor.perfil import Perfil, estado_inicial
 from app.sim.motor.narrativa import narrar
-from app.sim.motor.politicas import Jugador, elecciones_internas
+from app.sim.motor.politicas import Jugador, acepta_oferta_cesante, elecciones_internas
 
 ANIOS = 10
 JUGADOR = "tu"  # nombre de los dados de la persona; los gemelos usan 0, 1, 2...
@@ -97,7 +97,8 @@ def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dic
             n: int, pq: Paquete) -> dict:
     """Tu vida frente a los gemelos de la primera decisión que tuvo mundos (un año tranquilo no tiene)."""
     cierre = {"sueldo_final": round(partida.vida.sueldo_o_ultimo()), "estado": partida.vida.resumen(),
-              "anios_sin_trabajo": partida.vida.anios_buscando, "primera_decision": None}
+              "anios_sin_trabajo": partida.vida.anios_buscando, "meses_sin_trabajo": partida.vida.meses_buscando,
+              "primera_decision": None}
     comparacion, elegida = None, None
     for k in range(len(elecciones)):
         hasta = jugar(perfil, semilla, elecciones[:k], duda, partida.anios, pq)
@@ -149,7 +150,8 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         }
         return salida
     ocurrencia = sum(1 for x in vida.registro["decisiones"] if x["decision"] == d["id"]) if vida.registro else 0
-    contexto = {k: vida.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion")}
+    contexto = {k: vida.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad", "validado", "edu", "sexo", "recesion",
+                                        "meses_cesante")}
     contexto.update(vida.contexto_empleo())
     ofertas = {o.id: empresas.oferta(vida, d["id"], o.id, ocurrencia) for o in falta.opciones}
     primera = next((f for f in ofertas.values() if f is not None), None)
@@ -185,8 +187,29 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
         "comparacion": comparar_pendiente(partida, semilla, n_gemelos, parametros),
         # una oferta llega con su sueldo, como en la vida: el que tendrías si la aceptas (empresa incluida)
         "oferta_sueldo": ({"hoy": vida.e["sueldo"], "si_aceptas": vida.sueldo_si_elige(d["id"], "cambiar")}
-                          if d["id"] == "oferta_externa" else None),
+                          if d["id"] == "oferta_externa" else
+                          # cesante, "hoy" es lo que ganabas en tu último trabajo
+                          {"hoy": vida.e["sueldo_ref"], "si_aceptas": vida.sueldo_si_elige(d["id"], "aceptar"),
+                           "cesante": True}
+                          if d["id"] == "oferta_en_cesantia" else None),
+        # sin trabajo, el año pasa mes a mes: en qué mes vas y cuánto llevas buscando
+        "busqueda": _busqueda(vida, d["id"], ofertas.get("aceptar")) if vida.mes else None,
     }
+    return salida
+
+
+def _busqueda(vida: Vida, decision_id: str, empresa: dict | None) -> dict:
+    """La búsqueda mes a mes: en qué mes vas, cuánto llevas, lo que ganabas y, si llegó una oferta,
+    qué riesgo de despido trae (la regla del paquete con el empleador de la oferta) y qué haría tu copia."""
+    salida = {"mes": vida.mes, "meses_cesante": vida.e["meses_cesante"], "sueldo_ref": round(vida.e["sueldo_ref"]),
+              # trabaja informal y sigue postulando: tiene ingreso, pero le siguen llegando ofertas con contrato
+              "informal": bool(vida.e["busca_mientras_informal"]) and vida.e["estado"] == "independiente"}
+    if decision_id == "oferta_en_cesantia":
+        e = {**vida.e, "estado": "empleado", "tipo_empleador": vida.e["oferta_tipo_empleador"],
+             "empresa_id": (empresa or {}).get("empresa_id", -1), "rubro": (empresa or {}).get("rubro") or vida.e["rubro"]}
+        ev = vida.pq.eventos["separacion_empleo"]
+        salida["riesgo_despido"] = min(1.0, max(0.0, float(vida.pq.evaluar(ev["prob_anual"], vida.pq.derivar(e)))))
+        salida["gemelo_acepta"] = acepta_oferta_cesante(vida)
     return salida
 
 

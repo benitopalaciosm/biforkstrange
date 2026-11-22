@@ -345,6 +345,8 @@ def _tipo_y_rubro(vida, decision_id: str, opcion_id: str) -> tuple[str, str | No
             literal = v[1:-1] if v.startswith("'") and v.endswith("'") else None
             if ef["var"] == "tipo_empleador" and ef["op"] == "fija" and literal:
                 tipo = literal
+            elif ef["var"] == "tipo_empleador" and ef["op"] == "fija" and e.get(v):
+                tipo = e[v]  # el de una oferta ya sorteada (oferta_tipo_empleador)
             elif ef["var"] == "rubro" and ef["op"] == "fija":
                 rubro = literal if literal is not None else e.get(v) if v in e else None
             elif ef["var"] == "estado" and literal == "empleado":
