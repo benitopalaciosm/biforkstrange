@@ -53,6 +53,8 @@ export type Perfil = {
   ascensos_por_ano?: number | null;
   /** Empresas propias que ya cerró: si sus gemelos tienen empresa, la cierran más seguido. */
   empresas_cerradas?: number;
+  /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
+  rubro_sonado?: string | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
@@ -72,6 +74,11 @@ export type PerfilLeido = {
   dudas_sugeridas?: DudaSugerida[];
   /** Su empleador actual, si está en la nómina del SII. */
   empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
+  /** Lo que contó su Claude (solo por el prompt): temas que le apasionan y su proyecto paralelo. */
+  intereses?: string[];
+  proyecto?: string | null;
+  /** Campos del perfil que el texto dijo de verdad (el resto son valores por defecto). */
+  dados?: string[];
   /** Lo que su gemelo sabe de ella, en una línea. */
   retrato?: string | null;
   /** "documento" si venía en el formato del prompt; "api" o "comando" si Claude leyó un texto libre. */

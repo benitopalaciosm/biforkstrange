@@ -71,11 +71,6 @@
   display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 18px;
   background: var(--sol); border: 2px solid var(--tinta); animation: vd-entrar .4s ease-out both;
 }
-.ob-avatar { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
-.ob-avatar span { position: absolute; inset: 0; background: var(--acento); transform: translateY(calc(100% - var(--ob-lleno, 0) * 100% / 7)); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
-.ob-avatar[data-lleno="1"] { --ob-lleno: 1; } .ob-avatar[data-lleno="2"] { --ob-lleno: 2; } .ob-avatar[data-lleno="3"] { --ob-lleno: 3; }
-.ob-avatar[data-lleno="4"] { --ob-lleno: 4; } .ob-avatar[data-lleno="5"] { --ob-lleno: 5; } .ob-avatar[data-lleno="6"] { --ob-lleno: 6; }
-.ob-avatar[data-lleno="7"] { --ob-lleno: 7; }
 .ob-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .ob-tag { animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both; background: var(--papel); }
 
@@ -85,3 +80,71 @@
   .ob-gemelo span { transform: translateY(40%); }
   .ob-avatar span { transition: none; }
 }
+
+/* Tu Claude o ChatGPT: un atajo opcional, más chico que el de LinkedIn */
+.ob-claude-abrir {
+  display: flex; gap: 10px; align-items: center; width: 100%; padding: 12px 14px; text-align: left;
+  border: 1.5px solid var(--linea); border-radius: 16px; background: var(--papel); color: var(--media);
+  font: 400 14px/20px var(--font); cursor: pointer; transition: border-color .2s, transform .2s;
+}
+.ob-claude-abrir strong { color: var(--tinta); }
+.ob-claude-abrir:hover { border-color: var(--acento); transform: translateY(-1px); }
+.ob-claude-abrir:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.ob-claude-chispa { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--sol); color: var(--tinta); font-size: 16px; animation: ob-girar 6s linear infinite; }
+@keyframes ob-girar { to { transform: rotate(360deg); } }
+.ob-claude { padding: 14px; border: 1.5px solid var(--acento); border-radius: 16px; background: var(--acento-suave); animation: vd-subir .35s ease-out both; }
+.ob-claude-texto { min-height: 96px; font: 400 13px/18px ui-monospace, Menlo, monospace; }
+.ob-tag--tuyo { background: var(--acento-suave); }
+@media (prefers-reduced-motion: reduce) { .ob-claude-chispa, .ob-claude { animation: none; } }
+.ob-ficha > * { min-width: 0; }
+.ob-ficha .ob-tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+
+
+.ob-otras { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 360px) { .ob-otras { grid-template-columns: 1fr; } }
+
+/* Las fuentes de la primera pantalla: una tarjeta por fuente, con su check */
+.ob-fuente {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; text-align: left;
+  border: 1.5px solid var(--linea); border-radius: 16px; background: var(--papel); color: var(--tinta);
+  font: 400 15px/20px var(--font); cursor: pointer; transition: border-color .2s, background .2s, transform .2s;
+}
+.ob-fuente:hover:not(:disabled), .ob-fuente[data-encima] { border-color: var(--acento); transform: translateY(-1px); }
+.ob-fuente:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.ob-fuente:disabled { cursor: progress; }
+.ob-fuente[data-listo] { border-color: var(--dinero); background: #effaf4; }
+.ob-fuente .ob-anim { width: 120px; height: 44px; transform: scale(.75); transform-origin: left center; margin-right: -24px; }
+.ob-fuente-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ob-icono { flex: none; width: 40px; height: 40px; font-size: 20px; }
+.ob-in.ob-icono { font-size: 22px; border-radius: 9px; animation: ob-latir 4s ease-in-out infinite; }
+.ob-accion { flex: none; font: 600 13px/18px var(--font); color: var(--acento); }
+.ob-check {
+  flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--dinero); color: #fff; font: 700 15px/1 var(--font); animation: vd-pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+@media (prefers-reduced-motion: reduce) { .ob-check { animation: none; } }
+.ob-icono--tu { display: grid; place-items: center; border-radius: 50%; background: var(--niebla); color: var(--tinta); border: 1.5px solid var(--linea); }
+
+/* Leyendo el CV dentro de su tarjeta: una hoja chica que se escanea y una barra de progreso abajo */
+.ob-fuente { position: relative; overflow: hidden; }
+.ob-hoja-mini {
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 0 7px;
+  border: 1.5px solid var(--tinta); border-radius: 6px; background: var(--papel); overflow: hidden; width: 32px; margin: 0 4px;
+}
+.ob-hoja-mini i { height: 3px; border-radius: 2px; background: var(--linea); }
+.ob-hoja-mini i:first-child { background: #0A66C2; width: 70%; }
+.ob-hoja-mini .ob-scan { height: 14px; top: -14px; animation-duration: 1.2s; }
+.ob-fuente[data-leyendo] { border-color: var(--acento); }
+.ob-fuente[data-leyendo]::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 40%;
+  background: var(--acento); border-radius: 2px; animation: ob-progreso 1.4s ease-in-out infinite;
+}
+@keyframes ob-progreso { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@media (prefers-reduced-motion: reduce) { .ob-fuente[data-leyendo]::after, .ob-hoja-mini .ob-scan { animation: none; } }
+
+/* Tu gemelo: silueta en tinta sobre blanco, combina con la ficha amarilla */
+.ob-avatar { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
+.ob-silueta-vacia { fill: var(--linea); }
+.ob-silueta-llena { fill: var(--tinta); }
+.ob-nivel { transition: transform .6s cubic-bezier(.2, .8, .2, 1); transform-box: fill-box; }
+@media (prefers-reduced-motion: reduce) { .ob-nivel { transition: none; } }

@@ -113,8 +113,8 @@ EJEMPLO = (Path(__file__).parents[2] / "docs" / "motor" / "perfil-ejemplo.md").r
 
 def test_el_prompt_trae_el_formato_y_las_listas_validas():
     p = perfil_doc.prompt()
-    assert "```gemelo-laboral" in p and "## Cómo lo deduje" in p
-    assert "Finanzas y seguros" in p and "unirse_a_startup:" in p
+    assert "```gemelo-laboral" in p
+    assert "Finanzas y seguros" in p and "unirse_a_startup (" in p
     assert "tener_hijo" not in p  # solo lo laboral
 
 
@@ -391,3 +391,53 @@ def test_los_gemelos_se_cambian_como_tu():
     seguido = pesos_personales({"anos_por_empleo": 1.0})["oferta_externa"]["cambiar"]
     quieto = pesos_personales({"anos_por_empleo": 8.0})["oferta_externa"]["cambiar"]
     assert quieto < 0.34 < seguido <= 0.65
+
+
+TU_CLAUDE = """```gemelo-laboral
+sueldo_liquido: 1.800.000
+duda: ?
+situacion: empleado
+riesgo: 6
+ingles: si
+ia: no uso
+proyecto: una app para reservar canchas de pádel
+afuera: si
+rubro_sonado: Artes y entretención
+intereses: cine, filosofía, literatura rusa
+retrato: Eres analista de datos y escribes crítica de cine los fines de semana.
+```"""
+
+
+def test_el_prompt_es_corto_y_pide_lo_que_un_cv_no_dice():
+    p = perfil_doc.prompt()
+    assert len(p) < 3500  # cabe en el link que abre Claude o ChatGPT con el prompt escrito
+    for campo in ("sueldo_liquido:", "proyecto:", "afuera:", "rubro_sonado:", "intereses:", "Nada de salud"):
+        assert campo in p
+
+
+def test_lo_que_cuenta_tu_claude_sugiere_dudas_y_entra_al_perfil():
+    r = perfil_doc.leer_documento(TU_CLAUDE)
+    p = r["perfil"]
+    assert (p["sueldo"], p["ingles"], p["usa_ia"], p["rubro_sonado"]) == (1_800_000, 1, 0, "Artes y entretención")
+    assert r["intereses"] == ["cine", "filosofía", "literatura rusa"]
+    assert r["retrato"].startswith("Eres analista")
+    sugeridas = [d["decision"] for d in r["dudas_sugeridas"]]
+    assert sugeridas[0] == "emprender" and len(sugeridas) == 3 and r["duda"] == "emprender"
+    assert "pádel" in r["dudas_sugeridas"][0]["por_que"]
+    assert {"sueldo", "riesgo", "ingles", "usa_ia", "estado", "rubro_sonado"} <= set(r["dados"])
+    assert "edad" not in r["dados"]  # no la dijo: no debe pisar la del CV
+
+
+def test_el_rubro_sonado_es_la_opcion_por_defecto_al_cambiarse():
+    from app.sim.motor.azar import Dados
+    from app.sim.motor.motor import Vida
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+    from app.sim.motor.politicas import parametros_por_defecto
+
+    pq = paquete()
+    vida = Vida(estado_inicial(Perfil(rubro_sonado="Artes y entretención"), pq), Dados(0, "jugador"), pq)
+    opcion = next(o for o in vida.opciones("cambiar_de_rubro") if o.id == "cambiar")
+    assert parametros_por_defecto(vida, opcion)["rubro_destino"] == "Artes y entretención"
+    sin = Vida(estado_inicial(Perfil(), pq), Dados(0, "jugador"), pq)
+    assert parametros_por_defecto(sin, opcion)["rubro_destino"] != "Artes y entretención"  # sin dato, como antes
