@@ -96,6 +96,7 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
     opciones = vida.opciones(decision_id)
     parametros = parametros or {}
     anio0, buscando0, ingreso0 = len(vida.historia), vida.anios_buscando, vida.ingreso_total
+    edad0 = vida.e["edad"]
     usados = {o.id: _parametros(vida, o, parametros) for o in opciones}
     finales: dict[str, list[Vida]] = {
         o.id: [_vivir(vida.clonar(Dados(semilla, g)), decision_id, o.id, usados[o.id], anios) for g in range(n)]
@@ -126,9 +127,13 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
                 "tono": definiciones.get(rid, {}).get("tono", "neutro"),
                 "gemelos": cuantos, "prob": cuantos / n, **_contra_base(pares),
             })
+        # por edad, no por ronda: una ronda puede durar varios años (un magíster con beca) y su cierre cuenta
+        # para cada año que cubre
+        por_edad = [{ed: h["fin"] for h in v.historia[anio0:] if h.get("fin") for ed in range(h["edad"], h["fin"]["edad"])}
+                    for v in vidas]
         trayectoria = []
         for i in range(anios):
-            del_anio = [v.historia[anio0 + i]["fin"] for v in vidas if len(v.historia) > anio0 + i]
+            del_anio = [d[edad0 + i] for d in por_edad if edad0 + i in d]
             if len(del_anio) < n / 2:
                 break
             trayectoria.append({

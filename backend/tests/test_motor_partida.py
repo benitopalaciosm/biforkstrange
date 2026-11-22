@@ -91,7 +91,7 @@ def test_la_duda_inicial_es_la_primera_decision_y_solo_del_primer_anio():
     assert elecciones[0]["decision"] == "pedir_aumento"
     de_carta = [d["decision"] for r in completa.vida.historia for d in r["decisiones"] if d["origen"] == "carta"]
     assert de_carta[0] == "pedir_aumento" and len(de_carta) <= 10
-    assert len(set(de_carta)) >= 3  # la duda es solo la carta del primer año; después se sortea
+    assert "pedir_aumento" not in de_carta[1:]  # la duda es solo la carta del primer año; después se sortea
     with pytest.raises(ValueError, match="no aplica"):
         partida.jugar(Perfil(nivel=1), 3, [], duda="jefatura")  # pide nivel 2
     with pytest.raises(ValueError, match="no aplica"):
@@ -138,9 +138,9 @@ def test_vista_con_decision_pendiente():
         30, "empleado", 1_400_000, "Semi senior")
     p = v["pendiente"]
     assert set(p) == {"decision", "nombre", "pregunta", "categoria", "calidad", "creencia_vs_dato", "evidencia", "narrativa",
-                      "opciones", "comparacion", "por_que"}
+                      "opciones", "comparacion", "por_que", "oferta_sueldo"}
     assert p["decision"] == "unirse_a_startup" and [o["opcion"] for o in p["opciones"]] == ["ir", "quedarse"]
-    assert all(set(o) == {"opcion", "nombre", "detalle", "calidad", "elecciones_internas", "empresa"} for o in p["opciones"])
+    assert all(set(o) == {"opcion", "nombre", "detalle", "calidad", "respaldo", "elecciones_internas", "empresa"} for o in p["opciones"])
     c = p["comparacion"]
     assert c["decision"] == "unirse_a_startup" and c["gemelos"] == n(40) and c["anios"] == 10 and c["base"] == "quedarse"
     assert [o["opcion"] for o in c["opciones"]] == ["ir", "quedarse"]

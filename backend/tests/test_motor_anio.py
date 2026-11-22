@@ -14,7 +14,7 @@ from _motor_util import (CARTAS_PERFIL_BASE, DECISIONES_PERSONALES, EVENTOS_PERS
                          fabrica, foto, n, pq, vida, z_binomial)
 
 from app.sim.motor.azar import Dados
-from app.sim.motor.motor import FaltaEleccion
+from app.sim.motor.motor import TRANQUILO, FaltaEleccion
 from app.sim.motor.perfil import Perfil
 from app.sim.motor.politicas import Fija, Inercia, Jugador, Poblacion
 
@@ -44,7 +44,12 @@ def test_la_carta_del_anio_sale_en_proporcion_a_los_pesos():
         v = nueva(Dados(11, g))
         with pytest.raises(FaltaEleccion) as falta:
             v.vivir_anio(Jugador([]))
-        salio[falta.value.decision["id"]] += 1
+        carta = falta.value.decision["id"]
+        if carta == TRANQUILO:
+            # lo que no llega solo queda de sugerencia en un año tranquilo; la oferta (que solo llega por su
+            # evento) ocupa su lugar en el sorteo pero no deja sugerencia
+            carta = v.sugerida or "oferta_externa"
+        salio[carta] += 1
     assert set(salio) <= set(CARTAS_PERFIL_BASE)
     total = sum(CARTAS_PERFIL_BASE.values())
     for carta, peso in CARTAS_PERFIL_BASE.items():
@@ -58,7 +63,9 @@ def test_una_sola_carta_por_anio_y_ninguna_si_no_hay_cartas():
             reg = v.vivir_anio(Poblacion())
             de_carta = [d for d in reg["decisiones"] if d["origen"] == "carta"]
             assert len(de_carta) <= 1
-            assert all(d["origen"] in ("carta", "luego") for d in reg["decisiones"])
+            # en un año tranquilo se puede buscar una sola cosa (origen «buscada»)
+            assert len([d for d in reg["decisiones"] if d["origen"] == "buscada"]) <= 1
+            assert all(d["origen"] in ("carta", "buscada", "luego") for d in reg["decisiones"])
     for g in range(n(150)):
         v = vida(Perfil(edad=28), Dados(3, g))
         reg = v.vivir_anio(Inercia())  # sin cartas: solo lo que la vida obliga o encadena
@@ -105,13 +112,15 @@ def test_una_forzada_que_deja_de_aplicar_por_la_anterior_no_se_pregunta():
 
 def test_la_carta_se_sortea_con_su_propio_dado_en_el_orden_del_paquete():
     """Con el dado de la carta en 0 sale la primera del paquete que aplica (magíster, peso 0,4 de 8,0023);
-    apenas pasado su tramo, la segunda (doctorado)."""
+    apenas pasado su tramo, la segunda (doctorado). Ninguna de las tres llega sola: el año es tranquilo y la
+    sorteada queda de sugerencia."""
     total = sum(CARTAS_PERFIL_BASE.values())
     for u, esperada in ((0.0, "magister"), (0.4 / total + 1e-6, "doctorado"), (0.999999, "ahorro")):
         d = DadosGuion({"carta": u}, defecto=0.5)
+        v = vida(Perfil(), d)
         with pytest.raises(FaltaEleccion) as falta:
-            vida(Perfil(), d).vivir_anio(Jugador([]))
-        assert falta.value.decision["id"] == esperada and (0, "carta") in d.pedidos
+            v.vivir_anio(Jugador([]))
+        assert falta.value.decision["id"] == TRANQUILO and v.sugerida == esperada and (0, "carta") in d.pedidos
 
 
 def test_la_suerte_de_cada_anio_es_distinta():
@@ -336,14 +345,14 @@ def test_cierre_edad_ahorro_y_oficio():
     v = _independiente()
     v.vivir_anio(Guion())
     assert v.e["edad"] == 51 and v.anio == 1
-    # ahorro: lo que había + 8% de 12 sueldos, y sobre eso el retorno real de 3%
-    assert v.e["ahorro"] == pytest.approx((1_000_000 + 12 * 1_000_000 * 0.08) * 1.03)
+    # ahorro: lo que había + 8% de 12 sueldos, y sobre eso el retorno real de 4%
+    assert v.e["ahorro"] == pytest.approx((1_000_000 + 12 * 1_000_000 * 0.08) * 1.04)
     assert v.e["skill"] == pytest.approx(51.5)       # +1,5 de oficio por año trabajado
     assert v.ingreso_total == pytest.approx(12_000_000)
     assert v.e["antiguedad"] == 0                     # la antigüedad es del empleo dependiente
     assert v.e["anos_titulado"] == 27                 # 50 - 24, más el año
     v.vivir_anio(Guion())
-    assert v.e["ahorro"] == pytest.approx(((1_000_000 + 960_000) * 1.03 + 960_000) * 1.03)
+    assert v.e["ahorro"] == pytest.approx(((1_000_000 + 960_000) * 1.04 + 960_000) * 1.04)
     assert v.ingreso_total == pytest.approx(24_000_000) and v.e["skill"] == pytest.approx(53)
 
 
@@ -362,7 +371,7 @@ def test_cierre_ahorro_negativo_no_rinde_y_sin_sueldo_no_se_ahorra():
     assert v.e["ahorro"] == -20_000_000
     v = vida(Perfil(estado="inactivo", edad=40), DadosGuion(), ahorro=5_000_000.0, tasa_ahorro=0.2)
     v.vivir_anio(Guion())
-    assert v.e["ahorro"] == pytest.approx(5_000_000 * 1.03)
+    assert v.e["ahorro"] == pytest.approx(5_000_000 * 1.04)
 
 
 @pytest.mark.parametrize(("deuda", "pago"), [(5_000_000, 1_200_000), (700_000, 700_000)])
@@ -370,7 +379,7 @@ def test_cierre_el_credito_se_paga_con_el_10_por_ciento_del_sueldo(deuda, pago):
     v = _independiente(deuda_estudios=float(deuda), tasa_ahorro=0.0, ahorro=3_000_000.0)
     v.vivir_anio(Guion())
     assert v.e["deuda_estudios"] == pytest.approx(deuda - pago)
-    assert v.e["ahorro"] == pytest.approx((3_000_000 - pago) * 1.03)
+    assert v.e["ahorro"] == pytest.approx((3_000_000 - pago) * 1.04)
 
 
 def test_cierre_el_credito_no_se_paga_estudiando_ni_sin_sueldo():
@@ -552,10 +561,10 @@ def test_separacion_no_aplica_al_empleo_extranjero_ni_a_quien_no_es_empleada():
 
 
 @pytest.mark.parametrize(("evento", "perfil", "estado", "extra", "p"), [
-    ("ascenso", dict(nivel=1), {}, {}, 0.08),
+    ("ascenso", dict(nivel=1), {}, {}, 0.07),
     ("ascenso", dict(nivel=0), {}, {}, 0.10),
-    ("ascenso", dict(nivel=2), dict(skill=80), {}, 0.05 + 30 * 0.0006),
-    ("ascenso", dict(nivel=1), dict(prob_ascenso_extra=0.0064), {}, 0.08 + 0.0064),  # ASCENSO_HORAS: panel ESI
+    ("ascenso", dict(nivel=2), dict(skill=80), {}, 0.04 + 30 * 0.0006),
+    ("ascenso", dict(nivel=1), dict(prob_ascenso_extra=0.0064), {}, 0.07 + 0.0064),  # ASCENSO_HORAS: panel ESI
     ("oferta_llega", dict(edad=35), {}, {}, 0.1377 * 1.5 * 1.3),
     ("oferta_llega", dict(edad=25), dict(red=80), {}, 0.2178 * 1.5 * 1.8),
     ("startup_cierra", dict(tipo_empleador="startup"), {}, {}, 1 - (1 - 0.299) ** (1 / 8)),
@@ -568,8 +577,8 @@ def test_eventos_laborales_ocurren_bajo_su_probabilidad_literal(evento, perfil, 
     assert _ocurre(evento, p - 1e-7, Perfil(**perfil), guion, **estado) == [pytest.approx(p)]
 
 
-def test_la_recesion_ocurre_bajo_0_12_y_el_reempleo_bajo_su_corte():
-    for u, hay in ((0.12 - 1e-7, True), (0.12 + 1e-7, False)):
+def test_la_recesion_ocurre_bajo_0_08_y_el_reempleo_bajo_su_corte():
+    for u, hay in ((0.08 - 1e-7, True), (0.08 + 1e-7, False)):
         v = vida(A_LOS_35, DadosGuion({"evento:recesion": u}))
         assert v.vivir_anio(Guion(QUIETA))["recesion"] is hay
     corte = 1 - math.exp(-9 / 10.5)  # MESES_CESANTIA 30-44 = 10,5
@@ -605,9 +614,9 @@ def test_frecuencia_de_separacion_y_de_recesion_con_dados_reales():
     m = n(8000)
     p = 0.066 * 1.12 * 1.04
     despidos, recesiones = _frecuencia_separacion(m)
-    assert abs(z_binomial(recesiones, m, 0.12)) < Z
-    # 12% de los años son de recesión, donde la separación sube 40%
-    assert abs(z_binomial(despidos, m, p * (0.88 + 0.12 * 1.4))) < Z
+    assert abs(z_binomial(recesiones, m, 0.08)) < Z
+    # 8% de los años son de recesión, donde la separación sube 40%
+    assert abs(z_binomial(despidos, m, p * (0.92 + 0.08 * 1.4))) < Z
     despidos_recesion, _ = _frecuencia_separacion(m, recesion=1)
     assert abs(z_binomial(despidos_recesion, m, p * 1.4)) < Z
     assert z_binomial(despidos_recesion, m, p) > Z  # y se distingue de la tasa sin recesión

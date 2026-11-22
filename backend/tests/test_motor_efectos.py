@@ -127,17 +127,17 @@ def test_las_variables_derivadas_no_se_pisan_y_se_recalculan():
 
 
 def test_prob_ascenso_derivada_es_la_del_evento_ascenso():
-    """Literal del paquete: ASCENSO[1] = 0,08 con oficio 50; +0,0006 por punto de oficio;
+    """Literal del paquete: ASCENSO[1] = 0,07 con oficio 50; +0,0006 por punto de oficio;
     0 si el evento no aplica (sin antigüedad, o sin empleo)."""
-    assert vida(Perfil(nivel=1)).e["prob_ascenso"] == pytest.approx(0.08)
+    assert vida(Perfil(nivel=1)).e["prob_ascenso"] == pytest.approx(0.07)
     assert vida(Perfil(nivel=0), skill=60).e["prob_ascenso"] == pytest.approx(0.10 + 10 * 0.0006)
     # oficio 50 explícito: sin dato, quien terminó la media a los 18 tiene a los 30 el oficio de 12 años de experiencia
-    assert vida(Perfil(nivel=1, edu="media", skill=50)).e["prob_ascenso"] == pytest.approx(0.04)
-    assert vida(Perfil(nivel=1, tipo_empleador="startup")).e["prob_ascenso"] == pytest.approx(0.13)
-    assert vida(Perfil(nivel=1, tipo_empleador="publico")).e["prob_ascenso"] == pytest.approx(0.04)
-    assert vida(Perfil(nivel=1), parcial=1).e["prob_ascenso"] == pytest.approx(0.04)
+    assert vida(Perfil(nivel=1, edu="media", skill=50)).e["prob_ascenso"] == pytest.approx(0.035)
+    assert vida(Perfil(nivel=1, tipo_empleador="startup")).e["prob_ascenso"] == pytest.approx(0.12)
+    assert vida(Perfil(nivel=1, tipo_empleador="publico")).e["prob_ascenso"] == pytest.approx(0.03)
+    assert vida(Perfil(nivel=1), parcial=1).e["prob_ascenso"] == pytest.approx(0.035)
     # prob_ascenso_extra se suma tal cual (por ejemplo ASCENSO_HORAS, que escribe trabajar_mas_horas)
-    assert vida(Perfil(nivel=1), prob_ascenso_extra=0.0064).e["prob_ascenso"] == pytest.approx(0.08 + 0.0064)
+    assert vida(Perfil(nivel=1), prob_ascenso_extra=0.0064).e["prob_ascenso"] == pytest.approx(0.07 + 0.0064)
     assert vida(Perfil(nivel=3), marcado=1).e["prob_ascenso"] == pytest.approx(0.01)  # piso del clamp
     assert vida(Perfil(nivel=1, antiguedad=0)).e["prob_ascenso"] == 0.0
     assert vida(Perfil(nivel=4)).e["prob_ascenso"] == 0.0
@@ -151,7 +151,7 @@ def test_quedarse_hasta_tarde_suma_el_ascenso_por_horas_una_sola_vez():
     v.iniciar_anio(con_cartas=False)
     si = next(o for o in pq().decisiones["trabajar_mas_horas"]["opciones"] if o["id"] == "si")
     v._aplicar(si["resultados"][0]["efectos"], "lab")
-    assert v.e["horas"] == 55 and v.e["prob_ascenso"] == pytest.approx(0.08 + 0.0064)
+    assert v.e["horas"] == 55 and v.e["prob_ascenso"] == pytest.approx(0.07 + 0.0064)
     _cerrar(v)
     assert v.e["horas"] == 44 and v.e["prob_ascenso_extra"] == pytest.approx(0)
 
@@ -263,8 +263,8 @@ def test_separacion_cesante_lee_sueldo_y_antiguedad_de_antes(antiguedad, sueldos
     assert [x["resultado"] for x in registro["eventos"] if x["evento"] == "separacion_empleo"] == ["cesante"]
     assert v.e["estado"] == "buscando" and v.e["sueldo"] == 0
     assert v.e["sueldo_ref"] == pytest.approx(sueldo_antes * 0.85, rel=1e-12)
-    # cierre: sin sueldo no hay ahorro del año; el finiquito rinde el retorno real (3%)
-    assert v.e["ahorro"] == pytest.approx(sueldo_antes * sueldos_de_finiquito * 1.03, rel=1e-12)
+    # cierre: sin sueldo no hay ahorro del año; el finiquito rinde el retorno real (4%)
+    assert v.e["ahorro"] == pytest.approx(sueldo_antes * sueldos_de_finiquito * 1.04, rel=1e-12)
     assert v.e["animo"] < gemela.e["animo"]
 
 
@@ -335,7 +335,7 @@ def test_sorteo_sin_resto_puede_no_dar_ningun_resultado(paquete_lab, u, resultad
     assert (d["decision"], d["opcion"], d["resultado"]) == ("lab", "sin_resto", resultado)
     assert d["prob"] == pytest.approx(prob)
     assert v.e["red"] == red
-    assert v.e["ahorro"] == pytest.approx(4000 * 1.03)  # el costo de la opción se paga salga lo que salga
+    assert v.e["ahorro"] == pytest.approx(4000 * 1.04)  # el costo de la opción se paga salga lo que salga
 
 
 @pytest.mark.parametrize(("u", "resultado", "prob"), [

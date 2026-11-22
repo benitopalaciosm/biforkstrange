@@ -214,7 +214,9 @@ def test_primera_pega_asigna_empresa_y_rubro_coherentes():
         e = p.vida.e
         if e["estado"] == "empleado" and e["empresa_id"] >= 0:
             emp = empresas.empresa(pq(), e["empresa_id"])
-            assert emp["rubro"] == e["rubro"] and emp["tipo"] == e["tipo_empleador"]
+            assert emp["tipo"] == e["tipo_empleador"]
+            # el Estado te deja en Administración pública aunque el organismo sea de otro sector (Sernac: Comercio)
+            assert emp["rubro"] == e["rubro"] or e["tipo_empleador"] == "publico"
             vistos += 1
     assert vistos > 0
 
