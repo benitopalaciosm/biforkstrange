@@ -131,6 +131,7 @@ function ComponentsGallery() {
   const [seg, setSeg] = useState<"a" | "b">("a");
   const [slider, setSlider] = useState(6);
   const [card, setCard] = useState(true);
+  const [tirada, setTirada] = useState(0);
   return (
     <div style={grid}>
       <Section title="Tipografía" note="Heading 1/2/3, Text, Meta, Pill, BigNumber, Narrative">
@@ -215,12 +216,15 @@ function ComponentsGallery() {
         </Row>
       </Section>
 
-      <Section title="Esperas" note="Espera (features/juego): una apuesta distinta en cada espera larga">
+      <Section title="Esperas" note="Espera (features/juego): un juego por sorteo; gira, se frena y queda en su resultado">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
           {VARIANTES_ESPERA.map((v) => (
-            <Espera key={v} variante={v} texto={v} />
+            <Espera key={`${v}-${tirada}`} variante={v} texto={v} />
           ))}
         </div>
+        <Button variant="quiet" onClick={() => setTirada((t) => t + 1)}>
+          Sortear otra vez
+        </Button>
       </Section>
 
       <Section title="Superficies" note="Panel, SunCard, NightBand">
