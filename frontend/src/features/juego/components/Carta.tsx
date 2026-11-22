@@ -599,6 +599,7 @@ export function Carta({
 
   /** La pregunta abierta en la hoja de abajo (a qué rubro, a qué región), o null si está cerrada. */
   const [hoja, setHoja] = useState<number | null>(null);
+  const [defectos, setDefectos] = useState<Internas>({});
   const primeraFaltante = (o: OpcionPendiente, valores: Internas) =>
     Math.max(0, o.elecciones_internas.findIndex((i) => valores[i.variable] === undefined));
 
@@ -613,16 +614,18 @@ export function Carta({
     setSel(id);
     setInternas({});
     setHoja(pide ? 0 : null);
+    // se anota antes de que tu elección vuelva a simular la opción y cambie sus parámetros
+    if (o) setDefectos(Object.fromEntries(o.elecciones_internas.map((i) => [i.variable, defectoDe(o, i.variable)]).filter(([, v]) => v !== undefined)));
   };
 
-  /** Lo que la simulación usa si no eliges: lo que ya trae la comparación, o lo más común. */
-  const porDefecto = (variable: string) => {
-    if (!opcion) return undefined;
-    const simulado = comparadas.find((c) => c.opcion === opcion.opcion)?.parametros?.[variable];
+  /** Lo que la simulación usa si no eliges: lo que trae la comparación, o lo más común. */
+  const defectoDe = (o: OpcionPendiente, variable: string) => {
+    const simulado = comparadas.find((c) => c.opcion === o.opcion)?.parametros?.[variable];
     if (simulado !== undefined) return simulado;
-    const alts = opcion.elecciones_internas.find((i) => i.variable === variable)?.alternativas ?? [];
+    const alts = o.elecciones_internas.find((i) => i.variable === variable)?.alternativas ?? [];
     return [...alts].sort((a, b) => (b.prob ?? 0) - (a.prob ?? 0))[0]?.valor;
   };
+  const porDefecto = (variable: string) => defectos[variable] ?? (opcion ? defectoDe(opcion, variable) : undefined);
 
   const elegirInterna = (variable: string, valor: string | number) => {
     if (!opcion) return;
