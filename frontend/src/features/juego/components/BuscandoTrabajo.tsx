@@ -4,6 +4,7 @@ import { GEMELOS } from "../api";
 import { TIPO_EMPLEADOR, plata } from "../textos";
 import type { Anio, Eleccion, Vista } from "../types";
 import { ErrorCaja, Salir } from "./piezas";
+import { ProgresoAnios } from "./graficos";
 import { Logo } from "./Logo";
 
 /**
@@ -113,6 +114,7 @@ export function BuscandoTrabajo({ vista, cargando, error, onElegir, onMirar, onS
         left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {MESES_LARGOS[b.mes - 1]}</Pill>}
         right={onSalir && <Salir onSalir={onSalir} />}
       />
+      <ProgresoAnios actual={anio} total={vista.anios} />
       <Stack gap={10}>
         <Meta>{b.informal ? "Trabajas informal y sigues buscando" : "Sin trabajo"} · el año pasa mes a mes</Meta>
         <Heading level={2} as="h1">

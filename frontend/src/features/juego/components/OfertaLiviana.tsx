@@ -3,6 +3,7 @@ import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack,
 import { EMPRESA_EJEMPLO, TIPO_EMPLEADOR, plata } from "../textos";
 import type { Eleccion, SinNovedad, Vista } from "../types";
 import { ErrorCaja, FranjaSinNovedad, Hoy, Salir } from "./piezas";
+import { ProgresoAnios } from "./graficos";
 import { Logo } from "./Logo";
 
 /**
@@ -39,6 +40,7 @@ export function OfertaLiviana({ vista, cargando, error, onMirar, onElegir, onSal
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {vista.estado.edad} años</Pill>} right={onSalir && <Salir onSalir={onSalir} />} />
+      <ProgresoAnios actual={anio} total={vista.anios} />
       <FranjaSinNovedad s={sinNovedad} />
       <Hoy e={vista.estado} />
       <Stack gap={10} className="vd-subir">
