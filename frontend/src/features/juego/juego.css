@@ -517,3 +517,4 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-leyenda-boton { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1.5px solid transparent; border-radius: 999px; background: transparent; color: var(--suave); font: 500 13px/18px var(--font); cursor: pointer; }
 .jg-leyenda-boton[aria-pressed="true"] { border-color: var(--linea); color: var(--tinta); }
 .jg-leyenda-boton:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.jg-sin-duda { min-height: 64px; font-size: 18px; }
