@@ -31,6 +31,12 @@ def catalogo():
              "area": f["area"]}
             for f in pq.filas("mifuturo_carreras")
         ],
+        # sueldo líquido de gente con la misma edad y estudios (ESI 2025): la referencia del slider de sueldo
+        "sueldos_ref": [
+            {"educacion": f["educacion"], "banda": f["banda"],
+             **{p: int(round(float(f[p]), -4)) for p in ("p25", "p50", "p75")}}  # redondeado a $10.000
+            for f in pq.filas("esi_perfil_edad_edu")
+        ],
     }
 
 
@@ -102,7 +108,8 @@ def perfil_desde_texto(body: TextoPerfilIn):
     Claude sin que estuviera literal (`inferido`). Con 503, el cliente muestra el formulario a mano.
     """
     try:
-        return perfil_ia.perfil_desde_texto(body.texto, date.today().isoformat())
+        pdf = perfil_ia.pdf_desde_base64(body.pdf) if body.pdf else None
+        return perfil_ia.perfil_desde_texto(body.texto, date.today().isoformat(), pdf=pdf)
     except perfil_ia.ModeloNoDisponible as error:
         raise HTTPException(503, str(error)) from error
     except ValueError as error:

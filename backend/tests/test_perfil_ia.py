@@ -1,3 +1,4 @@
+import base64
 """Perfil desde un texto. No se llama al modelo: se prueba lo que la app hace con lo que el modelo devuelve."""
 
 import pytest
@@ -14,7 +15,7 @@ def test_completar_usa_lo_leido_y_marca_lo_que_falta():
     r = perfil_ia.completar(LEIDO)
     assert r["perfil"]["edad"] == 33 and r["perfil"]["carrera_id"] == 166 and r["perfil"]["sueldo"] == 2_624_000
     assert r["perfil"]["riesgo"] == 5  # el texto no lo dice: valor por defecto
-    assert [s["campo"] for s in r["supuestos"]] == ["riesgo"]
+    assert [s["campo"] for s in r["supuestos"]] == ["riesgo", "ingles"]  # el CV no habla de idiomas
     assert r["inferido"] == LEIDO.inferido
 
 
@@ -22,7 +23,7 @@ def test_sin_sueldo_se_usa_la_mediana_de_su_edad_y_estudios():
     r = perfil_ia.completar(LEIDO.model_copy(update={"sueldo": None}))
     assert "sueldo" in [s["campo"] for s in r["supuestos"]]
     # ESI 2025, universitaria, 30-34 (valor literal de esi_perfil_edad_edu.csv)
-    assert r["perfil"]["sueldo"] == 1_097_145
+    assert r["perfil"]["sueldo"] == 1_100_000
 
 
 def test_valores_fuera_de_rango_o_inventados_se_descartan():
@@ -48,7 +49,7 @@ def test_sin_credenciales_ni_comando_se_avisa(monkeypatch):
 
 
 def test_api_perfil(client, monkeypatch):
-    monkeypatch.setattr(perfil_ia, "leer", lambda texto, hoy, pq=None: (LEIDO, "api"))
+    monkeypatch.setattr(perfil_ia, "leer", lambda texto, hoy, pq=None, pdf=None: (LEIDO, "api"))
     r = client.post("/api/juego/perfil", json={"texto": "Soy Camila..."})
     assert r.status_code == 200
     cuerpo = r.json()
@@ -58,13 +59,48 @@ def test_api_perfil(client, monkeypatch):
 
 
 def test_api_perfil_sin_modelo_da_503(client, monkeypatch):
-    def falla(texto, hoy, pq=None):
+    def falla(texto, hoy, pq=None, pdf=None):
         raise ModeloNoDisponible("sin credenciales")
 
     monkeypatch.setattr(perfil_ia, "leer", falla)
     assert client.post("/api/juego/perfil", json={"texto": "hola"}).status_code == 503
     assert client.post("/api/juego/perfil", json={"texto": ""}).status_code == 422
 
+
+
+def test_api_perfil_desde_pdf(client, monkeypatch):
+    recibido = {}
+
+    def leer(texto, hoy, pq=None, pdf=None):
+        recibido["pdf"] = pdf
+        return LEIDO, "api"
+
+    monkeypatch.setattr(perfil_ia, "leer", leer)
+    pdf = base64.b64encode(b"%PDF-1.7 cv de prueba").decode()
+    r = client.post("/api/juego/perfil", json={"pdf": f"data:application/pdf;base64,{pdf}"})
+    assert r.status_code == 200 and recibido["pdf"] == b"%PDF-1.7 cv de prueba"
+
+
+def test_api_perfil_rechaza_lo_que_no_es_pdf(client):
+    otro = base64.b64encode(b"PK\x03\x04 un zip").decode()
+    r = client.post("/api/juego/perfil", json={"pdf": otro})
+    assert r.status_code == 422 and "no es un PDF" in r.json()["detail"]
+    assert client.post("/api/juego/perfil", json={"pdf": "no es base64!!"}).status_code == 422
+
+
+def test_el_pdf_va_como_documento_a_la_api(monkeypatch):
+    llamada = {}
+
+    class Mensajes:
+        def parse(self, **k):
+            llamada.update(k)
+            return type("R", (), {"stop_reason": "end_turn", "parsed_output": LEIDO})()
+
+    monkeypatch.setattr(perfil_ia.anthropic, "Anthropic", lambda **k: type("C", (), {"messages": Mensajes()})())
+    perfil_ia._por_api("", "2026-11-21", perfil_ia.paquete(), b"%PDF-1.7")
+    bloques = llamada["messages"][0]["content"]
+    assert bloques[0]["type"] == "document" and bloques[0]["source"]["media_type"] == "application/pdf"
+    assert llamada["model"] == "claude-haiku-5-5" and llamada["thinking"] == {"type": "disabled"}
 
 # ── documento armado por el Claude de la persona ──────────────────────────────
 
@@ -89,7 +125,7 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
     assert r["perfil"] | {"ahorro": None} == {
         "edad": 33, "sexo": "m", "edu": "universitaria", "carrera_id": 166, "rubro": "Finanzas y seguros",
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
-        "antiguedad": 3, "region": "rm", "ahorro": None}
+        "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -103,6 +139,19 @@ def test_documento_con_valores_libres_o_malos():
     assert {"edad", "riesgo"} <= {s["campo"] for s in r["supuestos"]}
     assert any("riesgo" in a for a in r["avisos"]) and any("volar" in a for a in r["avisos"])
     assert r["duda"] is None
+
+
+def test_cargo_por_nombre_no_borra_el_aviso_de_otro_campo():
+    r = perfil_doc.leer_documento("```gemelo-laboral\ncargo: Senior\nantiguedad: tres\n```")
+    assert r["perfil"]["nivel"] == 2
+    assert not any(a.startswith("cargo:") for a in r["avisos"])
+    assert any(a.startswith("antigüedad:") for a in r["avisos"])
+
+
+def test_catalogo_trae_la_referencia_de_sueldos(client):
+    ref = client.get("/api/juego/catalogo").json()["sueldos_ref"]
+    fila = next(f for f in ref if f["educacion"] == "universitaria" and f["banda"] == "30-34")
+    assert fila["p25"] < fila["p50"] < fila["p75"] and fila["p50"] % 10_000 == 0
 
 
 def test_carrera_parecida_se_avisa_y_desconocida_queda_sin_carrera():
@@ -119,3 +168,41 @@ def test_texto_sin_bloque_no_es_documento():
 
 def test_api_prompt(client):
     assert "```gemelo-laboral" in client.get("/api/juego/prompt").json()["prompt"]
+
+
+def test_las_dudas_sugeridas_se_filtran_por_el_perfil():
+    leido = LEIDO.model_copy(update={
+        "dudas_sugeridas": [
+            perfil_ia.DudaSugerida(decision="volar_a_marte", por_que="no existe"),
+            perfil_ia.DudaSugerida(decision="emprender", por_que="Llevas años pensando en tu idea."),
+            perfil_ia.DudaSugerida(decision="emprender", por_que="repetida"),
+        ],
+        "retrato": "  Eres contadora en una startup.  ",
+    })
+    r = perfil_ia.completar(leido)
+    assert [d["decision"] for d in r["dudas_sugeridas"]] == ["emprender"]
+    assert r["dudas_sugeridas"][0]["por_que"] == "Llevas años pensando en tu idea."
+    assert r["retrato"] == "Eres contadora en una startup."
+
+
+def test_ingles_experiencia_y_empresa_del_sii():
+    leido = LEIDO.model_copy(update={"ingles": True, "anios_experiencia": 8, "empleadores": 3,
+                                     "tipo_empleador": None, "rubro": None,
+                                     "empresa_actual": "I. Municipalidad de Curicó"})
+    r = perfil_ia.completar(leido)
+    p = r["perfil"]
+    assert (p["ingles"], p["skill"], p["red"]) == (1, 55, 35)
+    # la empresa está en el SII: tamaño y rubro son dato, no supuesto
+    assert r["empresa"]["tamano"] == "grande" and p["tipo_empleador"] == "grande"
+    assert p["rubro"] == "Administración pública"
+    assert not {"tipo_empleador", "rubro", "ingles"} & {s["campo"] for s in r["supuestos"]}
+
+
+def test_sin_datos_nuevos_el_motor_usa_los_supuestos_de_siempre():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    e = estado_inicial(Perfil(), paquete())
+    assert (e["ingles"], e["skill"], e["red"]) == (0, 50, 30)
+    e = estado_inicial(Perfil(ingles=1, skill=70, red=50), paquete())
+    assert (e["ingles"], e["skill"], e["red"]) == (1, 70, 50)

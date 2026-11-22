@@ -6,7 +6,7 @@ import { CierrePantalla } from "./components/Cierre";
 import { ComoFunciona } from "./components/ComoFunciona";
 import { DudaPicker } from "./components/DudaPicker";
 import { Inicio } from "./components/Inicio";
-import { PerfilForm } from "./components/PerfilForm";
+import { Onboarding } from "./components/Onboarding";
 import { QuePaso } from "./components/QuePaso";
 import { useCatalogo } from "./hooks/useCatalogo";
 import { usePartida } from "./hooks/usePartida";
@@ -49,11 +49,11 @@ function Juego() {
     );
   }
   if (j.fase === "perfil") {
-    return <PerfilForm inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
+    return <Onboarding inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker dudas={j.dudas} sugerida={j.dudaSugerida} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
+      <DudaPicker dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
@@ -93,7 +93,11 @@ function Juego() {
       cargando={j.cargando}
       error={j.error}
       onContinuar={j.continuar}
-      onEmpezar={() => setTutorial("antes")}
+      onEmpezar={() => {
+        j.descartar();
+        j.irAPerfil();
+      }}
+      onComoFunciona={() => setTutorial("antes")}
     />
   );
 }

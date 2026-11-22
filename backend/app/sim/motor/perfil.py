@@ -32,6 +32,10 @@ class Perfil:
     antiguedad: int = 2
     region: str = "rm"
     ahorro: float | None = None
+    # Del CV, si se sabe (ver perfil_ia.completar); si no, los supuestos neutros de siempre
+    ingles: int = 0                       # 1 si trabaja en inglés (intermedio o más)
+    skill: int | None = None              # 0 a 100; sin dato, 50
+    red: int | None = None                # 0 a 100; sin dato, 30
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -75,8 +79,9 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         ocupacion=perfil.ocupacion if perfil.ocupacion is not None
         else (1 if perfil.nivel >= 3 else OCUPACION_POR_EDU[perfil.edu]),
         # supuestos neutros: las fórmulas del paquete están centradas en estos valores
-        red=30, skill=50, ambicion=50,
-        pareja="no", hijos=0, edad_hijo_menor=-1, ingles=0, isapre=0, propietario=0,
+        red=30 if perfil.red is None else perfil.red, skill=50 if perfil.skill is None else perfil.skill,
+        ambicion=50, ingles=perfil.ingles,
+        pareja="no", hijos=0, edad_hijo_menor=-1, isapre=0, propietario=0,
         madre_edad=perfil.edad + round(pq.k("EDAD_MADRE")),
         padre_edad=perfil.edad + round(pq.k("EDAD_MADRE")) + 2,
         area="", tipo_institucion="", semestres_restantes=0,
