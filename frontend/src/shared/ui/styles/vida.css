@@ -92,7 +92,7 @@
   --velo: rgb(0 0 0 / .62);
 }
 
-/* Fuera de las pantallas (márgenes en escritorio, /simulacion) también va el fondo del tema */
+/* Fuera de las pantallas (márgenes en escritorio) también va el fondo del tema */
 html { background: var(--papel); color: var(--tinta); }
 
 /* ───────── Base ───────── */
