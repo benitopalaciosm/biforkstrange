@@ -349,3 +349,10 @@ def test_al_emprender_la_empresa_queda_en_el_rubro_elegido():
     vida._aplicar([{"var": "estado", "op": "fija", "valor": "'fundador'"},
                    {"var": "rubro", "op": "fija", "valor": "rubro_emprendimiento"}], "prueba")
     assert vida.e["estado"] == "fundador" and vida.e["rubro"] == "Salud"
+
+
+def test_emprender_no_trae_una_oferta_de_empresa():
+    """Emprender fija el rubro de tu empresa: eso no es cambiarte de rubro con otro empleador."""
+    v = partida.vista(Perfil(edad=32, rubro="Comercio", tipo_empleador="pyme", nivel=2), 5, "emprender", [], 0)
+    assert v["pendiente"]["decision"] == "emprender"
+    assert all(o["empresa"] is None for o in v["pendiente"]["opciones"])
