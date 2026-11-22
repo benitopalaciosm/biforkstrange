@@ -4,6 +4,57 @@
  "descripcion": "Eventos que pasan cada año sin que nadie decida, con su probabilidad anual.",
  "eventos": [
   {
+   "id": "separacion_empleo",
+   "nombre": "Despido o fin de contrato",
+   "categoria": "trabajo",
+   "cuando": "y(estado == 'empleado', tipo_empleador != 'extranjero')",
+   "prob_anual": "k('P_SEPARACION', banda3) * k('MULT_DESPIDO_TIPO', tipo_empleador) * si(tipo_empleador == 'publico', 1, k('MULT_DESPIDO_RUBRO', rubro, 1)) * si(recesion, 1.4, 1) * tabla_o(1, 'empresas_catalogo', 'mult_despido', 'empresa_id', empresa_id)",
+   "resultados": [
+    {
+     "id": "cesante",
+     "prob": 1,
+     "texto": "Pierdes el trabajo.",
+     "tono": "malo",
+     "efectos": [
+      {
+       "var": "estado",
+       "op": "fija",
+       "valor": "'buscando'"
+      },
+      {
+       "var": "sueldo_ref",
+       "op": "fija",
+       "valor": "sueldo"
+      },
+      {
+       "var": "sueldo",
+       "op": "fija",
+       "valor": 0
+      },
+      {
+       "var": "ahorro",
+       "op": "suma",
+       "valor": "sueldo * min(antiguedad, 11)"
+      },
+      {
+       "var": "animo",
+       "op": "suma",
+       "valor": "k('ANIMO_CESANTIA')"
+      }
+     ],
+     "luego": "cesantia"
+    }
+   ],
+   "fuentes": [
+    "eps_2024",
+    "ine_flujos",
+    "elsoc",
+    "couch_placzek_2010"
+   ],
+   "calidad": "dato",
+   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo. Ya no hay recontrato automático el mismo año: quien encuentra trabajo rápido lo hace por las ofertas mes a mes (oferta_cesante). Tampoco se descuenta CAIDA_REEMPLEO al despedirte: las ofertas ya traen la baja de sueldo (78% a 106% de lo que ganabas, y menos desde el mes 7). Va primero entre los eventos del año: si pierdes el trabajo, ese año ya no te toca alza ni ascenso (antes podían salir las tres noticias juntas)."
+  },
+  {
    "id": "alza_anual",
    "nombre": "Alza anual del sueldo",
    "categoria": "trabajo",
@@ -89,57 +140,6 @@
     "baker_gibbs_1994"
    ],
    "calidad": "supuesto"
-  },
-  {
-   "id": "separacion_empleo",
-   "nombre": "Despido o fin de contrato",
-   "categoria": "trabajo",
-   "cuando": "y(estado == 'empleado', tipo_empleador != 'extranjero')",
-   "prob_anual": "k('P_SEPARACION', banda3) * k('MULT_DESPIDO_TIPO', tipo_empleador) * si(tipo_empleador == 'publico', 1, k('MULT_DESPIDO_RUBRO', rubro, 1)) * si(recesion, 1.4, 1) * tabla_o(1, 'empresas_catalogo', 'mult_despido', 'empresa_id', empresa_id)",
-   "resultados": [
-    {
-     "id": "cesante",
-     "prob": 1,
-     "texto": "Pierdes el trabajo.",
-     "tono": "malo",
-     "efectos": [
-      {
-       "var": "estado",
-       "op": "fija",
-       "valor": "'buscando'"
-      },
-      {
-       "var": "sueldo_ref",
-       "op": "fija",
-       "valor": "sueldo"
-      },
-      {
-       "var": "sueldo",
-       "op": "fija",
-       "valor": 0
-      },
-      {
-       "var": "ahorro",
-       "op": "suma",
-       "valor": "sueldo * min(antiguedad, 11)"
-      },
-      {
-       "var": "animo",
-       "op": "suma",
-       "valor": "k('ANIMO_CESANTIA')"
-      }
-     ],
-     "luego": "cesantia"
-    }
-   ],
-   "fuentes": [
-    "eps_2024",
-    "ine_flujos",
-    "elsoc",
-    "couch_placzek_2010"
-   ],
-   "calidad": "dato",
-   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo. Ya no hay recontrato automático el mismo año: quien encuentra trabajo rápido lo hace por las ofertas mes a mes (oferta_cesante). Tampoco se descuenta CAIDA_REEMPLEO al despedirte: las ofertas ya traen la baja de sueldo (78% a 106% de lo que ganabas, y menos desde el mes 7)."
   },
   {
    "id": "oferta_cesante",

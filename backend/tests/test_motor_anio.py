@@ -780,3 +780,16 @@ def test_clonar_con_los_mismos_dados_repite_la_vida_y_con_otros_no():
     # el año en curso ya tenía su recesión: los clones con otros dados la conservan
     assert all(o.historia[0]["recesion"] is True for o in otras)
     assert v.dados.gemelo != otras[0].dados.gemelo and otras[0].dados.semilla == 9
+
+
+def test_si_te_despiden_ese_anio_no_te_toca_alza_ni_ascenso():
+    """El despido va primero: antes salían juntas «Te ascienden» y «Pierdes el trabajo» el mismo año."""
+    d = DadosGuion({"evento:separacion_empleo@0": 0.0, "evento:separacion_empleo@0:res": 0.999, "evento:ascenso@0": 0.0})
+    v = vida(Perfil(edad=26, sueldo=1_500_000), d, tipo_empleador="pyme", rubro="Comercio")
+    v.iniciar_anio(con_cartas=False)
+    try:
+        v.avanzar(Guion(QUIETA))
+    except AssertionError:
+        pass  # quedó cesante y le toca decidir cómo busca: los eventos del año ya corrieron
+    eventos = [x["evento"] for x in v.registro["eventos"]]
+    assert eventos[0] == "separacion_empleo" and "ascenso" not in eventos and "alza_anual" not in eventos
