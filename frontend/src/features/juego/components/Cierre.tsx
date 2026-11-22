@@ -6,6 +6,7 @@ import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
 import { IntuicionResumen } from "./Apuesta";
 import { GenteComoTu } from "./GenteComoTu";
+import { CompartirResultado } from "./Compartir";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
 function resumenDelAnio(a: Anio): string {
@@ -140,6 +141,8 @@ export function CierrePantalla({
           <StationTimeline stations={vista.historia.map((a) => ({ when: `${aniosDe(a.edad, a.fin?.edad, edadInicial)} · ${a.edad} años`, what: resumenDelAnio(a) }))} />
         </div>
       </Stack>
+
+      {primera && <CompartirResultado comparacion={primera.comparacion} elegida={primera.elegida} sueldoFinal={cierre.sueldo_final} perfil={perfil} />}
 
       <Stack gap={14}>
         <Button onClick={onOtraVida}>Jugar otra vida</Button>
