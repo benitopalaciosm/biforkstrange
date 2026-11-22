@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getDudas, getMundo, getNarracion, getVista } from "../api";
 import type { Duda, DudaSugerida, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
+import { borradorInicial, useBorrador, type Borrador } from "./useBorrador";
 
 export type Fase = "inicio" | "perfil" | "duda" | "carta" | "paso" | "cierre";
 
@@ -18,7 +19,7 @@ export const PERFIL_INICIAL: Perfil = {
 
 const CLAVE = "gemelo-laboral:juego:v1";
 
-type Guardado = { perfil: Perfil; partida: Partida | null };
+type Guardado = { perfil: Perfil; partida: Partida | null; borrador?: Borrador };
 
 function leer(): Guardado | null {
   try {
@@ -26,7 +27,9 @@ function leer(): Guardado | null {
     if (!crudo) return null;
     const g = JSON.parse(crudo) as Guardado;
     if (!g || typeof g.perfil !== "object" || g.perfil === null) return null;
-    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null };
+    const borrador = g.borrador && typeof g.borrador === "object" ? { ...borradorInicial(PERFIL_INICIAL), ...g.borrador } : undefined;
+    if (borrador) borrador.perfil = { ...PERFIL_INICIAL, ...borrador.perfil };
+    return { perfil: { ...PERFIL_INICIAL, ...g.perfil }, partida: g.partida ?? null, borrador };
   } catch {
     return null;
   }
@@ -61,8 +64,11 @@ export function usePartida() {
   const turno = useRef(0);
   /** Lo elegido dentro de las opciones de la carta actual: los mundos se ven con eso mismo. */
   const parametrosCarta = useRef<ParametrosComparar>({});
+  /** El onboarding a medio armar: sobrevive a ir y volver de las dudas. */
+  const onboarding = useBorrador(guardado?.borrador ?? borradorInicial(guardado?.perfil ?? PERFIL_INICIAL));
+  const borrador = onboarding.borrador;
 
-  useEffect(() => guardar({ perfil, partida }), [perfil, partida]);
+  useEffect(() => guardar({ perfil, partida, borrador }), [perfil, partida, borrador]);
 
   /** Pide la vista de `p`; si llega (y nadie pidió otra cosa entremedio) corre `listo`. */
   const pedir = useCallback(async (p: Partida, listo: (v: Vista) => void, parametros?: ParametrosComparar, minimo = 0) => {
@@ -230,7 +236,7 @@ export function usePartida() {
   }, []);
 
   return {
-    fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error,
+    fase, perfil, partida, vista, previa, dudas, dudasSugeridas, cargando, recalculando, error, onboarding,
     irAInicio, irAPerfil, verDudas, empezar, empezarAlAzar, continuar, elegir, compararCon, verMundo, narrar, seguir, jugarDeNuevo, descartar,
   };
 }
