@@ -928,6 +928,18 @@
    ]
   },
   {
+   "id": "IA_PRIMA_ANIOS_MIN",
+   "valor": 2,
+   "unidad": "años",
+   "descripcion": "Años desde que construiste la habilidad de trabajar con IA hasta que puedes cobrar su prima al cambiarte. Card, Kluve y Weber (2018): los programas de capacitación casi no mueven el empleo ni el sueldo el primer año y lo hacen a los 2 o 3 años. Usar su cota baja es del equipo.",
+   "fuente": "card_kluve_weber_2018",
+   "calidad": "mixto",
+   "rango": [
+    2,
+    3
+   ]
+  },
+  {
    "id": "IA_PRIMA_PUBLICO",
    "valor": 0.29,
    "unidad": "fracción de IA_PRIMA_SKILL",

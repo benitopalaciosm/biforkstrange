@@ -196,7 +196,7 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
             "calidad": d["calidad"], "creencia_vs_dato": None, "evidencia": [],
             "sugerida": vida.sugerida,  # lo que más suele buscar la gente como tú este año
             # la propuesta del año: la decisión sugerida, con un dato del paquete que la respalda
-            "sugerencia": _sugerencia(pq, _sugerible(vida)),
+            "sugerencia": _sugerencia(vida, _sugerible(vida)),
             "opciones": [{**opcion_a_dict(o), "elecciones_internas": [], "ejemplo_real": None} for o in falta.opciones],
             "comparacion": None,
         }
@@ -234,7 +234,8 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
                                     f"Nadie te lo propuso: lo buscaste tú."}
                       if por_que["tipo"] == "buscada" else narrar(d["id"], contexto, semilla, vida.anio, ocurrencia)),
         "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
-        "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"), "evidencia": d.get("evidencia", []),
+        "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"),
+        "evidencia": gemelos.evidencia(vida, d),
         "opciones": [{**opcion_a_dict(o), "elecciones_internas": elecciones_internas(vida, o),
                       "empresa": ofertas[o.id], "respaldo": respaldo(vida.pq, o)}
                      for o in falta.opciones],
@@ -285,13 +286,14 @@ def _cita_corta(cita: str) -> str:
     return cita.split(",")[0].strip()
 
 
-def _sugerencia(pq: Paquete, decision_id: str | None) -> dict | None:
+def _sugerencia(vida: Vida, decision_id: str | None) -> dict | None:
     """La propuesta de un año tranquilo. No es un modelo nuevo: es la decisión que el motor ya sorteó según qué tan
     seguido le pasa a gente como tú (el peso del paquete), con la primera cifra de su evidencia."""
     if not decision_id:
         return None
+    pq = vida.pq
     d = pq.decisiones[decision_id]
-    evidencia = d.get("evidencia") or []
+    evidencia = gemelos.evidencia(vida, d)
     # primero la estadística oficial de qué tan seguido la gente hace esto (evidencia con uso "frecuencia");
     # si no hay, la primera cifra de su evidencia
     frecuencias = [e for e in evidencia if str(e.get("uso", "")).lower().startswith("frecuencia")]
