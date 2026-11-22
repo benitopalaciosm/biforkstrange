@@ -57,6 +57,8 @@ export type Perfil = {
   universidad_id?: string;
   /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
   rubro_sonado?: string | null;
+  /** 1 si busca su primer empleo (sin experiencia tras titularse): parte en la primera pega, no en cesantía. */
+  primer_empleo?: 0 | 1;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
