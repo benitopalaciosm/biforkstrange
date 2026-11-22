@@ -79,6 +79,8 @@ export type PerfilLeido = {
   dudas_sugeridas?: DudaSugerida[];
   /** Su empleador actual, si está en la nómina del SII. */
   empresa?: { nombre: string; tamano: string; rubro: string; trabajadores: number; fuente: string } | null;
+  /** Su empleador actual en el catálogo de empresas, si está: para mostrar su logo. */
+  empresa_catalogo?: { empresa_id: number; nombre: string; rubro: string; logo: boolean } | null;
   /** Lo que contó su Claude (solo por el prompt): temas que le apasionan y su proyecto paralelo. */
   intereses?: string[];
   proyecto?: string | null;

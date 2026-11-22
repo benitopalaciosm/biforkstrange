@@ -311,6 +311,28 @@ def oferta(vida, decision_id: str, opcion_id: str, ocurrencia: int) -> dict | No
     return ficha(vida.pq, emp, car)
 
 
+def _normal(texto: str) -> str:
+    """'Walmart Chile (Lider)' -> 'walmartchile'; sin tildes, mayúsculas ni signos."""
+    import unicodedata
+
+    texto = unicodedata.normalize("NFKD", texto.split("(")[0]).encode("ascii", "ignore").decode()
+    return "".join(c for c in texto.lower() if c.isalnum())
+
+
+def buscar(pq: Paquete, nombre: str | None) -> dict | None:
+    """La empresa del catálogo con ese nombre (o con el que va entre paréntesis), para mostrar su logo."""
+    if not nombre or len(nombre.strip()) < 2:
+        return None
+    buscado = _normal(nombre)
+    for emp in _catalogo(pq)["empresas"]:
+        alias = {_normal(emp["nombre"])}
+        if "(" in emp["nombre"]:
+            alias.add(_normal(emp["nombre"].split("(", 1)[1].rstrip(")")))
+        if buscado in alias:
+            return emp
+    return None
+
+
 def universidades(pq: Paquete) -> list[dict]:
     """Instituciones del catálogo (para el perfil y los selectores)."""
     try:

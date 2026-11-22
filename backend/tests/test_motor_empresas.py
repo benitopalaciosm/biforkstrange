@@ -317,3 +317,10 @@ def test_quien_trabaja_en_salud_publica_recibe_ofertas_del_estado_de_su_sector()
         if emp and emp["tipo"] == "publico":
             publicas.append(emp["rubro"])
     assert publicas and sum(r == "Salud" for r in publicas) / len(publicas) >= 0.8
+
+
+@pytest.mark.parametrize("nombre", ["WOM", "wom", "Lider", "Banco de Chile", "banco de chile"])
+def test_la_empresa_del_cv_se_encuentra_en_el_catalogo_para_mostrar_su_logo(nombre):
+    emp = empresas.buscar(pq(), nombre)
+    assert emp is not None and emp["logo"]
+    assert empresas.buscar(pq(), "Empresa que no existe SpA") is None

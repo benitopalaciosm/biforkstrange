@@ -555,6 +555,13 @@ export function Carta({
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
   // la situación y las ofertas que escribe Sonnet se muestran cuando llegan, nunca antes la plantilla
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
+  // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
+  const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
+  const quienEscribe = oferta
+    ? { id: oferta.empresa_id, nombre: oferta.nombre, rubro: oferta.rubro, logo: oferta.logo }
+    : vista.estado.empresa && (vista.estado.empresa_id ?? -1) >= 0
+      ? { id: vista.estado.empresa_id!, nombre: vista.estado.empresa, rubro: vista.estado.rubro, logo: true }
+      : null;
 
   useEffect(() => {
     setSel(null);
@@ -642,7 +649,10 @@ export function Carta({
           </span>
         )}
         {pendiente.narrativa && listo && (
-          <div className="jg-mensaje" key={llave}>
+          <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
+            {quienEscribe && (
+              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={36} />
+            )}
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />
               <i />
