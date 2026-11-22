@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Meta, Pill, Screen, ScreenHeader, Stack, Tag, Text, cssVars,
+  Button, ChevronLeftIcon, DecisionArt, DecisionList, Heading, IconButton, Pill, Screen, ScreenHeader, Stack, Tag, Text, cssVars,
 } from "@/shared/ui";
 import { GEMELOS, getEnJuego } from "../api";
-import { CALIDAD, arte, plata } from "../textos";
+import { arteDuda, mayuscula, plata, preguntaCorta } from "../textos";
 import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 
@@ -69,6 +69,7 @@ export function DudaPicker({
     : dudas;
   const simulando = cargando && dudas !== null;
   const enJuego = useMasEnJuego(perfil, dudas, sugeridas);
+  const conCv = sugerida !== null && (dudas?.some((d) => d.decision === sugerida) ?? false);
   return (
     <Screen gap={16}>
       <ScreenHeader
@@ -81,12 +82,7 @@ export function DudaPicker({
       />
       <Stack gap={6}>
         <Heading level={1}>¿Qué duda te trajo?</Heading>
-        <Text>
-          {sugerida && dudas?.some((d) => d.decision === sugerida)
-            ? "Por tu CV, estas son las que más te calzan. Es la primera carta de tu partida."
-            : "Elige la que más se parece. Es la primera carta de tu partida."}
-        </Text>
-        {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
+        <Text>{conCv ? "Por tu CV, las primeras te calzan más." : "Elige una. Es tu primera carta."}</Text>
       </Stack>
       {enJuego && (
         <div className="jg-en-juego" role="note">
@@ -101,17 +97,30 @@ export function DudaPicker({
       {dudas && dudas.length === 0 && <Text>Con este perfil no hay dudas disponibles. Vuelve y cámbialo.</Text>}
       {dudas && dudas.length > 0 && (
         <DecisionList<string>
+          tile
           label="Dudas posibles"
           value={sel}
           onChange={setSel}
           options={(orden ?? dudas).slice(0, todas ? undefined : VISIBLES).map((d) => ({
             id: d.decision,
-            art: <DecisionArt kind={arte(d.categoria)} />,
+            art: <DecisionArt kind={arteDuda(d.decision, d.categoria)} llenar />,
             title: d.nombre,
-            subtitle: porQue.get(d.decision) ?? d.pregunta,
-            tags: [...(enJuego?.decision === d.decision ? [{ label: "La más en juego", tone: "accent" as const }] : []), ...(porQue.has(d.decision) ? [{ label: "Para ti", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
+            subtitle: preguntaCorta(d.pregunta),
+            tags: [
+              enJuego?.decision === d.decision
+                ? { label: "La más en juego", tone: "accent" as const }
+                : porQue.has(d.decision)
+                  ? { label: "Para ti", tone: "sol" as const }
+                  : { label: mayuscula(d.categoria) },
+            ],
           }))}
         />
+      )}
+      {sel && porQue.get(sel) && (
+        <div className="vd-caja" style={{ gap: 4 }}>
+          <span className="vd-meta">Por qué te calza</span>
+          <Text size="sm">{porQue.get(sel)}</Text>
+        </div>
       )}
       {dudas && !todas && dudas.length > VISIBLES && (
         <Button variant="quiet" onClick={() => setTodas(true)}>

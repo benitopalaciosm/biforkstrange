@@ -19,7 +19,7 @@ select.jg-campo { appearance: none; background-image: linear-gradient(45deg, tra
 
 /* Opciones lado a lado */
 .jg-opciones { display: grid; grid-template-columns: repeat(var(--jg-n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; padding: 10px 8px 6px 0; }
-.jg-opciones[data-cargando="true"] { opacity: .55; transition: opacity .2s ease; }
+.jg-opciones[data-cargando="true"], .jg-opciones-cortas[data-cargando="true"] { opacity: .55; transition: opacity .2s ease; }
 @media (max-width: 759px) {
   /* En teléfono caben dos; con tres o cuatro se desliza hacia el lado */
   .jg-opciones[data-muchas="true"] { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(148px, 42%); overflow-x: auto; scroll-snap-type: x proximity; margin-right: -20px; padding-right: 20px; }

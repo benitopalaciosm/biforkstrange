@@ -34,15 +34,15 @@ export function RangoSueldo({ rango, tope, color = "var(--dinero)" }: { rango: R
       className="vd-pila"
       style={{ gap: 4 }}
       role="img"
-      aria-label={`Del 10% peor, ${plata(rango.p10)}, al 10% mejor, ${plata(rango.p90)}. El gemelo del medio: ${plata(rango.p50)}`}
+      aria-label={`10%: ${plata(rango.p10)}. Mediana: ${plata(rango.p50)}. 90%: ${plata(rango.p90)}.`}
     >
       <span className="vd-rango-pista">
         <i style={{ left: `${pos(rango.p10)}%`, width: `${Math.max(pos(rango.p90) - pos(rango.p10), 2)}%`, background: color }} />
         <b style={{ left: `${pos(rango.p50)}%` }} />
       </span>
       <span className="jg-extremos">
-        <span>{plata(rango.p10)}</span>
-        <span>{plata(rango.p90)}</span>
+        <span>10% · {plata(rango.p10)}</span>
+        <span>90% · {plata(rango.p90)}</span>
       </span>
     </span>
   );

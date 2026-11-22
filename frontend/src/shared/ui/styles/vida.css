@@ -125,6 +125,15 @@
 .vd-opcion-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .vd-opcion-check { position: absolute; top: -10px; right: -8px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 2px solid var(--tinta); border-radius: 50%; background: var(--acento); color: var(--sobre-acento); transform: scale(0); transition: transform 240ms var(--rebote); }
 .vd-opcion[aria-pressed="true"] .vd-opcion-check { transform: scale(1); }
+/* La elegida se abre: el detalle baja a su propia fila, bajo el dibujo y el texto */
+.vd-opcion--abre { flex-wrap: wrap; }
+.vd-opcion-detalle { flex-basis: 100%; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 2px 2px; border-top: 1.5px dashed var(--control); animation: vd-subir .35s var(--ease) both; }
+/* Grilla de dos con el dibujo grande arriba (elegir tu duda) */
+.vd-rejilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.vd-opcion--tile { flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 8px 12px; }
+.vd-opcion--tile .vd-opcion-dibujo { width: 100%; height: 104px; }
+.vd-opcion--tile .vd-opcion-titulo { font-size: 15px; }
+.vd-opcion--tile .vd-opcion-tags { margin-top: auto; padding-top: 3px; }
 
 .vd-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--niebla); color: var(--tinta); font: 600 11px/1 var(--mono); letter-spacing: .02em; white-space: nowrap; }
 .vd-tag--menos { background: transparent; border: 1.5px dashed var(--control); }

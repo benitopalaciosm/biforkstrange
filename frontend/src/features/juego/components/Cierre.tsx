@@ -92,7 +92,7 @@ export function CierrePantalla({
             la línea azul es el mundo del medio. Si tu línea sale de la franja, tuviste más (o menos) suerte que casi todos, o tus decisiones de
             después te llevaron por otro lado.
           </Info>
-          <Text size="sm">Y el sueldo final de cada opción, lado a lado. Cada barra va de la mala suerte a la buena suerte; la raya es el sueldo típico.</Text>
+          <Text size="sm">Y el sueldo final de cada opción, lado a lado. Cada barra va del 10% al 90% de los mundos; la raya es la mediana.</Text>
           <Stack gap={6}>
             <span className="vd-camino">
               <Tag tone="sol">Tú · {GEMELOS + 1}</Tag>
