@@ -79,7 +79,8 @@ class DudaSugerida(BaseModel):
 class PerfilLeido(BaseModel):
     """Lo que Claude encontró en el texto. `None` = el texto no lo dice."""
 
-    edad: int | None = Field(None, description="Edad actual en años.")
+    edad: int | None = Field(None, description="Edad actual en años, solo si el texto la dice así (\"33 años\").")
+    anio_nacimiento: int | None = Field(None, description="Año de nacimiento, solo si el texto lo dice.")
     sexo: Literal["h", "m"] | None = Field(None, description="h hombre, m mujer. Solo si el texto lo deja claro.")
     edu: Literal["media", "tecnica", "universitaria", "postgrado"] | None = Field(
         None, description="Nivel de estudios más alto TERMINADO.")
@@ -88,7 +89,18 @@ class PerfilLeido(BaseModel):
     rubro: str | None = Field(None, description="Rubro del empleador actual, exactamente como aparece en la lista.")
     tipo_empleador: Literal["grande", "pyme", "startup", "publico", "extranjero"] | None = None
     nivel: int | None = Field(None, description="Cargo actual: 0 junior, 1 semi senior, 2 senior, 3 jefatura, 4 gerencia.")
-    sueldo: int | None = Field(None, description="Sueldo LÍQUIDO mensual en pesos chilenos. Solo si el texto lo dice.")
+    # sueldo es el líquido mensual en pesos ya convertido: lo trae el documento de tu Claude, o lo calcula
+    # `completar` desde los cuatro campos literales de abajo. Claude no lo llena (no va en `esquema_api`).
+    sueldo: int | None = Field(None, description="Sueldo LÍQUIDO mensual en pesos chilenos.")
+    sueldo_monto: int | None = Field(
+        None, description="La cifra del sueldo tal como aparece, sin convertirla (\"$3,2 millones\" es 3200000; "
+                          "\"USD 4.000\" es 4000; \"60 UF\" es 60). Solo si el texto da una cifra.")
+    sueldo_moneda: Literal["CLP", "USD", "EUR", "UF", "otra"] | None = Field(
+        None, description="Moneda de esa cifra: CLP si son pesos chilenos (\"$\" en un texto chileno).")
+    sueldo_periodo: Literal["mensual", "anual"] | None = Field(
+        None, description="Si esa cifra es por mes o por año, solo si el texto lo dice.")
+    sueldo_tipo: Literal["liquido", "bruto"] | None = Field(
+        None, description="Si esa cifra es líquida o bruta, solo si el texto lo dice.")
     riesgo: int | None = Field(None, description="Tolerancia al riesgo de 0 a 10. Solo si el texto la declara.")
     ocupacion: int | None = Field(None, description="Grupo ocupacional (0 a 9) de su trabajo actual, según la lista.")
     antiguedad: int | None = Field(None, description="Años completos en su empleador actual.")
@@ -148,9 +160,11 @@ Cómo llenar cada campo:
 - Usa solo lo que el texto dice o lo que se deduce de él con seguridad. Si un campo no se puede \
 saber, déjalo en null. El simulador pone un valor por defecto y se lo muestra a la persona como \
 supuesto; un valor inventado por ti se vería como un dato suyo y ella no sabría que revisarlo.
+- No hagas cuentas con cifras ni fechas para llenar edad o sueldo: copia lo que dice el texto. Las \
+conversiones las hace la app y se las muestra a la persona como supuesto.
 - Los campos describen su situación ACTUAL: el trabajo que tiene hoy, no los anteriores.
-- edad: si no la dice pero hay año de nacimiento o de egreso del colegio, calcúlala con la fecha \
-de hoy que viene en el mensaje. No la deduzcas de los años de experiencia.
+- edad: solo si el texto dice su edad en años. Si trae el año de nacimiento, cópialo en anio_nacimiento \
+y deja edad en null. No la deduzcas de los años de experiencia ni del año de egreso.
 - edu: el nivel más alto terminado. Un magíster o doctorado terminado es "postgrado"; una carrera \
 de instituto profesional o centro de formación técnica es "tecnica"; estudios sin terminar no cuentan.
 - carrera_id: elige del catálogo la carrera que mejor calza con su título de pregrado, mirando \
@@ -163,9 +177,10 @@ chica; "startup", una empresa joven de base tecnológica que busca crecer rápid
 Estado; "extranjero", si trabaja desde Chile para una empresa de afuera.
 - nivel: guíate por el cargo y la responsabilidad, no por los años. Jefatura (3) es tener personas \
 a cargo; gerencia (4), dirigir un área o la empresa.
-- sueldo: solo si el texto da una cifra. Si la da bruta, anual o en otra moneda, conviértela a \
-líquido mensual en pesos (líquido ≈ 82% del bruto) y anótalo en "inferido". Nunca estimes un \
-sueldo a partir del cargo.
+- sueldo_monto, sueldo_moneda, sueldo_periodo, sueldo_tipo: solo si el texto da una cifra de su \
+sueldo actual o pretendido. Copia la cifra tal cual, sin convertirla: "$3,2 millones brutos al mes" es \
+3200000, CLP, mensual, bruto; "USD 60k al año" es 60000, USD, anual. Si el texto no dice si es bruto \
+o líquido, o si es mensual o anual, deja ese campo en null. Nunca estimes un sueldo a partir del cargo.
 - riesgo: solo si la persona habla de cuánto riesgo tolera o busca. No lo deduzcas de su historia.
 - ocupacion: el grupo del trabajo que HACE (su oficio), según la lista de grupos.
 - inferido: una frase corta por cada campo que no estaba literal en el texto, diciendo de dónde lo \
@@ -247,6 +262,9 @@ def _dudas(pq: Paquete) -> list[dict]:
 
 
 NO_SE = "?"
+# Claude copia el sueldo literal (monto, moneda, periodo, bruto o líquido); el líquido mensual en pesos lo calcula
+# `completar`, y lo marca como supuesto. Solo el documento de tu Claude trae `sueldo` ya en líquido mensual.
+NO_LO_LLENA_CLAUDE = {"sueldo"}
 
 
 @lru_cache(maxsize=1)
@@ -259,7 +277,9 @@ def esquema_api() -> type[BaseModel]:
     """
     campos = {}
     for nombre, f in PerfilLeido.model_fields.items():
-        args = [a for a in typing.get_args(f.annotation) if a is not type(None)]
+        if nombre in NO_LO_LLENA_CLAUDE:
+            continue
+        args =[a for a in typing.get_args(f.annotation) if a is not type(None)]
         base = args[0] if typing.get_origin(f.annotation) in (typing.Union, types.UnionType) and len(args) == 1 else f.annotation
         descripcion = f.description or ""
         if typing.get_origin(base) is typing.Literal:
@@ -372,6 +392,64 @@ def leer(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = No
         "No hay credenciales para llamar a Claude. Define ANTHROPIC_API_KEY o llena el perfil a mano.")
 
 
+# Lo que Claude copia literal del texto y la app convierte (no entra tal cual al perfil)
+LITERALES = {"anio_nacimiento", "sueldo_monto", "sueldo_moneda", "sueldo_periodo", "sueldo_tipo"}
+# Fuera de estos rangos, lo leído se descarta y queda el valor por defecto (los mismos de PerfilIn)
+LIMITES = {"edad": (18, 50), "nivel": (0, 4), "riesgo": (0, 10), "ocupacion": (0, 9), "antiguedad": (0, 40),
+           "sueldo": (1, 30_000_000)}
+# Pesos por unidad de cada moneda. El dólar y el líquido sobre bruto salen del paquete (USD, LIQUIDO);
+# el euro y la UF no están en el paquete: son supuestos del equipo (noviembre de 2026, redondeados).
+EUR = 1_050
+UF = 40_000
+
+
+def _anio(hoy: str | None) -> int:
+    from datetime import date
+
+    return int(hoy[:4]) if hoy else date.today().year
+
+
+def _pesos(n: float) -> str:
+    return f"${round(n):,}".replace(",", ".")
+
+
+def sueldo_liquido_mensual(leido: PerfilLeido, pq: Paquete) -> tuple[int | None, str | None]:
+    """Del sueldo que Claude copió literal (monto, moneda, periodo, bruto o líquido) al líquido mensual en pesos.
+
+    Devuelve (sueldo, frase). La frase dice cada conversión y cada supuesto (moneda, periodo o tipo que el
+    texto no dijo); es None si la cifra ya era líquida, mensual y en pesos. Sueldo None si no se puede convertir.
+    """
+    monto = leido.sueldo_monto
+    if not monto or monto <= 0:
+        return None, None
+    if leido.sueldo_moneda == "otra":
+        return None, "Tu sueldo está en una moneda que no convertimos: pusimos uno típico para revisar."
+    moneda = leido.sueldo_moneda or "CLP"
+    pasos = []
+    if leido.sueldo_moneda is None:
+        pasos.append("no dice la moneda: la tomamos como pesos")
+    pesos = {"CLP": 1, "USD": pq.k("USD"), "EUR": EUR, "UF": UF}[moneda]
+    sueldo = monto * pesos
+    if moneda != "CLP":
+        pasos.append(f"1 {moneda} = {_pesos(pesos)}")
+    if leido.sueldo_periodo == "anual":
+        sueldo /= 12
+        pasos.append("el anual dividido en 12")
+    elif leido.sueldo_periodo is None:
+        pasos.append("no dice si es mensual o anual: lo tomamos como mensual")
+    if leido.sueldo_tipo == "bruto":
+        sueldo *= pq.k("LIQUIDO")
+        pasos.append(f"el líquido es {round(pq.k('LIQUIDO') * 100)}% del bruto")
+    elif leido.sueldo_tipo is None:
+        pasos.append("no dice si es bruto o líquido: lo tomamos como líquido")
+    if not pasos:
+        return int(monto), None
+    sueldo = int(round(sueldo, -3))
+    dice = f"{monto:,}".replace(",", ".") + f" {moneda}" + "".join(
+        f" {x}" for x in (leido.sueldo_periodo, {"liquido": "líquido"}.get(leido.sueldo_tipo, leido.sueldo_tipo)) if x)
+    return sueldo, f"Sueldo líquido {_pesos(sueldo)} al mes: tu texto dice {dice} ({'; '.join(pasos)}; supuesto del equipo)."
+
+
 def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = None) -> dict:
     """Arma el perfil que entra al juego: lo leído, más un valor por defecto donde el texto no dijo nada.
 
@@ -388,16 +466,29 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
               "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
-              "ascensos_internos", "empresas_cerradas", *HISTORIA_LEIDA}
+              "ascensos_internos", "empresas_cerradas", *HISTORIA_LEIDA, *LITERALES}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
+    inferido = list(leido.inferido)
+    # lo que Claude copió literal y la app convierte: la cuenta y sus supuestos quedan a la vista
+    if datos["edad"] is None and leido.anio_nacimiento:
+        edad = _anio(hoy) - leido.anio_nacimiento
+        if LIMITES["edad"][0] <= edad <= LIMITES["edad"][1]:
+            datos["edad"] = edad
+            inferido.append(f"Edad {edad}: naciste en {leido.anio_nacimiento} (si aún no cumples años este año, "
+                            f"tienes {edad - 1}).")
+    if datos["sueldo"] is None and leido.sueldo_monto:
+        sueldo, frase = sueldo_liquido_mensual(leido, pq)
+        if frase:
+            inferido.append(frase)
+        if sueldo is not None and LIMITES["sueldo"][0] <= sueldo <= LIMITES["sueldo"][1]:
+            datos["sueldo"] = sueldo
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
     if datos["carrera_id"] is not None and not 0 <= datos["carrera_id"] <= 251:
         datos["carrera_id"] = None
     if datos.get("universidad_id") and datos["universidad_id"] not in {u["universidad_id"] for u in universidades(pq)}:
         datos["universidad_id"] = None
-    for campo, limites in (("edad", (18, 50)), ("nivel", (0, 4)), ("riesgo", (0, 10)), ("ocupacion", (0, 9)),
-                           ("antiguedad", (0, 40)), ("sueldo", (1, 30_000_000))):
+    for campo, limites in LIMITES.items():
         if datos[campo] is not None and not limites[0] <= datos[campo] <= limites[1]:
             datos[campo] = None
     for campo, valor in datos.items():
@@ -414,7 +505,6 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
         # la institución mueve ese sueldo solo aquí: si lo declaró, su prima ya está adentro
         prima = prima_universidad(pq, perfil.get("universidad_id") or "")
         perfil["sueldo"] = round(prima * pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]), -4)
-    inferido = list(leido.inferido)
     if leido.ingles is not None:
         perfil["ingles"] = int(leido.ingles)
     else:

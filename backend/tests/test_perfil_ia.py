@@ -493,6 +493,60 @@ def test_ritmo_de_cambio_absurdo_no_rompe():
     assert perfil_ia.completar(leido)["perfil"]["anos_por_empleo"] == 0.1
 
 
+def test_claude_copia_el_sueldo_literal_y_la_app_lo_convierte_a_la_vista():
+    # Claude no calcula: no hay un campo de sueldo ya convertido en lo que llena, solo lo literal
+    props = perfil_ia.esquema_api().model_json_schema()["properties"]
+    assert "sueldo" not in props and {"sueldo_monto", "sueldo_moneda", "sueldo_periodo", "sueldo_tipo",
+                                      "anio_nacimiento"} <= set(props)
+    assert "82%" not in perfil_ia.INSTRUCCIONES and "calcúlala" not in perfil_ia.INSTRUCCIONES
+    sin_sueldo = LEIDO.model_copy(update={"sueldo": None, "inferido": []})
+
+    def leer(**sueldo):
+        return perfil_ia.completar(sin_sueldo.model_copy(update=sueldo), hoy="2026-11-21")
+
+    # pesos, mensual y líquido: es el dato tal cual, sin frase de supuesto
+    r = leer(sueldo_monto=1_800_000, sueldo_moneda="CLP", sueldo_periodo="mensual", sueldo_tipo="liquido")
+    assert r["perfil"]["sueldo"] == 1_800_000 and r["inferido"] == []
+    # bruto: 82% (LIQUIDO del paquete), dicho como supuesto
+    r = leer(sueldo_monto=3_200_000, sueldo_moneda="CLP", sueldo_periodo="mensual", sueldo_tipo="bruto")
+    assert r["perfil"]["sueldo"] == 2_624_000
+    assert "sueldo" not in {s["campo"] for s in r["supuestos"]}  # vino del texto: no es un valor por defecto
+    assert any("82% del bruto" in f and "supuesto" in f for f in r["inferido"])
+    # dólares al año, brutos: 60.000 × 950 / 12 × 0,82
+    r = leer(sueldo_monto=60_000, sueldo_moneda="USD", sueldo_periodo="anual", sueldo_tipo="bruto")
+    assert r["perfil"]["sueldo"] == 3_895_000
+    assert any("1 USD = $950" in f and "dividido en 12" in f for f in r["inferido"])
+    # lo que el texto no dice se supone, y se dice
+    r = leer(sueldo_monto=1_500_000, sueldo_moneda="CLP")
+    assert r["perfil"]["sueldo"] == 1_500_000
+    assert any("lo tomamos como mensual" in f and "lo tomamos como líquido" in f for f in r["inferido"])
+    # una moneda que no se convierte: valor típico, marcado como supuesto
+    r = leer(sueldo_monto=5_000, sueldo_moneda="otra", sueldo_periodo="mensual", sueldo_tipo="liquido")
+    assert "sueldo" in {s["campo"] for s in r["supuestos"]} and any("no convertimos" in f for f in r["inferido"])
+    # el sueldo ya en líquido mensual (el documento de tu Claude) manda sobre lo literal
+    r = perfil_ia.completar(LEIDO.model_copy(update={"sueldo_monto": 99, "sueldo_moneda": "UF"}))
+    assert r["perfil"]["sueldo"] == 2_624_000
+
+
+def test_la_edad_desde_el_anio_de_nacimiento_la_calcula_la_app():
+    leido = LEIDO.model_copy(update={"edad": None, "anio_nacimiento": 1993, "inferido": []})
+    r = perfil_ia.completar(leido, hoy="2026-11-21")
+    assert r["perfil"]["edad"] == 33 and "edad" not in {s["campo"] for s in r["supuestos"]}
+    assert r["inferido"] == ["Edad 33: naciste en 1993 (si aún no cumples años este año, tienes 32)."]
+    r = perfil_ia.completar(leido.model_copy(update={"anio_nacimiento": 1950}), hoy="2026-11-21")
+    assert "edad" in {s["campo"] for s in r["supuestos"]}  # 76 años: fuera de rango, valor por defecto
+    # la edad dicha en años manda
+    assert perfil_ia.completar(leido.model_copy(update={"edad": 40}), hoy="2026-11-21")["perfil"]["edad"] == 40
+
+
+def test_desde_api_trae_el_sueldo_literal():
+    crudo = _respuesta_vacia_del_esquema() | {"sueldo_monto": 3_200_000, "sueldo_moneda": "CLP",
+                                              "sueldo_periodo": "?", "sueldo_tipo": "bruto", "anio_nacimiento": 1990}
+    leido = perfil_ia.desde_api(crudo)
+    assert (leido.sueldo, leido.sueldo_monto, leido.sueldo_moneda, leido.sueldo_periodo, leido.sueldo_tipo,
+            leido.anio_nacimiento) == (None, 3_200_000, "CLP", None, "bruto", 1990)
+
+
 def _respuesta_vacia_del_esquema() -> dict:
     """Lo que devolvería Claude con un texto que no dice nada: "no se sabe" en cada campo."""
     datos = {}
