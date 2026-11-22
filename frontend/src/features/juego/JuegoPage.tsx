@@ -90,7 +90,7 @@ function Fase({
   if (j.fase === "duda") {
     return (
       <DudaPicker semilla={j.semillaNueva} fuentes={j.fuentes} origenSugeridas={j.origenSugeridas} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} onSinDuda={() => j.empezarAlAzar(j.perfil)}
-        onVolverPartida={j.partida ? () => void j.continuar() : undefined} terminada={j.terminada} />
+        onVolverPartida={j.partida ? () => (j.vista ? j.seguir() : void j.continuar()) : undefined} terminada={j.terminada} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente?.decision === "anio_tranquilo") {
