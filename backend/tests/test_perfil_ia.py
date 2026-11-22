@@ -168,3 +168,18 @@ def test_texto_sin_bloque_no_es_documento():
 
 def test_api_prompt(client):
     assert "```gemelo-laboral" in client.get("/api/juego/prompt").json()["prompt"]
+
+
+def test_las_dudas_sugeridas_se_filtran_por_el_perfil():
+    leido = LEIDO.model_copy(update={
+        "dudas_sugeridas": [
+            perfil_ia.DudaSugerida(decision="volar_a_marte", por_que="no existe"),
+            perfil_ia.DudaSugerida(decision="emprender", por_que="Llevas años pensando en tu idea."),
+            perfil_ia.DudaSugerida(decision="emprender", por_que="repetida"),
+        ],
+        "retrato": "  Eres contadora en una startup.  ",
+    })
+    r = perfil_ia.completar(leido)
+    assert [d["decision"] for d in r["dudas_sugeridas"]] == ["emprender"]
+    assert r["dudas_sugeridas"][0]["por_que"] == "Llevas años pensando en tu idea."
+    assert r["retrato"] == "Eres contadora en una startup."

@@ -4,7 +4,7 @@ import {
 } from "@/shared/ui";
 import { GEMELOS } from "../api";
 import { CALIDAD, arte } from "../textos";
-import type { Duda } from "../types";
+import type { Duda, DudaSugerida } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 
 const VISIBLES = 4;
@@ -18,24 +18,30 @@ const prioridad = (id: string) => {
 /** Tu duda: la decisión que te trajo. Viene de la lista de caminos de "3 · Decisión del año" del kit. */
 export function DudaPicker({
   dudas,
-  sugerida = null,
+  sugeridas = [],
   cargando,
   error,
   onVolver,
   onElegir,
 }: {
   dudas: Duda[] | null;
-  /** La duda que trajo el documento de tu Claude: va primera y elegida. */
-  sugerida?: string | null;
+  /** Las dudas que le calzan según su CV, con el porqué: van primero y la primera queda elegida. */
+  sugeridas?: DudaSugerida[];
   cargando: boolean;
   error: string | null;
   onVolver: () => void;
   onElegir: (decision: string) => void;
 }) {
+  const porQue = new Map(sugeridas.map((s) => [s.decision, s.por_que]));
+  const rango = (id: string) => {
+    const i = sugeridas.findIndex((s) => s.decision === id);
+    return i < 0 ? sugeridas.length : i;
+  };
+  const sugerida = sugeridas[0]?.decision ?? null;
   const [sel, setSel] = useState<string | null>(sugerida);
   const [todas, setTodas] = useState(false);
   const orden = dudas
-    ? [...dudas].sort((a, b) => Number(b.decision === sugerida) - Number(a.decision === sugerida) || prioridad(a.decision) - prioridad(b.decision))
+    ? [...dudas].sort((a, b) => rango(a.decision) - rango(b.decision) || prioridad(a.decision) - prioridad(b.decision))
     : dudas;
   const simulando = cargando && dudas !== null;
   return (
@@ -52,7 +58,7 @@ export function DudaPicker({
         <Heading level={1}>¿Qué duda te trajo?</Heading>
         <Text>
           {sugerida && dudas?.some((d) => d.decision === sugerida)
-            ? "Tu Claude eligió la primera; cámbiala si quieres. Es la primera carta de tu partida."
+            ? "Por tu CV, estas son las que más te calzan. Es la primera carta de tu partida."
             : "Elige la que más se parece. Es la primera carta de tu partida."}
         </Text>
         {dudas && <Meta>{dudas.length} dudas posibles para tu perfil</Meta>}
@@ -68,8 +74,8 @@ export function DudaPicker({
             id: d.decision,
             art: <DecisionArt kind={arte(d.categoria)} />,
             title: d.nombre,
-            subtitle: d.pregunta,
-            tags: [...(d.decision === sugerida ? [{ label: "La eligió tu Claude", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
+            subtitle: porQue.get(d.decision) ?? d.pregunta,
+            tags: [...(porQue.has(d.decision) ? [{ label: "Para ti", tone: "sol" as const }] : []), { label: d.categoria }, { label: CALIDAD[d.calidad]?.nombre ?? d.calidad, tone: d.calidad === "supuesto" ? "minus" : "default" }],
           }))}
         />
       )}

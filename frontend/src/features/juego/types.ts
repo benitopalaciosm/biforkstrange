@@ -23,6 +23,8 @@ export type Perfil = {
   ahorro?: number | null;
 };
 
+export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
+
 /** Respuesta de `POST /api/juego/perfil`: el perfil que Claude llenó desde un texto. */
 export type PerfilLeido = {
   perfil: Perfil;
@@ -34,6 +36,10 @@ export type PerfilLeido = {
   avisos: string[];
   /** La duda que el documento trae, si es una posible para este perfil. */
   duda: string | null;
+  /** Hasta 3 dudas que le calzan a esta persona según su CV, con el porqué. Solo si Claude leyó un texto o PDF. */
+  dudas_sugeridas?: DudaSugerida[];
+  /** Lo que su gemelo sabe de ella, en una línea. */
+  retrato?: string | null;
   /** "documento" si venía en el formato del prompt; "api" o "comando" si Claude leyó un texto libre. */
   via: string;
 };

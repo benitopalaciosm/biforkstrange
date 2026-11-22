@@ -1,10 +1,10 @@
 import { type DragEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
-  Button, ChevronLeftIcon, Chip, Heading, IconButton, Panel, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Tag, Text,
+  Button, ChevronLeftIcon, Chip, Heading, IconButton, Meta, Panel, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, SunCard, Tag, Text,
 } from "@/shared/ui";
 import { ErrorApi, leerPerfil } from "../api";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
-import type { Catalogo, Perfil, Sexo } from "../types";
+import type { Catalogo, DudaSugerida, Perfil, Sexo } from "../types";
 import { Cargando, ErrorCaja } from "./piezas";
 import { Trayectoria, type EstadoLectura } from "./Trayectoria";
 
@@ -121,7 +121,7 @@ export function PerfilForm({
   /** Empieza la partida: la primera carta sale al azar, como todas. */
   onListo: (p: Perfil) => void;
   /** Para quien prefiere partir por una duda concreta. */
-  onElegirDuda: (p: Perfil, dudaSugerida: string | null) => void;
+  onElegirDuda: (p: Perfil, sugeridas: DudaSugerida[]) => void;
   cargando?: boolean;
   error?: string | null;
 }) {
@@ -132,12 +132,14 @@ export function PerfilForm({
   const idSueldo = useId();
   const [lectura, setLectura] = useState<EstadoLectura>({ fase: "nada" });
   /** La duda que trajo el documento de tu Claude: se propone en la pantalla siguiente. */
-  const [dudaSugerida, setDudaSugerida] = useState<string | null>(null);
+  const [sugeridas, setSugeridas] = useState<DudaSugerida[]>([]);
   /** Campos con valor por defecto que la persona todavía no revisa. */
   const [marcados, setMarcados] = useState<ReadonlySet<string>>(new Set());
   /** Campos que la persona tocó desde que le pidió a Claude leer: esos no se pisan cuando llega la respuesta. */
   const tocados = useRef(new Set<string>());
   const pedido = useRef(0);
+  /** "Lo que tu gemelo sabe de ti": una línea que arma Claude con hechos del CV. */
+  const [retrato, setRetrato] = useState<string | null>(null);
   /** De dónde vino lo que se está leyendo: el PDF de arriba o el texto del panel de Claude. */
   const [origen, setOrigen] = useState<"pdf" | "texto">("pdf");
   useEffect(() => () => void pedido.current++, []);
@@ -163,7 +165,8 @@ export function PerfilForm({
       setP((x) => ({ ...x, ...nuevos }));
       setBusca("");
       setMarcados(new Set(pendientes.map((x) => x.campo)));
-      setDudaSugerida(r.duda);
+      setSugeridas(r.dudas_sugeridas?.length ? r.dudas_sugeridas : r.duda ? [{ decision: r.duda, por_que: "La trajo tu Claude." }] : []);
+      setRetrato(r.retrato ?? null);
       setLectura({
         fase: "listo", inferido: r.inferido, supuestos: pendientes.map((x) => x.nombre), avisos: r.avisos ?? [],
         documento: r.via === "documento", duda: r.duda,
@@ -203,6 +206,13 @@ export function PerfilForm({
 
       {errorCatalogo && <ErrorCaja error={errorCatalogo} />}
       {!catalogo && !errorCatalogo && <Cargando>Cargando alternativas…</Cargando>}
+
+      {retrato && (
+        <SunCard className="jg-retrato">
+          <Meta>Lo que tu gemelo sabe de ti</Meta>
+          <Text>«{retrato}»</Text>
+        </SunCard>
+      )}
 
       <SubirCv estado={origen === "pdf" ? lectura : { fase: "nada" }} onPdf={(pdf) => void llenarConClaude({ pdf })} />
 
@@ -395,8 +405,8 @@ export function PerfilForm({
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}
         {cargando && <Cargando>Simulando tus mundos y sorteando tu primera carta…</Cargando>}
-        <Button onClick={() => onElegirDuda(p, dudaSugerida)} disabled={!catalogo || !sueldoValido || cargando}>
-          {dudaSugerida ? "Seguir con la duda que trajo tu Claude" : "Elegir mi duda"}
+        <Button onClick={() => onElegirDuda(p, sugeridas)} disabled={!catalogo || !sueldoValido || cargando}>
+          {sugeridas.length ? "Ver las dudas que te sugerimos" : "Elegir mi duda"}
         </Button>
         <Button variant="quiet" onClick={() => onListo(p)} disabled={!catalogo || !sueldoValido || cargando}>
           Que me toque una al azar
