@@ -44,6 +44,7 @@ OFERTA_MES = "oferta_cesante"   # su probabilidad la multiplica p_encontrar, com
 # Un evento que te deja sin trabajo a mitad de año (despido, cierre de la startup, reestructuración) sigue con
 # `luego: cesantia`: el mes en que pasa queda fijo (`mes_perdida`) y desde ahí se vive la cesantía.
 CESANTIA = "cesantia"
+DESPIDO = "separacion_empleo"
 MES_BUSCANDO = "mes_buscando"
 
 # La suerte en la pega (ascenso, despido, oferta, alza) va con el trabajo: dos vidas de un mismo mundo
@@ -776,6 +777,9 @@ class Vida:
         mensual = ev.get("paso") == "mes"
         sitio = f"evento:{id_}:mes{self.mes}" if mensual and self.mes else self._sitio_evento(id_)
         prob = 1.0
+        if id_ == DESPIDO and not directo:
+            # quién estaba en riesgo de despido este año (la validación lo cuenta): el despido es el primer evento
+            self.registro["empleado_en_eventos"] = self.e["estado"] == "empleado"
         if not directo:
             if not self.pq.evaluar(ev["cuando"], self.e):
                 return
