@@ -220,6 +220,19 @@ def prima_universidad(pq: Paquete, universidad_id: str) -> float:
         return 1.0
 
 
+def ocupacion_por_omision(perfil: "Perfil", pq: Paquete) -> int:
+    """Sin oficio en el perfil: jefaturas y gerencias son directivos (CIUO 1); si no, el oficio típico de su rubro con
+    su educación y su nivel (catálogo de cargos), y solo si nada calza, el de su educación. Antes era solo por
+    educación: quien trabaja en construcción con educación media quedaba como vendedor (CIUO 5)."""
+    if perfil.nivel >= 3:
+        return 1
+    from app.sim.motor.empresas import ocupacion_tipica
+
+    area = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id) if perfil.carrera_id >= 0 else ""
+    tipica = ocupacion_tipica(pq, perfil.rubro, perfil.edu, perfil.nivel, area) if perfil.rubro else None
+    return tipica if tipica is not None else OCUPACION_POR_EDU[perfil.edu]
+
+
 def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
     p = asdict(perfil)
     e: dict = {}
@@ -245,8 +258,7 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         empresa_fondos=perfil.empresa_fondos if perfil.estado == "fundador" else 0,
         primer_empleo=1 if busca_primer_empleo(perfil) else 0,
         anos_titulado=max(0, min(40, perfil.edad - EDAD_TITULO[perfil.edu])),
-        ocupacion=perfil.ocupacion if perfil.ocupacion is not None
-        else (1 if perfil.nivel >= 3 else OCUPACION_POR_EDU[perfil.edu]),
+        ocupacion=perfil.ocupacion if perfil.ocupacion is not None else ocupacion_por_omision(perfil, pq),
         # supuestos neutros: las fórmulas del paquete están centradas en estos valores
         red=30 if perfil.red is None else perfil.red,
         # sin dato del CV: la experiencia se estima como los años desde que se tituló (supuesto)

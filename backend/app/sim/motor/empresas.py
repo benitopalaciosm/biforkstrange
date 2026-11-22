@@ -210,6 +210,39 @@ def _por_bootcamp(c: dict, e: dict) -> bool:
     return bool(e.get("bootcamp")) and c.get("familia") in FAMILIAS_BOOTCAMP and EDU_ORDEN.get(c["edu_min"], 0) <= 1
 
 
+def ocupacion_tipica(pq: Paquete, rubro: str, edu: str, nivel: int, area: str = "") -> int | None:
+    """El oficio (CIUO a 1 dígito) más probable de quien trabaja en ese rubro con esa educación y ese nivel.
+
+    Recorre las líneas de trabajo de su carrera (si se sabe) y luego las de su rubro, en el orden de la tabla
+    `familias`, y toma del catálogo un cargo que podría tener (rubro, educación, nivel y, en las profesiones de
+    una sola carrera, que sea la suya): entre los que piden la educación más cercana a la suya, el oficio que
+    suma más peso. None si nada calza.
+    """
+    cat = _catalogo(pq)
+    familias = (cat["familias"].get(("area", area), []) if area else []) + cat["familias"].get(("rubro", rubro), [])
+    nivel_edu = EDU_ORDEN.get(edu, 0)
+    respaldo = None  # la primera línea con algo, si ninguna pide una educación cercana a la suya
+    for familia in familias:
+        posibles = [c for c in cat["cargos"]
+                    if c.get("familia") == familia and c["peso"] > 0
+                    and (c["_rubros"] is None or rubro in c["_rubros"])
+                    and EDU_ORDEN.get(c["edu_min"], 0) <= nivel_edu and c["nivel_min"] <= nivel <= c["nivel_max"]
+                    and not (c["_areas"] is not None and len(c["_areas"]) == 1 and area not in c["_areas"])]
+        if posibles:
+            # los cargos que piden la educación más cercana a la suya (un universitario no queda de peoneta), y de
+            # ellos el oficio que suma más peso (albañil, electricista y soldador son todos operarios, CIUO 7)
+            tope = max(EDU_ORDEN.get(c["edu_min"], 0) for c in posibles)
+            por_oficio: dict[int, float] = {}
+            for c in posibles:
+                if EDU_ORDEN.get(c["edu_min"], 0) == tope:
+                    por_oficio[int(c["ciuo08_1d"])] = por_oficio.get(int(c["ciuo08_1d"]), 0.0) + c["peso"]
+            oficio = max(por_oficio, key=por_oficio.get)
+            if tope >= nivel_edu - 1:  # un universitario en hotelería no queda de camarera si el rubro tiene más
+                return oficio
+            respaldo = oficio if respaldo is None else respaldo
+    return respaldo
+
+
 def compatibles(pq: Paquete, emp: dict, e: dict) -> list[dict]:
     """Cargos que la empresa le ofrecería a esta persona.
 
