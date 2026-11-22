@@ -227,6 +227,10 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
     if perfil.practica and (perfil.estado == "estudiando" or e["primer_empleo"]):
         e["practica"] = perfil.practica  # solo pesa en su primera pega
+    if perfil.estado == "fundador" and perfil.sueldo > 0:
+        # ya tiene empresa: su ganancia parte de lo que declaró (el primer año gana eso en la mediana) y crece
+        # con los años como la de cualquier empresa; MICRO_MEDIANA queda para quien recién emprende
+        e["base_empresa"] = float(perfil.sueldo) / (1 + e["empresa_anos"] / 4)
     if perfil.ascensos_por_ano is not None:
         e["prob_ascenso_extra"] = ascenso_extra(perfil.ascensos_por_ano, perfil.nivel, pq)  # sin dato, 0 (estado.json)
     propios = parametros_propios(perfil, pq)
