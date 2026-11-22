@@ -5,7 +5,6 @@ import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
 import { IntuicionResumen } from "./Apuesta";
-import { GenteComoTu } from "./GenteComoTu";
 import { CompartirResultado } from "./Compartir";
 
 /** Lo más importante del año, en una línea, para la línea de tiempo. */
@@ -26,7 +25,7 @@ export function CierrePantalla({
   sueldoInicial: number;
   onOtraVida: () => void;
   onCambiarPerfil: () => void;
-  /** El perfil con que se jugó: filtra los datos de "gente como tú". */
+  /** El perfil con que se jugó: para el retrato de la tarjeta que se comparte. */
   perfil?: Perfil;
 }) {
   const cierre = vista.cierre!;
@@ -131,7 +130,6 @@ export function CierrePantalla({
       )}
       {!primera && <Text size="sm">Tu primera decisión tenía demasiadas opciones para simular los mundos, así que aquí no hay con quién compararte.</Text>}
 
-      {perfil && <GenteComoTu perfil={perfil} elegida={elegida} sueldoInicial={sueldoInicial} anios={primera?.comparacion.anios ?? vista.anios} />}
 
       <Stack as="section" gap={10}>
         <Heading level={3} as="h2">

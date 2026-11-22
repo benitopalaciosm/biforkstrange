@@ -338,16 +338,3 @@ export type DudaEnJuego = {
 /** Respuesta de `POST /api/juego/dudas-en-juego`. `mas_en_juego` es null si hay menos de dos dudas. */
 export type EnJuego = { gemelos: number; semilla: number; mas_en_juego: string | null; dudas: DudaEnJuego[] };
 
-/** Un dato real de chilenos como tú (`/api/juego/gente-como-tu`): una celda de la ESI o la EPS, con su fuente. */
-export type DatoReal = {
-  clave: "sueldo" | "cambio_de_pega" | "cesantia";
-  titulo: string;
-  frase: string;
-  cifra: number;
-  unidad: string;
-  /** Observaciones o personas detrás del dato. */
-  n: number;
-  tabla: string;
-  fuente: string;
-  fuente_url: string | null;
-};

@@ -140,28 +140,3 @@ def dudas_en_juego(body: EnJuegoIn):
         return peso.en_juego(body.perfil.a_perfil(), tuple(body.dudas), body.semilla, body.gemelos)
     except KeyError as error:
         raise HTTPException(422, f"no existe la decisión {error}") from error
-
-
-def _gente_como_tu(edad: int, sexo: str, edu: str, rubro: str, estado: str) -> dict:
-    from app.sim.motor import gente
-
-    return {"datos": gente.datos(edad, sexo, edu, rubro, estado)}
-
-
-@router.post("/gente-como-tu")
-def gente_como_tu(body: DudasIn):
-    """Hasta 3 datos reales de chilenos como tú (ESI, EPS), cada uno con su fuente. No simula nada."""
-    p = body.perfil
-    return _gente_como_tu(p.edad, p.sexo, p.edu, p.rubro, p.estado)
-
-
-@router.get("/gente-como-tu")
-def gente_como_tu_en_la_url(
-    edad: int = Query(30, ge=18, le=60),
-    sexo: str = Query("m", pattern="^[hm]$"),
-    edu: str = Query("universitaria", pattern="^(media|tecnica|universitaria|postgrado)$"),
-    rubro: str = "",
-    estado: str = "empleado",
-):
-    """Lo mismo que el POST, con el perfil en la URL (para abrirlo desde el navegador)."""
-    return _gente_como_tu(edad, sexo, edu, rubro, estado)
