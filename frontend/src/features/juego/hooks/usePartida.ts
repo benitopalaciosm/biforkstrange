@@ -253,13 +253,15 @@ export function usePartida() {
       const siguiente: Partida = { ...partida, elecciones: [...partida.elecciones, eleccion] };
       parametrosCarta.current = {};
       const antes = vista;
+      // en un año tranquilo, buscar algo abre esa decisión de inmediato: no hay dado que tirar todavía
+      const busca = eleccion.decision === "anio_tranquilo" && eleccion.opcion !== "seguir";
       setCargando(true);
       void pedir(siguiente, (v) => {
         setPartida(siguiente);
         setPrevia(antes);
         setVista(v);
-        setFase("paso");
-      }, undefined, sinMovimiento() ? 0 : 2400); // sin animaciones, no se espera al dado
+        setFase(busca && v.pendiente ? "carta" : "paso");
+      }, undefined, busca || sinMovimiento() ? 0 : 2400); // buscando o sin animaciones, no se espera al dado
     },
     [partida, vista, pedir],
   );

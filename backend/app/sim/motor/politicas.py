@@ -12,7 +12,7 @@ Los pesos son supuestos del equipo, calibrados contra las frecuencias de las
 encuestas (ver `validacion.py`); no son datos.
 """
 
-from app.sim.motor.motor import FaltaEleccion, Opcion, Vida
+from app.sim.motor.motor import TRANQUILO, FaltaEleccion, Opcion, Vida
 from app.sim.motor.paquete import ref as referencia
 
 # Respuesta cuando la vida obliga a elegir: {decisión: {opción: peso}}
@@ -285,6 +285,9 @@ class _PorPesos:
 
     def elegir(self, vida: Vida, decision: dict, opciones: list[Opcion]) -> tuple[str, dict]:
         id_ = decision["id"]
+        if id_ == TRANQUILO:
+            # como la gente real: considera lo que suele buscar alguien como él, y esa decisión la responde con sus pesos
+            return (vida.sugerida if any(o.id == vida.sugerida for o in opciones) else "seguir"), {}
         ocurrencia = sum(1 for x in (vida.registro or {}).get("decisiones", []) if x["decision"] == id_)
         sitio = f"elige:{id_}" + (f":{ocurrencia}" if ocurrencia else "")
         if decision.get("opciones_desde_tabla") and not decision["opciones"]:
@@ -294,6 +297,16 @@ class _PorPesos:
         else:
             tabla = next((t for t in (self.pesos, *self.tablas) if id_ in t), {})
             pesos = _pesos(decision, opciones, {id_: tabla.get(id_, {})})
+        if id_ == "oferta_externa":
+            # la gente ve el sueldo de la oferta antes de decidir: acepta más seguido la que paga más
+            # la chance de aceptar sube exactamente ACEPTA_SI_PAGA_MAS veces (no el peso, que compite con las demás)
+            for i, o in enumerate(opciones):
+                if o.id == "cambiar" and vida.resultado_previsto(id_, "cambiar") == "mejora":
+                    total = sum(pesos)
+                    a = pesos[i] / total if total > 0 else 0.0
+                    q = min(0.95, a * vida.pq.k("ACEPTA_SI_PAGA_MAS"))
+                    if 0 < a < 1:
+                        pesos[i] = q * (total - pesos[i]) / (1 - q)
         opcion = opciones[vida.dados.elegir(vida.anio, sitio, pesos)]
         return opcion.id, parametros_al_azar(vida, opcion, sitio)
 

@@ -146,7 +146,7 @@ export function Onboarding({
                 ))}
               </div>
             ) : (
-              <Pill>Tu gemelo</Pill>
+              <Pill>Tu copia</Pill>
             )}
           </Row>
         }
@@ -283,6 +283,16 @@ export function Onboarding({
               Mediana para tu edad y estudios: <strong>{pesos(ref.p50)}</strong>
             </Text>
           )}
+          <Slider
+            label="¿Hasta qué edad quieres jugar?"
+            value={Math.min(60, Math.max(p.edad + 1, p.edad_final ?? p.edad + 10))}
+            min={p.edad + 1}
+            max={60}
+            step={1}
+            color="var(--carrera)"
+            onChange={(n) => set("edad_final", n)}
+            display={`${p.edad_final ?? p.edad + 10} años`}
+          />
           <Stack gap={8}>
             <span className="jg-etiqueta">¿Podrías trabajar en inglés?</span>
             <Segmented<string>
@@ -359,7 +369,7 @@ function Entrada({
   return (
     <>
       <Stack gap={6} className="ob-entra">
-        <Heading level={1}>Armemos a tu gemelo.</Heading>
+        <Heading level={1}>Armemos tu copia.</Heading>
         <Text>Súmale lo que quieras: elige una o combínalas.</Text>
       </Stack>
 
@@ -422,7 +432,7 @@ function Entrada({
           <span className="ob-claude-chispa ob-icono" aria-hidden="true">✦</span>
           <span className="ob-fuente-texto">
             <strong>Tu Claude o ChatGPT</strong>
-            <span className="ob-chico">{claudeListo ? "Listo. Lo que contó ya está en tu gemelo." : "Sabe de tus proyectos y lo que te apasiona."}</span>
+            <span className="ob-chico">{claudeListo ? "Listo. Lo que contó ya está en tu copia." : "Sabe de tus proyectos y lo que te apasiona."}</span>
           </span>
           <Marca listo={claudeListo} accion={claudeAbierto ? "Cerrar" : "Abrir"} />
         </button>
@@ -524,7 +534,7 @@ function Ficha({
     <div className="ob-ficha">
       <Silueta lleno={Math.min(visibles.length + intereses.length, 7) / 7} />
       <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
-        <Meta>{cosas.length > 0 ? `Tu gemelo sabe ${cosas.length} ${cosas.length === 1 ? "cosa" : "cosas"} de ti` : "Tu gemelo"}</Meta>
+        <Meta>{cosas.length > 0 ? `Tu copia sabe ${cosas.length} ${cosas.length === 1 ? "cosa" : "cosas"} de ti` : "Tu copia"}</Meta>
         {retrato && <Text size="sm" className="ob-retrato">«{retrato}»</Text>}
         {cosas.length === 0 && <span className="ob-chico">Se va armando con cada respuesta.</span>}
         {cosas.length > 0 && (
@@ -627,7 +637,7 @@ function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string
         </div>
       )}
       <Button onClick={() => onTexto(texto.trim())} disabled={!texto.trim() || leyendo}>
-        {leyendo ? "Leyendo…" : "Sumar a mi gemelo"}
+        {leyendo ? "Leyendo…" : "Sumar a mi copia"}
       </Button>
     </Stack>
   );

@@ -48,7 +48,10 @@ export function DudaPicker({
   onElegir,
   onReintentarDudas,
   onReintentar,
+  onSinDuda,
 }: {
+  /** Empezar sin una duda: la vida decide qué te llega el primer año, como en cualquier otro. */
+  onSinDuda?: () => void;
   /** De dónde salió cada dato del perfil: lo que falta es supuesto. */
   fuentes?: Record<string, string> | null;
   /** De dónde vienen las sugeridas: del CV, o de lo que contaste a tu Claude. */
@@ -142,6 +145,11 @@ export function DudaPicker({
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
           {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} mundos` : "Elige una duda"}
         </Button>
+        {onSinDuda && !simulando && (
+          <Button variant="quiet" onClick={onSinDuda} disabled={cargando}>
+            Empezar sin una duda: que la vida decida
+          </Button>
+        )}
       </div>
     </Screen>
   );

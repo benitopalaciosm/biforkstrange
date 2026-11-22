@@ -10,6 +10,7 @@ y un generador de estados que no pasa por `perfil.py`.
 
 import math
 import os
+import re
 import random
 
 from app.sim.motor.azar import Dados
@@ -68,10 +69,16 @@ class DadosGuion:
         self._reales = Dados(semilla, gemelo)
 
     def u(self, anio: int, sitio: str) -> float:
-        self.pedidos.append((anio, sitio))
+        self.pedidos.append((anio, re.sub(r"@\d+", "", sitio)))  # los tests nombran los sitios sin el número de pega
         if (anio, sitio) in self.guion:
             return self.guion[(anio, sitio)]
-        return self.guion.get(sitio, self.defecto)
+        if sitio in self.guion:
+            return self.guion[sitio]
+        # la suerte de la pega lleva el número de pega (`evento:ascenso@2`); el guion la nombra sin él
+        sin_pega = re.sub(r"@\d+", "", sitio)
+        if (anio, sin_pega) in self.guion:
+            return self.guion[(anio, sin_pega)]
+        return self.guion.get(sin_pega, self.defecto)
 
     def flujo(self, anio: int, sitio: str):
         return self._reales.flujo(anio, sitio)

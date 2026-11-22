@@ -28,7 +28,7 @@ export function LeyendaCalidad() {
  * Rango de sueldos de los gemelos de una opción, del 10% peor al 10% mejor, con la raya en el gemelo del medio.
  * Usa la pista de <RangeCompare> del kit, pero en pesos y con una escala común (`tope`) para todas las opciones.
  */
-export function RangoSueldo({ rango, tope, color = "var(--dinero)" }: { rango: Rango; tope: number; color?: string }) {
+export function RangoSueldo({ rango, tope, color = "var(--dinero)", enPalabras = false }: { rango: Rango; tope: number; color?: string; enPalabras?: boolean }) {
   const pos = (n: number) => (tope > 0 ? Math.min(100, Math.max(0, (n / tope) * 100)) : 0);
   return (
     <span
@@ -41,10 +41,16 @@ export function RangoSueldo({ rango, tope, color = "var(--dinero)" }: { rango: R
         <i style={{ left: `${pos(rango.p10)}%`, width: `${Math.max(pos(rango.p90) - pos(rango.p10), 2)}%`, background: color }} />
         <b style={{ left: `${pos(rango.p50)}%` }} />
       </span>
-      <span className="jg-extremos">
-        <span>10% · {plata(rango.p10)}</span>
-        <span>90% · {plata(rango.p90)}</span>
-      </span>
+      {enPalabras ? (
+        <span className="jg-chico">
+          8 de cada 10 mundos terminan entre {plata(rango.p10)} y {plata(rango.p90)}
+        </span>
+      ) : (
+        <span className="jg-extremos">
+          <span>10% · {plata(rango.p10)}</span>
+          <span>90% · {plata(rango.p90)}</span>
+        </span>
+      )}
     </span>
   );
 }
@@ -101,6 +107,15 @@ export function AvisoPerfil({ fuentes }: { fuentes: Record<string, string> | nul
           : `No nos dijiste tu ${enLista(supuestos.map((k) => CAMPOS_PERFIL[k]))}: ahí usamos un supuesto.`}
       </span>
     </div>
+  );
+}
+
+/** Salir de la partida: vuelve a la portada, donde se puede continuar o empezar otra. La partida no se borra. */
+export function Salir({ onSalir }: { onSalir: () => void }) {
+  return (
+    <button type="button" className="jg-ayuda jg-salir" onClick={onSalir}>
+      Salir
+    </button>
   );
 }
 
