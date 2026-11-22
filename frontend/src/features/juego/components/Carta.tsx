@@ -209,6 +209,7 @@ function OpcionConGemelos({
   const de = total || 100;
   const veredicto = !o.es_base ? contraBase(o, base)?.frase : null;
   const cesantia = Math.round(o.paso_por_cesantia * 100);
+  const sube = Math.round((o.sube_de_cargo ?? 0) * 100);
   return (
     <DecisionCard
       art={<DecisionArt kind={arteOpcion(decision, o.opcion, categoria)} />}
@@ -250,6 +251,10 @@ function OpcionConGemelos({
             <span role="listitem">
               <span>Cierras algún año buscando trabajo</span>
               <b>{cesantia === 0 ? "en ningún mundo" : `en ${cesantia} de 100`}</b>
+            </span>
+            <span role="listitem">
+              <span>Terminas en un cargo más alto</span>
+              <b>{sube === 0 ? "en ningún mundo" : `en ${sube} de 100`}</b>
             </span>
           </span>
           {veredicto && <span className="jg-frase">{veredicto}</span>}

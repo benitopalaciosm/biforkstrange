@@ -370,7 +370,7 @@ def _tabla_gemelos(comp: dict) -> list[str]:
             ("1 de cada 10 gana menos de", [_plata(o["sueldo"]["p10"]) for o in opciones]),
             ("1 de cada 10 gana más de", [_plata(o["sueldo"]["p90"]) for o in opciones]),
             ("Algún año buscando pega", [_de_cada_cien(o["paso_por_cesantia"]) for o in opciones]),
-            ("Cargo más probable", [o["cargo_mas_probable"] for o in opciones]),
+            ("Terminan en un cargo más alto", [_de_cada_cien(o["sube_de_cargo"]) for o in opciones]),
         ]
         if desde:
             lineas.append("")
