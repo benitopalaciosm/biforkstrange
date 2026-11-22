@@ -37,7 +37,7 @@ flowchart TD
 3. **Los 100 mundos.** Antes de elegir, el motor juega 100 mundos. En cada uno, tu copia vive 10 años una vez por cada opción.
 4. **La comparación.** Cada punto de la nube es un mundo, pintado con la opción que ganó ahí. Tocas un punto y ves qué pasó en ese mundo. Cada opción muestra sus resultados posibles con su probabilidad ("te sube el sueldo: 54 de 100").
 5. **Tu resultado.** Eliges y te toca uno de los resultados de esa opción, según su probabilidad.
-6. **El año.** Pasan los eventos que nadie decide: alza anual, ascenso, despido, una oferta que llega, una recesión.
+6. **El año.** Pasan los eventos que nadie decide: alza anual, ascenso, despido, una oferta que llega, una recesión. Al cerrarlo ves cómo cambió tu sueldo, línea por línea, y lo que has ganado en sueldos desde que empezaste.
 7. **El cierre.** Tras 10 años comparas tu vida con los 100 mundos.
 
 ## Lo que pasa por dentro
@@ -49,6 +49,14 @@ Todo lo que decide el azar se identifica por mundo, año y sitio (por ejemplo, "
 ### Tu copia decide solo la primera
 
 En cada mundo, la copia toma la opción que se compara y después no recibe más decisiones al azar. Si la vida la obliga a decidir (la despiden, le llega una oferta), responde como responde la gente real: por ejemplo, ante una oferta, 34% se cambia, 9% negocia y 57% se queda. Si tu CV muestra que te cambias seguido, tu copia acepta más ofertas. Esos pesos están en `politicas.py` (`PESOS_FORZADAS`, `PESOS_CARTAS` y `pesos_personales`). Así la comparación mide el efecto de esa decisión, no de diez decisiones encadenadas.
+
+### Sin trabajo, el año pasa mes a mes
+
+Si te despiden, decides cómo enfrentarlo (carta `cesantia`): buscar trabajo, trabajar informal mientras buscas, un bootcamp o emprender. Si buscas (o trabajas informal y sigues postulando), el resto del año se vive de a un mes, desde el mes del despido. Cada mes un dado decide si llega una oferta (evento `oferta_cesante`, con paso `"mes"`); si llega, trae sueldo y empleador, y la aceptas o la rechazas (`oferta_en_cesantia`). Cada mes sin trabajo suma a `meses_cesante` (`mes_buscando`): con los meses te llaman menos y las ofertas pagan menos. Los meses buscando no suman sueldo. No hay recontrato automático: quien vuelve rápido lo hace por una oferta.
+
+Tus copias responden las ofertas con una regla fija (`acepta_oferta_cesante` en `politicas.py`): aceptan si paga al menos 90% de lo que ganaban, o cualquiera desde el séptimo mes. Con esa regla se calibró `K_OFERTA_CESANTE` para que la búsqueda dure lo que mide la EPS. En el motor, los pasos del mes son `("mes", m)` en la cola del año (`_buscar_mes_a_mes`).
+
+Una oferta paga lo que dice: el resultado de la decisión fija cuánto cambia el sueldo, y la empresa y el cargo nuevos no se apilan encima (`_asignar_empresa`). Así la etiqueta ("te sube el sueldo") y `P_SUBE_CAMBIO` siguen siendo ciertas.
 
 ### Qué se compara
 
@@ -89,7 +97,10 @@ No copies estos conteos a otros documentos: cambian cuando alguien agrega un dat
 
 ## Qué hace Claude y qué no
 
-Claude se usa en un solo lugar: **leer tu texto para llenar el perfil** (`services/perfil_ia.py`). No inventa: lo que tu texto no dice queda vacío y se completa con un valor por defecto marcado como supuesto.
+Claude se usa en dos lugares:
+
+- **Leer tu texto para llenar el perfil** (`services/perfil_ia.py`). No inventa: lo que tu texto no dice queda vacío y se completa con un valor por defecto marcado como supuesto.
+- **Narrar** la ficha de una oferta, los eventos del año y la historia de un mundo con la empresa, el rubro y el cargo concretos (`services/narrador_ia.py`). Parte de la plantilla de `narrativa.py` y no puede escribir números: si escribe uno, o se demora, queda la plantilla tal cual.
 
 Claude **no** calcula probabilidades, no decide qué decisión sale y no escribe resultados. La historia de cada decisión ("te escribe por LinkedIn la jefa de producto de Pagosur") sale de plantillas en `narrativa.py`, sin cifras. Las ofertas nombran empresas reales del catálogo como ejemplo, con el aviso de que sus cifras y lo que les pasa son simulados; un cierre o un despido nunca se cuenta con el nombre de una empresa real (ni en la plantilla ni cuando narra Claude, que lo valida `narrador_ia.py`).
 
