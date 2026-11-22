@@ -47,6 +47,8 @@ export type Perfil = {
   anos_independiente?: number | null;
   /** Si estudia o busca su primera pega: dónde hizo la práctica. Grande o Estado pesa en su primera pega. */
   practica?: "" | "grande" | "pyme" | "startup" | "publico";
+  /** Si todos sus empleos fueron en el Estado o en startups: al cambiar de pega, sus gemelos vuelven ahí más seguido. */
+  toda_su_carrera_en?: "" | "publico" | "startup";
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

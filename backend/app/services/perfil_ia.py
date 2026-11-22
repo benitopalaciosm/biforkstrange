@@ -118,6 +118,9 @@ class PerfilLeido(BaseModel):
         None, description="Si hoy trabaja por su cuenta (freelance, boletas): hace cuántos años, según las fechas.")
     practica: Literal["grande", "pyme", "startup", "publico"] | None = Field(
         None, description="Si estudia o busca su primer empleo: tipo de empleador donde hizo su práctica profesional.")
+    toda_su_carrera_en: Literal["publico", "startup"] | None = Field(
+        None, description="\"publico\" si todos sus empleos (dos o más, contando el actual) fueron en el Estado; "
+                          "\"startup\" si todos fueron en startups.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -181,6 +184,9 @@ trabajar por su cuenta sin interrupción, según la fecha de inicio.
   - practica: solo si estudia o nunca ha tenido un empleo después de titularse, y el texto nombra su \
 práctica profesional. El tipo de esa empresa con los mismos criterios de tipo_empleador ("publico" si \
 fue en el Estado). Si hizo varias, la más reciente.
+  - toda_su_carrera_en: mira el tipo de cada empleador de su experiencia, con los criterios de \
+tipo_empleador. Solo si tuvo dos o más empleos y TODOS son del Estado ("publico") o TODOS son startups \
+("startup"); si hay uno de otro tipo, o tuvo un solo empleo, null. Prácticas no cuentan.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -311,7 +317,8 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     perfil, supuestos = dict(base), []
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
-              "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", *HISTORIA_LEIDA}
+              "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
+              *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -371,6 +378,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     inferido += _historia(leido, perfil)
     inferido += _independiente(leido, perfil)
     inferido += _practica(leido, perfil)
+    inferido += _toda_su_carrera(leido, perfil, pq)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -454,6 +462,23 @@ def _practica(leido: PerfilLeido, perfil: dict) -> list[str]:
     donde = "una empresa grande" if leido.practica == "grande" else "el Estado"
     return [f"Hiciste tu práctica en {donde}: al buscar su primera pega, tus gemelos postulan ahí {round(suyo * 100)}% "
             f"de las veces (la gente, {round(PESOS_FORZADAS['primera_pega'][opcion] * 100)}%; supuesto del equipo)."]
+
+
+def _toda_su_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]:
+    """Toda su carrera en el Estado o en startups: al volver a trabajar, sesga de qué tipo de empleador es la pega."""
+    if not leido.toda_su_carrera_en:
+        return []
+    from app.sim.motor.perfil import Perfil, parametros_propios
+
+    perfil["toda_su_carrera_en"] = leido.toda_su_carrera_en
+    propios = parametros_propios(Perfil(toda_su_carrera_en=leido.toda_su_carrera_en), pq)
+    if leido.toda_su_carrera_en == "publico":
+        return [f"Toda tu carrera ha sido en el Estado: cuando tus gemelos cambian de pega, vuelven al Estado "
+                f"{round(propios['P_REEMPLEO_PUBLICO'] * 100)}% de las veces (la gente, "
+                f"{round(pq.k('P_REEMPLEO_PUBLICO') * 100)}%; supuesto del equipo)."]
+    return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de pega en el sector privado, "
+            f"{round(propios['MIX_EMPLEADOR']['startup'] * 100)}% de las veces es otra startup (la gente, "
+            f"{round(pq.k('MIX_EMPLEADOR', 'startup') * 100)}%; supuesto del equipo)."]
 
 
 def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:

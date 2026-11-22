@@ -7,7 +7,7 @@ que son supuestos del equipo y están marcados como tales.
 
 from dataclasses import asdict, dataclass
 
-from app.sim.motor.paquete import Paquete
+from app.sim.motor.paquete import K_PROPIOS, Paquete
 
 NIVELES = ("Junior", "Semi senior", "Senior", "Jefatura", "Gerencia")
 EDAD_TITULO = {"media": 18, "tecnica": 21, "universitaria": 24, "postgrado": 26}  # supuesto
@@ -65,12 +65,33 @@ class Perfil:
     emprendio_antes: int = 0              # ya tuvo una empresa propia antes de la de hoy
     anos_independiente: int | None = None  # si hoy trabaja por su cuenta: hace cuántos años
     practica: str = ""                    # tipo de empleador de su práctica (grande | pyme | startup | publico)
+    toda_su_carrera_en: str = ""          # publico | startup, si todos sus empleos (dos o más) fueron ahí
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
         """Alguien que sale del colegio: punto de partida de la cohorte de validación."""
         return cls(edad=18, sexo=sexo, edu="media", rubro="", tipo_empleador="", nivel=0, sueldo=0,
                    riesgo=riesgo, estado="estudiando", antiguedad=0)
+
+
+# Al volver a trabajar, de qué tipo de empleador viene la pega (decisión interna tipo_de_empleador).
+# Supuesto del equipo, sin dato detrás: quien hizo toda su carrera en el Estado vuelve a entrar al Estado
+# 40% de las veces (la población, P_REEMPLEO_PUBLICO = 12%); quien la hizo en startups encuentra una
+# startup en 20% de sus ofertas privadas (la población, MIX_EMPLEADOR['startup'] = 1%).
+REEMPLEO_PUBLICO_SI_SIEMPRE_ESTADO = 0.40
+STARTUP_SI_SIEMPRE_STARTUP = 0.20
+
+
+def parametros_propios(perfil: "Perfil", pq: Paquete) -> dict:
+    """Parámetros del paquete que esta vida tiene distintos por su historia (ver paquete.K_PROPIOS)."""
+    if perfil.toda_su_carrera_en == "publico":
+        return {"P_REEMPLEO_PUBLICO": REEMPLEO_PUBLICO_SI_SIEMPRE_ESTADO}
+    if perfil.toda_su_carrera_en == "startup":
+        mix = pq.k("MIX_EMPLEADOR")
+        escala = (1 - STARTUP_SI_SIEMPRE_STARTUP) / (1 - mix["startup"])
+        return {"MIX_EMPLEADOR": {"grande": mix["grande"] * escala, "pyme": mix["pyme"] * escala,
+                                  "startup": STARTUP_SI_SIEMPRE_STARTUP}}
+    return {}
 
 
 def avance_en_carrera(perfil: Perfil, pq: Paquete) -> tuple[int, int]:
@@ -155,6 +176,9 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
     if perfil.practica and (perfil.estado == "estudiando" or e["primer_empleo"]):
         e["practica"] = perfil.practica  # solo pesa en su primera pega
+    propios = parametros_propios(perfil, pq)
+    if propios:
+        e[K_PROPIOS] = propios
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)
         e["tipo_institucion"] = pq.tabla("mifuturo_carreras", "tipo_institucion", "carrera_id", perfil.carrera_id)

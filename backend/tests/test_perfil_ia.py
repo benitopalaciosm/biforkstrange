@@ -324,6 +324,29 @@ def test_la_practica_pesa_en_la_primera_pega():
     assert r["perfil"]["practica"] == "" and not any("práctica" in f for f in r["inferido"])
 
 
+def test_toda_su_carrera_en_el_estado_o_en_startups_sesga_el_reempleo():
+    from app.sim.motor.paquete import K_PROPIOS, paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+
+    pq = paquete()
+    sorteo = pq.decisiones["tipo_de_empleador"]["opciones"][0]["resultados"]
+    probs = lambda e: {r["id"]: pq.evaluar(r["prob"], e) for r in sorteo if r["prob"] != "resto"}  # noqa: E731
+    base = estado_inicial(Perfil(), pq)
+    assert K_PROPIOS not in base  # sin historia, k() es el del paquete
+    assert probs(base) == {"publico": 0.12, "grande": 0.88 * 0.4, "pyme": 0.88 * 0.59}
+    assert probs(base | {K_PROPIOS: {}}) == probs(base)  # el camino con parámetros propios, vacío, da lo mismo
+    estado = estado_inicial(Perfil(toda_su_carrera_en="publico"), pq)
+    assert probs(estado)["publico"] == 0.40 and probs(estado)["grande"] == pytest.approx(0.60 * 0.4)
+    startup = probs(estado_inicial(Perfil(toda_su_carrera_en="startup"), pq))
+    assert startup["publico"] == 0.12 and 1 - sum(startup.values()) == pytest.approx(0.88 * 0.20)
+    assert startup["grande"] / startup["pyme"] == pytest.approx(0.4 / 0.59)  # el resto del mix no cambia
+    assert pq.k("P_REEMPLEO_PUBLICO") == 0.12  # el paquete no se toca: el parámetro es solo de esa vida
+
+    r = perfil_ia.completar(LEIDO.model_copy(update={"toda_su_carrera_en": "publico"}))
+    assert r["perfil"]["toda_su_carrera_en"] == "publico"
+    assert any("vuelven al Estado 40%" in f and "12%" in f for f in r["inferido"])
+
+
 def test_los_gemelos_se_cambian_como_tu():
     from app.sim.motor.politicas import pesos_personales
 
