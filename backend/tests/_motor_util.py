@@ -200,7 +200,7 @@ def estado_al_azar(R: random.Random) -> dict:
         "isapre": R.randint(0, 1), "marcado": R.randint(0, 1), "validado": R.randint(0, 1),
         "propietario": R.randint(0, 1), "primer_grande": R.randint(0, 1), "oferta_al_titularse": R.randint(0, 1),
         "ocupacion": R.randint(0, 9), "edad_decide_estudios": R.choice([18, 19]), "cierra_en": R.choice([0, 0, 1, 3]),
-        "rubro_destino": R.choice(RUBROS), "region_destino": R.choice(REGIONES), "ocupacion_destino": R.randint(0, 9),
+        "rubro_destino": R.choice(RUBROS), "rubro_emprendimiento": R.choice(RUBROS), "region_destino": R.choice(REGIONES), "ocupacion_destino": R.randint(0, 9),
         "quien_enferma": R.choice(["madre", "padre"]),
         "universidad_destino": R.choice([f["universidad_id"] for f in p.filas("universidades")
                                          if f["tipo_institucion"] in ("U", "EXT")]),

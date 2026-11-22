@@ -689,3 +689,11 @@ def test_el_comando_local_corre_aislado_y_sin_guardar_el_cv(monkeypatch):
     assert "Eres parte de Gemelo Laboral" in args[args.index("--system-prompt") + 1]
     assert not any("contadora" in a for a in args) and "contadora" in llamada["input"]
     assert not os.path.exists(llamada["cwd"])  # el directorio temporal se borra al terminar
+
+
+def test_el_rubro_de_tu_proyecto_entra_al_perfil_solo_con_proyecto():
+    con = perfil_doc.leer_documento("```gemelo-laboral\nproyecto: una app de reservas para restoranes\n"
+                                    "rubro_proyecto: Hoteles y restaurantes\n```")
+    assert con["perfil"]["rubro_proyecto"] == "Hoteles y restaurantes" and "rubro_proyecto" in con["dados"]
+    sin = perfil_doc.leer_documento("```gemelo-laboral\nproyecto: ?\nrubro_proyecto: Hoteles y restaurantes\n```")
+    assert sin["perfil"].get("rubro_proyecto") is None

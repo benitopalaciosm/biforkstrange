@@ -324,3 +324,28 @@ def test_la_empresa_del_cv_se_encuentra_en_el_catalogo_para_mostrar_su_logo(nomb
     emp = empresas.buscar(pq(), nombre)
     assert emp is not None and emp["logo"]
     assert empresas.buscar(pq(), "Empresa que no existe SpA") is None
+
+
+def _rubro_por_defecto(perfil: Perfil) -> tuple[str, list[str]]:
+    from app.sim.motor.politicas import elecciones_internas, parametros_por_defecto
+
+    vida = _vida(perfil, 5, "tu")
+    opcion = next(o for o in vida.opciones("emprender") if o.id == "emprender")
+    internas = {el["variable"]: el for el in elecciones_internas(vida, opcion)}
+    return parametros_por_defecto(vida, opcion)["rubro_emprendimiento"], [a["valor"] for a in internas["rubro_emprendimiento"]["alternativas"]]
+
+
+def test_emprender_parte_en_el_rubro_de_tu_proyecto_el_que_sonaste_o_el_tuyo():
+    base = dict(edad=32, rubro="Comercio", tipo_empleador="pyme", nivel=2)
+    defecto, alternativas = _rubro_por_defecto(Perfil(**base))
+    assert defecto == "Comercio" and "Comercio" in alternativas  # tu rubro de hoy también se puede elegir
+    assert _rubro_por_defecto(Perfil(**base, rubro_sonado="Salud"))[0] == "Salud"
+    assert _rubro_por_defecto(Perfil(**base, rubro_sonado="Salud", rubro_proyecto="Hoteles y restaurantes"))[0] == "Hoteles y restaurantes"
+
+
+def test_al_emprender_la_empresa_queda_en_el_rubro_elegido():
+    vida = _vida(Perfil(edad=32, rubro="Comercio", tipo_empleador="pyme", nivel=2), 5, "tu")
+    vida.e["rubro_emprendimiento"] = "Salud"
+    vida._aplicar([{"var": "estado", "op": "fija", "valor": "'fundador'"},
+                   {"var": "rubro", "op": "fija", "valor": "rubro_emprendimiento"}], "prueba")
+    assert vida.e["estado"] == "fundador" and vida.e["rubro"] == "Salud"

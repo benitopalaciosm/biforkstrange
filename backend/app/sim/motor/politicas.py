@@ -152,7 +152,7 @@ def elecciones_internas(vida: Vida, opcion: Opcion) -> list[dict]:
     """Lo que hay que elegir dentro de una opción (a qué rubro, a qué ocupación), con sus alternativas."""
     pq, e = vida.pq, vida.e
     usadas = _variables_usadas(opcion)
-    if not usadas & {"rubro_destino", "ocupacion_destino", "region_destino", "universidad_destino", "institucion_destino"}:
+    if not usadas & {"rubro_destino", "rubro_emprendimiento", "ocupacion_destino", "region_destino", "universidad_destino", "institucion_destino"}:
         return []
     salida = []
     if "rubro_destino" in usadas:
@@ -165,6 +165,15 @@ def elecciones_internas(vida: Vida, opcion: Opcion) -> list[dict]:
              "preferencia": (1e12 if r == e.get("rubro_sonado") else
                              float(filas[r]["p50"] or 0) if r in filas else 0.0)}
             for r in pq.variables["rubro"]["dominio"] if r and r != e["rubro"]]})
+    if "rubro_emprendimiento" in usadas:
+        # peso: cuánta gente ocupada hay en cada rubro (ESI). Por defecto, el rubro de su proyecto según su
+        # Claude; si no, el que soñó; si no, el suyo de hoy
+        filas = {f["rubro"]: f for f in pq.filas("esi_ingreso_rubro_edad") if f["banda_edad"] == "18-54"}
+        orden = [r for r in (e.get("rubro_proyecto"), e.get("rubro_sonado"), e["rubro"]) if r]
+        salida.append({"variable": "rubro_emprendimiento", "pregunta": "¿De qué rubro es tu empresa?", "alternativas": [
+            {"valor": r, "nombre": r, "prob": float(filas[r]["share_ocupados_banda"] or 0) if r in filas else 0.0,
+             "preferencia": 1e12 * (len(orden) - orden.index(r)) if r in orden else 0.0}
+            for r in pq.variables["rubro"]["dominio"] if r]})
     if "ocupacion_destino" in usadas:
         nombres = {int(f["origen"]): f["origen_nombre"] for f in pq.filas("jobhop_transiciones")}
         salida.append({"variable": "ocupacion_destino", "pregunta": "¿A qué tipo de trabajo?", "alternativas": [

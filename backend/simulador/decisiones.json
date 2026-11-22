@@ -1592,6 +1592,11 @@
          "valor": "'fundador'"
         },
         {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "rubro_emprendimiento"
+        },
+        {
          "var": "primer_empleo",
          "op": "fija",
          "valor": 0
@@ -1840,6 +1845,11 @@
          "var": "estado",
          "op": "fija",
          "valor": "'fundador'"
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "rubro_emprendimiento"
         },
         {
          "var": "empresa_anos",
@@ -3444,6 +3454,11 @@
          "var": "estado",
          "op": "fija",
          "valor": "'fundador'"
+        },
+        {
+         "var": "rubro",
+         "op": "fija",
+         "valor": "rubro_emprendimiento"
         },
         {
          "var": "sueldo_ref",
