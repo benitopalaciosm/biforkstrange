@@ -374,3 +374,47 @@ def test_sobran_elecciones_da_422(client):
 
 def test_dudas_con_perfil_invalido_da_422(client):
     assert client.post("/api/juego/dudas", json={"perfil": {"edad": 99}}).status_code == 422
+
+
+# ------------------------------------------------------------------ mundos explorables
+def _mundo(client, mundo: int, **body):
+    return client.post("/api/juego/mundo", json={"gemelos": N, "mundo": mundo, **body})
+
+
+def test_ganador_por_mundo(client):
+    """Un ganador por mundo, que es una de las opciones o un empate (None)."""
+    comp = _ok(client, duda="oferta_externa")["pendiente"]["comparacion"]
+    ganadores = comp["ganador_por_mundo"]
+    assert len(ganadores) == N
+    opciones = {o["opcion"] for o in comp["opciones"]}
+    assert all(g is None or g in opciones for g in ganadores)
+
+
+def test_un_mundo_coincide_con_la_comparacion(client):
+    """Abrir un mundo vuelve a vivirlo con los mismos dados: el ganador y los sueldos calzan con la nube."""
+    comp = _ok(client, duda="oferta_externa", semilla=7)["pendiente"]["comparacion"]
+    for numero in (0, 3, N - 1):
+        r = _mundo(client, numero, duda="oferta_externa", semilla=7)
+        assert r.status_code == 200, r.text
+        m = r.json()
+        assert m["mundo"] == numero and m["ganador"] == comp["ganador_por_mundo"][numero]
+        assert {o["opcion"] for o in m["opciones"]} == {o["opcion"] for o in comp["opciones"]}
+        for o in m["opciones"]:
+            assert 1 <= len(o["anios"]) <= 10 and o["anios"][0]["anio"] == 1
+            assert all({"tipo", "nombre", "texto", "tono"} <= s.keys() for a in o["anios"] for s in a["sucesos"])
+        # lo que le pasa al mundo (la recesión) es igual con todas las opciones
+        largo = min(len(o["anios"]) for o in m["opciones"])
+        assert len({tuple(a["recesion"] for a in o["anios"][:largo]) for o in m["opciones"]}) == 1
+
+
+def test_la_primera_decision_del_mundo_es_la_opcion(client):
+    m = _mundo(client, 0, duda="oferta_externa").json()
+    for o in m["opciones"]:
+        primera = o["anios"][0]["sucesos"][0]
+        assert primera["tipo"] == "decision" and primera["opcion"] == o["nombre"]
+
+
+def test_mundo_sin_decision_pendiente_da_422(client):
+    final, elecciones, _ = _jugar_entera(client, lambda p: p["opciones"][0], duda="oferta_externa")
+    assert final["terminada"]
+    assert _mundo(client, 0, duda="oferta_externa", elecciones=elecciones).status_code == 422

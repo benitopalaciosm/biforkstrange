@@ -67,6 +67,7 @@ function Juego() {
         onElegir={j.elegir}
         onComparar={j.compararCon}
         onAyuda={() => setTutorial("ayuda")}
+        onVerMundo={j.verMundo}
       />
     );
   }

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cssVars, cx } from "@/shared/ui";
+import { GEMELOS } from "../api";
 import { plata } from "../textos";
 import type { Tono } from "../types";
 
@@ -77,8 +78,11 @@ export type PuntoAbanico = { edad: number; p10: number; p50: number; p90: number
  * `referencia` dibuja el gemelo del medio de otra opción (punteado) y `tu` la vida que jugaste (línea amarilla).
  */
 export function Abanico({
-  puntos, hoy, referencia, nombreReferencia, tu, alto = 170,
+  puntos, hoy, referencia, nombreReferencia, tu, alto = 170, color, colorReferencia,
 }: {
+  /** El color de la opción, para que la línea sea la misma que en su tarjeta y en la nube. */
+  color?: string;
+  colorReferencia?: string;
   puntos: PuntoAbanico[];
   /** Punto de partida común: edad y sueldo de hoy. */
   hoy: { edad: number; sueldo: number };
@@ -124,16 +128,16 @@ export function Abanico({
       aria-label={`Sueldo año a año, de los ${e0} a los ${e1} años. A los ${e1}: con mala suerte ${plata(fin.p10)}, lo típico ${plata(fin.p50)}, con buena suerte ${plata(fin.p90)}.`}
     >
       <line className="jg-abanico-eje" x1={X0} x2={X1} y1={Y1} y2={Y1} />
-      <path className="jg-abanico-franja" d={franja} />
-      {ref && <path className="jg-abanico-ref" pathLength={1} d={linea(ref.map((p) => ({ edad: p.edad, v: p.p50 })))} />}
-      <path className="jg-abanico-medio" pathLength={1} d={linea(serie.map((p) => ({ edad: p.edad, v: p.p50 })))} />
+      <path className="jg-abanico-franja" style={color ? { fill: `color-mix(in srgb, ${color} 16%, transparent)` } : undefined} d={franja} />
+      {ref && <path className="jg-abanico-ref" style={colorReferencia ? { stroke: colorReferencia } : undefined} pathLength={1} d={linea(ref.map((p) => ({ edad: p.edad, v: p.p50 })))} />}
+      <path className="jg-abanico-medio" style={color ? { stroke: color } : undefined} pathLength={1} d={linea(serie.map((p) => ({ edad: p.edad, v: p.p50 })))} />
       {tu && tu.length > 1 && (
         <>
           <path className="jg-abanico-tu-borde" pathLength={1} d={linea(tu.map((t) => ({ edad: t.edad, v: t.sueldo })))} />
           <path className="jg-abanico-tu" pathLength={1} d={linea(tu.map((t) => ({ edad: t.edad, v: t.sueldo })))} />
           <circle className="jg-abanico-tu-punto" cx={x(tu[tu.length - 1].edad)} cy={y(tu[tu.length - 1].sueldo)} r={5.5} />
           <text className="jg-abanico-num jg-abanico-tu-nombre" x={x(tu[tu.length - 1].edad) - 9} y={y(tu[tu.length - 1].sueldo) + (y(tu[tu.length - 1].sueldo) < 30 ? 18 : -9)} textAnchor="end">
-            tú · 501
+            tú · {GEMELOS + 1}
           </text>
         </>
       )}

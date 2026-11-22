@@ -72,6 +72,18 @@ def comparar_pendiente(partida: Partida, semilla: int, n: int = gemelos.N_GEMELO
                             semilla=semilla, parametros=parametros, crudo=crudo)
 
 
+def mundo_pendiente(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], numero: int,
+                    parametros: dict[str, dict] | None = None, anios: int = ANIOS, pq: Paquete | None = None) -> dict:
+    """Un mundo de la comparación de la decisión pendiente, con su historia completa."""
+    partida = jugar(perfil, semilla, elecciones, duda, anios, pq or paquete())
+    if partida.pendiente is None:
+        raise ValueError("la partida no tiene una decisión pendiente")
+    if len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR:
+        raise ValueError("esta decisión tiene demasiadas opciones para simular mundos")
+    return gemelos.mundo(partida.vida, partida.pendiente.decision["id"], numero, anios=gemelos.HORIZONTE,
+                         semilla=semilla, parametros=parametros)
+
+
 def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], partida: Partida,
             n: int, pq: Paquete) -> dict:
     """Tu vida frente a los gemelos de la primera decisión."""

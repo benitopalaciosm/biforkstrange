@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, CheckIcon, Chip, DecisionArt, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, deCada, minuscula, plata, sinSueldo } from "../textos";
-import type { ContraBase, EjemploReal, Eleccion, OpcionComparada, OpcionPendiente, ParametrosComparar, Vista } from "../types";
-import { Abanico, BarraPartes, Info, LeyendaNube, NubeGemelos, ProgresoAnios, repartir, type Reparto } from "./graficos";
+import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, minuscula, plata, sinSueldo } from "../textos";
+import type { ContraBase, EjemploReal, Eleccion, MundoDetalle, OpcionComparada, OpcionPendiente, ParametrosComparar, Suceso, Vista } from "../types";
+import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
 
@@ -59,14 +59,9 @@ function destacado(o: OpcionComparada, base: OpcionComparada | undefined, riesgo
   const valor = piso ? o.sueldo.p10 : o.sueldo.p90;
   if (o.es_base || !base) return `${nombre}: ${plata(valor)}`;
   const antes = piso ? base.sueldo.p10 : base.sueldo.p90;
-  if (plata(antes) === plata(valor)) return `${nombre} no cambia: ${plata(valor)}`;
+  if (Math.abs(valor - antes) < 0.03 * antes) return null; // una diferencia que no se nota no se destaca
   return `${nombre} ${valor < antes ? "baja" : "sube"} de ${plata(antes)} a ${plata(valor)}`;
 }
-
-const repartoDe = (o: OpcionComparada): Reparto | null =>
-  o.es_base || o.gana_mas_que_base === null || o.gana_menos_que_base === null
-    ? null
-    : { mas: o.gana_mas_que_base, menos: o.gana_menos_que_base, igual: o.igual_que_base ?? Math.max(0, 1 - o.gana_mas_que_base - o.gana_menos_que_base) };
 
 /** Un empleador u oferta real de ese tipo, con su fuente. Es referencia: no es la empresa de la historia. */
 function EjemploRealLinea({ ejemplo }: { ejemplo: EjemploReal }) {
@@ -78,15 +73,13 @@ function EjemploRealLinea({ ejemplo }: { ejemplo: EjemploReal }) {
   );
 }
 
-/** La opción para elegir: qué es, el veredicto en una frase y el sueldo típico. La simulación va aparte, más abajo. */
+/** La opción para elegir: qué es, en cuántos mundos gana y el sueldo típico. La simulación va aparte, más abajo. */
 function OpcionConGemelos({
-  o, base, unica, tope, riesgo, selected, onSelect, supuesto, edadFinal, sueldoHoy, ejemplo,
+  o, base, tope, riesgo, selected, onSelect, supuesto, edadFinal, color, ganadas, total, ejemplo,
 }: {
   o: OpcionComparada;
   ejemplo?: EjemploReal | null;
   base: OpcionComparada | undefined;
-  /** La otra opción, cuando la carta tiene solo dos: con ella se compara la base. */
-  unica: OpcionComparada | undefined;
   tope: number;
   riesgo: number;
   selected: boolean;
@@ -94,33 +87,38 @@ function OpcionConGemelos({
   /** Lo que se supuso dentro de la opción, ya con nombre ("Valparaíso"), no con código. */
   supuesto: string;
   edadFinal: number;
-  sueldoHoy: number | null;
+  color: string;
+  /** En cuántos mundos esta opción es la que más gana (el mismo número que la nube). */
+  ganadas: number | null;
+  total: number;
 }) {
   const nota = destacado(o, base, riesgo);
-  const contra = o.es_base ? null : contraBase(o, base);
-  let veredicto = contra ? contra.frase : "Con esta se comparan las demás.";
-  const r = o.es_base && unica ? repartoDe(unica) : null;
-  // la base, mirada desde su lado: lo contrario de lo que le pasa a la otra
-  if (r && unica) veredicto = veredictoDe({ mas: r.menos, igual: r.igual, menos: r.mas }, `«${unica.nombre}»`);
   return (
     <button type="button" className="vd-opcion jg-opcion" aria-pressed={selected} onClick={onSelect}>
       <span className="jg-opcion-cabeza">
-        <span className="vd-opcion-titulo">{o.nombre}</span>
+        <span className="vd-opcion-titulo">
+          <i className="jg-color" style={{ background: color }} aria-hidden="true" />
+          {o.nombre}
+        </span>
         {o.detalle && <span className="vd-opcion-sub">{o.detalle}</span>}
         {supuesto && <span className="vd-opcion-sub">En la simulación vas a: {supuesto}</span>}
         {ejemplo && <EjemploRealLinea ejemplo={ejemplo} />}
-        <span className="jg-veredicto">{veredicto}</span>
+        {ganadas !== null && (
+          <span className="jg-veredicto">
+            Gana en {ganadas} de {total} mundos
+          </span>
+        )}
       </span>
 
       <span className="jg-opcion-bloque">
         <span className="jg-chico">Sueldo típico a los {edadFinal} años</span>
         <span className="jg-opcion-num">{plata(o.sueldo.p50)}</span>
-        {sueldoHoy !== null && <span className="jg-chico">Hoy ganas {plata(sueldoHoy)}</span>}
         <span className="jg-rango-solo">
-          <RangoSueldo rango={o.sueldo} tope={tope} />
+          <RangoSueldo rango={o.sueldo} tope={tope} color={color} />
         </span>
         <span className="jg-chico">
-          Con mala suerte <strong>{plata(o.sueldo.p10)}</strong> · con buena suerte <strong>{plata(o.sueldo.p90)}</strong>
+          Con mala suerte <strong className="jg-plata">{plata(o.sueldo.p10)}</strong> · con buena suerte{" "}
+          <strong className="jg-plata">{plata(o.sueldo.p90)}</strong>
         </span>
         {nota && <span className="jg-destacado">{nota}</span>}
       </span>
@@ -132,55 +130,260 @@ function OpcionConGemelos({
   );
 }
 
+/** Un color por opción: la base siempre naranja; las demás en este orden. El gris es el empate. */
+const COLORES = ["var(--jg-mas)", "var(--acento)", "var(--vida)", "#7C5CD6", "#0E9AA7"];
+export function coloresDe(comparadas: OpcionComparada[]): Record<string, string> {
+  const salida: Record<string, string> = {};
+  let i = 0;
+  for (const o of comparadas) salida[o.opcion] = o.es_base ? "var(--jg-menos)" : COLORES[i++ % COLORES.length];
+  return salida;
+}
+
+const tonoSuceso = (t: string) => (t === "bueno" ? "bueno" : t === "malo" ? "malo" : "neutro");
+
+
+const claveSuceso = (x: Suceso) => `${x.nombre}|${x.texto}`;
+
+/** Sin repetir el mismo texto dos veces seguidas en un año. */
+function sinRepetir(sucesos: Suceso[]): Suceso[] {
+  return sucesos.filter((x, i) => i === 0 || claveSuceso(x) !== claveSuceso(sucesos[i - 1]));
+}
+
 /**
- * La simulación, aparte de las opciones: los gemelos vivieron todas las opciones con la misma suerte,
- * y aquí se cuenta con cuál terminó ganando más cada uno.
+ * Un mundo abierto. Lo que le pasa en él con todas las opciones (la recesión, una oferta que llega) va una sola vez
+ * arriba; en cada vida, solo lo que cambia por la decisión, con el sueldo al cerrar cada año.
  */
-function Simulacion({ comparadas, base, gemelos, edadFinal }: { comparadas: OpcionComparada[]; base: OpcionComparada; gemelos: number; edadFinal: number }) {
-  const otras = comparadas.filter((o) => !o.es_base && repartoDe(o));
-  if (otras.length === 0) return null;
-  const nubes = otras.length <= 2;
+function MundoAbierto({
+  mundo, comparadas, colores, anioInicial, onCerrar,
+}: {
+  mundo: MundoDetalle;
+  comparadas: OpcionComparada[];
+  colores: Record<string, string>;
+  /** El año de la partida en que se toma la decisión: los años del mundo se cuentan desde ahí. */
+  anioInicial: number;
+  onCerrar: () => void;
+}) {
+  // mismo orden que las tarjetas
+  const vidas = comparadas.map((c) => mundo.opciones.find((o) => o.opcion === c.opcion)).filter((o): o is MundoDetalle["opciones"][number] => !!o);
+  const porSueldo = [...vidas].sort((a, b) => b.sueldo_final - a.sueldo_final);
+  const ganadora = vidas.find((o) => o.opcion === mundo.ganador);
+  const segunda = porSueldo.find((o) => o.opcion !== ganadora?.opcion);
+  const empatadas = mundo.ganador === null ? porSueldo.filter((o) => o.sueldo_final >= porSueldo[0].sueldo_final * 0.995) : [];
+  const largo = Math.max(...vidas.map((v) => v.anios.length));
+
+  // lo que pasa igual en todas las vidas ese año es del mundo; la primera decisión siempre es distinta
+  const comunes: Suceso[][] = [];
+  for (let i = 0; i < largo; i++) {
+    const listas = vidas.map((v) => (v.anios[i]?.sucesos ?? []).filter((_, j) => !(i === 0 && j === 0)));
+    comunes.push(sinRepetir(listas[0] ?? []).filter((x) => listas.every((l) => l.some((y) => claveSuceso(y) === claveSuceso(x)))));
+  }
+  const esComun = (i: number, x: Suceso) => comunes[i].some((y) => claveSuceso(y) === claveSuceso(x));
+  const anioDe = (i: number) => anioInicial + i;
+  const delMundo = comunes.map((l, i) => ({ i, l })).filter((x) => x.l.length > 0);
+
+  return (
+    <div className="jg-mundo" role="region" aria-label={`Mundo ${mundo.mundo + 1}`}>
+      <div className="jg-mundo-cabeza">
+        <span className="jg-fuerte">Mundo {mundo.mundo + 1}</span>
+        <button type="button" className="jg-ayuda" onClick={onCerrar}>
+          Cerrar
+        </button>
+      </div>
+      <span className="jg-frase">
+        {ganadora && segunda ? (
+          <>
+            Aquí gana <strong style={{ color: colores[ganadora.opcion] }}>«{ganadora.nombre}»</strong>: terminas con {plata(ganadora.sueldo_final)} al mes,{" "}
+            {plata(ganadora.sueldo_final - segunda.sueldo_final)} más que con «{segunda.nombre}».
+          </>
+        ) : empatadas.length > 1 ? (
+          `Aquí ${empatadas.map((o) => `«${o.nombre}»`).join(" y ")} terminan casi igual: a menos de 0,5% de diferencia.`
+        ) : (
+          "Aquí las opciones terminan casi igual: a menos de 0,5% de diferencia."
+        )}
+      </span>
+
+      <div className="jg-mundo-comun">
+        <span className="jg-chico">Lo que pasa en este mundo con cualquier opción</span>
+        {delMundo.length === 0 ? (
+          <span className="jg-chico">Nada fuera de lo normal: sin recesión ni sorpresas.</span>
+        ) : (
+          <ol className="jg-mundo-anios">
+            {delMundo.map(({ i, l }) => (
+              <li key={i}>
+                <span className="jg-mundo-anio">Año {anioDe(i)}</span>
+                <span className="jg-mundo-sucesos">
+                  {l.map((x, j) => (
+                    <span className="jg-mundo-suceso" data-tono={tonoSuceso(x.tono)} key={j}>
+                      <i />
+                      {x.texto}
+                    </span>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+
+      <div className="jg-mundo-vidas">
+        {vidas.map((o) => {
+          const filas = o.anios.map((a, i) => ({
+            a,
+            i,
+            propios: sinRepetir(a.sucesos.filter((x, j) => (i === 0 && j === 0) || !esComun(i, x))),
+          }));
+          return (
+            <div className="jg-mundo-vida" key={o.opcion} style={{ borderTopColor: colores[o.opcion] }} data-gana={o.opcion === mundo.ganador}>
+              <span className="jg-mundo-vida-cabeza">
+                <span className="jg-fuerte">
+                  {o.nombre}
+                  {o.opcion === mundo.ganador && <span className="jg-mundo-gana">gana</span>}
+                </span>
+                <span className="jg-mundo-sueldo">{o.sueldo_final > 0 ? plata(o.sueldo_final) : "sin sueldo"}</span>
+              </span>
+              <ol className="jg-mundo-anios">
+                {filas.map(({ a, i, propios }) => (
+                  <li key={i}>
+                    <span className="jg-mundo-anio">Año {anioDe(i)}</span>
+                    <span className="jg-mundo-sucesos">
+                      {propios.map((x, j) => (
+                        <span className="jg-mundo-suceso" data-tono={tonoSuceso(x.tono)} key={j}>
+                          <i />
+                          {i === 0 && j === 0 && x.tipo === "decision" ? `Eliges «${x.opcion}»: ${x.texto}` : x.texto}
+                        </span>
+                      ))}
+                      {a.fin && (
+                        <span className="jg-mundo-fin">
+                          {a.fin.estado === "buscando" ? "Sin trabajo" : `${a.fin.cargo} · ${plata(a.fin.sueldo)}`}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * La simulación, aparte de las opciones: cada punto es un mundo, del color de la opción con la que terminas
+ * ganando más en él. Los puntos van agrupados por color, como en el tutorial. Al tocar uno se abre ese mundo.
+ */
+function Simulacion({
+  comparadas, ganadores, gemelos, colores, anioInicial, onVerMundo,
+}: {
+  comparadas: OpcionComparada[];
+  ganadores: (string | null)[];
+  gemelos: number;
+  colores: Record<string, string>;
+  anioInicial: number;
+  onVerMundo: (n: number) => Promise<MundoDetalle>;
+}) {
+  const [abierto, setAbierto] = useState<number | null>(null);
+  const [detalle, setDetalle] = useState<MundoDetalle | null>(null);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pedido = useRef(0);
+  const panel = useRef<HTMLDivElement>(null);
+  const clave = ganadores.join(",");
+  useEffect(() => {
+    pedido.current++;
+    setAbierto(null);
+    setDetalle(null);
+    setError(null);
+  }, [clave]);
+  useEffect(() => {
+    if (abierto !== null) panel.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [abierto, detalle]);
+  if (ganadores.length === 0) return null;
+
+  const cuenta = new Map<string | null, number>();
+  for (const g of ganadores) cuenta.set(g, (cuenta.get(g) ?? 0) + 1);
+  const empates = cuenta.get(null) ?? 0;
+  const nombreDe = (id: string | null) => comparadas.find((o) => o.opcion === id)?.nombre;
+  // agrupados por opción, en el orden de las tarjetas; los empates al final
+  const orden = new Map<string | null, number>(comparadas.map((o, i) => [o.opcion, i]));
+  const puntos = ganadores.map((g, i) => ({ g, i })).sort((a, b) => (orden.get(a.g) ?? 99) - (orden.get(b.g) ?? 99) || a.i - b.i);
+
+  const abrir = (n: number) => {
+    if (abierto === n) {
+      setAbierto(null);
+      return;
+    }
+    const mio = ++pedido.current;
+    setAbierto(n);
+    setDetalle(null);
+    setError(null);
+    setCargando(true);
+    onVerMundo(n)
+      .then((d) => mio === pedido.current && setDetalle(d))
+      .catch((e: unknown) => mio === pedido.current && setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => mio === pedido.current && setCargando(false));
+  };
+
+  if (empates === ganadores.length) {
+    return (
+      <section className="jg-seccion jg-simulacion">
+        <Meta>La simulación</Meta>
+        <Text size="sm">
+          En los {gemelos} mundos tu sueldo termina igual con cualquier opción. Esta decisión no mueve tu sueldo: elige por lo que dice cada una.
+        </Text>
+      </section>
+    );
+  }
+
   return (
     <section className="jg-seccion jg-simulacion">
       <Stack gap={4}>
         <Meta>La simulación</Meta>
         <Heading level={3} as="h2">
-          {gemelos} mundos posibles, {comparadas.length === 2 ? "dos vidas" : `${comparadas.length} vidas`} en cada uno
+          ¿Con qué opción ganas más en cada mundo?
         </Heading>
-        <Text size="sm">
-          En cada mundo la suerte es distinta: en uno hay recesión, en otro te despiden, en otro no pasa nada. Y en cada mundo tu gemelo vivió
-          hasta los {edadFinal} años una vez con cada opción. Así, cuando en un mundo gana una opción, es por la decisión y no por la suerte.
-        </Text>
+        <Text size="sm">Cada punto es uno de los {gemelos} mundos, del color de la opción con la que ahí terminas ganando más. Toca uno para ver qué pasa en él.</Text>
       </Stack>
-      {otras.map((o) => {
-        const reparto = repartoDe(o)!;
-        const [mas, igual, menos] = repartir([reparto.mas, reparto.igual, reparto.menos]);
-        const magnitud = contraBase(o, base)?.magnitud;
-        return (
-          <div className="jg-duelo" key={o.opcion}>
-            {otras.length > 1 && (
-              <span className="jg-fuerte">
-                «{o.nombre}» contra «{base.nombre}»
-              </span>
-            )}
-            <span className="jg-chico">De cada 100 mundos (cada punto son {Math.round(gemelos / 100)}):</span>
-            {nubes ? (
-              <NubeGemelos reparto={reparto} etiqueta={`De cada 100 mundos, en ${mas} ganas más con «${o.nombre}», en ${igual} terminas igual y en ${menos} ganas más con «${base.nombre}»`} />
-            ) : (
-              <BarraPartes
-                partes={[
-                  { nombre: "", prob: reparto.mas, tono: "mas" },
-                  { nombre: "", prob: reparto.igual, tono: "igual" },
-                  { nombre: "", prob: reparto.menos, tono: "menos" },
-                ]}
-                sinLeyenda
-              />
-            )}
-            <LeyendaNube reparto={reparto} nombre={o.nombre} contra={base.nombre} />
-            {magnitud && <span className="jg-chico">{magnitud}</span>}
-          </div>
-        );
-      })}
+      <div className="jg-duelo">
+        <div className="jg-mundos" role="group" aria-label="Los mundos, uno por punto">
+          {puntos.map(({ g, i }, k) => (
+            <button
+              type="button"
+              key={i}
+              className="jg-mundo-punto"
+              aria-pressed={abierto === i}
+              aria-label={`Mundo ${i + 1}: ${g ? `gana «${nombreDe(g)}»` : "da lo mismo"}`}
+              title={`Mundo ${i + 1}`}
+              style={{ ...cssVars({ "--jg-i": (k % 10) + Math.floor(k / 10) }), background: g ? colores[g] : undefined }}
+              data-empate={g === null}
+              onClick={() => abrir(i)}
+            />
+          ))}
+        </div>
+        <span className="jg-leyenda">
+          {comparadas.map((o) => (
+            <span key={o.opcion}>
+              <i style={{ background: colores[o.opcion] }} />
+              en <b>{cuenta.get(o.opcion) ?? 0}</b> gana «{o.nombre}»
+            </span>
+          ))}
+          {empates > 0 && (
+            <span>
+              <i data-tipo="igual" />
+              en <b>{empates}</b> da lo mismo
+            </span>
+          )}
+        </span>
+      </div>
+      {empates > 0 && <span className="jg-chico">«Da lo mismo» es cuando las mejores opciones de ese mundo terminan a menos de 0,5% de diferencia.</span>}
+      <div ref={panel} className="jg-mundo-ancla">
+        {abierto !== null && cargando && <Cargando>Abriendo el mundo {abierto + 1}…</Cargando>}
+        {abierto !== null && error && <ErrorCaja error={error} />}
+        {abierto !== null && detalle && (
+          <MundoAbierto mundo={detalle} comparadas={comparadas} colores={colores} anioInicial={anioInicial} onCerrar={() => setAbierto(null)} />
+        )}
+      </div>
     </section>
   );
 }
@@ -229,9 +432,10 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda,
+  vista, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo,
 }: {
   onAyuda: () => void;
+  onVerMundo: (n: number) => Promise<MundoDetalle>;
   vista: Vista;
   riesgo: number;
   cargando: boolean;
@@ -305,7 +509,8 @@ export function Carta({
   };
   /** Hasta qué edad vivieron los gemelos de esta carta (no siempre es el fin de la partida). */
   const edadGemelos = comparadas[0]?.trayectoria[comparadas[0].trayectoria.length - 1]?.edad ?? vista.edad_final;
-  const sueldoHoy = sinSueldo(e) ? null : e.sueldo;
+  const colores = coloresDe(comparadas);
+  const ganadores = comparacion?.ganador_por_mundo ?? null;
   const hoy = { edad: e.edad, sueldo: sinSueldo(e) ? 0 : e.sueldo };
   const sinEfecto = comparadas.length > 1 && comparadas.every((o) => o.es_base || (o.igual_que_base ?? 0) >= 0.9);
 
@@ -363,14 +568,15 @@ export function Carta({
               key={o.opcion}
               o={o}
               base={base}
-              unica={comparadas.length === 2 ? comparadas.find((x) => !x.es_base) : undefined}
               tope={tope}
               riesgo={riesgo}
               selected={sel === o.opcion}
               onSelect={() => elegirOpcion(o.opcion)}
               supuesto={supuestoDe(o)}
               edadFinal={edadGemelos}
-              sueldoHoy={sueldoHoy}
+              color={colores[o.opcion]}
+              ganadas={ganadores ? ganadores.filter((g) => g === o.opcion).length : null}
+              total={ganadores?.length ?? 0}
               ejemplo={pendiente.opciones.find((x) => x.opcion === o.opcion)?.ejemplo_real}
             />
           ))}
@@ -441,19 +647,30 @@ export function Carta({
 
       {comparacion && foco && (
         <Stack gap={12} className="jg-columna">
-          {base && <Simulacion comparadas={comparadas} base={base} gemelos={comparacion.gemelos} edadFinal={edadGemelos} />}
+          {ganadores && (
+            <Simulacion
+              comparadas={comparadas}
+              ganadores={ganadores}
+              gemelos={comparacion.gemelos}
+              colores={colores}
+              anioInicial={anio}
+              onVerMundo={onVerMundo}
+            />
+          )}
           <section className="jg-seccion" key={`abanico:${foco.opcion}`}>
             <Heading level={3} as="h2">
               «{foco.nombre}», año a año
             </Heading>
             <Abanico
+              color={colores[foco.opcion]}
+              colorReferencia={base ? colores[base.opcion] : undefined}
               puntos={foco.trayectoria}
               hoy={hoy}
               referencia={foco.es_base ? undefined : base?.trayectoria}
               nombreReferencia={foco.es_base ? undefined : base?.nombre}
             />
             <Info pregunta="¿Qué muestra este gráfico?">
-              Tu sueldo en los mundos donde eliges «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea azul es el mundo del medio. La
+              Tu sueldo en los mundos donde eliges «{foco.nombre}», desde hoy hasta los {edadGemelos} años. La línea de color es el mundo del medio. La
               franja celeste contiene 8 de cada 10 mundos: mientras más se abre, más depende de la suerte. Toca otra opción para ver la suya.
             </Info>
           </section>
@@ -462,23 +679,37 @@ export function Carta({
             <Heading level={3} as="h2">
               Además del sueldo
             </Heading>
-            {comparadas.map((o) => {
-              const meses = Math.round(o.meses_sin_trabajo);
-              return (
-                <div className="jg-fila-opcion" key={o.opcion} data-foco={comparadas.length > 1 && o.opcion === sel}>
-                  <span className="jg-fuerte">{o.nombre}</span>
-                  <span className="jg-chico">
-                    Quedas sin trabajo alguna vez en <strong>{deCada(o.paso_por_cesantia)}</strong> mundos
-                    {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
-                  </span>
-                  <span className="jg-medidor" aria-hidden="true">
-                    <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
-                  </span>
-                  <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
-                  <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
-                </div>
-              );
-            })}
+            {(() => {
+              const firma = (o: OpcionComparada) =>
+                `${Math.round(o.paso_por_cesantia * 100)}|${Math.round(o.meses_sin_trabajo)}|${o.cargos.map((c) => `${c.cargo}:${Math.round(c.prob * 100)}`).join(",")}`;
+              const iguales = comparadas.every((o) => firma(o) === firma(comparadas[0]));
+              return (iguales ? comparadas.slice(0, 1) : comparadas).map((o) => {
+                const meses = Math.round(o.meses_sin_trabajo);
+                return (
+                  <div className="jg-fila-opcion" key={o.opcion} data-foco={!iguales && comparadas.length > 1 && o.opcion === sel}>
+                    <span className="jg-fuerte">
+                      {iguales ? (
+                        "Igual con todas las opciones"
+                      ) : (
+                        <>
+                          <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
+                          {o.nombre}
+                        </>
+                      )}
+                    </span>
+                    <span className="jg-chico">
+                      Quedas sin trabajo alguna vez en <strong>{Math.round(o.paso_por_cesantia * 100)} de 100</strong> mundos
+                      {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
+                    </span>
+                    <span className="jg-medidor" aria-hidden="true">
+                      <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
+                    </span>
+                    <span className="jg-chico">Cargo a los {edadGemelos} años (de cada 100 mundos):</span>
+                    <BarraPartes partes={o.cargos.map((c) => ({ nombre: c.cargo, prob: c.prob }))} />
+                  </div>
+                );
+              });
+            })()}
             <Info pregunta="¿Por qué en tantos mundos paso por cesantía?">
               Cuenta cualquier mundo donde estás al menos un mes sin trabajo en todo el período, aunque después encuentres otro: un despido, el
               cierre de la empresa, una renuncia o un tiempo estudiando.

@@ -1,7 +1,7 @@
 import { http } from "@/shared/lib/http";
-import type { Catalogo, Duda, ParametrosComparar, Partida, Perfil, PerfilLeido, Vista } from "./types";
+import type { Catalogo, Duda, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, Vista } from "./types";
 
-export const GEMELOS = 500;
+export const GEMELOS = 100;
 
 export const getCatalogo = () => http<Catalogo>("/api/juego/catalogo");
 
@@ -12,6 +12,13 @@ export const getVista = (partida: Partida, parametros: ParametrosComparar = {}) 
   http<Vista>("/api/juego/partida", {
     method: "POST",
     body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros }),
+  });
+
+/** Un mundo de la comparación de la decisión pendiente, con lo que te pasa en él con cada opción. */
+export const getMundo = (partida: Partida, mundo: number, parametros: ParametrosComparar = {}) =>
+  http<MundoDetalle>("/api/juego/mundo", {
+    method: "POST",
+    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo }),
   });
 
 export const TEXTO_MAX = 60_000;

@@ -34,8 +34,8 @@ export function Inicio({
       </div>
       <Row gap={6}>
         <Tag>1 · Cuentas quién eres</Tag>
-        <Tag>2 · 500 mundos prueban cada opción</Tag>
-        <Tag>3 · Eliges y vives el mundo 501</Tag>
+        <Tag>2 · {GEMELOS} mundos prueban cada opción</Tag>
+        <Tag>3 · Eliges y vives el mundo {GEMELOS + 1}</Tag>
       </Row>
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}

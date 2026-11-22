@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, ChevronLeftIcon, Heading, IconButton, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text, cssVars } from "@/shared/ui";
 import { GEMELOS } from "../api";
 
-const COLUMNAS = 25;
+const COLUMNAS = 10;
 
 /** A cada mundo le toca un final, siempre el mismo (no es azar de verdad: es el dibujo de la explicación). */
 const FINALES = Array.from({ length: GEMELOS }, (_, i) => {
@@ -125,7 +125,7 @@ function DosVidas() {
   );
 }
 
-/** Cómo funciona, en cinco pasos: qué significa "simulamos 500 mundos" y por qué se puede comparar una opción con otra. */
+/** Cómo funciona, en cinco pasos: qué significa "simulamos los mundos" y por qué se puede comparar una opción con otra. */
 export function ComoFunciona({ onListo, onVolver, textoListo = "Armar mi perfil" }: { onListo: () => void; onVolver: () => void; textoListo?: string }) {
   const [paso, setPaso] = useState(0);
   const ultimo = paso === PASOS.length - 1;

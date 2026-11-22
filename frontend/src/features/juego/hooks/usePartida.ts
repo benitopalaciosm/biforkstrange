@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getDudas, getVista } from "../api";
+import { getDudas, getMundo, getVista } from "../api";
 import type { Duda, Eleccion, ParametrosComparar, Partida, Perfil, Vista } from "../types";
 
 export type Fase = "inicio" | "perfil" | "duda" | "carta" | "paso" | "cierre";
@@ -59,6 +59,8 @@ export function usePartida() {
   const [recalculando, setRecalculando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const turno = useRef(0);
+  /** Lo elegido dentro de las opciones de la carta actual: los mundos se ven con eso mismo. */
+  const parametrosCarta = useRef<ParametrosComparar>({});
 
   useEffect(() => guardar({ perfil, partida }), [perfil, partida]);
 
@@ -124,6 +126,7 @@ export function usePartida() {
   const empezar = useCallback(
     (duda: string) => {
       const nueva: Partida = { perfil, semilla: Math.floor(Math.random() * 1_000_000), duda, elecciones: [] };
+      parametrosCarta.current = {};
       setCargando(true);
       void pedir(nueva, (v) => {
         setPartida(nueva);
@@ -150,6 +153,7 @@ export function usePartida() {
     (eleccion: Eleccion) => {
       if (!partida || !vista) return;
       const siguiente: Partida = { ...partida, elecciones: [...partida.elecciones, eleccion] };
+      parametrosCarta.current = {};
       const antes = vista;
       setCargando(true);
       void pedir(siguiente, (v) => {
@@ -167,10 +171,17 @@ export function usePartida() {
     (parametros: ParametrosComparar) => {
       if (!partida) return;
       setRecalculando(true);
+      parametrosCarta.current = parametros;
       void pedir(partida, setVista, parametros);
     },
     [partida, pedir],
   );
+
+  /** La historia de un mundo de la carta actual. */
+  const verMundo = useCallback((mundo: number) => {
+    if (!partida) return Promise.reject(new Error("No hay partida"));
+    return getMundo(partida, mundo, parametrosCarta.current);
+  }, [partida]);
 
   const seguir = useCallback(() => {
     if (vista) setFase(vista.terminada ? "cierre" : "carta");
@@ -190,6 +201,6 @@ export function usePartida() {
 
   return {
     fase, perfil, partida, vista, previa, dudas, dudaSugerida, cargando, recalculando, error,
-    irAInicio, irAPerfil, verDudas, empezar, continuar, elegir, compararCon, seguir, jugarDeNuevo, descartar,
+    irAInicio, irAPerfil, verDudas, empezar, continuar, elegir, compararCon, verMundo, seguir, jugarDeNuevo, descartar,
   };
 }

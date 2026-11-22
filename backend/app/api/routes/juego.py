@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.juego import DudasIn, PartidaIn, TextoPerfilIn
+from app.schemas.juego import DudasIn, MundoIn, PartidaIn, TextoPerfilIn
 from app.services import perfil_ia
 from app.sim.motor import partida, supuestos, validacion
 from app.sim.motor.paquete import paquete
@@ -69,6 +69,18 @@ def jugar(body: PartidaIn):
         return partida.vista(
             body.perfil.a_perfil(), body.semilla, body.duda,
             [e.model_dump() for e in body.elecciones], body.gemelos, body.parametros,
+        )
+    except (ValueError, KeyError) as error:
+        raise HTTPException(422, str(error)) from error
+
+
+@router.post("/mundo")
+def ver_mundo(body: MundoIn):
+    """Un mundo de la comparación de la decisión pendiente: lo que te pasa en él con cada opción, año por año."""
+    try:
+        return partida.mundo_pendiente(
+            body.perfil.a_perfil(), body.semilla, body.duda,
+            [e.model_dump() for e in body.elecciones], body.mundo, body.parametros,
         )
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error

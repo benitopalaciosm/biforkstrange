@@ -159,6 +159,26 @@ export type Comparacion = {
   anios: number;
   base: string;
   opciones: OpcionComparada[];
+  /** En cada mundo (el índice), con qué opción terminas ganando más; null si dos quedan a menos de 0,5%. */
+  ganador_por_mundo?: (string | null)[];
+};
+
+export type Suceso = { tipo: "decision" | "evento"; nombre: string; opcion?: string; texto: string; tono: Tono };
+
+export type AnioMundo = {
+  anio: number;
+  edad: number;
+  recesion: boolean;
+  sucesos: Suceso[];
+  fin: { sueldo: number; sueldo_ref: number; cargo: string; estado: string; tipo_empleador: string } | null;
+};
+
+/** Respuesta de `POST /api/juego/mundo`: un mundo, con su historia por opción. */
+export type MundoDetalle = {
+  mundo: number;
+  decision: string;
+  ganador: string | null;
+  opciones: { opcion: string; nombre: string; sueldo_final: number; estado_final: string; anios: AnioMundo[] }[];
 };
 
 export type EleccionInterna = {
