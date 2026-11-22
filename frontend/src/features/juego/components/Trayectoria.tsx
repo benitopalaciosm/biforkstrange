@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Button, Heading, Panel, Row, Stack, Text } from "@/shared/ui";
 import { TEXTO_MAX, getPrompt } from "../api";
-import { Espera } from "./Apuesta";
+import { Cargando } from "./piezas";
 
 export type EstadoLectura =
   | { fase: "nada" }
@@ -141,7 +141,7 @@ export function Trayectoria({ estado, onLlenar }: { estado: EstadoLectura; onLle
       </Stack>
 
       {leyendo && !estado.documento && (
-        <Espera compacto frases={["Claude está leyendo tu texto…", "Puede tardar un minuto."]} cada={3000} />
+        <Cargando frases={["Claude está leyendo tu texto…", "Puede tardar un minuto."]} cada={3000} />
       )}
 
       {estado.fase === "error" && (

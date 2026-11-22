@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Avatar, Button, Tag, cx } from "@/shared/ui";
 import { CALIDAD, plata } from "../textos";
 import type { Calidad, Rango } from "../types";
@@ -49,11 +49,23 @@ export function RangoSueldo({ rango, tope, color = "var(--dinero)" }: { rango: R
   );
 }
 
-export function Cargando({ children }: { children: ReactNode }) {
+/**
+ * Espera sin juego: un punto que late y una frase. Para todo lo que no es un sorteo (simular opciones,
+ * leer el CV); la apuesta queda solo para cuando confirmas y se tira tu año. Con `frases`, van rotando.
+ */
+export function Cargando({ children, texto, frases, cada = 2400 }: { children?: ReactNode; texto?: string; frases?: string[]; cada?: number }) {
+  const [n, setN] = useState(0);
+  const total = frases?.length ?? 0;
+  useEffect(() => {
+    if (total < 2) return;
+    const id = window.setInterval(() => setN((x) => x + 1), cada);
+    return () => window.clearInterval(id);
+  }, [total, cada]);
+  const linea = total ? frases![n % total] : (texto ?? children);
   return (
-    <div className="jg-cargando" role="status">
+    <div className="jg-cargando" role="status" aria-live="polite">
       <i aria-hidden="true" />
-      <span>{children}</span>
+      <span key={total ? n % total : undefined}>{linea}</span>
     </div>
   );
 }

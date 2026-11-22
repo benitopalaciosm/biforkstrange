@@ -183,17 +183,19 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-ruleta-tramo:nth-last-child(2) { border-radius: 0 10px 10px 0; }
 .jg-ruleta-tramo[data-tono="bueno"] { background: color-mix(in srgb, var(--jg-mas) 28%, var(--papel)); }
 .jg-ruleta-tramo[data-tono="malo"] { background: color-mix(in srgb, var(--jg-menos) 34%, var(--papel)); }
-.jg-ruleta-tramo--tuyo { animation: jg-tuyo .5s ease 1.9s both; }
-@keyframes jg-tuyo { from { box-shadow: inset 0 0 0 0 var(--sol); } to { box-shadow: inset 0 0 0 4px var(--sol); } }
-.jg-ruleta-ficha { position: absolute; top: -9px; left: var(--jg-meta); width: 22px; height: 50px; margin-left: -11px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--sol); box-shadow: 0 3px 0 var(--sombra); animation: jg-ficha 1.9s cubic-bezier(.3, 0, .2, 1) both; }
-@keyframes jg-ficha { 0% { left: 2%; } 28% { left: 98%; } 52% { left: 6%; } 74% { left: 90%; } 90% { left: calc(var(--jg-meta) - 5%); } 100% { left: var(--jg-meta); } }
+/* Quieta: el sorteo ya se vio en la espera; acá solo queda el resultado */
+.jg-ruleta-tramo--tuyo { box-shadow: inset 0 0 0 4px var(--sol); }
+.jg-ruleta-ficha { position: absolute; top: -9px; left: var(--jg-meta); width: 22px; height: 50px; margin-left: -11px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--sol); box-shadow: 0 3px 0 var(--sombra); }
 .jg-ruleta-leyenda { display: flex; flex-direction: column; gap: 3px; font: 400 13px/18px var(--font); color: var(--suave); }
 .jg-ruleta-leyenda span { display: flex; align-items: baseline; gap: 6px; }
 .jg-ruleta-leyenda i { flex: none; align-self: center; width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid var(--tinta); background: var(--niebla); }
 .jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--jg-mas); }
 .jg-ruleta-leyenda i[data-tono="malo"] { background: var(--jg-menos); }
 .jg-ruleta-leyenda b { margin-left: auto; white-space: nowrap; font: 600 12px/18px var(--mono); }
-.jg-ruleta-tuyo { color: var(--tinta); font-weight: 600; animation: vd-aparecer .01s linear 1.9s both; }
+.jg-ruleta-tuyo { color: var(--tinta); font-weight: 600; }
+/* Después del sorteo, tu sueldo ya dibujado: nada más se simula en pantalla */
+.jg-quepaso .jg-abanico-medio { animation: none; stroke-dashoffset: 0; }
+.jg-quepaso .jg-abanico-tu-punto { animation: none; }
 .jg-despues { animation: vd-subir .7s var(--ease) var(--jg-espera, 2s) both; }
 
 /* Cómo quedaste: el cambio de sueldo en grande */

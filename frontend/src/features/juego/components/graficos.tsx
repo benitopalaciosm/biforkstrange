@@ -218,7 +218,7 @@ export type Casilla = { id: string; texto: string; prob: number; tono: Tono };
 
 /**
  * El dado, a la vista: la barra es todo lo que podía pasar con la opción elegida (cada tramo, su probabilidad)
- * y la ficha recorre la barra hasta caer en lo que te tocó a ti.
+ * y la ficha queda quieta en lo que te tocó a ti (el sorteo ya se vio en la espera).
  */
 export function Ruleta({ casillas, salio }: { casillas: Casilla[]; salio: string }) {
   const total = casillas.reduce((a, c) => a + c.prob, 0) || 1;
@@ -253,7 +253,7 @@ export function Ruleta({ casillas, salio }: { casillas: Casilla[]; salio: string
   );
 }
 
-/** Tu sueldo año a año hasta ahora: una línea que se dibuja, con el último punto marcado. */
+/** Tu sueldo año a año hasta ahora: una línea con el último punto marcado. */
 export function LineaSueldo({ puntos }: { puntos: { edad: number; sueldo: number }[] }) {
   if (puntos.length < 2) return null;
   const W = 320;

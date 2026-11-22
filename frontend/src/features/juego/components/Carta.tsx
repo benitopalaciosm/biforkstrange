@@ -8,7 +8,6 @@ import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
-import { Espera } from "./Apuesta";
 import { HojaEleccion } from "./HojaEleccion";
 import { CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
@@ -727,7 +726,7 @@ export function Carta({
         </Stack>
       )}
 
-      {recalculando && <Espera texto="Simulando los mundos por ese camino…" />}
+      {recalculando && <Cargando texto="Simulando los mundos por ese camino…" />}
 
       {opcion && hoja !== null && opcion.elecciones_internas.length > 0 && (
         <HojaEleccion

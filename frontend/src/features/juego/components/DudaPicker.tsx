@@ -5,7 +5,6 @@ import {
 import { GEMELOS, getEnJuego } from "../api";
 import { arteDuda, mayuscula, plata, preguntaCorta } from "../textos";
 import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
-import { Espera } from "./Apuesta";
 import { Cargando, ErrorCaja } from "./piezas";
 
 const VISIBLES = 4;
@@ -127,7 +126,7 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} />}
-        {simulando && <Espera frases={[`Simulando tus ${GEMELOS} mundos…`, "Diez años con cada opción…"]} />}
+        {simulando && <Cargando frases={[`Simulando tus ${GEMELOS} mundos…`, "Diez años con cada opción…"]} />}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
           {simulando ? "Simulando…" : `Ver mis ${GEMELOS} mundos`}
         </Button>

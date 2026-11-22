@@ -6,7 +6,6 @@ import {
 import { ErrorApi, getPrompt, leerPerfil } from "../api";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, PerfilLeido } from "../types";
-import { Espera } from "./Apuesta";
 import { ErrorCaja } from "./piezas";
 import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, TuPega, banda } from "./PerfilForm";
 

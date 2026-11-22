@@ -7,7 +7,6 @@ import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, PerfilLeido, Sexo } from "../types";
 import { Logo } from "./Logo";
 import { Info } from "./graficos";
-import { Espera } from "./Apuesta";
 import { Cargando, ErrorCaja } from "./piezas";
 import { Trayectoria, type EstadoLectura } from "./Trayectoria";
 
@@ -125,7 +124,7 @@ function SubirCv({
       <Button onClick={() => entrada.current?.click()} disabled={leyendo}>
         {leyendo ? "Leyendo tu CV…" : "Subir PDF"}
       </Button>
-      {leyendo && <Espera compacto frases={["Claude está leyendo tu CV…", "Mientras, revisa abajo."]} cada={3000} />}
+      {leyendo && <Cargando frases={["Claude está leyendo tu CV…", "Mientras, revisa abajo."]} cada={3000} />}
       {errorArchivo && (
         <div className="jg-error" role="alert">
           {errorArchivo}
@@ -535,7 +534,7 @@ export function PerfilForm({
 
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}
-        {cargando && <Espera frases={["Simulando tus mundos…", "Sorteando tu primera carta…"]} />}
+        {cargando && <Cargando frases={["Simulando tus mundos…", "Sorteando tu primera carta…"]} />}
         <Button onClick={() => onElegirDuda(p, sugeridas)} disabled={!catalogo || !sueldoValido || cargando}>
           {sugeridas.length ? "Ver mis dudas" : "Elegir mi duda"}
         </Button>

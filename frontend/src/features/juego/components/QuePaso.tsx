@@ -3,7 +3,7 @@ import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, deCi
 import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
-import { Contador, Info, LineaSueldo, Ruleta, type Casilla } from "./graficos";
+import { Info, LineaSueldo, Ruleta, type Casilla } from "./graficos";
 import { Noticia, Pensando } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
@@ -29,7 +29,7 @@ function Quedaste({ antes, ahora, recorrido, espera }: { antes: Estado | undefin
       <Meta>Cómo quedaste · {ahora.edad} años</Meta>
       <div className="jg-cambio">
         <span className="jg-cambio-num">
-          {sinSueldo(ahora) ? "Sin sueldo" : <Contador desde={comparable ? antes!.sueldo : ahora.sueldo} hasta={ahora.sueldo} formato={pesos} espera={espera * 1000 + 300} />}
+          {sinSueldo(ahora) ? "Sin sueldo" : pesos(ahora.sueldo)}
         </span>
         {comparable && Math.abs(delta) >= 1000 && (
           <span className="jg-delta" data-signo={delta > 0 ? "mas" : "menos"}>
@@ -92,7 +92,8 @@ export function QuePaso({
   const casillas: Casilla[] = (elegida?.por_resultado ?? []).map((r) => ({ id: r.resultado, texto: r.texto || r.resultado, prob: r.prob, tono: r.tono }));
   const tocada = dado ? casillas.find((c) => c.id === dado.resultado) : undefined;
   const hayRuleta = casillas.length > 1 && tocada !== undefined;
-  const espera = hayRuleta ? 2.1 : 0.15;
+  // el sorteo ya se vio en la espera: acá el resultado aparece de una
+  const espera = 0.15;
   const recorrido = [
     { edad: edadInicial, sueldo: sueldoInicial },
     ...vista.historia.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.sueldo })),
@@ -108,7 +109,7 @@ export function QuePaso({
   if (!listo) return <Pensando titulo={`Mundo ${GEMELOS + 1} · ${primero ? `${primero.edad} años` : `año ${proximo}`}`} />;
 
   return (
-    <Screen tone={noche ? "noche" : "dia"} gap={16} key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>
+    <Screen tone={noche ? "noche" : "dia"} gap={16} className="jg-quepaso" key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>
       <ScreenHeader
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
         right={<Meta>Mundo {GEMELOS + 1}</Meta>}
@@ -133,7 +134,7 @@ export function QuePaso({
           <SlowReveal delay={espera}>
             <Narrative strong>{dado.texto}</Narrative>
           </SlowReveal>
-          <SlowReveal delay={espera + 0.5}>
+          <SlowReveal delay={espera + 0.1}>
             <Text size="sm">
               {hayRuleta
                 ? `Pasó en ${deCien(tocada!.prob)} mundos.`
@@ -150,7 +151,7 @@ export function QuePaso({
         const eventos = a.eventos.filter((e) => !e.rutina);
         const nada = decisiones.length === 0 && eventos.length === 0;
         return (
-          <Stack as="section" gap={8} key={`${a.anio}:${a.edad}`} className="jg-despues" style={cssVars({ "--jg-espera": `${espera + 0.8 + i * 0.25}s` })}>
+          <Stack as="section" gap={8} key={`${a.anio}:${a.edad}`} className="jg-despues" style={cssVars({ "--jg-espera": `${espera + 0.2 + i * 0.1}s` })}>
             <Meta>
               {aniosDe(a.edad, a.fin?.edad, edadInicial)} · {a.edad} años{a.fin ? "" : " · en curso"}
             </Meta>
@@ -188,7 +189,7 @@ export function QuePaso({
         </NightBand>
       )}
 
-      <Quedaste antes={previa?.estado} ahora={vista.estado} recorrido={recorrido} espera={espera + 1.2} />
+      <Quedaste antes={previa?.estado} ahora={vista.estado} recorrido={recorrido} espera={espera + 0.3} />
 
       <ScreenFooter>
         <Button variant={vista.terminada ? "sol" : "primary"} onClick={onSeguir}>
