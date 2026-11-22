@@ -3,7 +3,7 @@ import { aniosDe, cargoYSueldo, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Vista } from "../types";
 import type { VidaAnterior } from "../hooks/usePartida";
 import { GEMELOS } from "../api";
-import { Abanico, Info, RangosOpciones } from "./graficos";
+import { Abanico, EjeX, Info, LIENZO, RangosOpciones, escalaSueldo, rotuloSueldo } from "./graficos";
 import { coloresDe } from "./Carta";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
@@ -189,19 +189,15 @@ function DecisionOSuerte({
 /** Tus dos vidas en el mismo mundo, en un solo gráfico: la de ahora en amarillo y la anterior punteada. */
 function DosVidas({ ahora, antes }: { ahora: { edad: number; sueldo: number }[]; antes: { edad: number; sueldo: number }[] }) {
   if (ahora.length < 2 || antes.length < 2) return null;
-  const W = 320;
+  const { W, X0, X1 } = LIENZO;
   const H = 160;
-  const X0 = 8;
-  const X1 = 236;
   const Y0 = 14;
   const Y1 = H - 22;
   const todos = [...ahora, ...antes];
   const e0 = Math.min(...todos.map((p) => p.edad));
   const e1 = Math.max(...todos.map((p) => p.edad));
-  const tope = Math.max(...todos.map((p) => p.sueldo), 1) * 1.08;
-  const piso = Math.min(...todos.map((p) => p.sueldo)) <= 0 ? 0 : Math.min(...todos.map((p) => p.sueldo)) * 0.8;
   const x = (edad: number) => X0 + ((edad - e0) / Math.max(1, e1 - e0)) * (X1 - X0);
-  const y = (n: number) => Y1 - ((Math.max(piso, n) - piso) / Math.max(1, tope - piso)) * (Y1 - Y0);
+  const y = escalaSueldo(todos.map((p) => p.sueldo), Y0, Y1);
   const linea = (ps: { edad: number; sueldo: number }[]) => ps.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.edad).toFixed(1)},${y(p.sueldo).toFixed(1)}`).join(" ");
   const finA = ahora[ahora.length - 1];
   const finB = antes[antes.length - 1];
@@ -213,17 +209,15 @@ function DosVidas({ ahora, antes }: { ahora: { edad: number; sueldo: number }[];
   }
   return (
     <svg className="jg-abanico" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Tu vida de ahora termina en ${plata(finA.sueldo)} y la anterior en ${plata(finB.sueldo)}.`}>
-      <line className="jg-abanico-eje" x1={X0} x2={X1} y1={Y1} y2={Y1} />
+      <EjeX alto={H} y1={Y1} e0={e0} e1={e1} sueldo0={ahora[0].sueldo} hoy={false} />
       <path className="jg-abanico-ref" style={{ stroke: "var(--suave)" }} pathLength={1} d={linea(antes)} />
       <path className="jg-abanico-tu-borde" pathLength={1} d={linea(ahora)} />
       <path className="jg-abanico-tu" pathLength={1} d={linea(ahora)} />
       <circle className="jg-abanico-tu-punto" cx={x(finA.edad)} cy={y(finA.sueldo)} r={5.5} />
-      <text x={X1 + 8} y={yA + 4} className="jg-abanico-num">{plata(finA.sueldo)}</text>
+      <text x={X1 + 8} y={yA + 4} className="jg-abanico-num">{rotuloSueldo(finA.sueldo)}</text>
       <text x={X1 + 8} y={yA + 15} className="jg-abanico-sub">esta vida</text>
-      <text x={X1 + 8} y={yB + 4} className="jg-abanico-num" style={{ fill: "var(--suave)" }}>{plata(finB.sueldo)}</text>
+      <text x={X1 + 8} y={yB + 4} className="jg-abanico-num" style={{ fill: "var(--suave)" }}>{rotuloSueldo(finB.sueldo)}</text>
       <text x={X1 + 8} y={yB + 15} className="jg-abanico-sub">la anterior</text>
-      <text x={X0} y={H - 6} className="jg-abanico-sub">{e0} años</text>
-      <text x={X1} y={H - 6} textAnchor="end" className="jg-abanico-sub">{e1} años</text>
     </svg>
   );
 }

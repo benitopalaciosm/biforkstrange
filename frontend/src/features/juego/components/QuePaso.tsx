@@ -3,7 +3,7 @@ import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, pesos, plata, porcient
 import type { Anio, DecisionTomada, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
-import { Info, LineaSueldo, Ruleta, sinMovimiento, type Casilla } from "./graficos";
+import { Info, LineaSueldo, ProgresoAnios, Ruleta, sinMovimiento, type Casilla } from "./graficos";
 import { Noticia, Pensando, Salir } from "./piezas";
 import { ComoCambioTuSueldo, TuIngreso } from "./Plata";
 import { TiraMeses, mesesDelAnio } from "./BuscandoTrabajo";
@@ -177,6 +177,7 @@ export function QuePaso({
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
         right={onSalir && <Salir onSalir={onSalir} />}
       />
+      <ProgresoAnios actual={primero ? Math.min(primero.edad - edadInicial + 1, vista.anios) : proximo} total={vista.anios} />
       <h1 className="vd-sr">{dado ? `Qué te pasó al elegir «${dado.opcion_nombre}»` : "Qué te pasó"}</h1>
 
       {edades.length > 1 && (

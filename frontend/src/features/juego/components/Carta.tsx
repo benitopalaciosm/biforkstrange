@@ -6,12 +6,13 @@ import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, deMundo
 import type { ContraBase, Eleccion, EmpresaOferta, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
-import { BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
+import { BarraPartes, EjeX, Info, LIENZO, ProgresoAnios, escalaSueldo, rotuloSueldo, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
 import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Pensando, Salir } from "./piezas";
 import { Espera } from "./Apuesta";
 import { GEMELOS } from "../api";
+import { coloresDeOpciones } from "../colores";
 
 type Internas = Record<string, string | number>;
 
@@ -331,13 +332,9 @@ function OpcionConGemelos({
 const MUCHOS_EMPATES = 0.3;
 const POCAS_GANADAS = 0.15;
 
-/** Un color por opción: la base siempre naranja; las demás en este orden. El gris es el empate. Sin azul: es el de la interfaz y la mediana. */
-const COLORES = ["var(--jg-mas)", "var(--vida)", "var(--violeta)", "var(--turquesa)"];
+/** Un color por opción (solo identidad, nunca mejor o peor): vive en colores.ts, el mismo de la imagen que se comparte. */
 export function coloresDe(comparadas: OpcionComparada[]): Record<string, string> {
-  const salida: Record<string, string> = {};
-  let i = 0;
-  for (const o of comparadas) salida[o.opcion] = o.es_base ? "var(--jg-menos)" : COLORES[i++ % COLORES.length];
-  return salida;
+  return coloresDeOpciones(comparadas);
 }
 
 
@@ -362,11 +359,9 @@ function TodasAnioAnio({
   const activa = elegida ?? foco;
   const series = comparadas.filter((o) => o.trayectoria.length > 0);
   if (series.length === 0) return null;
-  const W = 320;
+  const { W, X0, X1 } = LIENZO;
   const H = 180;
-  const X0 = 8;
-  const X1 = 236;
-  const Y0 = 12;
+  const Y0 = 14;
   const Y1 = H - 22;
   const inicio = { edad: hoy.edad, p10: hoy.sueldo, p50: hoy.sueldo, p90: hoy.sueldo, sin_trabajo: 0 };
   const conInicio = (o: OpcionComparada) => [inicio, ...o.trayectoria];
@@ -374,14 +369,9 @@ function TodasAnioAnio({
   const e0 = hoy.edad;
   const e1 = Math.max(...series.map((o) => o.trayectoria[o.trayectoria.length - 1].edad));
   // la escala sale de las franjas de todas las opciones, no solo de la destacada: así, al tocar otra opción,
-  // las líneas y el punto de hoy no se mueven; solo cambia la franja
-  const valores = [...series.flatMap((o) => o.trayectoria.flatMap((p) => [p.p10, p.p90])), hoy.sueldo];
-  const tope = Math.max(...valores, 1) * 1.06;
-  // si en algún año 1 de cada 10 mundos queda sin sueldo, el eje parte en cero para que esa caída se lea como $0
-  const tocaCero = Math.min(...valores) <= 0;
-  const piso = tocaCero ? 0 : Math.min(...valores) * 0.8;
+  // las líneas y el punto de hoy no se mueven; solo cambia la franja. Si toca $0, el eje parte en $0 (escalaSueldo).
   const x = (edad: number) => X0 + ((edad - e0) / Math.max(1, e1 - e0)) * (X1 - X0);
-  const y = (n: number) => Y1 - ((Math.max(piso, n) - piso) / Math.max(1, tope - piso)) * (Y1 - Y0);
+  const y = escalaSueldo([...series.flatMap((o) => o.trayectoria.flatMap((p) => [p.p10, p.p90])), hoy.sueldo], Y0, Y1);
   const linea = (ps: { edad: number; v: number }[]) => ps.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.edad).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
   const serieAct = conInicio(act);
   const franja = `${linea(serieAct.map((p) => ({ edad: p.edad, v: p.p90 })))} ${[...serieAct].reverse().map((p) => `L${x(p.edad).toFixed(1)},${y(p.p10).toFixed(1)}`).join(" ")} Z`;
@@ -389,14 +379,16 @@ function TodasAnioAnio({
   // la animación y la línea se vuelve a trazar desde cero. La destacada se repite encima, ya trazada.
   const orden = [...series].sort((a, b) => Number(a.opcion === foco) - Number(b.opcion === foco));
   const finAct = act.trayectoria[act.trayectoria.length - 1];
-  // al final: lo típico de cada opción y, como en el abanico, los dos bordes de la franja destacada
+  // al final: lo típico de cada opción y, como en el abanico, los dos bordes de la franja destacada. Con 4 o más
+  // opciones los rótulos se pisan y se alejan de su línea: va solo el de la destacada; las demás, en la leyenda.
+  const rotuladas = series.length >= 4 ? [act] : series;
   const etiquetas: { k: string; texto: string; sub?: string; color?: string; y: number }[] = [
-    ...series.map((o) => {
+    ...rotuladas.map((o) => {
       const fin = o.trayectoria[o.trayectoria.length - 1];
-      return { k: o.opcion, color: colores[o.opcion], texto: plata(fin.p50), y: y(fin.p50) };
+      return { k: o.opcion, color: colores[o.opcion], texto: rotuloSueldo(fin.p50), y: y(fin.p50) };
     }),
-    { k: "p90", texto: plata(finAct.p90), sub: "90%", y: y(finAct.p90) },
-    { k: "p10", texto: finAct.p10 > 0 ? plata(finAct.p10) : "sin sueldo", sub: "10%", y: y(finAct.p10) },
+    { k: "p90", texto: rotuloSueldo(finAct.p90), sub: "90%", y: y(finAct.p90) },
+    { k: "p10", texto: rotuloSueldo(finAct.p10), sub: "10%", y: y(finAct.p10) },
   ].sort((a, b) => a.y - b.y);
   const alto = (e: { sub?: string }) => (e.sub ? 24 : 14);
   for (let i = 1; i < etiquetas.length; i++) {
@@ -420,7 +412,7 @@ function TodasAnioAnio({
         role="img"
         aria-label={`Lo típico de cada opción, de los ${e0} a los ${e1} años: ${series.map((o) => `${o.nombre} ${plata(o.trayectoria[o.trayectoria.length - 1].p50)}`).join("; ")}.`}
       >
-        <line className="jg-abanico-eje" x1={X0} x2={X1} y1={Y1} y2={Y1} />
+        <EjeX alto={H} y1={Y1} e0={e0} e1={e1} sueldo0={hoy.sueldo} />
         <path className="jg-abanico-franja" key={`franja:${act.opcion}`} style={{ fill: `color-mix(in srgb, ${colores[act.opcion]} 16%, transparent)` }} d={franja} />
         {orden.map((o) => (
           <path
@@ -440,16 +432,16 @@ function TodasAnioAnio({
           />
         )}
         <circle className="jg-abanico-hoy" cx={x(e0)} cy={y(hoy.sueldo)} r={4.5} />
+        {/* el monto va en tinta (los colores de opción no se leen como texto chico) y el color, en la marca de al lado */}
         {etiquetas.map((e) => (
           <g key={e.k}>
-            <text x={X1 + 8} y={e.y + 4} className="jg-abanico-num" style={{ fill: e.color ?? "var(--suave)" }}>
+            {e.color && <circle cx={X1 + 11} cy={e.y} r={3.5} style={{ fill: e.color }} />}
+            <text x={X1 + (e.color ? 18 : 8)} y={e.y + 4} className="jg-abanico-num" style={e.color ? undefined : { fill: "var(--suave)" }}>
               {e.texto}
             </text>
             {e.sub && <text x={X1 + 8} y={e.y + 14} className="jg-abanico-sub">{e.sub}</text>}
           </g>
         ))}
-        <text x={X0} y={H - 6} className="jg-abanico-sub">hoy · {e0} años · {plata(hoy.sueldo)}</text>
-        <text x={X1} y={H - 6} textAnchor="end" className="jg-abanico-sub">{e1} años</text>
       </svg>
       <span className="jg-leyenda jg-leyenda-fila" role="group" aria-label="Destacar una opción">
         {series.map((o) => (
