@@ -482,3 +482,36 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 
 /* Oferta en corto: dos botones del mismo peso, para que la pantalla no empuje a quedarse */
 .jg-dos-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Los 100 mundos: atajos para abrir uno, el cursor que sortea y el duelo de un mundo abierto */
+.jg-atajos { display: flex; flex-wrap: wrap; gap: 8px; }
+.jg-atajo { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1.5px solid var(--linea); border-radius: 999px; background: var(--papel); color: var(--tinta); font: 600 13px/16px var(--font); cursor: pointer; transition: transform .15s var(--ease), border-color .15s ease; }
+.jg-atajo:hover:not(:disabled) { border-color: var(--tinta); transform: translateY(-1px); }
+.jg-atajo:disabled { opacity: .6; cursor: default; }
+.jg-atajo[data-principal="true"] { border-color: var(--tinta); background: var(--tinta); color: var(--papel); }
+.jg-atajo i { flex: none; width: 9px; height: 9px; border-radius: 50%; }
+.jg-atajo:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+.jg-mundos[data-sorteando="true"] .jg-mundo-punto { opacity: .45; transition: opacity .12s ease, transform .1s ease, box-shadow .1s ease; }
+.jg-mundos[data-sorteando="true"] .jg-mundo-punto[data-escaneo="true"] { opacity: 1; transform: scale(1.55); box-shadow: 0 0 0 2px var(--papel), 0 0 0 4px var(--sol); }
+.jg-mundo-acciones { display: inline-flex; gap: 10px; margin-left: auto; }
+.jg-mundo-cabeza { flex-wrap: wrap; }
+.jg-duelo-recesion { fill: color-mix(in srgb, var(--jg-menos) 14%, transparent); }
+.jg-leyenda-fila { flex-direction: row; flex-wrap: wrap; gap: 4px 14px; }
+
+/* La tarjeta de opción: nombre, en cuántos mundos es la mejor (el mismo número que la grilla) y, abierta, los escenarios */
+.jg-opcion-titulo { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.jg-opcion-nombre { display: inline-flex; align-items: center; gap: 6px; }
+.jg-marcador { display: flex; flex-direction: column; gap: 4px; }
+.jg-marcador-num { font: 400 12px/16px var(--font); color: var(--suave); }
+.jg-marcador-num b { font: 700 18px/20px var(--font); color: var(--tinta); font-variant-numeric: tabular-nums; margin-right: 2px; }
+.jg-marcador[data-lider="true"] .jg-marcador-num b { color: var(--tinta); }
+.jg-minimundos { display: grid; grid-template-columns: repeat(50, minmax(0, 1fr)); gap: 1.5px; max-width: 220px; }
+.jg-minimundos i { aspect-ratio: 1; border-radius: 50%; background: var(--linea); }
+.jg-escenarios { display: flex; flex-direction: column; }
+.jg-escenarios > span { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1.5px solid var(--linea); font: 400 13px/18px var(--font); color: var(--suave); }
+.jg-escenarios > span:first-child { border-top: 0; }
+.jg-escenarios b { font: 600 14px/18px var(--font); color: var(--tinta); font-variant-numeric: tabular-nums; }
+.jg-escenarios > span[data-fuerte="true"] b { font-size: 16px; }
+.jg-leyenda-boton { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1.5px solid transparent; border-radius: 999px; background: transparent; color: var(--suave); font: 500 13px/18px var(--font); cursor: pointer; }
+.jg-leyenda-boton[aria-pressed="true"] { border-color: var(--linea); color: var(--tinta); }
+.jg-leyenda-boton:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
