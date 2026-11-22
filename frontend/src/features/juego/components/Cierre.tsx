@@ -283,9 +283,11 @@ export function CierrePantalla({
       </Stack>
 
       <SunCard>
-        <Meta>{sinSueldo(e) ? "Tu último sueldo" : "Tu sueldo final"} · en pesos de hoy</Meta>
+        <Meta>Tu sueldo final · en pesos de hoy</Meta>
         <BigNumber value={plata(cierre.sueldo_final)} unit="al mes" animate />
         <Text>{sinSueldo(e) ? situacion(e.estado) : [e.rol || e.cargo, e.empresa].filter(Boolean).join(" · ")}</Text>
+        {/* sin trabajo cuenta $0, como en tus copias; el último sueldo va aparte, solo como dato */}
+        {sinSueldo(e) && (cierre.ultimo_sueldo ?? 0) > 0 && <Text size="sm">Terminas sin trabajo, así que cuenta $0. Tu último sueldo fue {plata(cierre.ultimo_sueldo!)} al mes.</Text>}
         <Text size="sm">
           {mesesSinTrabajo > 0 ? `${mesesSinTrabajo} ${mesesSinTrabajo === 1 ? "mes" : "meses"} sin trabajo.` : "Siempre con trabajo."}
         </Text>

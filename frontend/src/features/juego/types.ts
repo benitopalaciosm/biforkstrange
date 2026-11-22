@@ -454,7 +454,10 @@ export type Busqueda = {
 };
 
 export type Cierre = {
+  /** Lo que ganas al final: $0 si terminas sin trabajo, la misma base con que se comparan las opciones y tus copias. */
   sueldo_final: number;
+  /** Si terminas sin trabajo, lo que ganabas en tu último trabajo (solo para mostrar); null si trabajas. */
+  ultimo_sueldo?: number | null;
   estado: Estado;
   anios_sin_trabajo: number;
   meses_sin_trabajo?: number;

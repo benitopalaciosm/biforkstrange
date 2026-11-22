@@ -183,11 +183,13 @@ def test_vista_al_cierre():
                     for a in v["historia"]]
     assert len(v["historia"]) == 10 and sin_historia == p.vida.historia and v["estado"] == p.vida.resumen()
     c = v["cierre"]
-    assert set(c) == {"sueldo_final", "estado", "anios_sin_trabajo", "meses_sin_trabajo", "primera_decision",
+    assert set(c) == {"sueldo_final", "ultimo_sueldo", "estado", "anios_sin_trabajo", "meses_sin_trabajo", "primera_decision",
                       "mejor_que_gemelos"}
     assert c["estado"] == v["estado"] and c["anios_sin_trabajo"] == p.vida.anios_buscando
     assert c["meses_sin_trabajo"] == p.vida.meses_buscando
-    assert c["sueldo_final"] == round(p.vida.e["sueldo"] or p.vida.e["sueldo_ref"])
+    # el sueldo final es lo que ganas hoy (0 sin trabajo), la misma base de las copias; el último va aparte
+    assert c["sueldo_final"] == round(p.vida.e["sueldo"])
+    assert c["ultimo_sueldo"] == (None if p.vida.e["sueldo"] > 0 else round(p.vida.e["sueldo_ref"]))
     primera = c["primera_decision"]
     assert (primera["decision"], primera["elegida"]) == ("unirse_a_startup", "ir")
     comparacion = primera["comparacion"]
