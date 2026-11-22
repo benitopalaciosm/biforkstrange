@@ -14,7 +14,11 @@ sentido: `ingreso_p50_18-24`, `ingreso_p50_25-29`, `ingreso_p75_35-39`, `ingreso
 import pytest
 
 from app.sim.motor import validacion
+from app.sim.motor.azar import Dados
+from app.sim.motor.motor import Vida
 from app.sim.motor.paquete import paquete
+from app.sim.motor.perfil import Perfil, estado_inicial
+from app.sim.motor.politicas import Poblacion
 
 N, SEMILLA = 600, 0
 MINIMO_CUADRAN = 22        # con 600 personas cuadran 26; con 5.000, 25 o 26
@@ -96,6 +100,27 @@ def test_elsoc(resultado):
         sin_empleo = filas[f"elsoc_ocupado_a_no_ocupado_{banda}"]
         assert sin_empleo["comparable"] is False and sin_empleo["cumple"] is None
         assert sin_empleo["error"] < -0.03
+
+
+def test_el_ascenso_que_descuenta_el_alza_anual_es_el_promedio_de_la_cohorte():
+    """ASCENSO_POBLACION se midió con esta cohorte: si cambia la regla de ascenso o los pesos, hay que medirla
+    de nuevo; si no, el alza anual vuelve a contar los ascensos dos veces (o a no contarlos)."""
+    pq = paquete()
+
+    class Espia(Vida):
+        diferencias: list[float] = []
+
+        def _evento(self, id_, directo=False):
+            if id_ == "alza_anual" and self.e["estado"] == "empleado":
+                Espia.diferencias.append(self.e["prob_ascenso"] - pq.k("ASCENSO_POBLACION", self.e["banda7"]))
+            super()._evento(id_, directo)
+
+    for g in range(300):
+        v = Espia(estado_inicial(Perfil.a_los_18(sexo="hm"[g % 2]), pq), Dados(SEMILLA, g), pq)
+        while v.e["edad"] < validacion.EDAD_FIN:
+            v.vivir_anio(Poblacion())
+    assert len(Espia.diferencias) > 5000
+    assert abs(sum(Espia.diferencias) / len(Espia.diferencias)) < 0.005
 
 
 def test_misma_semilla_mismo_resultado_en_serie_y_en_paralelo():

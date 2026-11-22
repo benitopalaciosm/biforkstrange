@@ -50,4 +50,5 @@ El paquete dice qué pasa con cada decisión y evento. Esto lo decide el motor y
 - **Dentro de una opción** (a qué rubro, a qué región), si la persona no elige, los gemelos van al rubro que mejor paga y a la región con más gente.
 - **Valores iniciales que la persona no declara:** contactos 30, oficio 50, ahorro de dos sueldos, sin pareja ni hijos.
 - **Cómo deciden los gemelos:** no buscan cambios; cuando la vida los obliga (cesantía, una oferta) responden con pesos fijos (`politicas.py`).
+- **El alza anual descuenta el ascenso promedio, no el tuyo** (`ASCENSO_POBLACION`, supuesto). El perfil por edad de la ESI ya trae los ascensos promedio, así que se resta la probabilidad de ascenso promedio de la población de tu tramo de edad por el alza media de un ascenso (7,5%). Quien asciende más que el promedio gana más. El número sale de la cohorte de validación; si cambian el ascenso o los pesos, hay que medirlo de nuevo.
 - **Solo lo laboral:** fuera las 6 decisiones de vida personal y los eventos de salud, duelo y pareja.

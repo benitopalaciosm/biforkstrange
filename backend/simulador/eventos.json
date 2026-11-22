@@ -19,7 +19,7 @@
       {
        "var": "sueldo",
        "op": "multiplica",
-       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - prob_ascenso * 0.075 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), 0, 0.25)"
+       "valor": "1 + clamp(si(y(anos_titulado < 4, carrera_id >= 0), crecimiento_carrera, crecimiento_esi) * si(tipo_empleador == 'publico', 0.8, 1) - k('ASCENSO_POBLACION', banda7) * (k('ALZA_ASCENSO', 0) + k('ALZA_ASCENSO', 1)) / 2 + si(azar() < 0.9, 0.03 * azar_normal(), -0.05 + 0.08 * azar_normal()) + si(recesion, -0.015, 0), 0, 0.25)"
       }
      ]
     }
@@ -30,7 +30,7 @@
     "guvenen_2021"
    ],
    "calidad": "mixto",
-   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso esperado porque el perfil por edad ya lo incluye."
+   "notas": "crecimiento_esi = p50 de la banda siguiente / p50 de la actual en esi_perfil_edad_edu, anualizado. crecimiento_carrera usa ingreso_bruto_ano1..5 de la carrera. Se descuenta el ascenso promedio de la población (ASCENSO_POBLACION por el alza media de un ascenso), porque el perfil por edad ya lo incluye; el ascenso de cada persona lo paga el evento ascenso. Así quien asciende más que el promedio gana más y, en promedio, el ascenso no se cuenta dos veces."
   },
   {
    "id": "ascenso",

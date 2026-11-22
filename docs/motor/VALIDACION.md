@@ -14,6 +14,17 @@ Reproducir, desde `backend/`: `python -m app.sim.motor.validacion [n] [semilla]`
 
 8. **El alza anual ya no baja el sueldo (22 de noviembre de 2026).** El alza de quien sigue en su pega tenía ruido que podía dejarla negativa: en 3 de cada 10 años en la misma pega, el sueldo bajaba. Ahora el piso del alza es cero (`alza_anual` en `eventos.json`). Con la semilla 0 cuadran 31 de 37 metas, contra 24: los seis sueldos medianos, de los 18 a los 49 años, quedan a menos de 13% de Chile, y el 25% más alto a los 45-49 también cuadra. Siguen fallando el 25% más bajo a los 25-29 y a los 35-39 (los independientes), el empleo público y el cambio de empleador. La tabla de abajo es de antes de este cambio.
 
+9. **Decisiones del modelo (rama `fix/modelo-decisiones`).** Cuatro reglas que decidió el equipo, una por commit. Metas con 5.000 personas, semillas 0 y 1:
+
+   | Cambio | Metas (s0 / s1) | ELSOC (s0 / s1) | Sueldo mediano 30-34 / 45-49 (s0) |
+   |---|---|---|---|
+   | Antes | 33 / 31 | 5 / 5 | 708 / 807 mil (−3% / +3%) |
+   | 1. El alza anual descuenta el ascenso promedio (`ASCENSO_POBLACION`), no el tuyo | 33 / 31 | 5 / 5 | 707 / 805 mil (−3% / +3%) |
+
+   ELSOC 5 de 6 no es nuevo: la salida de la cesantía a los 30-44 da 69,1% y 67,8% contra un techo de 67,7% (59,7 + 8), igual que antes de estos cambios.
+
+   - **1.** En promedio el alza no cambia (el descuento promedio es el mismo), así que los sueldos de la cohorte se mueven menos de 1% y ninguna meta cambia. Lo que cambia es quién gana: con los mismos dados, el sueldo final medio con oficio 80 queda 2,0% sobre el de oficio 30 a 10 años (antes, 0,8%, y solo porque el piso de cero del alza corta la resta). `ASCENSO_POBLACION` es la `prob_ascenso` promedio de los años de empleado de esta cohorte por tramo de edad (0,045 a 0,061); `tests/test_motor_validacion.py` revisa que siga siendo el promedio.
+
 ## Cómo se midió
 
 5.000 personas, mitad hombres y mitad mujeres, desde los 18 años (`Perfil.a_los_18`) hasta los 50, decidiendo como la población (`Poblacion`), solo lo laboral. Las 3 metas del grupo "Vida" quedan fuera: quedan 37.
