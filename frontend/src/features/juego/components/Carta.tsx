@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, Chip, DecisionArt, DecisionCard, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars, type DecisionTag,
 } from "@/shared/ui";
-import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, deCada, minuscula, plata, primeraFrase, sinPunto, sinSueldo } from "../textos";
+import { CALIDAD, TIPO_EMPLEADOR, arteOpcion, cargoYSueldo, conSigno, minuscula, plata, primeraFrase, sinPunto, sinSueldo } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, EscenarioIA, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
@@ -155,15 +155,15 @@ const ESCENARIO_IA: Record<EscenarioIA["escenario"], string> = { lento: "lenta",
 
 /** La opción para elegir: qué es, en cuántos mundos gana y el sueldo típico. La simulación va aparte, más abajo. */
 /**
- * La frase de una línea bajo el nombre. Si la opción tiene dado, lo bueno que puede pasar y cada cuánto
- * ("Te igualan la oferta · 1 de cada 4"); si no, la primera oración del detalle cuando es corta.
+ * La frase de una línea bajo el nombre. Si la opción tiene dado, lo bueno que puede pasar y en cuántos mundos
+ * ("Te igualan la oferta · 19 de 100", igual que al abrirla); si no, la primera oración del detalle cuando es corta.
  */
 function fraseCorta(o: OpcionComparada, detalle: string): string | undefined {
   const rs = o.por_resultado;
   if (rs.length > 1) {
     const porProb = [...rs].sort((a, b) => b.prob - a.prob);
     const r = porProb.find((x) => x.tono === "bueno") ?? porProb[0];
-    return `${sinPunto(r.texto || r.resultado)} · ${deCada(r.prob)}`;
+    return `${sinPunto(r.texto || r.resultado)} · ${Math.round(r.prob * 100)} de 100`;
   }
   const corta = detalle ? primeraFrase(detalle) : "";
   if (corta && corta.length <= 60) return corta;
@@ -198,7 +198,9 @@ function OpcionConGemelos({
   lider: boolean;
 }) {
   const nota = destacado(o, base, riesgo);
-  const d = o.diferencia_tipica;
+  // la resta de las medianas que se ven al abrir la tarjeta, redondeadas como se muestran ($3,40 M − $3,12 M)
+  const aDiez = (n: number) => Math.round(n / 10_000) * 10_000;
+  const d = base ? aDiez(o.sueldo.p50) - aDiez(base.sueldo.p50) : null;
   const tags: DecisionTag[] = [];
   if (ganadas !== null) tags.push({ label: `Gana en ${ganadas} de ${total}`, tone: lider ? "accent" : "default" });
   if (o.es_base) tags.push({ label: "Punto de partida", tone: "minus" });
