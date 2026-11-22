@@ -75,13 +75,22 @@ def dudas(body: DudasIn):
     return partida.dudas_posibles(body.perfil.a_perfil())
 
 
+def _anios(body: PartidaIn) -> int:
+    """Cuántos años se juegan: hasta la edad final que eligió la persona, o 10."""
+    if body.edad_final is None:
+        return partida.ANIOS
+    if body.edad_final <= body.perfil.edad:
+        raise ValueError("la edad final tiene que ser mayor que tu edad")
+    return body.edad_final - body.perfil.edad
+
+
 @router.post("/partida")
 def jugar(body: PartidaIn):
     """Estado de la partida: historia, decisión pendiente con lo que vivieron los gemelos, o el cierre."""
     try:
         return partida.vista(
             body.perfil.a_perfil(), body.semilla, body.duda,
-            [e.model_dump() for e in body.elecciones], body.gemelos, body.parametros,
+            [e.model_dump() for e in body.elecciones], body.gemelos, body.parametros, anios=_anios(body),
         )
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error
@@ -93,7 +102,7 @@ def ver_mundo(body: MundoIn):
     try:
         return partida.mundo_pendiente(
             body.perfil.a_perfil(), body.semilla, body.duda,
-            [e.model_dump() for e in body.elecciones], body.mundo, body.parametros,
+            [e.model_dump() for e in body.elecciones], body.mundo, body.parametros, anios=_anios(body),
         )
     except (ValueError, KeyError) as error:
         raise HTTPException(422, str(error)) from error

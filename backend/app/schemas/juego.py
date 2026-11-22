@@ -152,6 +152,8 @@ class PartidaIn(BaseModel):
     semilla: int = 0
     duda: str | None = None
     elecciones: list[EleccionIn] = Field(default_factory=list, max_length=200)
+    # hasta qué edad se juega; sin dato, 10 años desde la edad del perfil
+    edad_final: int | None = Field(None, ge=19, le=60)
     gemelos: int = Field(100, ge=0, le=2000)
     # lo que se elige dentro de cada opción de la decisión pendiente, para comparar: {opción: {variable: valor}}
     parametros: dict[str, dict[str, str | int]] = {}

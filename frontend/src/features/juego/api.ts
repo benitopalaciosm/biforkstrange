@@ -11,14 +11,14 @@ export const getDudas = (perfil: Perfil) =>
 export const getVista = (partida: Partida, parametros: ParametrosComparar = {}) =>
   http<Vista>("/api/juego/partida", {
     method: "POST",
-    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros }),
+    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, edad_final: partida.perfil.edad_final ?? null }),
   });
 
 /** Un mundo de la comparación de la decisión pendiente, con lo que te pasa en él con cada opción. */
 export const getMundo = (partida: Partida, mundo: number, parametros: ParametrosComparar = {}) =>
   http<MundoDetalle>("/api/juego/mundo", {
     method: "POST",
-    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo }),
+    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo, edad_final: partida.perfil.edad_final ?? null }),
   });
 
 /** Lo que vale cada línea del CV en la duda: la misma comparación de la carta, sin cada dato. */

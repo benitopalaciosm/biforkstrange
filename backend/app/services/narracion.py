@@ -26,6 +26,8 @@ def items_pendiente(vista: dict) -> list[Item]:
     if p.get("narrativa"):
         items.append(Item(id="situacion", tipo="evento", plantilla=p["narrativa"]["situacion"],
                           contexto={"decision": p["decision"], "pregunta": p["pregunta"], "tono": "neutro",
+                                    # "buscada": la persona lo buscó en un año tranquilo; no contarlo como algo que le llegó
+                                    "como_llego": (p.get("por_que") or {}).get("tipo"),
                                     "edad": vista["estado"]["edad"], "rubro": vista["estado"]["rubro"],
                                     "empresa": vista["estado"].get("empresa"), "cargo": vista["estado"].get("rol")}))
     for o in p["opciones"]:
