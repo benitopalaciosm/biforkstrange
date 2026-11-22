@@ -646,26 +646,30 @@ export function Carta({
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
-      <Text size="sm">
-        <strong>Hoy:</strong>{" "}
-        {sinSueldo(e) ? (
-          `${situacion(e.estado)} · antes ${plata(e.sueldo_ref)}`
-        ) : (
-          <>
-            {e.rol || e.cargo}
-            {e.empresa && (
-              <>
-                {" en "}
-                {e.empresa}{" "}
-                <span className="jg-hoy-logo">
-                  <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
-                </span>
-              </>
-            )}
-            {` · ${plata(e.sueldo)}/mes`}
-          </>
-        )}
-      </Text>
+      <div className="jg-hoy">
+        <Text size="sm">
+          <strong>Hoy:</strong>{" "}
+          {sinSueldo(e) ? (
+            situacion(e.estado)
+          ) : (
+            <>
+              {e.rol || e.cargo}
+              {e.empresa && (
+                <>
+                  {" en "}
+                  {e.empresa}{" "}
+                  <span className="jg-hoy-logo">
+                    <Logo carpeta="empresas" id={e.empresa_id ?? e.empresa} nombre={e.empresa} grupo={e.rubro} hay={(e.empresa_id ?? -1) >= 0} tamano={22} />
+                  </span>
+                </>
+              )}
+            </>
+          )}
+        </Text>
+        <Text size="sm" className="jg-hoy-sueldo">
+          {sinSueldo(e) ? `Antes ganabas ${plata(e.sueldo_ref)}/mes` : `${plata(e.sueldo)}/mes`}
+        </Text>
+      </div>
       <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>
