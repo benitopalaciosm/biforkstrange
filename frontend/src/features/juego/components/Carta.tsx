@@ -105,7 +105,6 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
         <span>Exposición a IA {nivelIA(c.exposicion_ia)}</span>
         <span>{c.horas} h</span>
       </span>
-      <span className="jg-chico jg-empresa-nota">Cifras simuladas a partir de su rubro y tamaño: no son datos de la empresa.</span>
     </span>
   );
 }
