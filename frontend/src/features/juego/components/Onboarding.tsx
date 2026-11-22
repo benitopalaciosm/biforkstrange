@@ -7,10 +7,9 @@ import { ErrorApi, getPrompt, leerPerfil } from "../api";
 import { EDUCACION, TIPO_EMPLEADOR, pesos } from "../textos";
 import type { Catalogo, DudaSugerida, Perfil, PerfilLeido } from "../types";
 import { ErrorCaja } from "./piezas";
-import { Prueba } from "./Prueba";
 import { PerfilForm, RUBROS_TOP, SLIDER_MAX, SLIDER_MIN, TuPega, banda } from "./PerfilForm";
 
-type Paso = "entrada" | "leyendo" | "tu" | "pega" | "plata" | "prueba";
+type Paso = "entrada" | "leyendo" | "tu" | "pega" | "plata";
 /** Los pasos de cada camino: con CV se salta lo que el CV ya contestó. */
 const MANUAL: Paso[] = ["tu", "pega", "plata"];
 /** Las elecciones de cada tarjeta: parten vacías y hay que tocarlas para seguir. */
@@ -67,10 +66,6 @@ export function Onboarding({
   const [errorClaude, setErrorClaude] = useState<string | null>(null);
   const pedido = useRef(0);
   useEffect(() => () => void pedido.current++, []);
-  useEffect(() => {
-    const id = gemeloGuardado();
-    if (id && inicial.gemelo_id === undefined) setP((x) => ({ ...x, gemelo_id: id }));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = <K extends keyof Perfil>(k: K, v: Perfil[K]) => {
     setP((x) => ({ ...x, [k]: v }));
@@ -129,12 +124,10 @@ export function Onboarding({
   const seguir = () => {
     pedido.current++;
     const usoFuentes = cv === "listo" || claudeListo;
-    const pasos: Paso[] = [
-      ...(usoFuentes
-        ? MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !sabidos.has(k)))
-        : MANUAL),
-      "prueba", // al final, tu gemelo apuesta cómo vas a responder y comparan
-    ];
+    const pasos = usoFuentes
+      ? MANUAL.filter((x) => [...(ELEGIR[x] ?? []), ...(DESLIZAR[x] ?? [])].some((k) => !sabidos.has(k)))
+      : MANUAL;
+    if (pasos.length === 0) return onElegirDuda(p, sugeridas);
     setFaltan(pasos);
     setPaso(pasos[0]);
   };
@@ -213,7 +206,6 @@ export function Onboarding({
           claude={<TuClaude leyendo={leyendoClaude} error={errorClaude} onTexto={(t) => void leerTuClaude(t)} />}
           onSeguir={seguir}
           onSaltar={saltarTodo}
-          gemelo={<UsarGemelo gemeloId={p.gemelo_id ?? null} onGemelo={(id) => setP((x) => ({ ...x, gemelo_id: id }))} />}
           cargando={cargando}
         />
       )}
@@ -328,8 +320,6 @@ export function Onboarding({
         </Tarjeta>
       )}
 
-      {paso === "prueba" && <Prueba perfil={p} onGemelo={(id) => setP((x) => ({ ...x, gemelo_id: id }))} />}
-
       {i >= 0 && (
         <ScreenFooter>
           {error && <ErrorCaja error={error} />}
@@ -355,9 +345,8 @@ export function Onboarding({
  * después Seguir pregunta solo lo que falta. O juegas sin datos.
  */
 function Entrada({
-  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, cargando, gemelo,
+  cv, error, onPdf, claudeListo, claudeAbierto, onAbrirClaude, claude, onSeguir, onSaltar, cargando,
 }: {
-  gemelo: React.ReactNode;
   cv: "nada" | "leyendo" | "listo";
   error: string | null;
   onPdf: (pdf: string) => void;
@@ -467,7 +456,6 @@ function Entrada({
         </button>
       </Stack>
 
-      {gemelo}
 
       <ScreenFooter>
         {algo && (
@@ -662,36 +650,3 @@ function Silueta({ lleno }: { lleno: number }) {
 const PROMPT_RELATO = `
 
 4. Después del bloque, agrega una sección "## Sobre mí, en mis palabras" escrita en primera persona, como si yo me presentara (150–300 palabras): qué hago y qué me cansa de mi pega, cómo decido frente al riesgo y los cambios, cómo soy trabajando con otras personas, lo que me importa fuera del trabajo y las dudas o planes que tengo hoy. Solo lo que sabes de verdad.`;
-
-const CLAVE_GEMELO = "biforkstrange.twinProfileId"; // la misma que usa /gemelo
-
-function gemeloGuardado(): string | null {
-  try {
-    return localStorage.getItem(CLAVE_GEMELO);
-  } catch {
-    return null;
-  }
-}
-
-/** Usar tu gemelo digital: sus rasgos afinados deciden qué cartas te salen (nada más). */
-function UsarGemelo({ gemeloId, onGemelo }: { gemeloId: string | null; onGemelo: (id: string | null) => void }) {
-  const guardado = gemeloGuardado();
-  return (
-    <div className="ob-usar-gemelo ob-entra">
-      {guardado ? (
-        <label>
-          <input type="checkbox" checked={gemeloId === guardado} onChange={(e) => onGemelo(e.target.checked ? guardado : null)} />
-          <span>
-            <strong>Usar mi gemelo digital.</strong> Sus rasgos afinados deciden qué cartas te salen.{" "}
-            <a href="/gemelo" target="_blank" rel="noreferrer">Afinarlo</a>
-          </span>
-        </label>
-      ) : (
-        <span className="ob-chico">
-          ¿Quieres que las cartas sigan tu personalidad? Al final tu gemelo se pone a prueba, o{" "}
-          <a href="/gemelo" target="_blank" rel="noreferrer">ármalo con más preguntas</a>.
-        </span>
-      )}
-    </div>
-  );
-}

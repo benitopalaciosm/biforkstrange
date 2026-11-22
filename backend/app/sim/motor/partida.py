@@ -6,8 +6,6 @@ los dados dan lo mismo, así que el resultado es idéntico. Cuando faltan
 elecciones, la partida queda detenida en la decisión pendiente.
 """
 
-from contextlib import contextmanager
-from contextvars import ContextVar
 from dataclasses import dataclass
 
 from app.sim.motor import empresas, gemelos
@@ -19,19 +17,6 @@ from app.sim.motor.narrativa import narrar
 from app.sim.motor.politicas import Jugador, elecciones_internas
 
 ANIOS = 10
-# Cuánto pesa cada carta para esta persona (de su gemelo). Va por contexto para no cruzar todas las firmas.
-AFINIDAD: ContextVar[dict[str, float]] = ContextVar("afinidad", default={})
-
-
-@contextmanager
-def con_afinidad(afinidad: dict[str, float]):
-    token = AFINIDAD.set(afinidad)
-    try:
-        yield
-    finally:
-        AFINIDAD.reset(token)
-
-
 JUGADOR = "tu"  # nombre de los dados de la persona; los gemelos usan 0, 1, 2...
 
 
@@ -50,12 +35,10 @@ def dudas_posibles(perfil: Perfil, pq: Paquete | None = None) -> list[dict]:
     """Cartas del banco que esta persona puede elegir como su duda inicial."""
     pq = pq or paquete()
     vida = Vida(estado_inicial(perfil, pq), Dados(0, JUGADOR), pq)
-    vida.afinidad = AFINIDAD.get()
     return [
         {"decision": id_, "nombre": pq.decisiones[id_]["nombre"], "pregunta": pq.decisiones[id_]["pregunta"],
          "categoria": pq.decisiones[id_]["categoria"], "calidad": pq.decisiones[id_]["calidad"]}
-        # con gemelo, primero las que más te tiran
-        for id_, _ in sorted(vida.cartas_posibles(), key=lambda c: -c[1] if vida.afinidad else 0)
+        for id_, _ in vida.cartas_posibles()
     ]
 
 
@@ -64,7 +47,6 @@ def jugar(perfil: Perfil, semilla: int, elecciones: list[dict], duda: str | None
     pq = pq or paquete()
     vida = Vida(estado_inicial(perfil, pq), Dados(semilla, JUGADOR), pq)
     vida.variedad = REPETIR_CARTA  # tu vida no te repite la misma pregunta año tras año
-    vida.afinidad = AFINIDAD.get()
     if duda is not None and not vida.aplica(duda):
         raise ValueError(f"la decisión {duda!r} no aplica a este perfil")
     jugador = Jugador(elecciones)

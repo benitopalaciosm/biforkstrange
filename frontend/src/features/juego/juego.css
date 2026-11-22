@@ -343,13 +343,14 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 /* Mientras se vive tu año: el dado rodando y lo que se está viendo en tu mundo */
 .jg-pensando { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px; background: var(--noche); color: var(--sobre-noche); animation: vd-aparecer .25s ease both; }
 .jg-pensando-mundo { font: 500 13px/16px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--noche-suave); }
-.jg-pensando-dado { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; border: 3px solid #1D1E22; border-radius: 28px; background: var(--sol); color: #1D1E22; font: 400 92px/1 var(--font); box-shadow: 0 0 0 10px color-mix(in srgb, var(--sol) 22%, transparent); animation: jg-rodar .6s ease-in-out infinite; }
+.jg-pensando-dado { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; border: 3px solid var(--sobre-sol); border-radius: 28px; background: var(--sol); color: var(--sobre-sol); font: 400 92px/1 var(--font); box-shadow: 0 0 0 10px color-mix(in srgb, var(--sol) 22%, transparent); animation: jg-rodar .6s ease-in-out infinite; }
 @keyframes jg-rodar { 0%, 100% { transform: rotate(-9deg) translateY(0); } 50% { transform: rotate(9deg) translateY(-10px); } }
 .jg-pensando-frase { min-height: 56px; max-width: 320px; text-align: center; font: 500 20px/28px var(--font); animation: vd-subir .35s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) { .jg-pensando-dado { animation: none; } }
 
 /* La empresa real y el cargo de la opción, con sus cifras sintéticas */
-.jg-logo { flex: none; border-radius: 8px; object-fit: contain; background: var(--papel); }
+.jg-logo { flex: none; box-sizing: border-box; border-radius: 8px; object-fit: contain; background: var(--logo-fondo); box-shadow: inset 0 0 0 1px var(--linea); }
+.jg-logo--iniciales { background: none; box-shadow: none; } /* la baldosa de iniciales sigue al tema */
 .jg-empresa { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding: 10px; border: 1.5px solid var(--linea); border-radius: 12px; text-align: left; }
 .jg-empresa-cabeza { display: flex; gap: 10px; align-items: center; }
 .jg-empresa-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -357,7 +358,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-empresa-nota { font-style: italic; }
 .jg-chip-ia { padding: 2px 10px; border: 1.5px solid var(--linea); border-radius: 999px; font: 500 12px/18px var(--font); }
 .jg-mensaje[data-logo] { display: flex; gap: 10px; align-items: flex-start; }
-.jg-mensaje[data-logo] .jg-mensaje-escribiendo { left: 62px; }
+.jg-mensaje[data-logo] .jg-mensaje-escribiendo { left: 66px; } /* 16 de margen + logo de 40 + 10 de espacio */
 .jg-con-logo { display: flex; gap: 8px; align-items: flex-start; }
 .jg-mundo-historia { margin: 6px 0 0; font: 400 13px/19px var(--font); }
 
@@ -432,9 +433,9 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-hoja-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .jg-hoja-lista { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; }
 .jg-hoja-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1.5px solid var(--control); border-radius: 14px; background: var(--papel); color: var(--tinta); font: 500 15px/20px var(--font); text-align: left; cursor: pointer; }
-.jg-hoja-item[aria-pressed="true"] { background: var(--sol); color: var(--sobre-sol); --suave: #3A3B40; border-color: var(--tinta); font-weight: 600; }
+.jg-hoja-item[aria-pressed="true"] { background: var(--sol); color: var(--sobre-sol); --suave: #3A3B40; border-color: var(--sobre-sol); font-weight: 600; }
 .jg-hoja-item:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 .jg-hoja-item small { flex: none; font: 600 11px/1 var(--mono); letter-spacing: .02em; color: var(--suave); }
 
-/* La carta mientras Sonnet la escribe: tapa la plantilla con una espera simple */
+/* La carta mientras Claude la escribe: tapa la plantilla con una espera simple */
 .jg-preparando { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: var(--papel); animation: vd-aparecer .2s ease both; }

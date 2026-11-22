@@ -88,7 +88,7 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
   return (
     <span className="jg-empresa">
       <span className="jg-empresa-cabeza">
-        <Logo carpeta="empresas" id={empresa.empresa_id} nombre={empresa.nombre} grupo={empresa.rubro} hay={empresa.logo} />
+        <Logo carpeta="empresas" id={empresa.empresa_id} nombre={empresa.nombre} grupo={empresa.rubro} hay={empresa.logo} tamano={44} />
         <span className="jg-empresa-texto">
           <span className="jg-fuerte">{texto ?? ofertaTexto(empresa)}</span>
           <span className="jg-chico">
@@ -530,7 +530,7 @@ export function Carta({
 
   // otra carta: se parte sin nada marcado
   const llave = `${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}:${pendiente.decision}`;
-  // la situación y las ofertas que escribe Sonnet se muestran cuando llegan, nunca antes la plantilla
+  // la situación y las ofertas que escribe Claude se muestran cuando llegan, nunca antes la plantilla
   const { textos: narrados, listo } = useNarracion(onNarrar ? (signal) => onNarrar("pendiente", signal) : null, llave);
   // la empresa de la que habla el mensaje de arriba: la que te ofrece trabajo o, si no hay oferta, donde trabajas
   const oferta = pendiente.opciones.find((x) => x.empresa)?.empresa;
@@ -639,7 +639,7 @@ export function Carta({
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
       {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
-      {/* mientras Sonnet escribe la carta no hay sorteo: una espera simple, no la apuesta */}
+      {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
         <div className="jg-preparando">
           <Cargando>Preparando tu carta…</Cargando>
@@ -659,7 +659,7 @@ export function Carta({
         {pendiente.narrativa && listo && (
           <div className="jg-mensaje" key={llave} data-logo={quienEscribe ? "si" : undefined}>
             {quienEscribe && (
-              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={36} />
+              <Logo carpeta="empresas" id={quienEscribe.id} nombre={quienEscribe.nombre} grupo={quienEscribe.rubro} hay={quienEscribe.logo} tamano={40} />
             )}
             <span className="jg-mensaje-escribiendo" aria-hidden="true">
               <i />

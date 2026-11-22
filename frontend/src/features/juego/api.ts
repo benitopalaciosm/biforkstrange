@@ -6,10 +6,6 @@ export const GEMELOS = 100;
 
 export const getCatalogo = () => http<Catalogo>("/api/juego/catalogo");
 
-/** La afinidad de tu gemelo (cuánto te tira cada carta), para congelarla al empezar la partida. */
-export const getAfinidad = (gemelo_id: string) =>
-  http<{ afinidad: Record<string, number> }>("/api/juego/afinidad", { method: "POST", body: JSON.stringify({ gemelo_id }) });
-
 export const getDudas = (perfil: Perfil) =>
   http<Duda[]>("/api/juego/dudas", { method: "POST", body: JSON.stringify({ perfil }) });
 
@@ -40,7 +36,7 @@ export const getEnJuego = (perfil: Perfil, dudas: string[]) =>
     body: JSON.stringify({ perfil, dudas, gemelos: GEMELOS }),
   });
 
-/** Textos de la partida contados por Sonnet. Sin gemelos: el servidor solo rejuega tu vida. */
+/** Textos de la partida contados por Claude. Sin gemelos: el servidor solo rejuega tu vida. */
 export const getNarracion = (
   partida: Partida,
   que: "pendiente" | "historia" | "mundo",

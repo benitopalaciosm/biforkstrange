@@ -62,10 +62,6 @@ export type Perfil = {
   rubro_sonado?: string | null;
   /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
   relato?: string;
-  /** Su gemelo digital (/gemelo): sus rasgos afinados mueven qué cartas le salen. */
-  gemelo_id?: string | null;
-  /** La afinidad del gemelo congelada al empezar la partida: rejugarla da siempre las mismas cartas. */
-  afinidad?: Record<string, number>;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
@@ -294,8 +290,8 @@ export type Universidad = {
   selectiva: boolean;
 };
 
-/** Un texto contado por Sonnet (o su plantilla si Sonnet no estaba). */
-export type Narrado = { id: string; texto: string; via: "sonnet" | "plantilla" };
+/** Un texto contado por Claude (o su plantilla si Claude no estaba). */
+export type Narrado = { id: string; texto: string; via: "claude" | "plantilla" };
 
 export type OpcionPendiente = {
   opcion: string;

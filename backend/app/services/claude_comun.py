@@ -1,8 +1,7 @@
 import logging
 """Lo que comparten los servicios que llaman a Claude: credenciales, cliente y errores.
 
-Lo usan `perfil_ia` (leer el CV), `narrador_ia` (narrar ofertas, eventos y mundos) y el gemelo
-(`app.core.llm`).
+Lo usan `perfil_ia` (leer el CV) y `narrador_ia` (narrar ofertas, eventos y mundos).
 """
 
 import os

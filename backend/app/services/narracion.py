@@ -1,7 +1,7 @@
-"""Qué textos de una partida narra Sonnet, armados desde la partida que vuelve a jugar el servidor.
+"""Qué textos de una partida narra Claude, armados desde la partida que vuelve a jugar el servidor.
 
 No se confía en texto del cliente: el servidor rejuega (perfil, semilla, duda, elecciones) y saca de ahí
-la plantilla y el contexto de cada texto. Sonnet solo reescribe; si falla, queda la plantilla.
+la plantilla y el contexto de cada texto. Claude solo reescribe; si falla, queda la plantilla.
 """
 
 from app.services import narrador_ia
@@ -9,7 +9,7 @@ from app.services.narrador_ia import Item
 from app.sim.motor import gemelos, partida
 from app.sim.motor.perfil import Perfil
 
-MAX_ITEMS = 36  # unas tres llamadas a Sonnet como máximo por pedido
+MAX_ITEMS = 36  # unas tres llamadas a Claude como máximo por pedido
 
 
 def _ficha_oferta(o: dict) -> str:
