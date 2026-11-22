@@ -92,6 +92,16 @@ Todo número del juego sale del **paquete de datos** en `backend/simulador/`. El
 
 Un ejemplo completo. La decisión "Te llega una oferta" tiene la opción "Cambiarte". Su resultado "El cambio te sube el sueldo" tiene probabilidad `k('P_SUBE_CAMBIO')`. Ese parámetro vale 0,54, viene del Banco Central (IPoM 2018) y su calidad es **dato**.
 
+### Qué número puede ir escrito tal cual
+
+Toda probabilidad y todo efecto del paquete (`prob`, `prob_anual`, `prob_mensual`, y el `valor` y el `cuando` de cada efecto) usa un parámetro: `k('ID')`. Hay pocas excepciones, y son estructurales:
+
+- 0 y 1 (el neutro de `si(...)`, el piso y el techo de una probabilidad), 12 (meses del año) y 100 (porcentajes).
+- Conversiones de unidades y de escala: 2 semestres por año, 4,33 semanas por mes, `/ 2` para el centro de un rango, `2 * x - 1` para pasar de 0-1 a −1-1, los índices de `k('ID', 0)` y los códigos de una tabla (la ocupación 10).
+- Lo que sale de la definición de otro parámetro o de una tabla: `1 / 4` entre `SOBREVIVE_1` y `SOBREVIVE_5`, `anos_titulado < 4` por las columnas año 1 a año 5 de mifuturo, `nivel < 4` porque 4 es el cargo más alto.
+
+Quedan fuera de esta regla, por ahora: el `cuando` y el `requisito` de las decisiones (a quién le aparecen: edades y años, que son parte de cómo escribimos la decisión), los pesos de aparición (`aparicion.peso`, que son relativos: ver la decisión 13 de [DECISIONES.md](DECISIONES.md)) y los efectos fijos en ánimo, energía, horas y tiempo con tu gente, que no se comparan (decisión 7). En el motor (`motor.py`), las constantes de reglas también leen el paquete; las excepciones son las de la decisión 2.
+
 Cada parámetro tiene una de tres calidades:
 
 - **dato**: medido en Chile o leído en la fuente original.

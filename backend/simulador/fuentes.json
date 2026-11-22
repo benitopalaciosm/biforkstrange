@@ -842,6 +842,14 @@
    "pais": "Chile",
    "tipo": "ley",
    "verificacion": "resumen"
+  },
+  {
+   "id": "codigo_trabajo",
+   "cita": "Código del Trabajo de Chile, artículo 163: indemnización de un sueldo por año de servicio, con tope de 11 años",
+   "url": "https://www.bcn.cl/leychile/navegar?idNorma=207436",
+   "pais": "Chile",
+   "tipo": "ley",
+   "verificacion": "resumen"
   }
  ]
 }
