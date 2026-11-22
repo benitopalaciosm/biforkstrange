@@ -4,7 +4,7 @@ import { Espera } from "./Apuesta";
 import {
   Button, ChevronLeftIcon, Chip, DecisionArt, DecisionList, Heading, IconButton, Screen, ScreenHeader, Stack, Tag, Text,
 } from "@/shared/ui";
-import { GEMELOS, getEnJuego } from "../api";
+import { GEMELOS, edadFinal, getEnJuego } from "../api";
 import { arteDuda, mayuscula, plata, preguntaCorta } from "../textos";
 import type { Duda, DudaEnJuego, DudaSugerida, Perfil } from "../types";
 import { AvisoPerfil, Cargando, ErrorCaja } from "./piezas";
@@ -105,6 +105,8 @@ export function DudaPicker({
   };
   const simulando = cargando && dudas !== null;
   const enJuego = useMasEnJuego(perfil, dudas, sugeridas, semilla);
+  /** Los años que vas a jugar: hasta la edad que elegiste (10 si no elegiste). */
+  const anios = perfil ? (edadFinal(perfil) ?? perfil.edad + 10) - perfil.edad : 10;
   return (
     <Screen gap={16}>
       <ScreenHeader
@@ -122,7 +124,7 @@ export function DudaPicker({
         <div className="jg-en-juego" role="note">
           <Tag tone="accent">La más en juego para ti</Tag>
           <Text size="sm">
-            «{enJuego.nombre}»: de {plata(enJuego.mala)} (10%) a {plata(enJuego.buena)} (90%) al mes.
+            «{enJuego.nombre}»: de {plata(enJuego.mala)} si te va mal a {plata(enJuego.buena)} si te va bien, al mes.
           </Text>
         </div>
       )}
@@ -184,9 +186,9 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={dudas ? onReintentar : onReintentarDudas} />}
-        {simulando && <Espera frases={[`Corriendo tus ${GEMELOS} simulaciones…`, "Diez años con cada opción…"]} />}
+        {simulando && <Espera frases={[`Viviendo tus ${GEMELOS} mundos…`, `${anios} ${anios === 1 ? "año" : "años"} con cada opción…`]} />}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
-          {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} simulaciones` : "Elige una duda"}
+          {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} mundos` : "Elige una duda"}
         </Button>
       </div>
     </Screen>

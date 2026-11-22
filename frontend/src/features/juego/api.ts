@@ -4,6 +4,17 @@ import type { Catalogo, Duda, EnJuego, MundoDetalle, Narrado, ParametrosComparar
 /** Cuántos mundos se simulan por decisión (gemelos.N_GEMELOS en el backend). Tú eres el mundo GEMELOS + 1. */
 export const GEMELOS = 50;
 
+/**
+ * Hasta qué edad se juega, la misma que muestran los sliders: la que elegiste (o 10 años más), entre tu edad + 1
+ * y 60. Si cambiaste tu edad después de elegirla, se ajusta en vez de que el servidor la rechace. null: los 10
+ * años de siempre.
+ */
+export function edadFinal(perfil: Perfil): number | null {
+  const e = Math.min(60, Math.max(perfil.edad + 1, perfil.edad_final ?? perfil.edad + 10));
+  if (e <= perfil.edad) return null;
+  return e === perfil.edad + 10 && perfil.edad_final == null ? null : e;
+}
+
 export const getCatalogo = () => http<Catalogo>("/api/juego/catalogo");
 
 export const getDudas = (perfil: Perfil) =>
@@ -12,21 +23,21 @@ export const getDudas = (perfil: Perfil) =>
 export const getVista = (partida: Partida, parametros: ParametrosComparar = {}) =>
   http<Vista>("/api/juego/partida", {
     method: "POST",
-    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, edad_final: partida.perfil.edad_final ?? null }),
+    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, edad_final: edadFinal(partida.perfil) }),
   });
 
 /** Un mundo de la comparación de la decisión pendiente, con lo que te pasa en él con cada opción. */
 export const getMundo = (partida: Partida, mundo: number, parametros: ParametrosComparar = {}) =>
   http<MundoDetalle>("/api/juego/mundo", {
     method: "POST",
-    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo, edad_final: partida.perfil.edad_final ?? null }),
+    body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo, edad_final: edadFinal(partida.perfil) }),
   });
 
 /** Lo que vale cada línea del CV en la duda: la misma comparación de la carta, sin cada dato. */
 export const getPesoCv = (perfil: Perfil, duda: string, semilla: number) =>
   http<PesoCv>("/api/juego/peso-cv", {
     method: "POST",
-    body: JSON.stringify({ perfil, duda, semilla, gemelos: GEMELOS, edad_final: perfil.edad_final ?? null }),
+    body: JSON.stringify({ perfil, duda, semilla, gemelos: GEMELOS, edad_final: edadFinal(perfil) }),
   });
 
 /**
@@ -36,7 +47,7 @@ export const getPesoCv = (perfil: Perfil, duda: string, semilla: number) =>
 export const getEnJuego = (perfil: Perfil, dudas: string[], semilla: number) =>
   http<EnJuego>("/api/juego/dudas-en-juego", {
     method: "POST",
-    body: JSON.stringify({ perfil, dudas, semilla, gemelos: GEMELOS, edad_final: perfil.edad_final ?? null }),
+    body: JSON.stringify({ perfil, dudas, semilla, gemelos: GEMELOS, edad_final: edadFinal(perfil) }),
   });
 
 /** Textos de la partida contados por Claude. Sin gemelos: el servidor solo rejuega tu vida. */
