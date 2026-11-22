@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from app.sim.motor import empresas
 from app.sim.motor.azar import Dados
 from app.sim.motor.paquete import Paquete
-from app.sim.motor.perfil import NIVELES
+from app.sim.motor.perfil import NIVELES, estudio_sin_carrera, tipo_institucion_de
 
 # "Solo lo laboral": fuera las decisiones de vida personal y los eventos de salud, duelo y pareja.
 DECISIONES_PERSONALES = frozenset(
@@ -202,7 +202,7 @@ class Vida:
 
     # ------------------------------------------------------------------ año
     def iniciar_anio(self, con_cartas: bool, carta: str | None = None) -> None:
-        """Sortea el mundo y arma la cola del año. `carta` fuerza la decisión (la duda inicial)."""
+        """Sortea el mundo y arma la cola del año. `carta` (la duda inicial) va primero, antes de las forzadas."""
         if self.cola:
             raise RuntimeError("el año en curso no ha terminado")
         self.registro = {"anio": self.anio + 1, "edad": self.e["edad"], "recesion": False,
@@ -211,10 +211,13 @@ class Vida:
         self._derivar(inicio=True)
         self._evento(EVENTO_MUNDO)
         self.registro["recesion"] = bool(self.e["recesion"])
+        decisiones = self._forzadas()
         if carta is not None:
-            decisiones = [carta]
+            # la duda va primero (es la carta que la persona eligió), pero no tapa las forzadas: quien está
+            # cesante igual tiene que buscar pega ese año y al fundador igual le toca seguir con su empresa.
+            # Si la duda las resuelve (encuentra trabajo), al llegarles su turno ya no aplican y se saltan.
+            decisiones = [carta] + [d for d in decisiones if d != carta]
         else:
-            decisiones = self._forzadas()
             if not decisiones and con_cartas:
                 sorteada = self._sortear_carta()
                 decisiones = [sorteada] if sorteada else []
@@ -613,11 +616,17 @@ class Vida:
             e.update(estado="inactivo", sueldo=0.0, deja_de_trabajar=0)
 
         # estudios
-        if e["estado"] == "estudiando" and e["carrera_id"] >= 0:
+        # sin carrera del catálogo, estudia lo que supone perfil.estudio_sin_carrera (semestres puestos al partir)
+        if e["estado"] == "estudiando" and (e["carrera_id"] >= 0 or e["semestres_restantes"] > 0):
             e["semestres_restantes"] -= 2
             e["anos_en_carrera"] += 1
             if e["semestres_restantes"] <= 0:
-                e.update(edu=EDU_AL_TITULARSE.get(e["tipo_institucion"], e["edu"]), estado="buscando",
+                titulo = EDU_AL_TITULARSE.get(e["tipo_institucion"]) or estudio_sin_carrera(
+                    e["edu"], tipo_institucion_de(self.pq, e.get("universidad_id", "")))[0]
+                # recién titulado de pregrado: su primera pega parte en Junior (el cargo que traía era el del
+                # perfil, por omisión semi senior). Quien termina un postgrado conserva el cargo que declaró.
+                nivel = e["nivel"] if titulo == "postgrado" else 0
+                e.update(edu=titulo, estado="buscando", nivel=nivel,
                          primer_empleo=1, anos_titulado=0, semestres_restantes=0, anos_en_carrera=0)
         elif e["estado"] != "estudiando":
             e["anos_titulado"] = self._acotar("anos_titulado", e["anos_titulado"] + 1)

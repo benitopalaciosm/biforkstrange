@@ -60,6 +60,8 @@ export type Perfil = {
   cargo_nombre?: string;
   /** El rubro al que se cambiaría, según su Claude: "¿a qué rubro?" parte ahí. */
   rubro_sonado?: string | null;
+  /** 1 si busca su primer empleo (sin experiencia tras titularse): parte en la primera pega, no en cesantía. */
+  primer_empleo?: 0 | 1;
   /** Cómo se describe con sus palabras: el narrador cuenta las cartas a su medida. */
   relato?: string;
 };

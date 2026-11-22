@@ -1,5 +1,5 @@
 import "./juego.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Heading, Screen, ScreenFooter, Stack, Text } from "@/shared/ui";
 import { Carta } from "./components/Carta";
 import { CierrePantalla } from "./components/Cierre";
@@ -22,16 +22,47 @@ export function JuegoPage() {
 
 function Juego() {
   const j = usePartida();
-  const { catalogo, error: errorCatalogo } = useCatalogo();
+  const { catalogo, error: errorCatalogo, reintentar: reintentarCatalogo } = useCatalogo();
   /** El tutorial: "antes" de armar el perfil, o "ayuda" cuando se reabre a mitad de la partida. */
   const [tutorial, setTutorial] = useState<"antes" | "ayuda" | null>(null);
-  const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
-  // cada pantalla nueva (otra fase, otra carta) parte desde arriba
-  const punto = `${tutorial}:${j.fase}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  // cada pantalla nueva (otra fase, otra carta, otra tarjeta del onboarding) parte desde arriba
+  const { paso, completo } = j.onboarding.borrador;
+  const enOnboarding = j.fase === "perfil" ? `${paso}:${completo}` : "";
+  const punto = `${tutorial}:${j.fase}:${enOnboarding}:${j.vista?.historia.length ?? 0}:${j.vista?.anio_en_curso?.decisiones.length ?? 0}:${j.vista?.pendiente?.decision ?? ""}`;
+  const pantalla = useRef<HTMLDivElement>(null);
+  const primera = useRef(true);
   useEffect(() => {
     window.scrollTo(0, 0);
+    // y el foco va a su título, para que un lector de pantalla (o el teclado) siga desde ahí y no desde un botón que ya no existe
+    if (primera.current) {
+      primera.current = false;
+      return;
+    }
+    const titulo = pantalla.current?.querySelector<HTMLElement>("h1") ?? pantalla.current?.querySelector<HTMLElement>("h2");
+    if (!titulo) return;
+    if (!titulo.hasAttribute("tabindex")) titulo.setAttribute("tabindex", "-1");
+    titulo.focus({ preventScroll: true });
   }, [punto]);
+
+  return (
+    <div ref={pantalla} className="jg-pantalla">
+      <Fase j={j} tutorial={tutorial} setTutorial={setTutorial} catalogo={catalogo} errorCatalogo={errorCatalogo} reintentarCatalogo={reintentarCatalogo} />
+    </div>
+  );
+}
+
+function Fase({
+  j, tutorial, setTutorial, catalogo, errorCatalogo, reintentarCatalogo,
+}: {
+  j: ReturnType<typeof usePartida>;
+  tutorial: "antes" | "ayuda" | null;
+  setTutorial: (t: "antes" | "ayuda" | null) => void;
+  catalogo: ReturnType<typeof useCatalogo>["catalogo"];
+  errorCatalogo: string | null;
+  reintentarCatalogo: () => void;
+}) {
+  const sueldoInicial = j.partida?.perfil.sueldo ?? j.perfil.sueldo;
 
   if (tutorial === "ayuda") {
     return <ComoFunciona textoListo="Volver a mi partida" onVolver={() => setTutorial(null)} onListo={() => setTutorial(null)} />;
@@ -42,18 +73,17 @@ function Juego() {
         onVolver={() => setTutorial(null)}
         onListo={() => {
           setTutorial(null);
-          j.descartar();
-          j.irAPerfil();
+          j.empezarDeCero();
         }}
       />
     );
   }
   if (j.fase === "perfil") {
-    return <Onboarding inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
+    return <Onboarding o={j.onboarding} catalogo={catalogo} errorCatalogo={errorCatalogo} onReintentarCatalogo={reintentarCatalogo} onReintentar={j.reintentar} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
+      <DudaPicker fuentes={j.fuentes} origenSugeridas={j.origenSugeridas} perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} onReintentarDudas={j.reintentarDudas} onReintentar={j.reintentar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
@@ -61,11 +91,13 @@ function Juego() {
       <Carta
         vista={j.vista}
         partida={j.partida}
+        fuentes={j.fuentes}
         riesgo={j.perfil.riesgo}
         cargando={j.cargando}
         recalculando={j.recalculando}
         error={j.error}
         onElegir={j.elegir}
+        onReintentar={j.reintentar}
         onComparar={j.compararCon}
         onAyuda={() => setTutorial("ayuda")}
         onVerMundo={j.verMundo}
@@ -79,7 +111,7 @@ function Juego() {
       <CierrePantalla
         vista={j.vista}
         sueldoInicial={sueldoInicial}
-        perfil={j.partida?.perfil ?? j.perfil}
+        retrato={j.retrato}
         onOtraVida={j.jugarDeNuevo}
         onCambiarPerfil={j.irAPerfil}
       />
@@ -103,11 +135,9 @@ function Juego() {
       hayPartida={j.partida !== null}
       cargando={j.cargando}
       error={j.error}
-      onContinuar={j.continuar}
-      onEmpezar={() => {
-        j.descartar();
-        j.irAPerfil();
-      }}
+      aviso={j.aviso}
+      onContinuar={() => void j.continuar()}
+      onEmpezar={j.empezarDeCero}
       onComoFunciona={() => setTutorial("antes")}
     />
   );

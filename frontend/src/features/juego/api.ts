@@ -1,5 +1,4 @@
 import { http } from "@/shared/lib/http";
-import { guardarRetrato } from "./retrato";
 import type { Catalogo, Duda, EnJuego, MundoDetalle, Narrado, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
 
 export const GEMELOS = 100;
@@ -63,9 +62,13 @@ export class ErrorApi extends Error {
   }
 }
 
-function comoErrorApi(e: unknown): ErrorApi {
+/** Sin respuesta del servidor (caído, sin red, CORS): el navegador dice "Failed to fetch" o "Load failed". */
+const SIN_RESPUESTA = "Puede que esté caído o que se haya cortado tu conexión. Prueba de nuevo en un rato.";
+
+export function comoErrorApi(e: unknown): ErrorApi {
+  if (e instanceof ErrorApi) return e;
   const m = /^(\d{3}): ([\s\S]*)$/.exec(e instanceof Error ? e.message : String(e));
-  if (!m) return new ErrorApi(0, e instanceof Error ? e.message : String(e));
+  if (!m) return new ErrorApi(0, e instanceof TypeError ? SIN_RESPUESTA : e instanceof Error ? e.message : String(e));
   let detalle = m[2];
   try {
     const d = (JSON.parse(m[2]) as { detail?: unknown }).detail;
@@ -77,14 +80,20 @@ function comoErrorApi(e: unknown): ErrorApi {
   return new ErrorApi(Number(m[1]), detalle);
 }
 
+/** El error en palabras de persona, para poner después de "No pudimos hablar con el simulador.". */
+export function textoError(e: unknown): string {
+  const err = comoErrorApi(e);
+  if (err.status === 0) return err.detalle || SIN_RESPUESTA;
+  if (err.status >= 500) return `Algo le falló al calcular (error ${err.status}). Prueba de nuevo.`;
+  return err.detalle;
+}
+
 /** Lee el documento que armó el Claude de la persona (al tiro). Si es texto libre, Claude lo lee (cerca de medio minuto). */
 /** Claude lee un texto, o un PDF en base64 (el CV o el "Guardar como PDF" de LinkedIn), y llena el perfil. */
 export async function leerPerfil(entrada: string | { pdf: string }): Promise<PerfilLeido> {
   const cuerpo = typeof entrada === "string" ? { texto: entrada } : entrada;
   try {
-    const leido = await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
-    guardarRetrato(leido); // para la tarjeta que se comparte al final
-    return leido;
+    return await http<PerfilLeido>("/api/juego/perfil", { method: "POST", body: JSON.stringify(cuerpo) });
   } catch (e) {
     throw comoErrorApi(e);
   }

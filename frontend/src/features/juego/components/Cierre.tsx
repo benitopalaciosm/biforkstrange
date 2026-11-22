@@ -1,6 +1,6 @@
 import { BigNumber, Button, Heading, Meta, Pill, RangeCompare, Screen, ScreenHeader, Stack, StationTimeline, SunCard, Tag, Text, type Range } from "@/shared/ui";
 import { aniosDe, cargoYSueldo, deCien, plata, sinSueldo, situacion } from "../textos";
-import type { Anio, Perfil, Rango, Vista } from "../types";
+import type { Anio, Rango, Vista } from "../types";
 import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { CompartirResultado } from "./Compartir";
@@ -17,14 +17,14 @@ function resumenDelAnio(a: Anio): string {
 
 /** El cierre: tu vida frente a los gemelos de tu primera decisión. Viene de "8 · Fin de la partida" del kit. */
 export function CierrePantalla({
-  vista, sueldoInicial, onOtraVida, onCambiarPerfil, perfil,
+  vista, sueldoInicial, onOtraVida, onCambiarPerfil, retrato = null,
 }: {
   vista: Vista;
   sueldoInicial: number;
   onOtraVida: () => void;
   onCambiarPerfil: () => void;
-  /** El perfil con que se jugó: para el retrato de la tarjeta que se comparte. */
-  perfil?: Perfil;
+  /** "Lo que tu gemelo sabe de ti", si Claude leyó tu CV o tu Claude: va en la tarjeta que se comparte. */
+  retrato?: string | null;
 }) {
   const cierre = vista.cierre!;
   const e = cierre.estado;
@@ -130,7 +130,7 @@ export function CierrePantalla({
         </div>
       </Stack>
 
-      {primera && <CompartirResultado comparacion={primera.comparacion} elegida={primera.elegida} sueldoFinal={cierre.sueldo_final} perfil={perfil} />}
+      {primera && <CompartirResultado comparacion={primera.comparacion} elegida={primera.elegida} sueldoFinal={cierre.sueldo_final} retrato={retrato} />}
 
       <Stack gap={14}>
         <Button onClick={onOtraVida}>Jugar otra vida</Button>

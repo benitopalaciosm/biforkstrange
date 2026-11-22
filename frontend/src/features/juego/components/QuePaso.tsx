@@ -3,7 +3,7 @@ import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, deCi
 import type { Anio, Estado, Narrado, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { GEMELOS } from "../api";
-import { Info, LineaSueldo, Ruleta, type Casilla } from "./graficos";
+import { Info, LineaSueldo, Ruleta, sinMovimiento, type Casilla } from "./graficos";
 import { Noticia, Pensando } from "./piezas";
 
 /** Todo lo que pasó entre la elección y la siguiente decisión pendiente: años cerrados y lo que va del año en curso. */
@@ -93,7 +93,7 @@ export function QuePaso({
   const tocada = dado ? casillas.find((c) => c.id === dado.resultado) : undefined;
   const hayRuleta = casillas.length > 1 && tocada !== undefined;
   // el sorteo ya se vio en la espera: acá el resultado aparece de una
-  const espera = 0.15;
+  const espera = sinMovimiento() ? 0 : 0.15;
   const recorrido = [
     { edad: edadInicial, sueldo: sueldoInicial },
     ...vista.historia.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.sueldo })),
@@ -114,6 +114,7 @@ export function QuePaso({
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
         right={<Meta>Mundo {GEMELOS + 1}</Meta>}
       />
+      <h1 className="vd-sr">{dado ? `Qué te pasó al elegir «${dado.opcion_nombre}»` : "Qué te pasó"}</h1>
 
       {edades.length > 1 && (
         <Stack gap={6}>

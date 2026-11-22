@@ -9,8 +9,8 @@ import { Logo } from "./Logo";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo } from "./piezas";
-import { GEMELOS } from "../api";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, Pensando, RangoSueldo } from "./piezas";
+import { GEMELOS, textoError } from "../api";
 
 type Internas = Record<string, string | number>;
 
@@ -390,6 +390,9 @@ function Simulacion({
       setAbierto(null);
       return;
     }
+    cargar(n);
+  };
+  const cargar = (n: number) => {
     const mio = ++pedido.current;
     setAbierto(n);
     setDetalle(null);
@@ -397,7 +400,7 @@ function Simulacion({
     setCargando(true);
     onVerMundo(n)
       .then((d) => mio === pedido.current && setDetalle(d))
-      .catch((e: unknown) => mio === pedido.current && setError(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => mio === pedido.current && setError(textoError(e)))
       .finally(() => mio === pedido.current && setCargando(false));
   };
 
@@ -455,7 +458,7 @@ function Simulacion({
       {empates > 0 && <span className="jg-chico">«Da lo mismo» es cuando las mejores opciones de ese mundo terminan a menos de 0,5% de diferencia.</span>}
       <div ref={panel} className="jg-mundo-ancla">
         {abierto !== null && cargando && <Cargando>Abriendo el mundo {abierto + 1}…</Cargando>}
-        {abierto !== null && error && <ErrorCaja error={error} />}
+        {abierto !== null && error && <ErrorCaja error={error} onReintentar={() => cargar(abierto)} />}
         {abierto !== null && detalle && (
           <MundoAbierto mundo={detalle} comparadas={comparadas} colores={colores} anioInicial={anioInicial} onCerrar={() => setAbierto(null)} onNarrar={onNarrar} />
         )}
@@ -508,10 +511,14 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo, onNarrar,
 }: {
   /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
   partida?: Partida | null;
+  /** De dónde salió cada dato del perfil: sin datos es un perfil de ejemplo. */
+  fuentes?: Record<string, string> | null;
+  /** Repite lo que falló (tirar el dado o volver a simular una opción). */
+  onReintentar?: () => void;
   onNarrar?: Narrar;
   onAyuda: () => void;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
@@ -634,6 +641,8 @@ export function Carta({
   const ganadas = (id: string) => (ganadores ? ganadores.filter((g) => g === id).length : 0);
   const hoy = { edad: e.edad, sueldo: sinSueldo(e) ? 0 : e.sueldo };
   const sinEfecto = comparadas.length > 1 && comparadas.every((o) => o.es_base || (o.igual_que_base ?? 0) >= 0.9);
+  /** "Lo que vale cada línea de tu CV" solo tiene sentido si hubo CV o tu Claude: sin ellos, no hay líneas tuyas. */
+  const conFuentes = fuentes !== null && Object.values(fuentes).some((f) => f === "cv" || f === "claude");
 
   return (
     <Screen gap={16}>
@@ -650,6 +659,7 @@ export function Carta({
         <strong>Hoy:</strong> {cargoYSueldo(e, true)}
         {sinSueldo(e) ? ` · antes ${plata(e.sueldo_ref)}` : "/mes"}
       </Text>
+      <AvisoPerfil fuentes={fuentes} />
 
       <Stack gap={8} style={{ marginTop: 4 }}>
         <Meta>
@@ -749,7 +759,7 @@ export function Carta({
 
       {comparacion && foco && (
         <Stack gap={12} className="jg-columna">
-          {partida && pendiente.por_que?.tipo === "elegida" && (
+          {partida && pendiente.por_que?.tipo === "elegida" && conFuentes && (
             <PesoDelCv perfil={partida.perfil} duda={pendiente.decision} semilla={partida.semilla} />
           )}
           <section className="jg-seccion" key={`abanico:${foco.opcion}`}>
@@ -806,7 +816,7 @@ export function Carta({
       )}
 
       <div className="jg-pie-fijo">
-        {error && <ErrorCaja error={error} />}
+        {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
         {cargando && <Cargando>Tirando tu dado y viviendo el año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando ? (
           <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>

@@ -1652,11 +1652,11 @@
     {
      "id": "rapido",
      "nombre": "Tomar lo primero que salga",
-     "detalle": "Más probable, y más aún mientras más llevas buscando. Sueldo menor.",
+     "detalle": "Más probable que esperar algo de tu nivel, por menos sueldo.",
      "resultados": [
       {
        "id": "encuentra",
-       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(hueco, k('PENAL_HUECO'), 1) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95) * 1.15 + 0.1 * min(3, meses_cesante / 12), 0, 0.96)",
+       "prob": "clamp(clamp((1 - exp(-12 / k('MESES_CESANTIA', banda3))) * si(hueco, k('PENAL_HUECO'), 1) * si(recesion, 0.85, 1) * (1 + (red - 30) / 400), 0.08, 0.95) * 1.15, 0, 0.96)",
        "texto": "Vuelves a trabajar, por menos.",
        "tono": "bueno",
        "efectos": [
@@ -3765,7 +3765,7 @@
    "nombre": "Irte a trabajar afuera",
    "categoria": "lugar",
    "pregunta": "¿Te vas a trabajar a Estados Unidos?",
-   "cuando": "y(pais == 'chile', edad >= 22, edad <= 45, en(edu, 'tecnica', 'universitaria', 'postgrado'))",
+   "cuando": "y(pais == 'chile', estado == 'empleado', edad >= 22, edad <= 45, en(edu, 'tecnica', 'universitaria', 'postgrado'))",
    "aparicion": {
     "tipo": "carta",
     "peso": 0.25,
