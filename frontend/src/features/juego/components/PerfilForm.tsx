@@ -9,10 +9,10 @@ import { Cargando, ErrorCaja } from "./piezas";
 import { Trayectoria, type EstadoLectura } from "./Trayectoria";
 
 const SUELDO_MAX = 30_000_000;
-const SLIDER_MIN = 300_000;
-const SLIDER_MAX = 8_000_000;
+export const SLIDER_MIN = 300_000;
+export const SLIDER_MAX = 8_000_000;
 /** Los rubros que se muestran como chips; el resto queda en "Otro". */
-const RUBROS_TOP = ["Comercio", "Información y comunicaciones", "Servicios profesionales", "Salud", "Enseñanza", "Finanzas y seguros"];
+export const RUBROS_TOP = ["Comercio", "Información y comunicaciones", "Servicios profesionales", "Salud", "Enseñanza", "Finanzas y seguros"];
 const RIESGOS = [
   { value: "2", label: "Prefiero lo seguro" },
   { value: "5", label: "Depende" },
@@ -21,7 +21,7 @@ const RIESGOS = [
 const riesgoCercano = (r: number) => (r <= 3 ? "2" : r >= 7 ? "8" : "5");
 
 /** Banda de edad de la ESI (18-24, 25-29, …, 50-54). */
-function banda(edad: number): string {
+export function banda(edad: number): string {
   if (edad <= 24) return "18-24";
   const desde = Math.min(50, Math.floor(edad / 5) * 5);
   return `${desde}-${desde + 4}`;

@@ -286,7 +286,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
     if datos["sueldo"] is None:
         # sin sueldo declarado: el del medio para su edad y estudios (ESI), para no partir de un número ajeno
         estado = pq.derivar({"edad": perfil["edad"], "sexo": perfil["sexo"], "edu": perfil["edu"], "sueldo": 0})
-        perfil["sueldo"] = round(pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]))
+        perfil["sueldo"] = round(pq.tabla("esi_perfil_edad_edu", "p50", "educacion", perfil["edu"], "banda", estado["banda7"]), -4)
     inferido = list(leido.inferido)
     if leido.ingles is not None:
         perfil["ingles"] = int(leido.ingles)
