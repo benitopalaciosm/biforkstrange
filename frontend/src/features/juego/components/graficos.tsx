@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cssVars, cx } from "@/shared/ui";
 import { GEMELOS } from "../api";
 import { minuscula, plata } from "../textos";
-import type { Tono } from "../types";
+import type { Rango, Tono } from "../types";
+import { RangoSueldo } from "./piezas";
 
 export const sinMovimiento = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -266,11 +267,17 @@ export function Ruleta({ casillas, salio }: { casillas: Casilla[]; salio: string
  * y la ficha buscando dónde caer. Sin resultados que sortear (una opción segura) es solo una espera corta.
  * Es la misma pista que la ruleta del resultado: ahí la ficha cae donde te tocó.
  */
-export function DadoEnJuego({ casillas, titulo, texto }: { casillas: Casilla[]; titulo: string; texto?: string }) {
+export function DadoEnJuego({ casillas, titulo, texto, onSalir }: { casillas: Casilla[]; titulo: string; texto?: string; onSalir?: () => void }) {
   const total = casillas.reduce((a, c) => a + c.prob, 0) || 1;
   const hay = casillas.length > 1;
   return (
     <div className="jg-dado-pantalla" data-sorteo={hay} role="status" aria-live="polite">
+      {/* si el motor tarda o no responde, siempre hay una salida: la partida queda guardada */}
+      {onSalir && (
+        <button type="button" className="jg-ayuda jg-dado-salir" onClick={onSalir}>
+          Salir
+        </button>
+      )}
       <span className="ap-titulo">{titulo}</span>
       {hay ? (
         <div className="jg-dado-cuerpo">
@@ -333,5 +340,39 @@ export function LineaSueldo({ puntos }: { puntos: { edad: number; sueldo: number
       <text x={X0} y={H - 6} className="jg-abanico-sub">{e0} años · {plata(puntos[0].sueldo)}</text>
       <text x={X1} y={H - 6} textAnchor="end" className="jg-abanico-sub">{e1} años</text>
     </svg>
+  );
+}
+
+/**
+ * El sueldo final de cada opción en una sola escala: del 10% al 90% de sus mundos, con la mediana marcada y los
+ * extremos en pesos. `tu` marca tu sueldo una sola vez, con una raya que cruza todas las opciones.
+ */
+export function RangosOpciones({ opciones, tu }: { opciones: { id: string; nombre: string; rango: Rango; color?: string; nota?: string }[]; tu?: number }) {
+  if (opciones.length === 0) return null;
+  const tope = Math.max(tu ?? 0, ...opciones.map((o) => o.rango.p90), 1) * 1.05;
+  const enPct = (n: number) => Math.min(100, Math.max(0, (n / tope) * 100));
+  return (
+    <div style={{ position: "relative", display: "grid", gap: 14 }}>
+      {opciones.map((o) => (
+        <div key={o.id} style={{ display: "grid", gap: 4 }}>
+          <span className="jg-chico">
+            <i className="jg-color" style={{ background: o.color }} aria-hidden="true" /> {o.nombre}
+            {o.nota && ` · ${o.nota}`}
+          </span>
+          <RangoSueldo rango={o.rango} tope={tope} color={o.color} />
+        </div>
+      ))}
+      {tu !== undefined && (
+        <span
+          aria-label={`Tu sueldo: ${plata(tu)}`}
+          role="img"
+          style={{ position: "absolute", top: 0, bottom: 18, left: `${enPct(tu)}%`, borderLeft: "2px dashed var(--sol, #f5b800)", pointerEvents: "none" }}
+        >
+          <span className="jg-chico" style={{ position: "absolute", top: -16, transform: enPct(tu) > 85 ? "translateX(-100%)" : "translateX(-50%)", whiteSpace: "nowrap", fontWeight: 700 }}>
+            tú
+          </span>
+        </span>
+      )}
+    </div>
   );
 }
