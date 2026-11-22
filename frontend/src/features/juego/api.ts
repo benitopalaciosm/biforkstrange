@@ -1,5 +1,5 @@
 import { http } from "@/shared/lib/http";
-import type { Catalogo, Duda, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, Vista } from "./types";
+import type { Catalogo, Duda, MundoDetalle, ParametrosComparar, Partida, Perfil, PerfilLeido, PesoCv, Vista } from "./types";
 
 export const GEMELOS = 100;
 
@@ -19,6 +19,13 @@ export const getMundo = (partida: Partida, mundo: number, parametros: Parametros
   http<MundoDetalle>("/api/juego/mundo", {
     method: "POST",
     body: JSON.stringify({ ...partida, gemelos: GEMELOS, parametros, mundo }),
+  });
+
+/** Lo que vale cada línea del CV en la duda: la misma comparación de la carta, sin cada dato. */
+export const getPesoCv = (perfil: Perfil, duda: string, semilla: number) =>
+  http<PesoCv>("/api/juego/peso-cv", {
+    method: "POST",
+    body: JSON.stringify({ perfil, duda, semilla, gemelos: GEMELOS }),
   });
 
 export const TEXTO_MAX = 60_000;

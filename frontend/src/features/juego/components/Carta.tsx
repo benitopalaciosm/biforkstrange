@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, CheckIcon, Chip, DecisionArt, DecisionList, Heading, Meta, Panel, Pill, Row, Screen, ScreenHeader, Stack, Text, cssVars } from "@/shared/ui";
 import { CALIDAD, TIPO_EMPLEADOR, arte, cargoYSueldo, conSigno, minuscula, plata, sinSueldo } from "../textos";
-import type { ContraBase, EjemploReal, Eleccion, PorQue, MundoDetalle, OpcionComparada, OpcionPendiente, ParametrosComparar, Suceso, Vista } from "../types";
+import type { ContraBase, EjemploReal, Eleccion, PorQue, MundoDetalle, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Suceso, Vista } from "../types";
 import { Abanico, BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
+import { PesoDelCv } from "./PesoDelCv";
 import { CalidadTag, Cargando, ErrorCaja, LeyendaCalidad, Pensando, RangoSueldo } from "./piezas";
 import { GEMELOS } from "../api";
 
@@ -476,8 +477,10 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo,
+  vista, partida, riesgo, cargando, recalculando, error, onElegir, onComparar, onAyuda, onVerMundo,
 }: {
+  /** Perfil y semilla de la partida: con ellos se mide cuánto pesa cada línea del CV en la duda. */
+  partida?: Partida | null;
   onAyuda: () => void;
   onVerMundo: (n: number) => Promise<MundoDetalle>;
   vista: Vista;
@@ -706,6 +709,9 @@ export function Carta({
               anioInicial={anio}
               onVerMundo={onVerMundo}
             />
+          )}
+          {partida && pendiente.por_que?.tipo === "elegida" && (
+            <PesoDelCv perfil={partida.perfil} duda={pendiente.decision} semilla={partida.semilla} />
           )}
           <section className="jg-seccion" key={`abanico:${foco.opcion}`}>
             <Heading level={3} as="h2">

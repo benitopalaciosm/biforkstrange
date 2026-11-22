@@ -277,3 +277,43 @@ export type Vista = {
 
 /** Lo que se elige dentro de cada opción para comparar: {opción: {variable: valor}}. */
 export type ParametrosComparar = Record<string, Record<string, string | number>>;
+
+/** Una opción de la duda con un dato del CV y sin él, con los mismos dados. */
+export type PesoOpcion = {
+  opcion: string;
+  nombre: string;
+  /** Fracción de mundos donde esa opción termina ganando más. */
+  gana_con: number;
+  gana_sin: number;
+  /** Sueldo típico (p50) al final. */
+  sueldo_con: number;
+  sueldo_sin: number;
+};
+
+export type CampoCv = "ingles" | "skill" | "red" | "usa_ia" | "remoto" | "anos_por_empleo" | "nivel" | "edu" | "parcial" | "empresa_fondos";
+
+/** Una línea del CV: cuánto mueve la duda. `mueve` dice qué cambia más, y `opcion` es la que más cambia. */
+export type PesoDato = {
+  campo: CampoCv;
+  tuyo: string | number;
+  neutro: string | number | null;
+  mueve: "gana" | "sueldo";
+  opcion: string;
+  cambio: number;
+  opciones: PesoOpcion[];
+};
+
+/** Respuesta de `POST /api/juego/peso-cv`: las líneas del CV que más mueven la duda (hasta 4). */
+export type PesoCv = {
+  decision: string;
+  nombre: string;
+  pregunta: string;
+  gemelos: number;
+  semilla: number;
+  base: string;
+  datos: PesoDato[];
+  /** Datos del CV que no cambian esta duda. */
+  sin_efecto: CampoCv[];
+  /** Datos que la mueven, pero menos que los que se muestran. */
+  otros: CampoCv[];
+};

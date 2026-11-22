@@ -60,6 +60,7 @@ function Juego() {
     return (
       <Carta
         vista={j.vista}
+        partida={j.partida}
         riesgo={j.perfil.riesgo}
         cargando={j.cargando}
         recalculando={j.recalculando}

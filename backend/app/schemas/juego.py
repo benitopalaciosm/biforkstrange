@@ -69,3 +69,12 @@ class TextoPerfilIn(BaseModel):
     texto: str = Field("", max_length=60_000)
     # un PDF (el CV o el "Guardar como PDF" de LinkedIn) en base64; ~10 MB como máximo
     pdf: str | None = Field(None, max_length=14_000_000)
+
+
+class PesoCvIn(BaseModel):
+    """El perfil y la duda: se repite la comparación sin cada dato del CV, con la misma semilla."""
+
+    perfil: PerfilIn = PerfilIn()
+    duda: str
+    semilla: int = 0
+    gemelos: int = Field(100, ge=20, le=300)
