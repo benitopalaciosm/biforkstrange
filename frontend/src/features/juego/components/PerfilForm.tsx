@@ -7,7 +7,6 @@ import type { Catalogo, Perfil, Sexo } from "../types";
 import { Logo } from "./Logo";
 import { Info } from "./graficos";
 import { Cargando, ErrorCaja } from "./piezas";
-import { Espera } from "./Apuesta";
 
 const SUELDO_MAX = 30_000_000;
 export const SLIDER_MIN = 300_000;
@@ -375,7 +374,7 @@ export function PerfilForm({
 
       <ScreenFooter>
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
-        {cargando && <Espera frases={["Simulando tus mundos…", "Sorteando tu primera carta…"]} />}
+        {cargando && <Cargando frases={["Simulando tus mundos…", "Sorteando tu primera carta…"]} />}
         <Button onClick={() => onElegirDuda(p)} disabled={!catalogo || !sueldoValido || cargando}>
           Elegir mi duda
         </Button>
