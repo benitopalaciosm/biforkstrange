@@ -638,7 +638,13 @@ export function Carta({
   return (
     <Screen gap={16}>
       <ScreenHeader left={<Pill style={{ whiteSpace: "nowrap" }}>Año {anio} · {e.edad} años</Pill>} right={<Meta>{anio} de {vista.anios}</Meta>} />
-      {(cargando || !listo) && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
+      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} />}
+      {/* mientras Sonnet escribe la carta no hay sorteo: una espera simple, no la apuesta */}
+      {!cargando && !listo && (
+        <div className="jg-preparando">
+          <Cargando>Preparando tu carta…</Cargando>
+        </div>
+      )}
       <ProgresoAnios actual={anio} total={vista.anios} />
       <Text size="sm">
         <strong>Hoy:</strong> {cargoYSueldo(e, true)}
