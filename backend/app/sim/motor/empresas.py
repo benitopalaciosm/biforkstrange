@@ -383,9 +383,18 @@ def _predecir_tipo(vida) -> str | None:
     return None
 
 
-def origen_decision(decision_id: str, ocurrencia: int) -> str:
-    """La misma oferta en todas las opciones de una decisión (cambiarte o pedir contraoferta)."""
-    return f"{decision_id}:{ocurrencia}"
+# Decisiones que tratan de una sola oferta: todas sus opciones hablan de la misma empresa (cambiarte o
+# usarla para negociar). En las demás, cada opción es otra búsqueda y trae su propia empresa: en la
+# cesantía, "esperar algo de tu nivel" no es la misma pega que "tomar lo primero que salga".
+DECISIONES_CON_OFERTA = frozenset({"oferta_externa", "unirse_a_startup", "remoto_para_afuera", "emigrar",
+                                   "oferta_en_cesantia"})  # la oferta que llega estando cesante: una sola empresa
+
+
+def origen_decision(decision_id: str, ocurrencia: int, opcion_id: str = "") -> str:
+    """De dónde sale el empleador que trae una opción: uno por decisión si es una sola oferta, uno por opción si no."""
+    if decision_id in DECISIONES_CON_OFERTA or not opcion_id:
+        return f"{decision_id}:{ocurrencia}"
+    return f"{decision_id}:{opcion_id}:{ocurrencia}"
 
 
 def ficha(pq: Paquete, emp: dict | None, car: dict | None) -> dict | None:
@@ -411,7 +420,7 @@ def oferta(vida, decision_id: str, opcion_id: str, ocurrencia: int) -> dict | No
     if destino is None:
         return None
     tipo, rubro = destino
-    sitio = sitio_empresa(origen_decision(decision_id, ocurrencia))
+    sitio = sitio_empresa(origen_decision(decision_id, ocurrencia, opcion_id))
     emp = sortear_empresa(vida.pq, vida.dados, vida.anio, sitio, tipo, rubro, vida.e)
     car = sortear_cargo(vida.pq, vida.dados, vida.anio, sitio + ":cargo", emp, vida.e)
     return ficha(vida.pq, emp, car)

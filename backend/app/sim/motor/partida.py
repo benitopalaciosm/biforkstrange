@@ -155,7 +155,9 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
     contexto.update(vida.contexto_empleo())
     ofertas = {o.id: empresas.oferta(vida, d["id"], o.id, ocurrencia) for o in falta.opciones}
     primera = next((f for f in ofertas.values() if f is not None), None)
-    if primera is not None:
+    # la historia nombra a la empresa solo si la decisión es sobre una oferta; si cada opción trae la suya
+    # (la cesantía), nombrar la de una opción haría creer que todas hablan de ella
+    if primera is not None and d["id"] in empresas.DECISIONES_CON_OFERTA:
         contexto["oferta"] = {k: primera[k] for k in ("empresa_id", "nombre", "cargo", "tipo", "rubro", "pais")}
     # por qué te tocó esta decisión: sorteada entre las cartas posibles, obligada por tu situación, o consecuencia
     origen = vida.cola[0][2] if vida.cola and vida.cola[0][0] == "decision" and vida.cola[0][1] == d["id"] else None
