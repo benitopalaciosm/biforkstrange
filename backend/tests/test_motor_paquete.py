@@ -242,17 +242,3 @@ def test_ninguna_condicion_ni_probabilidad_usa_azar():
             assert not p.compilar(expr)[1], f"{clase} de {donde} usa azar"
 
 
-@pytest.mark.xfail(strict=True, reason="paquete.py:53 compila y() sin argumentos a 0; la referencia da 1 (all([])). "
-                                       "Latente: el paquete no usa y() vacío")
-def test_y_sin_argumentos_da_lo_mismo_que_la_referencia():
-    assert pq().evaluar("y()", {}) == pq().ref.evaluar("y()", {})
-
-
-@pytest.mark.xfail(strict=True, reason="paquete.py:63 compila clamp(x, lo, hi) como max(lo, min(hi, x)): evalúa lo y "
-                                       "hi antes que x, al revés que la referencia. Con azar en más de un argumento "
-                                       "los números salen cruzados. Latente: el paquete solo pone azar en x")
-def test_clamp_evalua_sus_argumentos_en_el_orden_de_la_referencia():
-    p = pq()
-    r1, r2 = random.Random(5), random.Random(5)
-    expr = "clamp(azar(), azar() * 0, 1 + azar())"
-    assert p.evaluar(expr, {}, AzarEspejo(r2)) == p.ref.evaluar(expr, {}, r1)

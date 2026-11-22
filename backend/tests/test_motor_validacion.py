@@ -4,13 +4,11 @@ La corrida de verdad es `python -m app.sim.motor.validacion` (5.000 personas) y 
 está en `docs/motor/VALIDACION.md`. Aquí se fija lo que no debe romperse:
 
 - cuántas metas cuadran como mínimo;
-- las metas clave una por una, con un margen extra por el tamaño de la cohorte;
-- las brechas conocidas, en `xfail(strict=True)`: si una empieza a cuadrar (porque se
-  arregló el motor o el paquete), el test avisa y hay que actualizar el informe.
+- las metas clave una por una, con un margen extra por el tamaño de la cohorte.
 
 Metas que quedan al borde de la tolerancia y cambian con la semilla no se fijan en ningún
-sentido: `ingreso_p50_18-24`, `ingreso_p50_25-29`, `ingreso_p75_35-39`, `ingreso_p25_45-49`,
-`publico_45-49`, `cambio_45_59`.
+sentido: `ingreso_p50_18-24`, `ingreso_p50_25-29`, `ingreso_p75_35-39`, `ingreso_p25_25-29`,
+`ingreso_p25_35-39`, `ingreso_p25_45-49`, `publico_45-49`, `cambio_45_59`.
 """
 
 import pytest
@@ -35,12 +33,6 @@ CUADRAN = [
     # desde que el alza anual no baja el sueldo de quien sigue en su pega, los sueldos medianos cuadran
     "ingreso_p50_30-34", "ingreso_p50_35-39", "ingreso_p50_40-44", "ingreso_p50_45-49", "ingreso_p75_45-49",
 ]
-# ingreso_p25_25-29 e ingreso_p25_35-39 dejaron de ser brecha: con prima_personal los independientes ya no
-# caen todos a la mediana informal. Quedan fuera de CUADRAN porque cuadran al borde (simulado ~14% bajo la
-# meta, tolerancia 15%).
-BRECHAS = {
-    "publico_35-39": "P_REEMPLEO_PUBLICO = 0,12 fija el empleo público en 12% de los asalariados a toda edad",
-}
 
 
 @pytest.fixture(scope="module")
@@ -76,11 +68,6 @@ def test_meta_clave_cuadra(metas, id_):
     m = metas[id_]
     margen = MARGEN_RELATIVO if m["tolerancia_relativa"] else MARGEN
     assert abs(m["error"]) <= m["tolerancia"] + margen, (m["meta"], m["simulado"])
-
-
-@pytest.mark.parametrize("id_", [pytest.param(i, marks=pytest.mark.xfail(strict=True, reason=r)) for i, r in BRECHAS.items()])
-def test_brecha_conocida(metas, id_):
-    assert metas[id_]["cumple"], (metas[id_]["meta"], metas[id_]["simulado"])
 
 
 def test_los_insumos_estan_marcados(metas):

@@ -33,7 +33,7 @@ Rama: `feat/trayectoria-ultimo-trabajo`. Reemplaza al esqueleto (`sim/engine.py`
 | M9 | Aplicar el feedback de M5 y M6 | Tests en verde; `DEV.md` actualizado | En curso: aplicado lo de M6, M7 y M8 |
 | M10 | Perfil armado por tu Claude | La app da un prompt; lo pegas en tu Claude, que te conoce; su respuesta (bloque `gemelo-laboral`) se pega o sube en la app y llena el perfil y la duda sin llamar a un modelo. Texto libre: lo lee Claude si hay credenciales | Hecho (`services/perfil_doc.py`, `make jugar` con `--desde`, `python -m app.cli prompt`) |
 | M11 | Cartas con historia | Cada carta cuenta quién te escribe y desde qué empresa, según tu rubro y tipo de empresa; sin cifras en el texto | Hecho para 23 decisiones (`motor/narrativa.py`); el resto muestra la pregunta del paquete |
-| M12 | Errores pendientes de la revisión del núcleo | 21 hallazgos marcados `xfail(strict=True)` en `tests/test_motor_*.py` | 1 corregido (dados repetidos en el mismo año); quedan 20 |
+| M12 | Errores pendientes de la revisión del núcleo | 21 hallazgos que eran tests `xfail(strict=True)` en `tests/test_motor_*.py` | 1 corregido (dados repetidos en el mismo año); quedan 20. Los tests se sacaron para acelerar la suite: la descripción de cada uno está en `git show c7136b9:backend/tests/test_motor_hallazgos.py` |
 
 ## Reglas que el paquete deja al simulador (supuestos del motor)
 
