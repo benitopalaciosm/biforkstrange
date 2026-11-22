@@ -36,6 +36,9 @@ export type Perfil = {
   empresa_fondos?: 0 | 1;
   /** Cada cuántos años se ha cambiado de pega: sus gemelos aceptan ofertas a ese ritmo. */
   anos_por_empleo?: number | null;
+  /** Si estudia: semestres que le faltan y años que lleva en la carrera. Sin dato, se suponen por su edad. */
+  semestres_restantes?: number | null;
+  anos_en_carrera?: number | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

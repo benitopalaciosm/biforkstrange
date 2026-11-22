@@ -127,7 +127,7 @@ def test_el_documento_de_ejemplo_se_lee_exacto_y_sin_modelo(monkeypatch):
         "tipo_empleador": "startup", "nivel": 2, "sueldo": 2_624_000, "riesgo": 4, "ocupacion": 2,
         "antiguedad": 3, "region": "rm", "ahorro": None, "ingles": 1, "skill": 57, "red": 35,
         "estado": "empleado", "meses_cesante": 0, "parcial": 0, "remoto": 0, "usa_ia": 0, "empresa_anos": 0,
-        "empresa_fondos": 0, "anos_por_empleo": 3.0}
+        "empresa_fondos": 0, "anos_por_empleo": 3.0, "semestres_restantes": None, "anos_en_carrera": None}
     assert any("82%" in frase for frase in r["inferido"])
 
 
@@ -239,6 +239,20 @@ def test_la_situacion_llega_al_motor():
     assert (e["horas"], e["remoto"], e["usa_ia"]) == (22, 1, 1)
     e = estado_inicial(Perfil(), pq)
     assert (e["hueco"], e["horas"], e["remoto"], e["usa_ia"]) == (0, 44, 0, 0)  # sin datos: como antes
+
+
+def test_cuanto_le_falta_a_quien_estudia():
+    estudia = LEIDO.model_copy(update={"situacion": "estudiando", "edad": 21, "edu": "media"})
+    r = perfil_ia.completar(estudia.model_copy(update={"anio_egreso_esperado": 2028}), hoy="2026-11-21")
+    assert r["perfil"]["semestres_restantes"] == 4 and r["perfil"]["anos_en_carrera"] is None
+    assert any("2028" in f and "2 años más" in f for f in r["inferido"])
+    r = perfil_ia.completar(estudia.model_copy(update={"anio_que_cursa": 3}), hoy="2026-11-21")
+    assert r["perfil"]["anos_en_carrera"] == 2 and r["perfil"]["semestres_restantes"] is None
+    r = perfil_ia.completar(estudia, hoy="2026-11-21")  # sin dato: el supuesto se dice como supuesto
+    assert r["perfil"]["semestres_restantes"] is None and any("supuesto del equipo" in f for f in r["inferido"])
+    # quien trabaja no recibe estos campos ni la frase, aunque el texto diga un año de egreso
+    r = perfil_ia.completar(LEIDO.model_copy(update={"anio_egreso_esperado": 2028}), hoy="2026-11-21")
+    assert r["perfil"]["semestres_restantes"] is None and not any("titular" in f for f in r["inferido"])
 
 
 def test_los_gemelos_se_cambian_como_tu():

@@ -103,6 +103,10 @@ class PerfilLeido(BaseModel):
     empresa_propia_anos: int | None = Field(None, description="Si es fundador: años que tiene su empresa.")
     levanto_inversion: bool | None = Field(None, description="Si es fundador: true si su empresa levantó inversión externa.")
     empresa_actual: str | None = Field(None, description="Su empleador de hoy: el nombre legal en Chile si lo conoces.")
+    anio_egreso_esperado: int | None = Field(
+        None, description="Si hoy estudia: el año en que espera titularse, solo si el texto lo dice (\"egreso esperado 2028\").")
+    anio_que_cursa: int | None = Field(
+        None, description="Si hoy estudia: qué año de la carrera está cursando (\"cursando 3er año\" es 3).")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -150,6 +154,9 @@ no cuentan como empleador.
 hay otro, está buscando (o estudiando, si cursa algo). Freelance, consultor independiente o boletas es \
 "independiente"; fundador, cofundador o CEO de su propia empresa es "fundador".
 - jornada_parcial, remoto, usa_ia: solo si el texto lo dice o lo muestra; si no, null.
+- anio_egreso_esperado y anio_que_cursa: solo si hoy estudia una carrera y el texto lo dice ("egreso \
+esperado 2028", "titulación 2027", "cursando 3er año", "alumno de cuarto año"). Copia el año o el número tal \
+cual; no los calcules desde la edad ni desde el año de ingreso.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -265,11 +272,12 @@ def _hay_credenciales() -> bool:
                 or (Path.home() / ".config" / "anthropic").is_dir())
 
 
-def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
+def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = None) -> dict:
     """Arma el perfil que entra al juego: lo leído, más un valor por defecto donde el texto no dijo nada.
 
     Devuelve {"perfil", "leido", "supuestos", "inferido"}; `supuestos` nombra cada campo que la
-    persona tiene que revisar porque lo puso la app.
+    persona tiene que revisar porque lo puso la app. `hoy` (AAAA-MM-DD) sirve para contar cuánto le
+    falta a quien estudia; sin él, se usa la fecha del servidor.
     """
     from app.schemas.juego import PerfilIn
 
@@ -278,7 +286,8 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
     rubros = [r for r in pq.variables["rubro"]["dominio"] if r]
     perfil, supuestos = dict(base), []
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
-              "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion"}
+              "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
+              "anio_egreso_esperado", "anio_que_cursa"}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -334,6 +343,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
         cambiar = pesos_personales({"anos_por_empleo": perfil["anos_por_empleo"]})["oferta_externa"]["cambiar"]
         inferido.append(f"Te cambias de pega cada {str(perfil['anos_por_empleo']).replace('.', ',')} años: tus gemelos aceptan una oferta "
                         f"{round(cambiar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['oferta_externa']['cambiar'] * 100)}%).")
+    inferido += _avance_en_carrera(leido, perfil, pq, hoy)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -355,6 +365,30 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
         "dudas_sugeridas": _sugeridas_posibles(leido.dudas_sugeridas, final, pq),
         "retrato": (leido.retrato or "").strip() or None,
     }
+
+
+def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:
+    """Si estudia: cuánto le falta. Sin esto, el motor lo titulaba al cerrar su primer año."""
+    if perfil["estado"] != "estudiando" or perfil["carrera_id"] < 0:
+        return []
+    from datetime import date
+
+    from app.sim.motor.perfil import Perfil, avance_en_carrera
+
+    anio_hoy = int(hoy[:4]) if hoy else date.today().year
+    if leido.anio_que_cursa is not None:
+        perfil["anos_en_carrera"] = max(0, min(10, leido.anio_que_cursa - 1))
+    if leido.anio_egreso_esperado is not None:
+        perfil["semestres_restantes"] = max(1, min(16, 2 * (leido.anio_egreso_esperado - anio_hoy)))
+    restantes, _ = avance_en_carrera(Perfil(**perfil), pq)
+    anios_que_faltan = (restantes + 1) // 2
+    plazo = "un año más" if anios_que_faltan == 1 else f"{anios_que_faltan} años más"
+    if leido.anio_egreso_esperado is not None:
+        return [f"Esperas titularte en {leido.anio_egreso_esperado}: tus gemelos estudian {plazo} antes de buscar su primera pega."]
+    if leido.anio_que_cursa is not None:
+        return [f"Vas en {leido.anio_que_cursa}° año: según la duración real de tu carrera, tus gemelos estudian {plazo}."]
+    return [f"No sabemos cuánto te falta para titularte: suponemos que entraste a los 18 y vas al día, así que "
+            f"tus gemelos estudian {plazo} (supuesto del equipo)."]
 
 
 def _empresa_sii(nombre: str | None) -> dict | None:
@@ -399,6 +433,6 @@ def perfil_desde_texto(texto: str, hoy: str, pq: Paquete | None = None, pdf: byt
     if documento is not None:
         return {**documento, "via": "documento"}
     leido, via = leer(texto, hoy, pq, pdf)
-    resultado = completar(leido, pq)
+    resultado = completar(leido, pq, hoy)
     sugeridas = resultado["dudas_sugeridas"]
     return {**resultado, "duda": sugeridas[0]["decision"] if sugeridas else None, "avisos": [], "via": via}
