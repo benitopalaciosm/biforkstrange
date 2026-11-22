@@ -241,18 +241,6 @@
    ]
   },
   {
-   "id": "CAIDA_REEMPLEO",
-   "valor": 0.15,
-   "unidad": "fracción",
-   "descripcion": "Pérdida de sueldo al volver a trabajar tras un despido, en años siguientes.",
-   "fuente": "couch_placzek_2010",
-   "calidad": "mixto",
-   "rango": [
-    0.08,
-    0.25
-   ]
-  },
-  {
    "id": "PENAL_HUECO",
    "valor": 0.571,
    "unidad": "multiplicador",

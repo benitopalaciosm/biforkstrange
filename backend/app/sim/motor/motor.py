@@ -41,6 +41,9 @@ DECISIONES_CON_OFERTA = empresas.DECISIONES_CON_OFERTA
 # paso "mes" del paquete (llega una oferta, pasa un mes más buscando). Ver docs/COMO-FUNCIONA.md.
 BUSCAR_MES_A_MES = {("cesantia", "buscar"), ("cesantia", "informal")}  # informal: trabaja sin contrato y sigue postulando
 OFERTA_MES = "oferta_cesante"   # su probabilidad la multiplica p_encontrar, como antes la de encontrar en el año
+# Un evento que te deja sin trabajo a mitad de año (despido, cierre de la startup, reestructuración) sigue con
+# `luego: cesantia`: el mes en que pasa queda fijo (`mes_perdida`) y desde ahí se vive la cesantía.
+CESANTIA = "cesantia"
 MES_BUSCANDO = "mes_buscando"
 
 # La suerte en la pega (ascenso, despido, oferta, alza) va con el trabajo: dos vidas de un mismo mundo
@@ -132,7 +135,8 @@ class Vida:
         self.anios_buscando = 0
         self.meses_buscando = 0           # meses sin trabajo buscando, en toda la vida
         self._meses_buscando_anio = 0     # los de este año: esos meses no hay sueldo
-        self._antes_del_despido = (0, 0.0)  # si te despidieron este año: meses que alcanzaste a trabajar y con qué sueldo
+        self._antes_del_despido = (0, 0.0)  # si perdiste la pega este año: meses que alcanzaste a trabajar y con qué sueldo
+        self.mes_perdida: int | None = None  # el mes (1 a 12) en que perdiste la pega este año; las copias lo heredan
         self.mes: int | None = None       # el mes en curso (1 a 12) cuando el año se vive mes a mes
         self.ingreso_total = 0.0
         self._anios_con_hueco = 0
@@ -259,7 +263,7 @@ class Vida:
         if ia.activa():
             self.registro["ia"] = {"ritmo": self.e.get("ia_ritmo", "medio"),
                                    "titular": titular_ia(self.e.get("ia_ritmo", "medio"), self.anio + 1)}
-        self.mes, self._meses_buscando_anio, self._antes_del_despido = None, 0, (0, 0.0)
+        self.mes, self._meses_buscando_anio, self._antes_del_despido, self.mes_perdida = None, 0, (0, 0.0), None
         self.reparto = None  # cómo se sorteó la carta de este año, si hubo sorteo
         self.sugerida = None
         self._derivar()
@@ -480,13 +484,18 @@ class Vida:
             self._buscar_mes_a_mes(origen)
 
     def _buscar_mes_a_mes(self, origen: str) -> None:
-        """El resto del año pasa de a un mes. Al empezar el año, los 12; si te despidieron este año, desde el
-        mes del despido (sorteado con la suerte de la pega: tus copias en el mismo trabajo pierden la pega el mismo mes)."""
-        desde = 1
-        if origen == "luego":
-            desde = 1 + int(12 * self.dados.u(self.anio, f"{self._sitio_evento('separacion_empleo')}:mes"))
-            self._antes_del_despido = (desde - 1, self.e["sueldo_ref"])  # esos meses sí cobraste tu sueldo de antes
+        """El resto del año pasa de a un mes. Al empezar el año, los 12; si perdiste la pega este año, desde el mes
+        en que la perdiste (`mes_perdida`, fijado por el evento: las copias que se comparan desde aquí lo heredan).
+        Si renunciaste, renunciaste al empezar el año: los 12."""
+        desde = self.mes_perdida if origen == "luego" and self.mes_perdida else 1
         self.cola[0:0] = [("mes", m) for m in range(desde, 13)]
+
+    def _perder_la_pega(self, id_: str) -> None:
+        """Un evento te dejó sin trabajo a mitad de año (despido, cierre, reestructuración): sortea el mes con la suerte
+        de la pega (tus vidas en el mismo trabajo la pierden el mismo mes) y lo deja fijo en la vida. Los meses de antes
+        cobraste tu sueldo de entonces; desde ahí, la cesantía."""
+        self.mes_perdida = 1 + int(12 * self.dados.u(self.anio, f"{self._sitio_evento(id_)}:mes"))
+        self._antes_del_despido = (self.mes_perdida - 1, self.e["sueldo_ref"])
 
     def _plata(self) -> tuple[float, float]:
         return self.e["sueldo"], self.e["ahorro"]
@@ -756,7 +765,9 @@ class Vida:
             return f"evento:{id_}"  # lo del país y lo personal (la salud) es igual en todas las vidas
         return f"evento:{id_}@{self.pega}"
 
-    def _evento(self, id_: str, directo: bool = False) -> None:
+    def _evento(self, id_: str, directo: bool = False, encadenar: bool = True) -> None:
+        """Sortea y aplica un evento. Sin `encadenar` no sigue con su `luego`: la startup que cierra al cerrar el año
+        (`cierra_en`) deja la cesantía para el año siguiente, que la trae como forzada."""
         ev = self.pq.eventos[id_]
         mensual = ev.get("paso") == "mes"
         sitio = f"evento:{id_}:mes{self.mes}" if mensual and self.mes else self._sitio_evento(id_)
@@ -794,7 +805,10 @@ class Vida:
         if id_ == MES_BUSCANDO:
             self.meses_buscando += 1
             self._meses_buscando_anio += 1
-        self._encolar_luego(resultado.get("luego"))
+        if encadenar:
+            if resultado.get("luego") == CESANTIA and not mensual:
+                self._perder_la_pega(id_)
+            self._encolar_luego(resultado.get("luego"))
         self._espera_tipo = False
 
     # ------------------------------------------------------------------ cierre
@@ -813,7 +827,9 @@ class Vida:
         if self._meses_buscando_anio:
             plata["meses_sin_sueldo"] = min(12, self._meses_buscando_anio)
         if e["estado"] == "buscando" and not self._meses_buscando_anio:
-            self.meses_buscando += 12  # un año buscando sin vivirlo mes a mes (la primera pega)
+            # buscando sin vivirlo mes a mes (la primera pega, o tras perder la pega elegiste otra cosa): desde que
+            # la perdiste, o el año entero
+            self.meses_buscando += 12 - meses_antes
         ganado = meses_con_sueldo * e["sueldo"] + meses_antes * sueldo_antes
         self.ingreso_total += ganado
         plata["ganado"] = round(ganado)
@@ -844,7 +860,8 @@ class Vida:
         if e["cierra_en"] > 0:
             e["cierra_en"] -= 1
             if e["cierra_en"] == 0 and e["estado"] == "empleado" and e["tipo_empleador"] == "startup":
-                self._evento("startup_cierra", directo=True)
+                # cierra al terminar el año: lo trabajaste entero, y la cesantía viene el año siguiente como forzada
+                self._evento("startup_cierra", directo=True, encadenar=False)
                 e = self.e
         if e["estado"] == "independiente" and self.dados.u(self.anio, "independiente:vuelve") < p_independiente_busca_empleo(e, self.pq):
             e.update(estado="buscando", sueldo=0.0, primer_empleo=1 if e["sueldo_ref"] <= 0 else 0)

@@ -274,7 +274,7 @@ def test_separacion_cesante_lee_sueldo_y_antiguedad_de_antes(antiguedad, sueldos
 
 def test_renunciar_guarda_el_ultimo_sueldo_como_referencia():
     v = vida(Perfil(edad=35, sueldo=1_000_000), DadosGuion())
-    v.vivir_anio(Guion({"renunciar": "renunciar"}), carta="renunciar")
+    v.vivir_anio(Guion({"renunciar": "renunciar", "cesantia": "buscar"}), carta="renunciar")
     assert v.e["estado"] == "buscando" and v.e["sueldo"] == 0 and v.e["sueldo_ref"] == 1_000_000
 
 

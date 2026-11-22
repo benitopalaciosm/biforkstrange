@@ -52,7 +52,7 @@
     "couch_placzek_2010"
    ],
    "calidad": "dato",
-   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo. Ya no hay recontrato automático el mismo año: quien encuentra trabajo rápido lo hace por las ofertas mes a mes (oferta_cesante). Tampoco se descuenta CAIDA_REEMPLEO al despedirte: las ofertas ya traen la baja de sueldo (78% a 106% de lo que ganabas, y menos desde el mes 7). Va primero entre los eventos del año: si pierdes el trabajo, ese año ya no te toca alza ni ascenso (antes podían salir las tres noticias juntas)."
+   "notas": "La indemnización (un sueldo por año, tope 11) solo corresponde a despido por necesidades de la empresa; el simulador puede separarla del fin de contrato con eps_terminos_empleo. Ya no hay recontrato automático el mismo año: quien encuentra trabajo rápido lo hace por las ofertas mes a mes (oferta_cesante). Tampoco se descuenta la caída de sueldo al reemplearse (Couch y Placzek 2010): las ofertas ya traen la baja de sueldo (78% a 106% de lo que ganabas, y menos desde el mes 7). Va primero entre los eventos del año: si pierdes el trabajo, ese año ya no te toca alza ni ascenso (antes podían salir las tres noticias juntas). El mes del despido se sortea al pasar el evento y queda fijo en la vida: las copias que se comparan desde la cesantía lo heredan."
   },
   {
    "id": "alza_anual",
@@ -324,13 +324,9 @@
        "var": "animo",
        "op": "suma",
        "valor": "k('ANIMO_CESANTIA')"
-      },
-      {
-       "var": "sueldo_ref",
-       "op": "multiplica",
-       "valor": "1 - k('CAIDA_REEMPLEO')"
       }
-     ]
+     ],
+     "luego": "cesantia"
     }
    ],
    "fuentes": [
@@ -339,7 +335,7 @@
     "manning_aguirre_2026"
    ],
    "calidad": "supuesto",
-   "notas": "Solo pasa con IA rápida (IA_DESPIDO_EXTRA es 0 en lenta y media: el FRI ve el mismo desempleo) y en ocupaciones donde la IA automatiza o es incógnita. Los mismos efectos que separacion_empleo; la adaptabilidad mueve la chance de reemplearse el mismo año."
+   "notas": "Solo pasa con IA rápida (IA_DESPIDO_EXTRA es 0 en lenta y media: el FRI ve el mismo desempleo) y en ocupaciones donde la IA automatiza o es incógnita. Los mismos efectos que separacion_empleo; la adaptabilidad mueve la chance de reemplearse el mismo año. El resultado cesante tiene los mismos efectos que separacion_empleo, también la cesantía desde el mes de la reestructuración, y no descuenta una caída de sueldo al reemplearse: las ofertas ya traen la baja."
   },
   {
    "id": "recesion",
@@ -560,14 +556,15 @@
        "op": "fija",
        "valor": 0
       }
-     ]
+     ],
+     "luego": "cesantia"
     }
    ],
    "fuentes": [
     "yc_directorio"
    ],
    "calidad": "mixto",
-   "notas": "Anualiza el 29,9% de cierres en unos 8 años de las cohortes 2012-2019."
+   "notas": "Anualiza el 29,9% de cierres en unos 8 años de las cohortes 2012-2019. Como un despido, encadena la cesantía (luego) desde el mes del cierre: los meses de antes cobras tu sueldo y desde ahí buscas mes a mes."
   },
   {
    "id": "animo_vuelve",

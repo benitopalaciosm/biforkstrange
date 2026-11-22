@@ -120,10 +120,10 @@ def test_el_ascenso_que_descuenta_el_alza_anual_es_el_promedio_de_la_cohorte():
     class Espia(Vida):
         diferencias: list[float] = []
 
-        def _evento(self, id_, directo=False):
+        def _evento(self, id_, directo=False, encadenar=True):
             if id_ == "alza_anual" and self.e["estado"] == "empleado":
                 Espia.diferencias.append(self.e["prob_ascenso"] - pq.k("ASCENSO_POBLACION", self.e["banda7"]))
-            super()._evento(id_, directo)
+            super()._evento(id_, directo, encadenar)
 
     for g in range(300):
         v = Espia(estado_inicial(Perfil.a_los_18(sexo="hm"[g % 2]), pq), Dados(SEMILLA, g), pq)

@@ -2173,7 +2173,8 @@
          "op": "suma",
          "valor": 10
         }
-       ]
+       ],
+       "luego": "cesantia"
       }
      ],
      "fuentes": [
