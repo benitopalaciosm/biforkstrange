@@ -62,7 +62,7 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 
 **Agregar una decisión:** crear una subclase en `sim/decisions/catalog.py` con `key`, `label` y `apply()` (o heredar de `ParametricDecision` y fijar tres números). Aparece sola en `GET /api/decisions`.
 
-**Agregar un atributo del gemelo:** sumarlo a `State` (o usar `state.extra`) y resumirlo en `metrics.py`.
+**Agregar un atributo de la copia:** sumarlo a `State` (o usar `state.extra`) y resumirlo en `metrics.py`.
 
 ### Motor del juego (`backend/app/sim/motor`)
 
@@ -71,11 +71,11 @@ El juego corre sobre el paquete de datos de `backend/simulador/` (43 decisiones,
 | Archivo | Qué hace |
 |---|---|
 | `paquete.py` | Carga el paquete y traduce cada fórmula a una función de Python |
-| `azar.py` | Dados con suerte compartida: cada sorteo se identifica por gemelo, año y sitio |
+| `azar.py` | Dados con suerte compartida: cada sorteo se identifica por copia, año y sitio |
 | `perfil.py` | De los 9 campos del perfil a las variables iniciales |
 | `motor.py` | El año: mundo, decisión, dado del resultado, eventos, cierre |
-| `politicas.py` | Quién decide: la persona, los gemelos por inercia o la población (pesos calibrados) |
-| `gemelos.py` | 500 gemelos por opción con los mismos dados |
+| `politicas.py` | Quién decide: la persona, las copias por inercia o la población (pesos calibrados) |
+| `gemelos.py` | 100 mundos: en cada uno la copia vive todas las opciones con los mismos dados |
 | `partida.py` | La partida de la persona; no guarda nada, se vuelve a jugar en cada llamada |
 | `validacion.py` | Cohorte de 5.000 personas contra las 37 metas del paquete y el panel ELSOC |
 | `supuestos.py` | Cada parámetro con su calidad (dato, mixto, supuesto), fuente y país |
@@ -85,7 +85,7 @@ API: `GET /api/juego/catalogo`, `POST /api/juego/dudas`, `POST /api/juego/partid
 
 ```bash
 make jugar DUDA=unirse_a_startup   # partida en el terminal
-make comparar DUDA=oferta_externa  # solo la tabla de gemelos de una decisión
+make comparar DUDA=oferta_externa  # solo la tabla de copias de una decisión
 make validar                       # cuántas metas de Chile cuadran
 make supuestos CALIDAD=supuesto    # qué números siguen siendo supuestos del equipo
 ```
