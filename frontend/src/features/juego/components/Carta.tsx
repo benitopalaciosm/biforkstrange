@@ -1161,6 +1161,7 @@ export function Carta({
         </div>
       )}
 
+
       {comparacion && opcion && (() => {
         const c = comparadas.find((x) => x.opcion === opcion.opcion);
         return c ? <ComoLeer o={c} base={base} total={ganadores?.length ?? 0} edadFinal={edadGemelos} respaldo={opcion.respaldo} /> : null;

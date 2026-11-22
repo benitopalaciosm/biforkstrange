@@ -64,6 +64,19 @@ El sueldo al año 10, el cargo, los meses sin trabajo y el estado (empleado, ces
 
 El ánimo y la energía existen en el modelo, pero casi no se mueven con las decisiones de trabajo, así que no se muestran.
 
+### La incertidumbre de la IA
+
+Nadie sabe qué tan rápido va a avanzar la IA, y para eso no hay frecuencias como las de la recesión. El juego lo trata así (`app/sim/motor/ia.py`):
+
+- **Cada mundo trae un ritmo de la IA**: lento, medio o rápido, igual para todas sus vidas. Sale con los pesos que economistas y superforecasters dieron a cada escenario al 2030 (FRI 2026): 42%, 45% y 13%. Es un pronóstico de expertos, y la pantalla lo dice.
+- **Tu cargo tiene un tipo**: la IA lo automatiza, lo complementa, no se sabe o no lo toca (OIT 2025, `ia_cargos_ciuo08.csv`).
+- **El ritmo mueve la contratación, no los despidos**, como en los datos: donde la IA automatiza, a los menores de 30 les cuesta más encontrar pega, y la brecha crece hasta 2030 (`ia_encontrar`). Solo con IA rápida hay reestructuraciones (`ia_reestructura`), del tamaño que el FRI ve en el desempleo.
+- **Eventos y decisiones de IA**: tu empresa adopta IA (y te pregunta si lideras, aprendes, sigues o te vas), se pincha la burbuja de la IA, hay un auge del cobre por los data centers. `aprender_ia` separa el curso corto (no mueve el sueldo, dato SENCE) del programa largo (cobra la prima de saber IA al cambiarte).
+- **Lo que ve la persona**: un titular por año según el ritmo de su mundo, y el cierre dice qué ritmo vivió, cuánto habría ganado su opción con cada ritmo y quién pronostica qué.
+- **La AGI y la superinteligencia no entran con números**: no hay frecuencias ni consenso. Aparecen como voces en el cierre.
+
+Se prende y se apaga con la variable de entorno `BIFURCA_IA` (`0` la apaga; por omisión está prendida). Apagada, el juego es el de antes. Los tests corren con ella apagada salvo los marcados `@pytest.mark.ia` (`tests/test_motor_ia.py`). Con ella prendida, la cohorte de validación sigue cuadrando y el desempleo juvenil sube entre 1 y 2 puntos, lo que ve el FRI.
+
 ## De dónde salen los números
 
 Todo número del juego sale del **paquete de datos** en `backend/simulador/`. El código no tiene probabilidades escritas a mano: las lee del paquete y las ejecuta.
@@ -116,6 +129,7 @@ Regla del producto: **los números salen de los datos; la IA hace todo lo demás
 | Cómo responde la población a una decisión | `backend/app/sim/motor/politicas.py` |
 | Qué eventos quedan fuera del juego (solo trabajo: hoy, el cáncer) | `EVENTOS_PERSONALES` en `motor.py` |
 | Del perfil a las variables de la copia | `backend/app/sim/motor/perfil.py` |
+| La incertidumbre de la IA y su flag | `backend/app/sim/motor/ia.py`, `backend/simulador/escenarios_ia.json` y `backend/scripts/ia_oit.py` |
 | Leer el perfil desde un texto o con tu Claude | `services/perfil_ia.py` y `services/perfil_doc.py` |
 | La historia que cuenta cada decisión | `backend/app/sim/motor/narrativa.py` |
 | Empresas reales de ejemplo | `backend/data/empresas/` y `empresas.py` |

@@ -181,12 +181,14 @@ export function QuePaso({
         const decisiones = (i === 0 ? a.decisiones.slice(1) : a.decisiones).filter((d) => d.decision !== "tipo_de_oferta");
         const eventos = a.eventos.filter((e) => !e.rutina && e.evento !== "oferta_cesante");
         const celdas = mesesDelAnio(a);
-        const nada = decisiones.length === 0 && eventos.length === 0;
+        const titular = a.ia?.titular;
+        const nada = decisiones.length === 0 && eventos.length === 0 && !titular;
         return (
           <Stack as="section" gap={8} key={`${a.anio}:${a.edad}`} className="jg-despues" style={cssVars({ "--jg-espera": `${espera + 0.2 + i * 0.1}s` })}>
             <Meta>
               {aniosDe(a.edad, a.fin?.edad, edadInicial)} · {a.edad} años{a.fin ? "" : " · en curso"}
             </Meta>
+            {titular && <Noticia titulo="En las noticias" texto={titular} className="jg-titular-ia" />}
             {celdas && <TiraMeses celdas={celdas} />}
             {eventos.map((e, j) => (
               <Noticia

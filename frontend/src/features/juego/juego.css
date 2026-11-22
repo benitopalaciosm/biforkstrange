@@ -588,3 +588,9 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-filtro-dudas { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px; scrollbar-width: none; }
 .jg-filtro-dudas::-webkit-scrollbar { display: none; }
 .jg-filtro-dudas .vd-chip { flex: none; min-height: 36px; padding: 0 14px; font-size: 14px; }
+
+/* La incertidumbre de la IA: el titular del año y la IA en tu mundo (cierre) */
+.jg-ia-voz { padding-left: 10px; border-left: 3px solid var(--linea); }
+.jg-ia-voz i { font-style: normal; }
+.jg-titular-ia .vd-noti-quien { color: var(--suave); }
+.jg-ia-cierre .jg-escenarios b { white-space: nowrap; }
