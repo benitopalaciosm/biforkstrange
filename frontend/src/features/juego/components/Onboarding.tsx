@@ -1,5 +1,5 @@
 import "./onboarding.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   Button, ChevronLeftIcon, Chip, Heading, IconButton, Meta, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Tag, Text,
 } from "@/shared/ui";
@@ -384,6 +384,7 @@ function Entrada({
           type="button"
           className="ob-fuente"
           data-listo={cv === "listo" || undefined}
+          data-leyendo={cv === "leyendo" || undefined}
           data-encima={encima || undefined}
           disabled={cv === "leyendo"}
           onClick={() => entrada.current?.click()}
@@ -398,14 +399,24 @@ function Entrada({
             subir(e.dataTransfer.files?.[0]);
           }}
         >
-          {cv === "leyendo" ? <LinkedinAPdf /> : <span className="ob-in ob-icono">in</span>}
+          {cv === "leyendo" ? (
+            <span className="ob-icono ob-hoja-mini" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+              <span className="ob-scan" />
+            </span>
+          ) : (
+            <span className="ob-in ob-icono">in</span>
+          )}
           <span className="ob-fuente-texto">
             <strong>Tu LinkedIn o CV</strong>
             <span className="ob-chico">
               {cv === "leyendo" ? <LeyendoFrase /> : cv === "listo" ? "Listo. Puedes subir otro." : "PDF. En LinkedIn: tu perfil → Recursos → Guardar como PDF"}
             </span>
           </span>
-          <Marca listo={cv === "listo"} accion="Subir" />
+          <Marca listo={cv === "listo"} accion={cv === "leyendo" ? "" : "Subir"} />
         </button>
         <input
           ref={entrada}
@@ -482,24 +493,6 @@ function LeyendoFrase() {
   );
 }
 
-/** La mini animación: el logo de LinkedIn suelta un PDF que vuela hasta tu gemelo. */
-function LinkedinAPdf() {
-  return (
-    <div className="ob-anim" aria-hidden="true">
-      <span className="ob-in">in</span>
-      <span className="ob-via" />
-      <span className="ob-pdf">
-        <i />
-        <i />
-        <i />
-      </span>
-      <span className="ob-gemelo">
-        <span />
-      </span>
-    </div>
-  );
-}
-
 /** La ficha de tu gemelo: cada dato que se sabe aparece con un pop. */
 function Ficha({
   p, sabidos, catalogo, retrato, intereses = [], proyecto = null,
@@ -523,9 +516,7 @@ function Ficha({
   const visibles = datos.filter(([k, v]) => v && sabidos.has(k));
   return (
     <div className="ob-ficha">
-      <div className="ob-avatar" data-lleno={Math.min(visibles.length, 7)} aria-hidden="true">
-        <span />
-      </div>
+      <Silueta lleno={Math.min(visibles.length + intereses.length, 7) / 7} />
       <Stack gap={6}>
         <Meta>Tu gemelo</Meta>
         {retrato && <Text size="sm">«{retrato}»</Text>}
@@ -626,5 +617,26 @@ function TuClaude({ leyendo, error, onTexto }: { leyendo: boolean; error: string
         {leyendo ? "Leyendo…" : "Sumar a mi gemelo"}
       </Button>
     </Stack>
+  );
+}
+
+/** Tu gemelo como silueta: se va llenando (de abajo hacia arriba) con cada dato que se sabe. */
+function Silueta({ lleno }: { lleno: number }) {
+  const id = useId();
+  const cuerpo = "M10 50c0-12 7-18 16-18s16 6 16 18z";
+  return (
+    <svg className="ob-avatar" viewBox="0 0 52 52" aria-hidden="true">
+      <defs>
+        <clipPath id={id}>
+          <rect className="ob-nivel" x="0" y="0" width="52" height="52" style={{ transform: `translateY(${(1 - lleno) * 100}%)` }} />
+        </clipPath>
+      </defs>
+      <circle cx="26" cy="19" r="9" className="ob-silueta-vacia" />
+      <path d={cuerpo} className="ob-silueta-vacia" />
+      <g clipPath={`url(#${id})`}>
+        <circle cx="26" cy="19" r="9" className="ob-silueta-llena" />
+        <path d={cuerpo} className="ob-silueta-llena" />
+      </g>
+    </svg>
   );
 }
