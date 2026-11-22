@@ -17,9 +17,9 @@ const ELEGIR: Record<string, (keyof Perfil)[]> = { tu: ["edu"], pega: ["tipo_emp
 /** Los sliders siempre tienen un valor: cuentan como respuesta al pasar de tarjeta. */
 const DESLIZAR: Record<string, (keyof Perfil)[]> = { tu: ["edad"], plata: ["sueldo"] };
 const SITUACION: Record<string, string> = {
-  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando pega", estudiando: "Estudiando",
+  independiente: "Independiente", fundador: "Fundador", buscando: "Buscando trabajo", estudiando: "Estudiando",
 };
-const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de pega…", "Eligiendo tus dudas…"];
+const FRASES = ["Leyendo tu experiencia…", "Buscando tu empresa en el SII…", "Contando tus años de trabajo…", "Eligiendo tus dudas…"];
 
 /**
  * Onboarding en 3 pantallas: subes tu CV (o el PDF de LinkedIn) o contestas unas pocas preguntas, después solo

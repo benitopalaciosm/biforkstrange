@@ -19,7 +19,7 @@ const PASOS = [
   },
   {
     titulo: `Imaginamos ${GEMELOS} mundos posibles.`,
-    texto: `En cada mundo vive una copia tuya, tu gemelo: misma edad, mismo sueldo, misma pega. Lo que cambia de un mundo a otro es la suerte: en uno hay recesión el año 3, en otro te despiden, en otro no pasa nada. También cambia qué tan rápido llega la IA, dentro del rango que han medido los estudios.`,
+    texto: `En cada mundo vive una copia tuya, tu gemelo: misma edad, mismo sueldo, mismo trabajo. Lo que cambia de un mundo a otro es la suerte: en uno hay recesión el año 3, en otro te despiden, en otro no pasa nada. También cambia qué tan rápido llega la IA, dentro del rango que han medido los estudios.`,
   },
   {
     titulo: "En cada mundo, tu gemelo vive todas las opciones.",

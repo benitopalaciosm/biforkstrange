@@ -830,7 +830,7 @@ export function Carta({
                     </span>
                     <span className="jg-chico">
                       Quedas sin trabajo alguna vez en <strong>{Math.round(o.paso_por_cesantia * 100)} de 100</strong> mundos
-                      {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin pega en todo el período` : ""}
+                      {meses > 0 ? ` · en promedio ${meses} ${meses === 1 ? "mes" : "meses"} sin trabajo en todo el período` : ""}
                     </span>
                     <span className="jg-medidor" aria-hidden="true">
                       <i style={{ width: `${Math.max(1, o.paso_por_cesantia * 100)}%` }} />
