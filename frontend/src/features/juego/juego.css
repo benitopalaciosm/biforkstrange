@@ -66,12 +66,10 @@ select.jg-campo { appearance: none; background-image: linear-gradient(45deg, tra
 .jg-cargando i { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--acento); animation: jg-pulso 1s ease-in-out infinite alternate; }
 @keyframes jg-pulso { from { transform: scale(.6); opacity: .4; } to { transform: scale(1); opacity: 1; } }
 .jg-error { padding: 12px 14px; border: 2px dashed var(--tinta); border-radius: 14px; font: 500 14px/20px var(--font); }
-.jg-enlaces { display: flex; gap: 16px; justify-content: center; }
-.jg-enlaces a { color: var(--suave); }
 /* Pie con la acción principal siempre a la vista en pantallas largas */
 .jg-pie-fijo { position: sticky; bottom: 0; z-index: 2; margin-top: auto; padding: 12px 0 16px; margin-bottom: -16px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to bottom, transparent, var(--papel) 14px); }
 @media (min-width: 760px) { .jg-ancha .jg-pie-fijo > * { max-width: 420px; width: 100%; margin-left: auto; margin-right: auto; } }
-/* Fondo detrás de la columna de la pantalla, como en /ui */
+/* Fondo detrás de la columna de la pantalla */
 .jg-fondo { min-height: 100dvh; background: var(--niebla); }
 .jg-vivido .vd-paso { padding: 9px 0; }
 /* Cinco o seis opciones lado a lado (la cesantía) */

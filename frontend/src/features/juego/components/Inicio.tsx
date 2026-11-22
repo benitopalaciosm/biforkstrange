@@ -58,14 +58,6 @@ export function Inicio({
         <Button variant="quiet" onClick={onComoFunciona} disabled={cargando}>
           ¿Cómo funciona?
         </Button>
-        <div className="jg-enlaces">
-          <a href="/simulacion" className="vd-meta">
-            Simulación anterior
-          </a>
-          <a href="/ui" className="vd-meta">
-            Kit de UI
-          </a>
-        </div>
       </ScreenFooter>
     </Screen>
   );
