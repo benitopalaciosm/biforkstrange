@@ -523,30 +523,38 @@ function Ficha({
     ["anos_por_empleo", p.anos_por_empleo ? `Se cambia cada ${p.anos_por_empleo.toLocaleString("es-CL")} años` : undefined],
   ];
   const visibles = datos.filter(([k, v]) => v && sabidos.has(k));
+  const cosas = [
+    ...visibles.map(([k, v]) => ({ clave: k, texto: v!, tuyo: false })),
+    ...(proyecto ? [{ clave: "proyecto", texto: `Proyecto: ${proyecto.length > 40 ? `${proyecto.slice(0, 40)}…` : proyecto}`, tuyo: true }] : []),
+    ...intereses.map((x) => ({ clave: `interes:${x}`, texto: x, tuyo: true })),
+  ];
+  // pocas cosas caben quietas; con más, pasan en una cinta que va y viene
+  const cinta = cosas.length > 4;
   return (
     <div className="ob-ficha">
       <Silueta lleno={Math.min(visibles.length + intereses.length, 7) / 7} />
-      <Stack gap={6}>
-        <Meta>Tu copia</Meta>
-        {retrato && <Text size="sm">«{retrato}»</Text>}
-        <div className="ob-tags">
-          {visibles.length === 0 && <span className="ob-chico">Se va armando con cada respuesta.</span>}
-          {visibles.map(([k, v]) => (
-            <Tag key={`${k}:${v}`} className="ob-tag">
-              {v}
-            </Tag>
-          ))}
-          {proyecto && (
-            <Tag key={`proyecto:${proyecto}`} className="ob-tag ob-tag--tuyo">
-              Proyecto: {proyecto.length > 40 ? `${proyecto.slice(0, 40)}…` : proyecto}
-            </Tag>
-          )}
-          {intereses.map((x) => (
-            <Tag key={`interes:${x}`} className="ob-tag ob-tag--tuyo">
-              {x}
-            </Tag>
-          ))}
-        </div>
+      <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+        <Meta>{cosas.length > 0 ? `Tu copia sabe ${cosas.length} ${cosas.length === 1 ? "cosa" : "cosas"} de ti` : "Tu copia"}</Meta>
+        {retrato && <Text size="sm" className="ob-retrato">«{retrato}»</Text>}
+        {cosas.length === 0 && <span className="ob-chico">Se va armando con cada respuesta.</span>}
+        {cosas.length > 0 && (
+          <div className="ob-cinta" data-mueve={cinta || undefined}>
+            <ul className="vd-sr">
+              {cosas.map((c) => (
+                <li key={c.clave}>{c.texto}</li>
+              ))}
+            </ul>
+            <div className="ob-cinta-pista" aria-hidden="true" style={cinta ? { animationDuration: `${cosas.length * 2.6}s` } : undefined}>
+              {(cinta ? [0, 1] : [0]).flatMap((vuelta) =>
+                cosas.map((c) => (
+                  <Tag key={`${vuelta}:${c.clave}:${c.texto}`} className={`ob-tag${c.tuyo ? " ob-tag--tuyo" : ""}${vuelta ? " ob-cinta-copia" : ""}`}>
+                    {c.texto}
+                  </Tag>
+                )),
+              )}
+            </div>
+          </div>
+        )}
       </Stack>
     </div>
   );

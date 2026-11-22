@@ -904,6 +904,14 @@
    "inicio": "eleccion"
   },
   {
+   "nombre": "rubro_emprendimiento",
+   "tipo": "eleccion",
+   "dominio": [],
+   "unidad": "",
+   "descripcion": "Rubro de la empresa que parte (lo elige el jugador; por defecto, el de su proyecto, el que soñó o el suyo).",
+   "inicio": "eleccion"
+  },
+  {
    "nombre": "region_destino",
    "tipo": "eleccion",
    "dominio": [],

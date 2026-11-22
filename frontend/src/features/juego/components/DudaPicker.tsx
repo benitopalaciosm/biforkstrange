@@ -97,6 +97,11 @@ export function DudaPicker({
         <Heading level={1}>¿Qué duda te trajo?</Heading>
         <AvisoPerfil fuentes={fuentes} />
       </Stack>
+      {onSinDuda && (
+        <Button onClick={onSinDuda} disabled={cargando} className="jg-sin-duda">
+          Solo quiero simular mi vida
+        </Button>
+      )}
       {enJuego && (
         <div className="jg-en-juego" role="note">
           <Tag tone="accent">La más en juego para ti</Tag>
@@ -141,15 +146,10 @@ export function DudaPicker({
       )}
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={dudas ? onReintentar : onReintentarDudas} />}
-        {simulando && <Cargando frases={[`Simulando tus ${GEMELOS} mundos…`, "Diez años con cada opción…"]} />}
+        {simulando && <Cargando frases={[`Corriendo tus ${GEMELOS} simulaciones…`, "Diez años con cada opción…"]} />}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
-          {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} mundos` : "Elige una duda"}
+          {simulando ? "Simulando…" : sel ? `Ver mis ${GEMELOS} simulaciones` : "Elige una duda"}
         </Button>
-        {onSinDuda && !simulando && (
-          <Button variant="quiet" onClick={onSinDuda} disabled={cargando}>
-            Empezar sin una duda: que la vida decida
-          </Button>
-        )}
       </div>
     </Screen>
   );

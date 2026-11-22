@@ -17,9 +17,10 @@ TRABAJA = ("empleado", "independiente", "fundador")
 EDAD_INGRESO_CARRERA = 18  # supuesto: sin dato del CV, entró a la carrera al salir del colegio
 # Rasgos de su historia que pasan tal cual al estado, solo si el CV los trae. No son del paquete: los leen
 # `politicas.pesos_personales` (cómo deciden sus gemelos), `motor.p_independiente_busca_empleo` y
-# `politicas.elecciones_internas` (rubro_sonado: a qué rubro iría si se cambia).
+# `politicas.elecciones_internas` (rubro_sonado: a qué rubro iría si se cambia; rubro_proyecto: de qué rubro es
+# su proyecto, si emprende).
 HISTORIA = ("anos_por_empleo", "volvio_a_su_nivel", "freelance_entre_pegas", "emprendio_antes", "anos_independiente",
-            "empresas_cerradas", "rubro_sonado")
+            "empresas_cerradas", "rubro_sonado", "rubro_proyecto")
 
 
 def skill_por_experiencia(anios: int) -> int:
@@ -59,6 +60,8 @@ class Perfil:
     anos_por_empleo: float | None = None
     # Lo que contó su Claude: el rubro al que se cambiaría ("¿a qué rubro?" parte ahí)
     rubro_sonado: str | None = None
+    # Lo que contó su Claude: el rubro de su proyecto o idea de negocio ("¿de qué rubro es tu empresa?" parte ahí)
+    rubro_proyecto: str | None = None
     # Si estudia: cuánto le falta ("egreso esperado 2028") y cuántos años lleva ("cursando 3er año").
     # Sin dato, se suponen por su edad y la duración real de la carrera (ver `avance_en_carrera`).
     semestres_restantes: int | None = None
@@ -255,7 +258,7 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         padre_edad=perfil.edad + round(pq.k("EDAD_MADRE")) + 2,
         area="", tipo_institucion="", semestres_restantes=0,
         # variables que elige el jugador dentro de una opción
-        rubro_destino=perfil.rubro or RUBROS_DESTINO, region_destino="Valparaíso",
+        rubro_destino=perfil.rubro or RUBROS_DESTINO, rubro_emprendimiento=perfil.rubro or RUBROS_DESTINO, region_destino="Valparaíso",
         ocupacion_destino=2, quien_enferma="madre",
         universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
         institucion_destino=_institucion_por_defecto(pq), universidad_id=perfil.universidad_id or "",

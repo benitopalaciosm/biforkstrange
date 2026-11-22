@@ -305,6 +305,8 @@ def _tipo_y_rubro(vida, decision_id: str, opcion_id: str) -> tuple[str, str | No
                 rubro = literal if literal is not None else e.get(v) if v in e else None
             elif ef["var"] == "estado" and literal == "empleado":
                 emplea = True
+            elif ef["var"] == "estado" and literal in ("fundador", "independiente"):
+                return None  # tu empresa o por tu cuenta: nadie te contrata
         if r.get("luego") == "tipo_de_empleador":
             tipo = _predecir_tipo(vida)
         elif tipo is None and emplea:
