@@ -315,7 +315,7 @@ function Entrada({ error, onPdf, onManual }: { error: string | null; onPdf: (pdf
       >
         <LinkedinAPdf />
         <strong>Sube el PDF de tu LinkedIn o tu CV</strong>
-        <span className="ob-chico">En LinkedIn: tu perfil → Más → Guardar como PDF</span>
+        <span className="ob-chico">En LinkedIn, desde el computador: tu perfil → Recursos → Guardar como PDF</span>
       </button>
       <input
         ref={entrada}
