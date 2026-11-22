@@ -24,6 +24,14 @@ class PerfilIn(BaseModel):
     ingles: int = Field(0, ge=0, le=1)
     skill: int | None = Field(None, ge=0, le=100)
     red: int | None = Field(None, ge=0, le=100)
+    estado: Literal["empleado", "independiente", "fundador", "buscando", "estudiando"] = "empleado"
+    meses_cesante: int = Field(0, ge=0, le=120)
+    parcial: int = Field(0, ge=0, le=1)
+    remoto: int = Field(0, ge=0, le=1)
+    usa_ia: int = Field(0, ge=0, le=1)
+    empresa_anos: int = Field(0, ge=0, le=30)
+    empresa_fondos: int = Field(0, ge=0, le=1)
+    anos_por_empleo: float | None = Field(None, gt=0, le=40)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())

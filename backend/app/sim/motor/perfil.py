@@ -42,6 +42,15 @@ class Perfil:
     ingles: int = 0                       # 1 si trabaja en inglés (intermedio o más)
     skill: int | None = None              # 0 a 100; sin dato, 50
     red: int | None = None                # 0 a 100; sin dato, 30
+    # Su situación de hoy, del CV: decide qué cartas le aparecen
+    meses_cesante: int = 0                # si está buscando; 8 o más es un "hueco" en el CV
+    parcial: int = 0                      # 1 si trabaja media jornada
+    remoto: int = 0                       # 1 si ya trabaja remoto
+    usa_ia: int = 0                       # 1 si ya trabaja con herramientas de IA
+    empresa_anos: int = 0                 # si es fundador: años de su empresa
+    empresa_fondos: int = 0               # si es fundador: 1 si levantó inversión
+    # Su historia: cada cuántos años se ha cambiado de pega (calibra cómo deciden sus gemelos)
+    anos_por_empleo: float | None = None
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -80,6 +89,12 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         nivel=perfil.nivel, sueldo=float(perfil.sueldo) if trabaja else 0.0,
         sueldo_ref=float(perfil.sueldo), antiguedad=perfil.antiguedad if trabaja else 0,
         region=perfil.region, riesgo=perfil.riesgo * 10,
+        meses_cesante=perfil.meses_cesante if perfil.estado == "buscando" else 0,
+        hueco=1 if perfil.estado == "buscando" and perfil.meses_cesante >= 8 else 0,  # PENAL_HUECO: 8 meses
+        parcial=perfil.parcial if trabaja else 0, horas=22 if trabaja and perfil.parcial else 44,
+        remoto=perfil.remoto if trabaja else 0, usa_ia=perfil.usa_ia,
+        empresa_anos=perfil.empresa_anos if perfil.estado == "fundador" else 0,
+        empresa_fondos=perfil.empresa_fondos if perfil.estado == "fundador" else 0,
         primer_empleo=1 if perfil.estado in ("estudiando", "buscando") and perfil.sueldo == 0 else 0,
         anos_titulado=max(0, min(40, perfil.edad - EDAD_TITULO[perfil.edu])),
         ocupacion=perfil.ocupacion if perfil.ocupacion is not None
@@ -99,6 +114,8 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         ocupacion_destino=2, quien_enferma="madre",
         universidad_destino=pq.filas("sies_magister_2026")[0]["universidad_id"],  # la con más programas
     )
+    if perfil.anos_por_empleo is not None:
+        e["anos_por_empleo"] = perfil.anos_por_empleo  # no es del paquete: lo lee la política de los gemelos
     if perfil.carrera_id >= 0:
         e["area"] = pq.tabla("mifuturo_carreras", "area", "carrera_id", perfil.carrera_id)
         e["tipo_institucion"] = pq.tabla("mifuturo_carreras", "tipo_institucion", "carrera_id", perfil.carrera_id)
