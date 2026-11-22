@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { ErrorApi, leerPerfil } from "../api";
+import { CAMPOS_PERFIL } from "../textos";
 import type { DudaSugerida, Perfil, PerfilLeido } from "../types";
 
 /** Las pantallas del onboarding: tus fuentes y las tarjetas de preguntas. */
@@ -42,6 +43,15 @@ export const borradorInicial = (perfil: Perfil): Borrador => ({
 /** El onboarding: el borrador y las dos lecturas de Claude (tu CV y lo que pegas de tu Claude). */
 export function useBorrador(inicial: Borrador) {
   const [borrador, setBorrador] = useState<Borrador>(inicial);
+  /**
+   * El borrador al día, sin esperar al render: quien sigue a las dudas justo después de editar (el formulario
+   * completo) se lleva lo recién editado. Todos los cambios pasan por `cambiar`, en orden.
+   */
+  const actual = useRef(inicial);
+  const cambiar = useCallback((f: (b: Borrador) => Borrador) => {
+    actual.current = f(actual.current);
+    setBorrador(actual.current);
+  }, []);
   const [leyendoCv, setLeyendoCv] = useState(false);
   const [errorCv, setErrorCv] = useState<string | null>(null);
   const [leyendoClaude, setLeyendoClaude] = useState(false);
@@ -51,19 +61,44 @@ export function useBorrador(inicial: Borrador) {
   const pedidoClaude = useRef(0);
 
   const set = useCallback(<K extends keyof Perfil>(k: K, v: Perfil[K]) => {
-    setBorrador((b) => ({ ...b, perfil: { ...b.perfil, [k]: v }, fuentes: { ...b.fuentes, [k]: "tu" } }));
+    cambiar((b) => ({ ...b, perfil: { ...b.perfil, [k]: v }, fuentes: { ...b.fuentes, [k]: "tu" } }));
   }, []);
 
   /** Marca como respondidos campos que ya tienen valor (los sliders siempre tienen uno). */
   const marcar = useCallback((campos: string[]) => {
-    setBorrador((b) => ({ ...b, fuentes: { ...Object.fromEntries(campos.map((k) => [k, "tu" as const])), ...b.fuentes } }));
+    cambiar((b) => ({ ...b, fuentes: { ...Object.fromEntries(campos.map((k) => [k, "tu" as const])), ...b.fuentes } }));
   }, []);
 
   const irA = useCallback((paso: Paso, faltan?: Paso[]) => {
-    setBorrador((b) => ({ ...b, paso, faltan: faltan ?? b.faltan }));
+    cambiar((b) => ({ ...b, paso, faltan: faltan ?? b.faltan }));
   }, []);
 
-  const verCompleto = useCallback((completo: boolean) => setBorrador((b) => ({ ...b, completo })), []);
+  const verCompleto = useCallback((completo: boolean) => cambiar((b) => ({ ...b, completo })), []);
+
+  /**
+   * Lo que se editó en el formulario completo vuelve al borrador: lo que cambiaste queda como tuyo. Si seguiste
+   * desde el formulario (`revisado`), viste todos los datos: ninguno queda como supuesto.
+   */
+  const aplicarFormulario = useCallback((p: Perfil, revisado = false) => {
+    cambiar((b) => {
+      const cambiados = (Object.keys(p) as (keyof Perfil)[]).filter((k) => p[k] !== b.perfil[k]);
+      const vistos = revisado ? Object.keys(CAMPOS_PERFIL) : [];
+      return {
+        ...b,
+        perfil: p,
+        fuentes: { ...Object.fromEntries(vistos.map((k) => [k, "tu" as const])), ...b.fuentes, ...Object.fromEntries(cambiados.map((k) => [k, "tu" as const])) },
+      };
+    });
+  }, []);
+
+  /** El formulario completo también puede leer tu CV o lo de tu Claude: su retrato y sus dudas quedan en el borrador. */
+  const anotarLectura = useCallback((r: PerfilLeido, origen: "pdf" | "texto") => {
+    cambiar((b) =>
+      origen === "pdf"
+        ? { ...b, leido: r }
+        : { ...b, claude: { intereses: r.intereses ?? [], proyecto: r.proyecto ?? null, retrato: r.retrato ?? null, sugeridas: r.dudas_sugeridas ?? [] } },
+    );
+  }, []);
 
   /** Si alguna lectura estaba en curso, su respuesta ya no se usa. */
   const soltarLecturas = useCallback(() => {
@@ -77,8 +112,8 @@ export function useBorrador(inicial: Borrador) {
     soltarLecturas();
     setErrorCv(null);
     setErrorClaude(null);
-    setBorrador(borradorInicial(perfil));
-  }, [soltarLecturas]);
+    cambiar(() => borradorInicial(perfil));
+  }, [soltarLecturas, cambiar]);
 
   const leerPdf = useCallback(async (pdf: string) => {
     const mio = ++pedidoCv.current;
@@ -89,7 +124,7 @@ export function useBorrador(inicial: Borrador) {
       if (mio !== pedidoCv.current) return;
       const supuestos = new Set(r.supuestos.map((s) => s.campo));
       // sobre el borrador de ahora, no el de cuando se subió: tu Claude pudo llegar mientras tanto
-      setBorrador((b) => {
+      cambiar((b) => {
         // lo que contestaste o contó tu Claude manda; el CV llena el resto (o reemplaza a un CV anterior)
         const delCv = Object.keys(r.perfil).filter((k) => !supuestos.has(k) && (b.fuentes[k] ?? "cv") === "cv");
         return {
@@ -117,7 +152,7 @@ export function useBorrador(inicial: Borrador) {
       if (mio !== pedidoClaude.current) return false;
       const supuestos = new Set(r.supuestos.map((x) => x.campo));
       const dados = r.dados ?? Object.keys(r.perfil).filter((k) => !supuestos.has(k));
-      setBorrador((b) => {
+      cambiar((b) => {
         // tu Claude pisa lo que leyó el CV, pero no lo que contestaste tú
         const suyos = dados.filter((k) => b.fuentes[k] !== "tu");
         return {
@@ -143,8 +178,8 @@ export function useBorrador(inicial: Borrador) {
     .slice(0, 3);
 
   return {
-    borrador, sugeridas, leyendoCv, errorCv, leyendoClaude, errorClaude,
-    set, marcar, irA, verCompleto, soltarLecturas, reiniciar, leerPdf, leerTuClaude,
+    borrador, actual, sugeridas, leyendoCv, errorCv, leyendoClaude, errorClaude,
+    set, marcar, irA, verCompleto, aplicarFormulario, anotarLectura, soltarLecturas, reiniciar, leerPdf, leerTuClaude,
   };
 }
 

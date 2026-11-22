@@ -111,6 +111,7 @@ export function PerfilForm({
   catalogo,
   errorCatalogo,
   onVolver,
+  onLeido,
   onListo,
   onElegirDuda,
   cargando = false,
@@ -119,7 +120,10 @@ export function PerfilForm({
   inicial: Perfil;
   catalogo: Catalogo | null;
   errorCatalogo: string | null;
-  onVolver: () => void;
+  /** Vuelve atrás con lo editado: no se pierde. */
+  onVolver: (p: Perfil) => void;
+  /** Lo que leyó Claude aquí (tu CV o lo de tu Claude): para el retrato y las dudas sugeridas. */
+  onLeido?: (r: PerfilLeido, origen: "pdf" | "texto") => void;
   /** Empieza la partida: la primera carta sale al azar, como todas. */
   onListo: (p: Perfil) => void;
   /** Para quien prefiere partir por una duda concreta. */
@@ -173,6 +177,7 @@ export function PerfilForm({
       setSugeridas(r.dudas_sugeridas?.length ? r.dudas_sugeridas : r.duda ? [{ decision: r.duda, por_que: "La trajo tu Claude." }] : []);
       setRetrato(r.retrato ?? null);
       setEmpresa(r.empresa ?? null);
+      onLeido?.(r, typeof entrada === "string" ? "texto" : "pdf");
       setLectura({
         fase: "listo", inferido: r.inferido, supuestos: pendientes.map((x) => x.nombre), avisos: r.avisos ?? [],
         documento: r.via === "documento", duda: r.duda,
@@ -209,7 +214,7 @@ export function PerfilForm({
     <Screen>
       <ScreenHeader
         left={
-          <IconButton label="Volver al inicio" onClick={onVolver}>
+          <IconButton label="Volver" onClick={() => onVolver(p)}>
             <ChevronLeftIcon />
           </IconButton>
         }

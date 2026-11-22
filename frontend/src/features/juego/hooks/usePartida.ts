@@ -79,8 +79,7 @@ export function usePartida() {
   /** El onboarding a medio armar: sobrevive a ir y volver de las dudas. */
   const onboarding = useBorrador(guardado?.borrador ?? borradorInicial(guardado?.perfil ?? PERFIL_INICIAL));
   const borrador = onboarding.borrador;
-  const borradorActual = useRef(borrador);
-  borradorActual.current = borrador;
+  const borradorActual = onboarding.actual;
   /** De dónde salió cada dato del perfil con que se juega: lo que no está quedó como supuesto. */
   const [fuentes, setFuentes] = useState<Record<string, Fuente> | null>(guardado?.fuentes ?? null);
   const [retrato, setRetrato] = useState<string | null>(guardado?.retrato ?? null);

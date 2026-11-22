@@ -73,9 +73,21 @@ export function Onboarding({
         inicial={p}
         catalogo={catalogo}
         errorCatalogo={errorCatalogo}
-        onVolver={() => o.verCompleto(false)}
-        onListo={onListo}
-        onElegirDuda={(perfil) => onElegirDuda(perfil, sugeridas)}
+        onVolver={(perfil) => {
+          o.aplicarFormulario(perfil);
+          o.verCompleto(false);
+        }}
+        onLeido={o.anotarLectura}
+        onListo={(perfil) => {
+          o.aplicarFormulario(perfil, true);
+          onListo(perfil);
+        }}
+        onElegirDuda={(perfil, suyas) => {
+          o.aplicarFormulario(perfil, true);
+          // las que trajo el formulario primero, después las de tus fuentes, sin repetir
+          const todas = [...suyas, ...sugeridas].filter((d, k, xs) => xs.findIndex((x) => x.decision === d.decision) === k).slice(0, 3);
+          onElegirDuda(perfil, todas);
+        }}
         cargando={cargando}
         error={error}
       />
