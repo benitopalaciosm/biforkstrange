@@ -52,7 +52,13 @@ export function DudaPicker({
   onReintentar,
   onSinDuda,
   semilla,
+  onVolverPartida,
+  terminada = false,
 }: {
+  /** Si tienes una partida, puedes volver a ella sin elegir otra duda: no se borra hasta que la nueva arranque. */
+  onVolverPartida?: () => void;
+  /** La partida que tienes ya terminó: volver a ella es ver tu resultado. */
+  terminada?: boolean;
   /** La semilla de la partida que viene: con ella se mide "más en juego" y la carta elegida queda lista. */
   semilla: number;
   /** Empezar sin una duda: la vida decide qué te llega el primer año, como en cualquier otro. */
@@ -169,6 +175,11 @@ export function DudaPicker({
       {onSinDuda && (
         <button type="button" className="ob-link" onClick={onSinDuda} disabled={cargando}>
           Empezar sin una duda
+        </button>
+      )}
+      {onVolverPartida && (
+        <button type="button" className="ob-link" onClick={onVolverPartida} disabled={cargando}>
+          {terminada ? "Volver a mi resultado" : "Volver a mi partida"}
         </button>
       )}
       <div className="jg-pie-fijo">

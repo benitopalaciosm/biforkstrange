@@ -3,7 +3,7 @@ import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Pill, Row, Screen, ScreenHeader, Stack, Text,
 } from "@/shared/ui";
 import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, deMundos, mayuscula, mundos, plata, primeraFrase, sinSueldo } from "../textos";
-import type { ContraBase, Eleccion, EmpresaOferta, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
+import type { ContraBase, Eleccion, EmpresaOferta, PorQue, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
 import { BarraPartes, EjeX, Info, LIENZO, ProgresoAnios, escalaSueldo, rotuloSueldo, type Reparto } from "./graficos";
@@ -508,7 +508,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
 
 /** La carta: la decisión pendiente con lo que vivieron los gemelos. Viene de "3 · Decisión del año" del kit. */
 export function Carta({
-  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onVerMundo, onSalir, onNarrar, sinNovedad,
+  vista, partida, fuentes = null, cargando, onReintentar, recalculando, error, onElegir, onComparar, onSalir, onNarrar, sinNovedad,
 }: {
   /** El año anterior, si pasó sin novedades: va como franja arriba. */
   sinNovedad?: SinNovedad | null;
@@ -519,7 +519,6 @@ export function Carta({
   /** Repite lo que falló (tirar el dado o volver a simular una opción). */
   onReintentar?: () => void;
   onNarrar?: Narrar;
-  onVerMundo: (n: number) => Promise<MundoDetalle>;
   /** Volver a la portada sin perder la partida. */
   onSalir?: () => void;
   vista: Vista;

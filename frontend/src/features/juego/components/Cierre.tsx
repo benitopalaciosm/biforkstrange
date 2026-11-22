@@ -7,7 +7,7 @@ import { Abanico, EjeX, Info, LIENZO, RangosOpciones, escalaSueldo, rotuloSueldo
 import { coloresDe } from "./Carta";
 import { CompartirResultado } from "./Compartir";
 import { Logo } from "./Logo";
-import { Salir } from "./piezas";
+import { Cargando, ErrorCaja, Salir } from "./piezas";
 import { IACierre } from "./IACierre";
 
 type Tramo = { titulo: string; empresa: string | null; empresaId: number | null; rubro: string; desde: number; hasta: number; sueldo: number };
@@ -242,8 +242,12 @@ function MismoMundo({ antes, ahora, sueldoFinal, primeraAhora }: { antes: VidaAn
 
 /** El cierre: tu vida frente a los gemelos de tu primera decisión. Viene de "8 · Fin de la partida" del kit. */
 export function CierrePantalla({
-  vista, sueldoInicial, onOtraVida, onRevivir, anterior = null, onCambiarPerfil, onSalir, retrato = null,
+  vista, sueldoInicial, onOtraVida, onRevivir, anterior = null, onCambiarPerfil, onSalir, retrato = null, cargando = false, error = null, onReintentar,
 }: {
+  /** Mientras arranca la otra vida, el cierre sigue a la vista: si falla, se puede reintentar o quedarse aquí. */
+  cargando?: boolean;
+  error?: string | null;
+  onReintentar?: () => void;
   vista: Vista;
   sueldoInicial: number;
   onOtraVida: () => void;
@@ -366,14 +370,16 @@ export function CierrePantalla({
       {cierre.ia && <IACierre ia={cierre.ia} elegida={elegida?.opcion} nombreElegida={elegida?.nombre} />}
 
       <Stack gap={10}>
-        <Button onClick={onRevivir}>Vivir este mismo mundo eligiendo distinto</Button>
+        {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
+        {cargando && <Cargando>Preparando tu otra vida…</Cargando>}
+        <Button onClick={onRevivir} disabled={cargando}>Vivir este mismo mundo eligiendo distinto</Button>
         <Text size="sm">Vuelves al año 1 con la misma primera carta y la misma suerte del país. Al final ves tus dos vidas juntas.</Text>
       </Stack>
       {primera && (
         <CompartirResultado comparacion={primera.comparacion} elegida={primera.elegida} sueldoFinal={cierre.sueldo_final} retrato={retrato} />
       )}
       <Stack gap={10}>
-        <Button variant="white" onClick={onOtraVida}>
+        <Button variant="white" onClick={onOtraVida} disabled={cargando}>
           Jugar otra vida, en otro mundo
         </Button>
         <Button variant="white" onClick={onCambiarPerfil}>
