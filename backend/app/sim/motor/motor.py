@@ -112,7 +112,6 @@ class Vida:
         self.anios_buscando = 0
         self.ingreso_total = 0.0
         self._anios_con_hueco = 0
-        self.afinidad: dict[str, float] = {}  # cuánto te tira cada carta según tu gemelo (solo tu partida)
         self.variedad = 1.0               # peso de una carta ya vista; la partida de la persona usa REPETIR_CARTA
         # empleo actual: cuánto paga respecto del nivel de referencia (empresa × cargo); 1 = neutro
         self._factor_empleo = 1.0
@@ -131,7 +130,6 @@ class Vida:
         otra.temporales = [dict(t) for t in self.temporales]
         otra.historia = list(self.historia)
         otra.registro = copy.deepcopy(self.registro)
-        otra.afinidad = {}  # los mundos de comparación viven con las cartas de la población: tu gemelo no mueve sus números
         if dados is not None:
             otra.dados = dados
             otra._sortear_ia()
@@ -274,7 +272,6 @@ class Vida:
             peso = self.pq.evaluar(d["aparicion"]["peso"], self.e)
             if id_ == "renunciar":
                 peso *= self.e["p_renuncia"]
-            peso *= self.afinidad.get(id_, 1.0)
             if self.variedad != 1.0:  # solo en tu partida: la población calibrada no se toca
                 peso *= self.variedad ** self._veces_vista(id_)
             if peso > 0:

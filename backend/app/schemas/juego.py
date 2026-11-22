@@ -62,20 +62,8 @@ class PerfilIn(BaseModel):
             raise ValueError(f"universidad desconocida: {v!r}")
         return v
 
-    # lo abierto: cómo te describes con tus palabras y tu gemelo digital. Fuera de model_dump: no son campos del motor
+    # cómo te describes con tus palabras: el narrador lo usa como trasfondo. Fuera de model_dump: no es campo del motor
     relato: str = Field("", max_length=20000, exclude=True)
-    gemelo_id: str | None = Field(None, max_length=64, exclude=True)
-    # la afinidad del gemelo congelada al empezar la partida (de POST /juego/afinidad); manda sobre gemelo_id
-    afinidad: dict[str, float] | None = Field(None, exclude=True)
-
-    @field_validator("afinidad")
-    @classmethod
-    def _afinidad_acotada(cls, v: dict[str, float] | None) -> dict[str, float] | None:
-        if v is None:
-            return None
-        from app.services.juego_personal import acotar_afinidad
-
-        return acotar_afinidad(v)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())
@@ -102,10 +90,6 @@ class NarrarIn(PartidaIn):
 
     que: Literal["pendiente", "historia", "mundo"] = "pendiente"
     mundo: int | None = Field(None, ge=0, le=1999)
-
-
-class AfinidadIn(BaseModel):
-    gemelo_id: str = Field(min_length=1, max_length=64)
 
 
 class MundoIn(PartidaIn):

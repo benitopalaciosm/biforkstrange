@@ -163,31 +163,8 @@
   padding: 4px 10px; border: 1px solid var(--linea); border-radius: 999px;
   font: 400 12px/16px var(--font); color: var(--media);
 }
-.ob-usar-gemelo { width: 100%; padding: 12px 14px; border-radius: 14px; background: var(--acento-suave); font: 400 14px/20px var(--font); color: var(--tinta); }
-.ob-usar-gemelo label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
-.ob-usar-gemelo input { margin-top: 3px; accent-color: var(--acento); }
-.ob-usar-gemelo a { color: inherit; font-weight: 600; }
 .ob-o { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--suave); font: 400 13px/18px var(--font); }
 .ob-o::before, .ob-o::after { content: ""; flex: 1; height: 1px; background: var(--linea); }
-
-/* Paso final: ¿tu gemelo te conoce? */
-.ob-prueba { display: flex; flex-direction: column; gap: 14px; width: 100%; padding: 18px; border: 2px solid var(--tinta); border-radius: 20px; background: var(--fondo, #fff); }
-.ob-prueba-espera { padding: 12px 14px; border-radius: 12px; background: var(--acento-suave); font: 400 14px/20px var(--font); color: var(--tinta); animation: ob-latir 1.4s ease-in-out infinite; }
-@keyframes ob-latir { 50% { opacity: .55; } }
-.ob-prueba-sello { color: var(--suave); }
-.ob-prueba-op {
-  text-align: left; width: 100%; padding: 12px 14px; border: 2px solid var(--linea); border-radius: 14px;
-  background: none; font: 400 15px/21px var(--font); color: var(--tinta); cursor: pointer; transition: border-color .15s, background .15s;
-}
-.ob-prueba-op:hover { border-color: var(--acento); background: var(--acento-suave); }
-.ob-prueba-op:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
-.ob-prueba-comp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.ob-prueba-comp > div { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 14px; background: var(--acento-suave); }
-.ob-prueba-comp > div[data-tu] { background: none; border: 2px solid var(--tinta); }
-.ob-prueba-comp span { font: 600 14px/19px var(--font); color: var(--tinta); }
-.ob-prueba-comp small { font: 400 12px/16px var(--font); color: var(--suave); }
-.ob-prueba-pq { font-style: italic; color: var(--media); }
-.ob-prueba a { color: inherit; font-weight: 600; }
 
 /* Prompt para que tu propia IA te describa */
 .ob-agente { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--acento-suave); font: 400 14px/20px var(--font); color: var(--tinta); }
