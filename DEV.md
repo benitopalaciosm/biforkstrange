@@ -3,15 +3,15 @@
 ## Arranque
 
 ```bash
-cp backend/.env.example backend/.env      # SUPABASE_URL y SUPABASE_SERVICE_KEY
-cp frontend/.env.example frontend/.env    # VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+cp backend/.env.example backend/.env      # CORS_ORIGINS y, opcional, ANTHROPIC_API_KEY
+cp frontend/.env.example frontend/.env    # VITE_API_URL
 make install
 make back    # http://localhost:8000/docs
 make front   # http://localhost:5173
 make test
 ```
 
-Sin credenciales de Supabase el backend guarda las corridas en memoria.
+No hay base de datos: el juego no guarda estado en el servidor y las corridas de `/api/simulations` viven en memoria.
 
 ## Producción (Render)
 
@@ -36,15 +36,14 @@ Variables de entorno:
 | API | `ANTHROPIC_API_KEY` | `sk-ant-...` | Leer el CV con Claude y narrar. Sin ella, el perfil se llena a mano y los textos salen de plantillas |
 | API | `CORS_ORIGINS` | `["https://bifurca.onrender.com"]` | Orígenes que pueden llamar a la API. Va en **formato JSON** (una lista entre corchetes con comillas dobles); una URL suelta no se lee |
 | API | `WEB_CONCURRENCY` | `2` | Procesos de uvicorn. Cada uno usa ~170 MB después de jugar: 2 caben en 512 MB. Más procesos solo ayudan si el plan tiene más CPUs |
-| API | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | | Opcionales: guardar las corridas de `/api/simulations` |
 | Front | `VITE_API_URL` | `https://bifurca-api.onrender.com` | URL de la API. Vite la mete en el build: si cambia, hay que volver a construir el front |
 
 `PORT` lo pone Render. En local, el backend lee estas mismas variables de `backend/.env` (incluida
 `ANTHROPIC_API_KEY`); una variable de entorno pesa más que el `.env`.
 
 El juego no guarda estado entre llamadas, así que cualquier proceso puede atender cualquier request. Lo
-único en memoria por proceso es el historial de `/api/simulations` sin Supabase: con varios procesos, una
-corrida guardada en uno no aparece en otro. Para eso, configura Supabase.
+único en memoria por proceso es el historial de `/api/simulations`: con varios procesos, una corrida
+guardada en uno no aparece en otro, y se pierde al reiniciar.
 
 ## Backend (`backend/app`)
 
@@ -55,7 +54,7 @@ Las dependencias van en una sola dirección: `api → services → (sim, reposit
 | `sim/` | Dominio puro (numpy, sin FastAPI ni DB). `state.py` es el estado vectorizado, `engine.py` el loop Monte Carlo, `metrics.py` los resúmenes por año. |
 | `sim/decisions/` | Una clase por decisión. Se registran solas al heredar de `Decision`. |
 | `schemas/` | Modelos Pydantic de entrada y salida de la API. |
-| `repositories/` | Persistencia detrás de un `Protocol`: Supabase o memoria. |
+| `repositories/` | Persistencia detrás de un `Protocol` (hoy, en memoria). |
 | `services/` | Casos de uso que orquestan motor y repositorio. |
 | `api/` | Rutas delgadas. `deps.py` es el único lugar que elige implementaciones. |
 | `core/` | Configuración y clientes externos. |
@@ -100,7 +99,7 @@ El esqueleto anterior (`sim/engine.py`, `sim/decisions/`, `sim/labor.py`) sigue 
 
 - `app/`: shell de la app.
 - `features/<feature>/`: todo lo de una funcionalidad (api, tipos, hooks, componentes); se expone por su `index.ts`.
-- `shared/`: config, cliente HTTP, Supabase y utilidades sin dominio.
+- `shared/`: config, cliente HTTP y utilidades sin dominio.
 
 Importa con el alias `@/` (apunta a `src/`).
 
