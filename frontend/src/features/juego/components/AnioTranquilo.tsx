@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
-import { deCien } from "../textos";
+import { Button, DecisionArt, Heading, Meta, Pill, Screen, ScreenFooter, ScreenHeader, Stack, Text } from "@/shared/ui";
+import { arteDuda, deCien } from "../textos";
 import type { Eleccion, SinNovedad, Vista } from "../types";
 import { FranjaSinNovedad, Noticia, Salir } from "./piezas";
 
@@ -74,8 +74,14 @@ export function AnioTranquilo({ vista, cargando, error, onElegir, onSalir, sinNo
         <div className="jg-tranquilo vd-subir" role="list" aria-label="Otras cosas que puedes hacer este año">
           {otras.map((o) => (
             <button key={o.opcion} type="button" role="listitem" className="jg-tranquilo-op" disabled={cargando} onClick={() => elegir(o.opcion)}>
-              <b>{o.nombre}</b>
-              <span>{o.detalle}</span>
+              {/* el mismo dibujo que esa duda tiene en la lista de dudas */}
+              <span className="jg-tranquilo-arte" aria-hidden="true">
+                <DecisionArt kind={arteDuda(o.opcion, "")} llenar />
+              </span>
+              <span className="jg-tranquilo-texto">
+                <b>{o.nombre}</b>
+                <span>{o.detalle}</span>
+              </span>
             </button>
           ))}
         </div>

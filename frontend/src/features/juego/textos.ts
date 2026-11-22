@@ -107,6 +107,7 @@ const ARTE_CATEGORIA: Record<string, DecisionArtKind> = {
 };
 
 const ARTE_DUDA: Record<string, DecisionArtKind> = {
+  magister: "magister",
   oferta_externa: "puerta",
   renunciar: "caja",
   independizarse: "maletin",

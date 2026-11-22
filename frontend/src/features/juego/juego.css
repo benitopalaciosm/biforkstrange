@@ -454,14 +454,14 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 /* Año tranquilo: lo que puedes buscar por tu cuenta */
 .jg-tranquilo { display: grid; gap: 10px; }
 .jg-tranquilo-op {
-  display: flex; flex-direction: column; gap: 4px; text-align: left; font: inherit; color: var(--tinta);
+  display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; color: var(--tinta);
   padding: 14px 16px; border: 1px solid var(--linea); border-radius: 14px; background: var(--papel); cursor: pointer;
   transition: border-color .15s var(--ease), background .15s var(--ease);
 }
 .jg-tranquilo-op:hover:not(:disabled) { border-color: var(--acento); }
 .jg-tranquilo-op:disabled { opacity: .5; cursor: default; }
 .jg-tranquilo-op b { font-weight: 600; }
-.jg-tranquilo-op span { color: var(--suave); font-size: .9em; }
+.jg-tranquilo-texto > span { color: var(--suave); font-size: .9em; }
 .jg-tranquilo-op em { font-style: normal; font-size: .8em; color: var(--acento); }
 .jg-tranquilo-op[data-sugerida="true"] { border-color: var(--acento); background: var(--acento-suave); }
 
@@ -530,3 +530,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-tipico b { color: var(--tinta); font-weight: 700; }
 .jg-pie-opciones { display: flex; gap: 8px; }
 .jg-pie-opcion { flex: 1 1 0; min-width: 0; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* "Ver más cosas que podrías hacer": cada una con su dibujo, como en la lista de dudas */
+.jg-tranquilo-arte { flex: none; width: 48px; height: 48px; border: 1.5px solid var(--tinta); border-radius: 10px; overflow: hidden; }
+.jg-tranquilo-texto { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
