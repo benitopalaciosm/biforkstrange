@@ -181,7 +181,9 @@ export function QuePaso({
               <Noticia
                 key={`d${j}`}
                 titulo={d.nombre}
-                texto={narrados[`anio:${a.anio}:decision:${a.decisiones.indexOf(d)}`] ?? (d.narrativa ? `${d.narrativa.situacion} ${d.texto}` : d.texto)}
+                texto={narrados[`anio:${a.anio}:decision:${a.decisiones.indexOf(d)}`] ??
+                  // la historia nombra a la empresa real: un resultado malo (la startup cierra) va sin ella
+                  (d.narrativa && d.tono !== "malo" ? `${d.narrativa.situacion} ${d.texto}` : d.texto)}
                 lado={queTanProbable(d.prob)}
               />
             ))}

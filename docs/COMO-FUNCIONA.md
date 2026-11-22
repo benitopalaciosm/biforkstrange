@@ -91,7 +91,7 @@ No copies estos conteos a otros documentos: cambian cuando alguien agrega un dat
 
 Claude se usa en un solo lugar: **leer tu texto para llenar el perfil** (`services/perfil_ia.py`). No inventa: lo que tu texto no dice queda vacío y se completa con un valor por defecto marcado como supuesto.
 
-Claude **no** calcula probabilidades, no decide qué decisión sale y no escribe resultados. La historia de cada decisión ("te escribe por LinkedIn la jefa de producto de Pagosur") sale de plantillas en `narrativa.py`, con empresas ficticias y sin cifras.
+Claude **no** calcula probabilidades, no decide qué decisión sale y no escribe resultados. La historia de cada decisión ("te escribe por LinkedIn la jefa de producto de Pagosur") sale de plantillas en `narrativa.py`, sin cifras. Las ofertas nombran empresas reales del catálogo como ejemplo, con el aviso de que sus cifras y lo que les pasa son simulados; un cierre o un despido nunca se cuenta con el nombre de una empresa real (ni en la plantilla ni cuando narra Claude, que lo valida `narrador_ia.py`).
 
 Regla del producto: **los números salen de los datos; la IA hace todo lo demás.** Puede personalizar cómo se cuenta una decisión, preguntarte lo que te importa o buscar fuentes nuevas, pero no poner una probabilidad ni un efecto.
 
