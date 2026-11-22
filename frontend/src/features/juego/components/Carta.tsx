@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, DecisionArt, DecisionCard, DecisionList, Heading, Pill, Row, Screen, ScreenHeader, Stack, Text,
 } from "@/shared/ui";
-import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, deMundos, mayuscula, mundos, plata, primeraFrase, sinSueldo } from "../textos";
+import { CALIDAD, EMPRESA_EJEMPLO, TIPO_EMPLEADOR, arteOpcion, conSigno, mayuscula, plata, primeraFrase, sinSueldo } from "../textos";
 import type { ContraBase, Eleccion, EmpresaOferta, PorQue, MundoDetalle, Narrado, OpcionComparada, OpcionPendiente, ParametrosComparar, Partida, Respaldo, SinNovedad, Vista } from "../types";
 import { useNarracion } from "../hooks/useNarracion";
 import { Logo } from "./Logo";
-import { BarraPartes, DadoEnJuego, Info, ProgresoAnios, type Casilla, type Reparto } from "./graficos";
+import { BarraPartes, Info, ProgresoAnios, type Reparto } from "./graficos";
 import { PesoDelCv } from "./PesoDelCv";
 import { HojaEleccion } from "./HojaEleccion";
-import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Salir } from "./piezas";
+import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Pensando, Salir } from "./piezas";
+import { Espera } from "./Apuesta";
 import { GEMELOS } from "../api";
 
 type Internas = Record<string, string | number>;
@@ -96,7 +97,7 @@ function DeDondeSalen({ o, ganadas, total, edadFinal, respaldo, pendiente }: {
   respaldo?: Respaldo[];
   pendiente: NonNullable<Vista["pendiente"]>;
 }) {
-  const de = total || GEMELOS;
+  const de = total || 100;
   const sorteo = respaldo && respaldo.length > 1 ? respaldo : null;
   return (
     <details className="jg-plegable">
@@ -200,7 +201,7 @@ function EmpresaLinea({ empresa, texto }: { empresa: EmpresaOferta; texto?: stri
 /** La opción para elegir: qué es, en cuántos mundos gana y el sueldo típico. La simulación va aparte, más abajo. */
 /**
  * La frase de una línea bajo el nombre: qué es la opción, sin números. El único número de la tarjeta es
- * "Mejor opción en X de 50"; el dado del primer año va en "¿Por qué sale así?", para no poner dos cifras
+ * "Mejor opción en X de 100"; el dado del primer año va en "¿Por qué sale así?", para no poner dos cifras
  * parecidas que miden cosas distintas.
  */
 function fraseCorta(o: OpcionComparada, detalle: string): string | undefined {
@@ -242,16 +243,16 @@ function OpcionConGemelos({
   textoEmpresa?: string;
 }) {
   // Un solo número en todas partes: en cuántos mundos esta es la mejor opción, el mismo que la grilla de
-  // "Tus 50 mundos". Así la tarjeta y la grilla nunca dicen cosas distintas, y con los empates suman 50.
-  const de = total || GEMELOS;
+  // "Tus 100 mundos". Así la tarjeta y la grilla nunca dicen cosas distintas, y con los empates suman 100.
+  const de = total || 100;
   const veredicto = !o.es_base ? contraBase(o, base)?.frase : null;
   // el tiempo sin trabajo dice más que "cuántas copias pasaron por la cesantía": en 10 años a casi todos
   // les toca una vez, pero suele durar meses. Es el promedio de tus copias, contando a las que nunca la vivieron.
   const mesesSinTrabajo = Math.round(o.meses_sin_trabajo);
   // El rango de sueldo cuenta con $0 a quien termina sin trabajo; aquí se muestra solo entre quienes trabajan y los demás aparte.
   const conTrabajo = o.sueldo_con_trabajo ?? o.sueldo;
-  const sinTrabajoFinal = mundos(o.sin_trabajo_al_final, de);
-  const sube = mundos(o.sube_de_cargo ?? 0, de);
+  const sinTrabajoFinal = Math.round(o.sin_trabajo_al_final * 100);
+  const sube = Math.round((o.sube_de_cargo ?? 0) * 100);
   return (
     <DecisionCard
       art={<DecisionArt kind={arteOpcion(decision, o.opcion, categoria)} />}
@@ -265,7 +266,7 @@ function OpcionConGemelos({
             <span className="jg-marcador" data-lider={lider}>
               <span className="jg-marcador-num">
                 {ganadas === 0 ? "En ningún mundo es la mejor" : <>Es la mejor en <b>{ganadas}</b> de {de} mundos</>}
-                {empates >= de / 2 && ganadas < POCAS_GANADAS * de && `; en ${empates} da lo mismo`}
+                {empates >= de / 2 && ganadas < POCAS_GANADAS && `; en ${empates} da lo mismo`}
               </span>
             </span>
           )}
@@ -299,7 +300,7 @@ function OpcionConGemelos({
             {sinTrabajoFinal > 0 && (
               <span role="listitem">
                 <span>Terminan sin trabajo a los {edadFinal} (no cuentan arriba)</span>
-                <b>{sinTrabajoFinal} de {de}</b>
+                <b>{sinTrabajoFinal} de 100</b>
               </span>
             )}
             <span role="listitem">
@@ -308,7 +309,7 @@ function OpcionConGemelos({
             </span>
             <span role="listitem">
               <span>Terminas en un cargo más alto</span>
-              <b>{sube === 0 ? "en ningún mundo" : `en ${sube} de ${de}`}</b>
+              <b>{sube === 0 ? "en ningún mundo" : `en ${sube} de 100`}</b>
             </span>
           </span>
           {veredicto && <span className="jg-frase">{veredicto}</span>}
@@ -326,9 +327,9 @@ function OpcionConGemelos({
   );
 }
 
-// Desde qué parte de los mundos empatados se avisa arriba de las opciones, y bajo qué parte ganada una opción dice que "da lo mismo"
-const MUCHOS_EMPATES = 0.3;
-const POCAS_GANADAS = 0.15;
+// Desde cuántos empates se avisa arriba de las opciones, y bajo cuántas ganadas una opción dice que "da lo mismo"
+const MUCHOS_EMPATES = 30;
+const POCAS_GANADAS = 15;
 
 /** Un color por opción: la base siempre naranja; las demás en este orden. El gris es el empate. Sin azul: es el de la interfaz y la mediana. */
 const COLORES = ["var(--jg-mas)", "var(--vida)", "var(--violeta)", "var(--turquesa)"];
@@ -457,7 +458,7 @@ function Porque({ o, base }: { o: OpcionComparada; base: OpcionComparada | undef
           <div className="jg-resultado" key={r.resultado}>
             <span className="jg-resultado-cabeza">
               <span>{r.texto || r.resultado}</span>
-              <b>en {deMundos(r.prob)} mundos</b>
+              <b>en {Math.round(r.prob * 100)} de 100 mundos</b>
             </span>
             <span className="jg-medidor" aria-hidden="true">
               <i style={{ width: `${Math.max(2, r.prob * 100)}%`, background: "var(--tinta)" }} />
@@ -539,7 +540,7 @@ export function Carta({
 
   /** La pregunta abierta en la hoja de abajo (a qué rubro, a qué región), o null si está cerrada. */
   const [hoja, setHoja] = useState<number | null>(null);
-  // Sin opción elegida, el botón del pie sube a las tarjetas: después de mirar los mundos no hay que buscarlas
+  // Sin opción elegida, el botón del pie sube a las tarjetas: después de mirar los 100 mundos no hay que buscarlas
   const opcionesRef = useRef<HTMLDivElement>(null);
   const irAOpciones = () => opcionesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const [defectos, setDefectos] = useState<Internas>({});
@@ -613,16 +614,9 @@ export function Carta({
   /** Hasta qué edad vivieron los gemelos de esta carta (no siempre es el fin de la partida). */
   const edadGemelos = comparadas[0]?.trayectoria[comparadas[0].trayectoria.length - 1]?.edad ?? vista.edad_final;
   const colores = coloresDe(comparadas);
-  /** Lo que te juegas con la opción elegida: sus resultados posibles. Con uno solo, era segura y no hay dado. */
-  const enJuego: Casilla[] = (comparadas.find((c) => c.opcion === opcion?.opcion)?.por_resultado ?? []).map((r) => ({
-    id: r.resultado,
-    texto: r.texto || r.resultado,
-    prob: r.prob,
-    tono: r.tono,
-  }));
   const ganadores = comparacion?.ganador_por_mundo ?? null;
   const ganadas = (id: string) => (ganadores ? ganadores.filter((g) => g === id).length : 0);
-  // mundos donde da lo mismo qué elijas (las dos mejores a menos de 0,5%): el "X de 50 es la mejor" solo no los muestra
+  // mundos donde da lo mismo qué elijas (las dos mejores a menos de 0,5%): el "X de 100 es la mejor" solo no los muestra
   const empates = ganadores ? ganadores.filter((g) => g === null).length : 0;
   const hoy = { edad: e.edad, sueldo: sinSueldo(e) ? 0 : e.sueldo };
   const sinEfecto = comparadas.length > 1 && comparadas.every((o) => o.es_base || (o.igual_que_base ?? 0) >= 0.9);
@@ -641,11 +635,11 @@ export function Carta({
         }
       />
       {/* el único dado de la decisión: gira mientras responde el motor; "qué te pasó" cierra el sorteo */}
-      {cargando && <DadoEnJuego casillas={enJuego} titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} texto={enJuego.length > 1 ? undefined : `Viviendo tu año ${anio}…`} onSalir={onSalir} />}
+      {cargando && <Pensando titulo={`Mundo ${GEMELOS + 1} · año ${anio}`} onSalir={onSalir} />}
       {/* mientras Claude escribe la carta no hay sorteo: una espera simple, no la apuesta */}
       {!cargando && !listo && (
         <div className="jg-preparando">
-          <Cargando>Preparando tu carta…</Cargando>
+          <Espera pantalla frases={["Preparando tu carta…", "Claude está escribiendo tu situación…"]} onSalir={onSalir} />
         </div>
       )}
       <ProgresoAnios actual={anio} total={vista.anios} />
@@ -676,7 +670,7 @@ export function Carta({
           {pendiente.pregunta}
         </Heading>
         {sinEfecto && <Text size="sm" className="jg-destacado">Tu sueldo termina casi igual con cualquier opción.</Text>}
-        {!sinEfecto && empates >= MUCHOS_EMPATES * ganadores!.length && (
+        {!sinEfecto && empates >= MUCHOS_EMPATES && (
           <Text size="sm" className="jg-destacado">
             En {empates} de tus {ganadores!.length} mundos da lo mismo qué elijas: tu sueldo termina igual.
           </Text>
@@ -737,7 +731,7 @@ export function Carta({
 
 
 
-      {recalculando && <Cargando texto="Simulando los mundos por ese camino…" />}
+      {recalculando && <Espera texto="Simulando los mundos por ese camino…" />}
 
       {opcion && hoja !== null && opcion.elecciones_internas.length > 0 && (
         <HojaEleccion
