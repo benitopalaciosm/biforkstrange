@@ -69,6 +69,8 @@ CESANTIA_POR_HISTORIA = {
 }
 # Dónde hizo la práctica, y cuánto peso suma a buscar la primera pega en ese tipo de empleador (supuesto)
 PRIMERA_PEGA_POR_PRACTICA = {"grande": ("grande", 0.13), "publico": ("estado", 0.10)}
+# Quien ya cerró empresas sabe cerrar: +0,05 a "cerrar" por cada una, hasta +0,15 (supuesto del equipo)
+CERRAR_POR_EMPRESA_CERRADA, CERRAR_MAX = 0.05, 0.15
 
 
 def _mover(pesos: dict[str, float], opcion: str, cuanto: float) -> dict[str, float]:
@@ -88,6 +90,7 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
     - cesantia: cada rasgo de `CESANTIA_POR_HISTORIA` suma peso a la opción que se le parece.
     - primera_pega: una práctica en una empresa grande o en el Estado suma peso a postular ahí
       (`practica` solo llega al estado de quien estudia o busca su primer empleo).
+    - seguir_con_tu_empresa: cada empresa que ya cerró suma peso a cerrar la de ahora.
     """
     salida: dict[str, dict[str, float]] = {}
     anos = e.get("anos_por_empleo")
@@ -105,6 +108,9 @@ def pesos_personales(e: dict) -> dict[str, dict[str, float]]:
     if e.get("practica") in PRIMERA_PEGA_POR_PRACTICA:
         opcion, cuanto = PRIMERA_PEGA_POR_PRACTICA[e["practica"]]
         salida["primera_pega"] = _mover(PESOS_FORZADAS["primera_pega"], opcion, cuanto)
+    if e.get("empresas_cerradas"):
+        cuanto = min(CERRAR_MAX, CERRAR_POR_EMPRESA_CERRADA * e["empresas_cerradas"])
+        salida["seguir_con_tu_empresa"] = _mover(PESOS_FORZADAS["seguir_con_tu_empresa"], "cerrar", cuanto)
     return salida
 
 

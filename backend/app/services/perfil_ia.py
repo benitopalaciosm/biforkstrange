@@ -124,6 +124,8 @@ class PerfilLeido(BaseModel):
     ascensos_internos: int | None = Field(
         None, description="Cuántas veces lo ascendieron DENTRO de una misma empresa (un cargo mayor con el mismo "
                           "empleador), sumando todas sus empresas.")
+    empresas_cerradas: int | None = Field(
+        None, description="Cuántas empresas o emprendimientos propios cerró (no cuenta los que vendió ni el actual).")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -193,6 +195,8 @@ tipo_empleador. Solo si tuvo dos o más empleos y TODOS son del Estado ("publico
   - ascensos_internos: cuenta los cargos que aparecen uno tras otro en una MISMA empresa, cuando el \
 siguiente es mayor en la escala de CARGOS. Cambiarse de empresa a un cargo mayor no cuenta. Si el texto \
 lista un solo cargo por empresa, 0; si no trae experiencia, null.
+  - empresas_cerradas: emprendimientos propios que terminaron cerrando ("cerramos en 2022", "la empresa \
+no prosperó"). Vendidos o adquiridos no cuentan. Si tuvo empresas y no dice cómo terminaron, null.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -324,7 +328,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
               "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
-              "ascensos_internos", *HISTORIA_LEIDA}
+              "ascensos_internos", "empresas_cerradas", *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -386,6 +390,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     inferido += _practica(leido, perfil)
     inferido += _toda_su_carrera(leido, perfil, pq)
     inferido += _ritmo_de_ascensos(leido, perfil, pq)
+    inferido += _empresas_cerradas(leido, perfil)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -486,6 +491,20 @@ def _toda_su_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]
     return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de pega en el sector privado, "
             f"{round(propios['MIX_EMPLEADOR']['startup'] * 100)}% de las veces es otra startup (la gente, "
             f"{round(pq.k('MIX_EMPLEADOR', 'startup') * 100)}%; supuesto del equipo)."]
+
+
+def _empresas_cerradas(leido: PerfilLeido, perfil: dict) -> list[str]:
+    """Quien ya cerró empresas cierra antes la que tenga (politicas.CERRAR_POR_EMPRESA_CERRADA)."""
+    if not leido.empresas_cerradas or leido.empresas_cerradas < 0:
+        return []
+    from app.sim.motor.politicas import PESOS_FORZADAS, pesos_personales
+
+    perfil["empresas_cerradas"] = min(10, leido.empresas_cerradas)
+    cerrar = pesos_personales({"empresas_cerradas": perfil["empresas_cerradas"]})["seguir_con_tu_empresa"]["cerrar"]
+    cuantas = "una empresa" if perfil["empresas_cerradas"] == 1 else f"{perfil['empresas_cerradas']} empresas"
+    return [f"Ya cerraste {cuantas}: cuando tus gemelos tienen empresa y deciden si seguir, la cierran "
+            f"{round(cerrar * 100)}% de las veces (la gente, {round(PESOS_FORZADAS['seguir_con_tu_empresa']['cerrar'] * 100)}%; "
+            "supuesto del equipo)."]
 
 
 ANOS_PARA_RITMO = 2  # con menos años de experiencia, el ritmo de ascensos no dice nada (supuesto)

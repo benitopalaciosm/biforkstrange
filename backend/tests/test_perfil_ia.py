@@ -369,6 +369,21 @@ def test_quien_asciende_rapido_asciende_mas():
     assert r["perfil"]["ascensos_por_ano"] is None
 
 
+def test_quien_ya_cerro_empresas_cierra_antes():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, estado_inicial
+    from app.sim.motor.politicas import pesos_personales
+
+    fundador = dict(estado="fundador", empresa_anos=1)
+    assert pesos_personales(estado_inicial(Perfil(**fundador), paquete())) == {}  # sin dato, como siempre
+    cerrar = [pesos_personales(estado_inicial(Perfil(**fundador, empresas_cerradas=n), paquete()))
+              ["seguir_con_tu_empresa"]["cerrar"] for n in (1, 3, 9)]
+    assert cerrar == [0.10, 0.20, 0.20]  # 0,05 por empresa, hasta +0,15
+    r = perfil_ia.completar(LEIDO.model_copy(update={"situacion": "fundador", "empresas_cerradas": 2}))
+    assert r["perfil"]["empresas_cerradas"] == 2 and any("Ya cerraste 2 empresas" in f and "15%" in f
+                                                         for f in r["inferido"])
+
+
 def test_los_gemelos_se_cambian_como_tu():
     from app.sim.motor.politicas import pesos_personales
 

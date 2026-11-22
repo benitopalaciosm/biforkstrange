@@ -51,6 +51,8 @@ export type Perfil = {
   toda_su_carrera_en?: "" | "publico" | "startup";
   /** Ascensos dentro de una misma empresa por año de experiencia. Si es más rápido que lo típico, asciende más. */
   ascensos_por_ano?: number | null;
+  /** Empresas propias que ya cerró: si sus gemelos tienen empresa, la cierran más seguido. */
+  empresas_cerradas?: number;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };
