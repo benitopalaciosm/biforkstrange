@@ -523,9 +523,10 @@ function MundoAbierto({
     opcion: v.opcion,
     nombre: v.nombre,
     color: colores[v.opcion],
-    puntos: v.anios.filter((a) => a.fin).map((a) => ({ edad: a.edad, sueldo: a.fin!.estado === "buscando" ? 0 : a.fin!.sueldo })),
+    // la edad al cerrar el año, como en el resto del juego: con la de partida el último punto quedaba en 39 y no en 40
+    puntos: v.anios.filter((a) => a.fin).map((a) => ({ edad: a.fin!.edad, sueldo: a.fin!.estado === "buscando" ? 0 : a.fin!.sueldo })),
   }));
-  const recesiones = (vidas[0]?.anios ?? []).filter((a) => a.recesion).map((a) => a.edad);
+  const recesiones = (vidas[0]?.anios ?? []).filter((a) => a.recesion).map((a) => a.fin?.edad ?? a.edad + 1);
 
   return (
     <div className="jg-mundo" role="region" aria-label={`Mundo ${mundo.mundo + 1}`} key={mundo.mundo}>

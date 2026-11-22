@@ -518,3 +518,6 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-leyenda-boton[aria-pressed="true"] { border-color: var(--linea); color: var(--tinta); }
 .jg-leyenda-boton:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 .jg-sin-duda { min-height: 64px; font-size: 18px; }
+
+/* El gráfico de un mundo se abre a pedido: las líneas se trazan rápido para que no parezca vacío */
+.jg-duelo-mundo .jg-abanico-medio { animation-duration: .5s; animation-delay: 0s; }
