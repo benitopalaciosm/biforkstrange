@@ -5,50 +5,50 @@
  "parametros": [
   {
    "id": "LIQUIDO",
-   "valor": 0.82,
+   "valor": 0.81,
    "unidad": "fracción",
-   "descripcion": "Líquido sobre bruto para un asalariado formal.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Líquido sobre bruto para un asalariado formal: 10% AFP más comisión, 7% salud, 0,6% seguro de cesantía e impuesto único 2025, para un sueldo típico.",
+   "fuente": "sii_impuesto_unico_2025",
+   "calidad": "mixto",
    "rango": [
-    0.78,
-    0.86
+    0.79,
+    0.82
    ]
   },
   {
    "id": "USD",
-   "valor": 950,
+   "valor": 951,
    "unidad": "CLP por USD",
-   "descripcion": "Tipo de cambio.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Tipo de cambio: dólar observado, promedio 2025.",
+   "fuente": "sii_dolar_2025",
+   "calidad": "dato",
    "rango": [
-    850,
-    1050
+    916,
+    1001
    ]
   },
   {
    "id": "P_RECESION",
-   "valor": 0.12,
+   "valor": 0.08,
    "unidad": "probabilidad anual",
-   "descripcion": "Probabilidad de que un año sea de recesión.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Probabilidad de que un año sea de recesión: años con caída del PIB de Chile, 3 de 40 entre 1986 y 2025 (1999, 2009, 2020).",
+   "fuente": "bm_wdi_pib_chile",
+   "calidad": "dato",
    "rango": [
-    0.08,
-    0.15
+    0.05,
+    0.12
    ]
   },
   {
    "id": "RETORNO_REAL",
-   "valor": 0.03,
+   "valor": 0.04,
    "unidad": "tasa anual",
-   "descripcion": "Retorno real del ahorro.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Retorno real del ahorro: el del Fondo C de pensiones desde 2002 (4,2% real al año), como aproximación al ahorro de una persona.",
+   "fuente": "spensiones_rentabilidad",
+   "calidad": "mixto",
    "rango": [
-    0.0,
-    0.05
+    0.027,
+    0.059
    ]
   },
   {
@@ -292,15 +292,15 @@
    "id": "ASCENSO",
    "valor": {
     "0": 0.1,
-    "1": 0.08,
-    "2": 0.05,
+    "1": 0.07,
+    "2": 0.04,
     "3": 0.025,
     "4": 0
    },
    "unidad": "probabilidad anual",
-   "descripcion": "Ascenso según nivel actual.",
+   "descripcion": "Ascenso según nivel actual. El de junior es calibración del equipo; cómo baja por nivel sigue la Tabla II de Baker, Gibbs y Holmström 1994 (el segundo nivel 0,68 veces el primero, el tercero 0,41).",
    "fuente": "baker_gibbs_1994",
-   "calidad": "supuesto",
+   "calidad": "mixto",
    "rango": null
   },
   {
@@ -456,9 +456,9 @@
    "id": "IA_EXPUESTA",
    "valor": 0.25,
    "unidad": "puntaje",
-   "descripcion": "Umbral de aplicabilidad de IA desde el que un área cuenta como expuesta.",
-   "fuente": "microsoft_ia",
-   "calidad": "supuesto",
+   "descripcion": "Umbral de aplicabilidad de IA desde el que un área cuenta como expuesta: 0,25 es el quintil superior de las 785 ocupaciones de Microsoft, el grupo más expuesto en Canaries.",
+   "fuente": "canaries_2026",
+   "calidad": "mixto",
    "rango": null
   },
   {
@@ -715,12 +715,12 @@
    "id": "P_MUERE_ENFERMO",
    "valor": 0.134,
    "unidad": "probabilidad anual",
-   "descripcion": "Morir el año siguiente si un familiar tiene una enfermedad grave.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Morir el año siguiente si un familiar tiene una enfermedad grave: mortalidad anual media en 5 años de un cáncer en Chile (sobrevida neta 54% a 5 años; 36% muere el primer año).",
+   "fuente": "minsal_sobrevida_cancer_2023",
+   "calidad": "mixto",
    "rango": [
-    0.08,
-    0.25
+    0.11,
+    0.36
    ]
   },
   {
@@ -841,12 +841,12 @@
    "id": "COPAGO_CANCER",
    "valor": 3000000,
    "unidad": "CLP",
-   "descripcion": "Copago de un tratamiento.",
-   "fuente": "equipo",
-   "calidad": "supuesto",
+   "descripcion": "Copago de un tratamiento de cáncer: entre 0 (GES en FONASA A-D) y el tope GES en ISAPRE (20%, unos $4,8 M al año).",
+   "fuente": "superdesalud_ges_cancer",
+   "calidad": "mixto",
    "rango": [
-    1000000,
-    8000000
+    0,
+    4850000
    ]
   },
   {

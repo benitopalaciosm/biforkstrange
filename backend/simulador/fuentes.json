@@ -618,6 +618,62 @@
    "pais": "EE.UU.",
    "tipo": "prensa",
    "verificacion": "resumen"
+  },
+  {
+   "id": "sii_dolar_2025",
+   "cita": "SII, Dólar Observado 2025 (dato del Banco Central de Chile), promedio de los 12 promedios mensuales",
+   "url": "https://www.sii.cl/valores_y_fechas/dolar/dolar2025.htm",
+   "pais": "Chile",
+   "tipo": "serie oficial",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "bm_wdi_pib_chile",
+   "cita": "Banco Mundial, WDI, crecimiento anual del PIB de Chile (cuentas nacionales del Banco Central), 1986-2025",
+   "url": "https://api.worldbank.org/v2/country/CHL/indicator/NY.GDP.MKTP.KD.ZG?format=json&date=1986:2025&per_page=100",
+   "pais": "Chile",
+   "tipo": "serie oficial",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "sii_impuesto_unico_2025",
+   "cita": "SII, Impuesto Único de Segunda Categoría, tabla mensual 2025, con cotizaciones de AFP, salud y seguro de cesantía",
+   "url": "https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto2025.htm",
+   "pais": "Chile",
+   "tipo": "normativa",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "spensiones_rentabilidad",
+   "cita": "Superintendencia de Pensiones, rentabilidad real de los Fondos de Pensiones (deflactada por UF), Fondo C desde septiembre 2002",
+   "url": "https://www.spensiones.cl/apps/rentabilidad/getRentabilidad.php",
+   "pais": "Chile",
+   "tipo": "serie oficial",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "minsal_sobrevida_cancer_2023",
+   "cita": "Navarro y Bralic, Depto. de Epidemiología MINSAL, Sobrevivencia relativa de cáncer en Chile 1998-2020 (registros poblacionales, diagnósticos 2010-2014)",
+   "url": "https://congreso2023.ufro.cl/images/presentaciones/orales/viernes11/202/8.-%20ov1203_656_SOBREVIVENCIA%20DE%20CANCER%20EN%20CHILE%201998-2020%20APROXIMACION.pdf",
+   "pais": "Chile",
+   "tipo": "estudio",
+   "verificacion": "descargado"
+  },
+  {
+   "id": "superdesalud_ges_cancer",
+   "cita": "Superintendencia de Salud, GES cáncer de mama: copago 0% en FONASA A-D y 20% en ISAPRE, con tope por evento",
+   "url": "https://www.superdesalud.gob.cl/orientacion-en-salud/cancer-de-mama",
+   "pais": "Chile",
+   "tipo": "normativa",
+   "verificacion": "resumen"
+  },
+  {
+   "id": "canaries_2026",
+   "cita": "Brynjolfsson, Chandar y Chen, Canaries in the Coal Mine? Six Facts about the Recent Employment Effects of Artificial Intelligence, Stanford Digital Economy Lab, agosto 2026",
+   "url": "https://digitaleconomy.stanford.edu/app/uploads/2026/08/Canaries_August2026.pdf",
+   "pais": "EE.UU.",
+   "tipo": "estudio",
+   "verificacion": "descargado"
   }
  ]
 }
