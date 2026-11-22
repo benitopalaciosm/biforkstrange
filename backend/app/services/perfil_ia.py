@@ -21,6 +21,7 @@ import io
 import json
 import shutil
 import subprocess
+import tempfile
 from functools import lru_cache
 from typing import Literal
 
@@ -317,16 +318,30 @@ def _por_api(texto: str, hoy: str, pq: Paquete, pdf: bytes | None = None) -> Per
     return desde_api(respuesta.parsed_output)
 
 
+# El comando corre aislado del Claude Code del dev. Sin esto, el CV queda guardado en
+# ~/.claude/projects/... y el modelo corre con los hooks, MCP, CLAUDE.md y herramientas de esa
+# máquina: un PDF con texto oculto podría pedirle que lea archivos o ejecute comandos.
+AISLADO = [
+    "--no-session-persistence",  # no guarda la sesión en disco: el CV no queda en ~/.claude/projects
+    "--safe-mode",  # sin CLAUDE.md, hooks, plugins, skills ni MCP del usuario (la autenticación sigue igual)
+    "--tools", "",  # ninguna herramienta: solo lee y responde
+    "--strict-mcp-config", "--mcp-config", '{"mcpServers": {}}',  # ningún servidor MCP
+    "--disable-slash-commands",
+]
+
+
 def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
-    """Desarrollo local sin llave de API: usa el comando `claude` de la máquina."""
-    prompt = (f"{INSTRUCCIONES}\n\n{_catalogo(pq)}\n\nFecha de hoy: {hoy}\n\n"
-              f"<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>")
+    """Desarrollo local sin llave de API: usa el comando `claude` de la máquina, aislado (`AISLADO`)."""
+    prompt = f"Fecha de hoy: {hoy}\n\n<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>"
     try:
-        salida = subprocess.run(
-            ["claude", "-p", "--model", MODELO, "--effort", "low", "--output-format", "json",
-             "--json-schema", json.dumps(esquema_api().model_json_schema())],
-            input=prompt, capture_output=True, text=True, timeout=90, check=True,
-        )
+        # en un directorio vacío, para que no descubra el CLAUDE.md ni la configuración del repo
+        with tempfile.TemporaryDirectory(prefix="perfil-") as vacio:
+            salida = subprocess.run(
+                ["claude", "-p", "--model", MODELO, "--effort", "low", "--output-format", "json", *AISLADO,
+                 "--system-prompt", f"{INSTRUCCIONES}\n\n{_catalogo(pq)}",
+                 "--json-schema", json.dumps(esquema_api().model_json_schema())],
+                input=prompt, capture_output=True, text=True, timeout=90, check=True, cwd=vacio,
+            )
         cuerpo = json.loads(salida.stdout)
         datos = cuerpo.get("structured_output")
         if datos is None:
