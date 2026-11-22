@@ -317,3 +317,23 @@ export type PesoCv = {
   /** Datos que la mueven, pero menos que los que se muestran. */
   otros: CampoCv[];
 };
+
+/** Cuánto se juega la persona en una duda: el rango que abre entre la mala y la buena suerte. */
+export type DudaEnJuego = {
+  decision: string;
+  nombre: string;
+  pregunta: string;
+  /** Peor sueldo de mala suerte (p10) entre todas las opciones. */
+  mala: number;
+  /** Mejor sueldo de buena suerte (p90) entre todas las opciones. */
+  buena: number;
+  /** Sueldo típico (p50) si te quedas como estás. */
+  tipico: number;
+  /** (buena − mala) / típico: lo que ordena. */
+  dispersion: number;
+  /** Distancia entre el sueldo típico de la mejor y la peor opción, sobre la peor. */
+  entre_opciones: number;
+};
+
+/** Respuesta de `POST /api/juego/dudas-en-juego`. `mas_en_juego` es null si hay menos de dos dudas. */
+export type EnJuego = { gemelos: number; semilla: number; mas_en_juego: string | null; dudas: DudaEnJuego[] };

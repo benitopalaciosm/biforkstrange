@@ -78,3 +78,12 @@ class PesoCvIn(BaseModel):
     duda: str
     semilla: int = 0
     gemelos: int = Field(100, ge=20, le=300)
+
+
+class EnJuegoIn(BaseModel):
+    """El perfil y las dudas que sugiere su CV: cuál tiene más en juego para esta persona."""
+
+    perfil: PerfilIn = PerfilIn()
+    dudas: list[str] = Field(min_length=1, max_length=5)
+    semilla: int = 0
+    gemelos: int = Field(100, ge=20, le=300)

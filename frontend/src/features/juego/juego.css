@@ -410,3 +410,7 @@ textarea.jg-texto { min-height: 132px; padding: 12px 14px; resize: vertical; fon
 .jg-peso-valor { font-family: var(--mono); white-space: nowrap; text-align: right; }
 @keyframes jg-peso-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .jg-peso-linea, .jg-peso-barra i { animation: none; } }
+
+/* La duda que tu CV esconde: encabezado sobre la lista de dudas */
+.jg-en-juego { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 14px; border: 1.5px solid var(--acento); border-radius: 14px; background: var(--acento-suave); animation: jg-peso-entra .5s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) { .jg-en-juego { animation: none; } }

@@ -94,8 +94,9 @@ def peso_cv(perfil: Perfil, duda: str, semilla: int = 0, n: int = gemelos.N_GEME
             continue
         mueve = "gana" if max(d_gana.values()) >= min(GANA_VISIBLE, max(d_sueldo.values())) else "sueldo"
         medida = d_gana if mueve == "gana" else d_sueldo
-        # la opción clave: la que más cambia; entre iguales, la que no es la base (la que se está pensando)
-        clave = max(opciones, key=lambda x: (medida[x["opcion"]], x["opcion"] != con["base"]))["opcion"]
+        # la opción clave: la que se está pensando (no la base) que más cambia; la base solo si ninguna otra se mueve
+        otras = [x for x in opciones if x["opcion"] != con["base"] and medida[x["opcion"]] >= MIN_CAMBIO]
+        clave = max(otras or opciones, key=lambda x: medida[x["opcion"]])["opcion"]
         tuyo = getattr(perfil, campo)
         datos.append({"campo": campo, "tuyo": tuyo, "neutro": None if neutro == "sin_dato" else neutro,
                       "mueve": mueve, "opcion": clave, "cambio": round(cambio, 4), "opciones": opciones})
@@ -104,3 +105,31 @@ def peso_cv(perfil: Perfil, duda: str, semilla: int = 0, n: int = gemelos.N_GEME
             "base": con["base"], "datos": datos[:MAX_DATOS], "sin_efecto": sin_efecto,
             "otros": [d["campo"] for d in datos[MAX_DATOS:]]}  # mueven algo, pero menos que los que se muestran
 
+
+@lru_cache(maxsize=64)
+def en_juego(perfil: Perfil, dudas: tuple[str, ...], semilla: int = 0, n: int = gemelos.N_GEMELOS) -> dict:
+    """De varias dudas, cuánto se juega la persona en cada una y cuál es la que más.
+
+    `mala` es el peor sueldo de mala suerte (p10) entre todas las opciones y `buena` el mejor de buena suerte
+    (p90): el rango que abre la decisión. `dispersion` es ese rango sobre el sueldo típico de quedarse como está
+    (la opción base), y es lo que ordena. `entre_opciones` es la distancia entre la opción de sueldo típico más
+    alto y la de más bajo, sobre esta última. Con una sola duda no hay cuál marcar.
+    """
+    salida = []
+    for duda in dict.fromkeys(dudas):
+        c = _comparar(perfil, duda, semilla, n)
+        if c is None:
+            continue
+        ops = c["opciones"]
+        base = next(o for o in ops if o["es_base"])
+        mala = min(o["sueldo"]["p10"] for o in ops)
+        buena = max(o["sueldo"]["p90"] for o in ops)
+        tipicos = [o["sueldo"]["p50"] for o in ops]
+        salida.append({
+            "decision": duda, "nombre": c["nombre"], "pregunta": c["pregunta"],
+            "mala": mala, "buena": buena, "tipico": base["sueldo"]["p50"],
+            "dispersion": round((buena - mala) / max(base["sueldo"]["p50"], 1), 4),
+            "entre_opciones": round((max(tipicos) - min(tipicos)) / max(min(tipicos), 1), 4),
+        })
+    mas = max(salida, key=lambda d: d["dispersion"])["decision"] if len(salida) > 1 else None
+    return {"gemelos": n, "semilla": semilla, "mas_en_juego": mas, "dudas": salida}

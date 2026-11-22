@@ -53,7 +53,7 @@ function Juego() {
   }
   if (j.fase === "duda") {
     return (
-      <DudaPicker dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
+      <DudaPicker perfil={j.perfil} dudas={j.dudas} sugeridas={j.dudasSugeridas} cargando={j.cargando} error={j.error} onVolver={j.irAPerfil} onElegir={j.empezar} />
     );
   }
   if (j.fase === "carta" && j.vista?.pendiente) {
