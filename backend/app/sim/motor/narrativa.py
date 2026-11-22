@@ -130,7 +130,7 @@ def narrar(decision: str, contexto: dict, semilla: int, anio: int, ocurrencia: i
         texto = (f"{canal}, te contacta {quien} de {otra}. Buscan a alguien con tu experiencia "
                  f"en {rubro.lower()} para {CARGOS[min(nivel, 4)]}. Quieren una respuesta esta semana.")
     elif decision == "unirse_a_startup" and oferta:
-        texto = (f"{oferta['nombre']} te ofrece {puesto} en su equipo. Pagan menos que tu pega actual, "
+        texto = (f"{oferta['nombre']} te ofrece {puesto} en su equipo. Pagan menos que tu trabajo actual, "
                  f"pero te dan acciones. {canal}, te lo propone {quien}.")
     elif decision == "unirse_a_startup":
         nombre, desc = s.uno("startup", STARTUPS_RUBRO.get(rubro) or STARTUPS)

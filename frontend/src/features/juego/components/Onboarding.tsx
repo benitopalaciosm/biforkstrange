@@ -450,7 +450,7 @@ function Entrada({
           <span className="ob-icono ob-icono--tu" aria-hidden="true">✎</span>
           <span className="ob-fuente-texto">
             <strong>{algo ? "Completar lo que falta" : "Contesto yo unas preguntas"}</strong>
-            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu pega y tu sueldo. Un toque cada una."}</span>
+            <span className="ob-chico">{algo ? "Solo lo que tus fuentes no dijeron." : "Edad, estudios, tu trabajo y tu sueldo. Un toque cada una."}</span>
           </span>
           <Marca listo={false} accion="Empezar" />
         </button>

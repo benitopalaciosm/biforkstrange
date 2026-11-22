@@ -372,7 +372,7 @@ export function PerfilForm({
                 <label htmlFor={idUniversidad} className="vd-h3">
                   Dónde estudiaste <span className="jg-chico">(opcional)</span>
                 </label>
-                <Text size="sm">Universidad, instituto o CFT, en Chile o afuera. Cuenta para tu primera pega y para un magíster.</Text>
+                <Text size="sm">Universidad, instituto o CFT, en Chile o afuera. Cuenta para tu primer trabajo y para un magíster.</Text>
               </Stack>
               {universidad ? (
                 <Row style={{ alignItems: "center" }}>
