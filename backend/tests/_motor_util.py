@@ -205,7 +205,7 @@ def estado_al_azar(R: random.Random) -> dict:
         "anos_en_carrera": R.randint(0, 5), "anos_en_startup": R.randint(0, 6),
         "financia": R.choice(["", "cae", "gratuidad", "familia"]), "ingles": R.randint(0, 1),
         "isapre": R.randint(0, 1), "marcado": R.randint(0, 1), "validado": R.randint(0, 1),
-        "propietario": R.randint(0, 1), "primer_grande": R.randint(0, 1), "oferta_al_titularse": R.randint(0, 1),
+        "propietario": R.randint(0, 1), "primer_grande": R.randint(0, 1), "bootcamp": R.randint(0, 1), "oferta_al_titularse": R.randint(0, 1),
         "ocupacion": R.randint(0, 9), "edad_decide_estudios": R.choice([18, 19]), "cierra_en": R.choice([0, 0, 1, 3]),
         "rubro_destino": R.choice(RUBROS), "rubro_emprendimiento": R.choice(RUBROS), "region_destino": R.choice(REGIONES), "ocupacion_destino": R.randint(0, 9),
         "quien_enferma": R.choice(["madre", "padre"]),

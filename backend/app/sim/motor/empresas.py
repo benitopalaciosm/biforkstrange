@@ -180,6 +180,8 @@ def familias_de(pq: Paquete, e: dict) -> list[str]:
     car = cargo(pq, e.get("cargo_id", -1))
     if car is not None and car.get("familia"):
         return [car["familia"]]
+    if e.get("bootcamp"):
+        return list(FAMILIAS_BOOTCAMP)  # recién salido del bootcamp: entra a tecnología
     if e.get("familia_inicial"):
         return [e["familia_inicial"]]
     fam = _catalogo(pq)["familias"]
@@ -197,30 +199,39 @@ def _duros(pq: Paquete, emp: dict, e: dict) -> list[dict]:
             if (c["_tipos"] is None or emp["tipo"] in c["_tipos"])
             and (c["_rubros"] is None or emp["rubro"] in c["_rubros"])
             and c["nivel_min"] <= nivel <= c["nivel_max"]
-            and EDU_ORDEN.get(c["edu_min"], 0) <= edu and c["peso"] > 0]
+            and (EDU_ORDEN.get(c["edu_min"], 0) <= edu or _por_bootcamp(c, e)) and c["peso"] > 0]
+
+
+FAMILIAS_BOOTCAMP = ("tecnologia", "datos")
+
+
+def _por_bootcamp(c: dict, e: dict) -> bool:
+    """Un bootcamp abre los cargos de tecnología y datos que piden título técnico, aunque no lo tengas."""
+    return bool(e.get("bootcamp")) and c.get("familia") in FAMILIAS_BOOTCAMP and EDU_ORDEN.get(c["edu_min"], 0) <= 1
 
 
 def compatibles(pq: Paquete, emp: dict, e: dict) -> list[dict]:
     """Cargos que la empresa le ofrecería a esta persona.
 
-    Duro: tipo y rubro de la empresa, nivel actual y educación mínima. Blando, en este orden: su familia
-    (finanzas, tecnología, salud...), su grupo ocupacional de hoy y el área de su carrera. Se sueltan de a
-    uno, el área primero y la familia al final, hasta que quede alguno.
+    Duro: tipo y rubro de la empresa, nivel actual, educación mínima, su grupo ocupacional de hoy (un cambio de
+    trabajo no te cambia de oficio: eso lo hacen "cambiar de oficio" o un bootcamp, que mueven la ocupación
+    antes) y las profesiones de una sola carrera (no se le ofrece "Abogado" a quien no estudió Derecho).
+    Blando, en este orden: su familia (finanzas, tecnología, salud...) y el área de su carrera. Si nada calza,
+    no hay cargo y la historia dice "un cargo parecido al tuyo".
     """
-    duros = _duros(pq, emp, e)
     area, ocup = e.get("area") or "", int(e.get("ocupacion", -1))
+
+    def profesion_ajena(c):  # el cargo pide una sola carrera y no es la tuya (un bootcamp abre los de tecnología)
+        return (c["_areas"] is not None and len(c["_areas"]) == 1 and area not in c["_areas"]
+                and not _por_bootcamp(c, e))
+
+    duros = [c for c in _duros(pq, emp, e) if (ocup < 0 or c["ciuo08_1d"] == ocup) and not profesion_ajena(c)]
     familias = set(familias_de(pq, e))
 
     def del_area(c):
         return c["_areas"] is None or (area and area in c["_areas"])
 
-    def de_familia(c):
-        return c.get("familia") in familias
-
-    for filtro in (lambda c: de_familia(c) and c["ciuo08_1d"] == ocup and del_area(c),
-                   lambda c: de_familia(c) and c["ciuo08_1d"] == ocup,
-                   de_familia,
-                   lambda c: c["ciuo08_1d"] == ocup and del_area(c), lambda c: c["ciuo08_1d"] == ocup,
+    for filtro in (lambda c: c.get("familia") in familias and del_area(c), lambda c: c.get("familia") in familias,
                    del_area, lambda c: True):
         quedan = [c for c in duros if filtro(c)]
         if quedan:

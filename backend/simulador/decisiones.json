@@ -1087,6 +1087,11 @@
        "tono": "bueno",
        "efectos": [
         {
+         "var": "bootcamp",
+         "op": "fija",
+         "valor": 1
+        },
+        {
          "var": "ahorro",
          "op": "suma",
          "valor": "-k('COSTO_BOOTCAMP')"
@@ -1115,6 +1120,16 @@
          "var": "sueldo",
          "op": "fija",
          "valor": "max(sueldo_ref * 0.85, k('USD') * 1375 * 0.9)"
+        },
+        {
+         "var": "ocupacion",
+         "op": "fija",
+         "valor": 2
+        },
+        {
+         "var": "cargo_id",
+         "op": "fija",
+         "valor": -1
         }
        ]
       },
@@ -1124,6 +1139,11 @@
        "texto": "Terminas, pero no encuentras trabajo todavía.",
        "tono": "malo",
        "efectos": [
+        {
+         "var": "bootcamp",
+         "op": "fija",
+         "valor": 1
+        },
         {
          "var": "ahorro",
          "op": "suma",
