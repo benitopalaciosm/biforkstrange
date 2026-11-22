@@ -65,7 +65,7 @@ function SubirCv({ estado, empresa, onPdf }: { estado: EstadoLectura; empresa: P
         <Heading level={3} as="h2">
           Sube tu CV y nos saltamos el formulario
         </Heading>
-        <Text size="sm">O el PDF de tu LinkedIn: en tu perfil, Más → Guardar como PDF.</Text>
+        <Text size="sm">O el PDF de tu LinkedIn: desde el computador, tu perfil → Recursos → Guardar como PDF.</Text>
       </Stack>
       <input
         ref={entrada}
