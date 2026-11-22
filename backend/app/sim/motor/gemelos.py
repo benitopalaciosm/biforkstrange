@@ -13,7 +13,7 @@ from app.sim.motor.motor import Vida
 from app.sim.motor.perfil import NIVELES
 from app.sim.motor.politicas import Fija, Inercia, opcion_base, parametros_por_defecto
 
-N_GEMELOS = 500
+N_GEMELOS = 100
 HORIZONTE = 10
 IGUAL = 0.005  # dos sueldos a menos de 0,5% se cuentan como iguales
 
@@ -53,6 +53,15 @@ def _contra_base(pares: list[tuple[float, float]]) -> dict:
         # lo mismo, pero solo entre los mundos donde la opción cambia algo (sin los empates)
         "diferencia_si_cambia": round(median(distintos)) if distintos else 0,
     }
+
+
+def _ganador(sueldos: dict[str, float]) -> str | None:
+    """La opción con la que ese mundo termina ganando más; None si las dos mejores quedan a menos de 0,5%."""
+    orden = sorted(sueldos.items(), key=lambda kv: kv[1], reverse=True)
+    if len(orden) < 2:
+        return orden[0][0] if orden else None
+    (primera, a), (_, b) = orden[0], orden[1]
+    return None if a <= b * (1 + IGUAL) else primera
 
 
 def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = HORIZONTE, semilla: int = 0,
@@ -123,9 +132,61 @@ def comparar(vida: Vida, decision_id: str, *, n: int = N_GEMELOS, anios: int = H
             "trayectoria": trayectoria,
             **({"sueldos": sorted(round(x) for x in sueldos)} if crudo else {}),
         })
+    finales_por_mundo = [{o.id: finales[o.id][g].sueldo_o_ultimo() for o in opciones} for g in range(n)]
     return {
         "decision": decision_id, "nombre": decision["nombre"], "pregunta": decision["pregunta"],
         "calidad": decision["calidad"], "creencia_vs_dato": decision.get("creencia_vs_dato"),
         "evidencia": decision.get("evidencia", []),
         "gemelos": n, "anios": anios, "base": base, "opciones": salida,
+        # en cada mundo, con qué opción terminas ganando más (None: empate); el índice es el número del mundo
+        "ganador_por_mundo": [_ganador(f) for f in finales_por_mundo],
+    }
+
+
+def _anios_vividos(v: Vida, anio0: int, antes: tuple[int, int]) -> list[dict]:
+    """Lo que pasó en cada año desde la decisión: eventos que no son rutina, decisiones y cómo cerró el año."""
+    anios = []
+    registros = v.historia[anio0:] + ([v.registro] if v.registro and v.registro not in v.historia[anio0:] else [])
+    for i, r in enumerate(registros):
+        eventos = r.get("eventos", [])
+        decisiones = r.get("decisiones", [])
+        if i == 0:  # lo que pasó ese año antes de la carta es de tu vida, no de este mundo
+            decisiones, eventos = decisiones[antes[0]:], eventos[antes[1]:]
+        fin = r.get("fin")
+        anios.append({
+            "anio": i + 1, "edad": r.get("edad"), "recesion": bool(r.get("recesion")),
+            "sucesos": [
+                *({"tipo": "decision", "nombre": d["nombre"], "opcion": d["opcion_nombre"], "texto": d["texto"],
+                   "tono": d["tono"]} for d in decisiones),
+                *({"tipo": "evento", "nombre": e["nombre"], "texto": e["texto"], "tono": e["tono"]}
+                  for e in eventos if not e.get("rutina")),
+            ],
+            "fin": None if fin is None else {"sueldo": fin["sueldo"], "sueldo_ref": fin["sueldo_ref"], "cargo": fin["cargo"],
+                                             "estado": fin["estado"], "tipo_empleador": fin["tipo_empleador"]},
+        })
+    return anios
+
+
+def mundo(vida: Vida, decision_id: str, numero: int, *, anios: int = HORIZONTE, semilla: int = 0,
+          parametros: dict[str, dict] | None = None) -> dict:
+    """Un mundo de la comparación, completo: lo que te pasa en él con cada opción, año por año.
+
+    Vuelve a vivir el gemelo `numero` con sus mismos dados, así que coincide con lo que contó `comparar`.
+    """
+    opciones = vida.opciones(decision_id)
+    parametros = parametros or {}
+    anio0 = len(vida.historia)
+    antes = (len(vida.registro["decisiones"]), len(vida.registro["eventos"])) if vida.cola and vida.registro else (0, 0)
+    vidas = {}
+    for o in opciones:
+        usados = parametros.get(o.id) or parametros_por_defecto(vida, o)
+        vidas[o.id] = (o, _vivir(vida.clonar(Dados(semilla, numero)), decision_id, o.id, usados, anios))
+    return {
+        "mundo": numero, "decision": decision_id,
+        "ganador": _ganador({k: v.sueldo_o_ultimo() for k, (_, v) in vidas.items()}),
+        "opciones": [
+            {"opcion": o.id, "nombre": o.nombre, "sueldo_final": round(v.sueldo_o_ultimo()), "estado_final": v.e["estado"],
+             "anios": _anios_vividos(v, anio0, antes)}
+            for o, v in vidas.values()
+        ],
     }

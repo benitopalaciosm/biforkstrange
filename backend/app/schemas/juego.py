@@ -37,9 +37,15 @@ class PartidaIn(BaseModel):
     semilla: int = 0
     duda: str | None = None
     elecciones: list[EleccionIn] = Field(default_factory=list, max_length=200)
-    gemelos: int = Field(500, ge=0, le=2000)
+    gemelos: int = Field(100, ge=0, le=2000)
     # lo que se elige dentro de cada opción de la decisión pendiente, para comparar: {opción: {variable: valor}}
     parametros: dict[str, dict[str, str | int]] = {}
+
+
+class MundoIn(PartidaIn):
+    """La partida y cuál de sus mundos se quiere ver (0 a `gemelos` - 1)."""
+
+    mundo: int = Field(ge=0, le=1999)
 
 
 class DudasIn(BaseModel):

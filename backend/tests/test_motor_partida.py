@@ -138,7 +138,7 @@ def test_vista_con_decision_pendiente():
         30, "empleado", 1_400_000, "Semi senior")
     p = v["pendiente"]
     assert set(p) == {"decision", "nombre", "pregunta", "categoria", "calidad", "creencia_vs_dato", "evidencia", "narrativa",
-                      "opciones", "comparacion"}
+                      "opciones", "comparacion", "por_que"}
     assert p["decision"] == "unirse_a_startup" and [o["opcion"] for o in p["opciones"]] == ["ir", "quedarse"]
     assert all(set(o) == {"opcion", "nombre", "detalle", "calidad", "elecciones_internas", "ejemplo_real"} for o in p["opciones"])
     c = p["comparacion"]

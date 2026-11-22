@@ -72,6 +72,18 @@ def comparar_pendiente(partida: Partida, semilla: int, n: int = gemelos.N_GEMELO
                             semilla=semilla, parametros=parametros, crudo=crudo)
 
 
+def mundo_pendiente(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], numero: int,
+                    parametros: dict[str, dict] | None = None, anios: int = ANIOS, pq: Paquete | None = None) -> dict:
+    """Un mundo de la comparación de la decisión pendiente, con su historia completa."""
+    partida = jugar(perfil, semilla, elecciones, duda, anios, pq or paquete())
+    if partida.pendiente is None:
+        raise ValueError("la partida no tiene una decisión pendiente")
+    if len(partida.pendiente.opciones) > MAX_OPCIONES_COMPARAR:
+        raise ValueError("esta decisión tiene demasiadas opciones para simular mundos")
+    return gemelos.mundo(partida.vida, partida.pendiente.decision["id"], numero, anios=gemelos.HORIZONTE,
+                         semilla=semilla, parametros=parametros)
+
+
 def _cierre(perfil: Perfil, semilla: int, duda: str | None, elecciones: list[dict], partida: Partida,
             n: int, pq: Paquete) -> dict:
     """Tu vida frente a los gemelos de la primera decisión."""
@@ -111,7 +123,20 @@ def vista(perfil: Perfil, semilla: int = 0, duda: str | None = None, elecciones:
     d = falta.decision
     ocurrencia = sum(1 for x in vida.registro["decisiones"] if x["decision"] == d["id"]) if vida.registro else 0
     contexto = {k: vida.e[k] for k in ("edad", "rubro", "tipo_empleador", "nivel", "region", "ocupacion", "estado", "antiguedad")}
+    # por qué te tocó esta decisión: sorteada entre las cartas posibles, obligada por tu situación, o consecuencia
+    origen = vida.cola[0][2] if vida.cola and vida.cola[0][0] == "decision" and vida.cola[0][1] == d["id"] else None
+    if d["aparicion"]["tipo"] == "forzada":
+        por_que = {"tipo": "obligada"}
+    elif origen == "luego":
+        por_que = {"tipo": "consecuencia"}
+    elif vida.reparto and vida.reparto["carta"] == d["id"]:
+        por_que = {"tipo": "sorteo", "prob": vida.reparto["prob"], "posibles": vida.reparto["posibles"]}
+    elif duda is not None and d["id"] == duda and vida.anio == 0:
+        por_que = {"tipo": "elegida"}
+    else:
+        por_que = {"tipo": "consecuencia"}
     salida["pendiente"] = {
+        "por_que": por_que,
         "narrativa": narrar(d["id"], contexto, semilla, vida.anio, ocurrencia),
         "decision": d["id"], "nombre": d["nombre"], "pregunta": d["pregunta"], "categoria": d["categoria"],
         "calidad": d["calidad"], "creencia_vs_dato": d.get("creencia_vs_dato"), "evidencia": d.get("evidencia", []),

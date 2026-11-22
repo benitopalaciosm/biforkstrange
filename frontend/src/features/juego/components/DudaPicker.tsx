@@ -75,7 +75,7 @@ export function DudaPicker({
           </>
         )}
         <Button onClick={() => sel && onElegir(sel)} disabled={!sel || cargando}>
-          {simulando ? "Simulando…" : "Ver mis 500 mundos"}
+          {simulando ? "Simulando…" : `Ver mis ${GEMELOS} mundos`}
         </Button>
       </div>
     </Screen>

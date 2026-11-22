@@ -50,7 +50,7 @@ def prompt(pq: Paquete | None = None) -> str:
     ocupaciones = sorted({(int(f["origen"]), f["origen_nombre"]) for f in pq.filas("jobhop_transiciones")})
     dudas = _dudas_laborales(pq)
     lineas = [
-        "Voy a usar Gemelo Laboral, un simulador que muestra cómo les va en 10 años a 500 \"gemelos\" míos "
+        "Voy a usar Gemelo Laboral, un simulador que muestra cómo les va en 10 años a 100 \"gemelos\" míos "
         "(misma persona, otra suerte) según las decisiones de carrera que tome en Chile. Necesito que armes "
         "mi perfil con lo que sabes de mí por nuestras conversaciones y tus memorias.",
         "",

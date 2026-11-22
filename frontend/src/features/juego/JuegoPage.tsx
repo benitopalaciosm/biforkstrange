@@ -49,7 +49,7 @@ function Juego() {
     );
   }
   if (j.fase === "perfil") {
-    return <PerfilForm inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.verDudas} />;
+    return <PerfilForm inicial={j.perfil} catalogo={catalogo} errorCatalogo={errorCatalogo} onVolver={j.irAInicio} onListo={j.empezarAlAzar} onElegirDuda={j.verDudas} cargando={j.cargando} error={j.error} />;
   }
   if (j.fase === "duda") {
     return (
@@ -67,6 +67,7 @@ function Juego() {
         onElegir={j.elegir}
         onComparar={j.compararCon}
         onAyuda={() => setTutorial("ayuda")}
+        onVerMundo={j.verMundo}
       />
     );
   }

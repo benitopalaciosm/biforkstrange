@@ -23,7 +23,7 @@ export function Inicio({
       <Stack gap={12}>
         <Heading level={1}>Vive tu decisión antes de tomarla.</Heading>
         <Text>
-          Trae la duda de trabajo que te da vueltas. Simulamos {GEMELOS} mundos posibles. En cada uno vive un gemelo tuyo, que prueba cada opción durante 10 años con la suerte de ese mundo.
+          Cada año la vida te pone una decisión de trabajo: ¿me cambio?, ¿pido aumento?, ¿emprendo? Simulamos {GEMELOS} mundos posibles. En cada uno vive un gemelo tuyo, que prueba cada opción durante 10 años con la suerte de ese mundo.
           Así ves qué pasa casi siempre y qué pasa a veces, antes de jugártela tú.
         </Text>
       </Stack>
@@ -34,8 +34,8 @@ export function Inicio({
       </div>
       <Row gap={6}>
         <Tag>1 · Cuentas quién eres</Tag>
-        <Tag>2 · 500 mundos prueban cada opción</Tag>
-        <Tag>3 · Eliges y vives el mundo 501</Tag>
+        <Tag>2 · {GEMELOS} mundos prueban cada opción</Tag>
+        <Tag>3 · Eliges y vives el mundo {GEMELOS + 1}</Tag>
       </Row>
       <ScreenFooter>
         {error && <ErrorCaja error={error} />}

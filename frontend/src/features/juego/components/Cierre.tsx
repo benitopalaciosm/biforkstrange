@@ -1,6 +1,7 @@
 import { BigNumber, Button, Heading, Meta, Pill, RangeCompare, Screen, ScreenHeader, Stack, StationTimeline, SunCard, Tag, Text, type Range } from "@/shared/ui";
 import { aniosDe, cargoYSueldo, deCada10, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Rango, Vista } from "../types";
+import { GEMELOS } from "../api";
 import { Abanico, Info } from "./graficos";
 import { LeyendaCalidad } from "./piezas";
 
@@ -36,7 +37,7 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
     <Screen gap={28}>
       <Stack gap={12}>
         <ScreenHeader left={<Pill tone="sol">Fin de la partida</Pill>} right={<Meta>{vista.anios} años · {e.edad} años</Meta>} />
-        <Heading level={1}>Diez años en el mundo 501: el que viviste tú.</Heading>
+        <Heading level={1}>Diez años en el mundo {GEMELOS + 1}: el que viviste tú.</Heading>
       </Stack>
 
       <SunCard>
@@ -65,7 +66,7 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
         <Stack as="section" gap={12}>
           <Stack gap={4}>
             <Heading level={3} as="h2">
-              Tu mundo, el 501, contra los otros 500
+              Tu mundo, el {GEMELOS + 1}, contra los otros {GEMELOS}
             </Heading>
             <Text size="sm">
               Tu primera decisión: {primera.pregunta} Aquí va tu sueldo año a año contra el de tus gemelos en los {primera.comparacion.gemelos} mundos donde
@@ -74,14 +75,14 @@ export function CierrePantalla({ vista, sueldoInicial, onOtraVida, onCambiarPerf
           </Stack>
           <Abanico puntos={elegida.trayectoria} hoy={{ edad: edadInicial, sueldo: sueldoInicial }} tu={recorrido} alto={190} />
           <Info pregunta="¿Cómo leo este gráfico?">
-            La línea amarilla es tu sueldo en el mundo 501, el que jugaste. La franja celeste contiene 8 de cada 10 mundos donde elegiste «{elegida.nombre}» y
+            La línea amarilla es tu sueldo en el mundo {GEMELOS + 1}, el que jugaste. La franja celeste contiene 8 de cada 10 mundos donde elegiste «{elegida.nombre}» y
             la línea azul es el mundo del medio. Si tu línea sale de la franja, tuviste más (o menos) suerte que casi todos, o tus decisiones de
             después te llevaron por otro lado.
           </Info>
           <Text size="sm">Y el sueldo final de cada opción, lado a lado. Cada barra va de la mala suerte a la buena suerte; la raya es el sueldo típico.</Text>
           <Stack gap={6}>
             <span className="vd-camino">
-              <Tag tone="sol">Tú · 501</Tag>
+              <Tag tone="sol">Tú · {GEMELOS + 1}</Tag>
               {plata(cierre.sueldo_final)}
             </span>
             <span className="vd-camino">

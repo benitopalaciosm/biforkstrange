@@ -1,6 +1,7 @@
 import { Button, Meta, Narrative, NightBand, Panel, Pill, Screen, ScreenFooter, ScreenHeader, SlowReveal, Stack, Text, YearTicker, cssVars } from "@/shared/ui";
 import { TIPO_EMPLEADOR, aniosDe, cargoYSueldo, conSigno, deCada, deCada10, pesos, plata, sinSueldo, situacion } from "../textos";
 import type { Anio, Estado, Vista } from "../types";
+import { GEMELOS } from "../api";
 import { Contador, LineaSueldo, Ruleta, type Casilla } from "./graficos";
 import { Noticia } from "./piezas";
 
@@ -96,7 +97,7 @@ export function QuePaso({ previa, vista, sueldoInicial, onSeguir }: { previa: Vi
     <Screen tone={noche ? "noche" : "dia"} gap={16} key={`${vista.historia.length}:${vista.anio_en_curso?.decisiones.length ?? 0}`}>
       <ScreenHeader
         left={<Pill style={{ whiteSpace: "nowrap" }}>{primero ? `${aniosDe(primero.edad, primero.fin?.edad, edadInicial)} · ${primero.edad} años` : `Año ${proximo}`}</Pill>}
-        right={<Meta>Mundo 501</Meta>}
+        right={<Meta>Mundo {GEMELOS + 1}</Meta>}
       />
 
       {edades.length > 1 && (
@@ -111,7 +112,7 @@ export function QuePaso({ previa, vista, sueldoInicial, onSeguir }: { previa: Vi
           <Meta>Elegiste «{dado.opcion_nombre}»{hayRuleta ? " · tiramos tu dado" : ""}</Meta>
           {hayRuleta && (
             <>
-              <Text size="sm">Esto pasó en los 500 mundos simulados con esa opción. Tú eres el mundo 501, con tu propio dado:</Text>
+              <Text size="sm">Esto pasó en los {GEMELOS} mundos simulados con esa opción. Tú eres el mundo {GEMELOS + 1}, con tu propio dado:</Text>
               <Ruleta casillas={casillas} salio={dado.resultado} />
             </>
           )}
