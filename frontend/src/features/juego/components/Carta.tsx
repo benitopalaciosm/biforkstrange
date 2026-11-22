@@ -12,6 +12,7 @@ import { HojaEleccion } from "./HojaEleccion";
 import { AvisoPerfil, CalidadTag, Cargando, ErrorCaja, FranjaSinNovedad, Hoy, Pensando, Salir } from "./piezas";
 import { Espera } from "./Apuesta";
 import { GEMELOS } from "../api";
+import { coloresDeOpciones } from "../colores";
 
 type Internas = Record<string, string | number>;
 
@@ -331,13 +332,9 @@ function OpcionConGemelos({
 const MUCHOS_EMPATES = 0.3;
 const POCAS_GANADAS = 0.15;
 
-/** Un color por opción: la base siempre naranja; las demás en este orden. El gris es el empate. Sin azul: es el de la interfaz y la mediana. */
-const COLORES = ["var(--jg-mas)", "var(--vida)", "var(--violeta)", "var(--turquesa)"];
+/** Un color por opción (solo identidad, nunca mejor o peor): vive en colores.ts, el mismo de la imagen que se comparte. */
 export function coloresDe(comparadas: OpcionComparada[]): Record<string, string> {
-  const salida: Record<string, string> = {};
-  let i = 0;
-  for (const o of comparadas) salida[o.opcion] = o.es_base ? "var(--jg-menos)" : COLORES[i++ % COLORES.length];
-  return salida;
+  return coloresDeOpciones(comparadas);
 }
 
 

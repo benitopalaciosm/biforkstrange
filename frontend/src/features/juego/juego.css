@@ -58,7 +58,18 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-aviso-perfil { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 
 /* ───────── Gráficos y animaciones del juego ───────── */
-.jg-fondo { --jg-mas: var(--dinero); --jg-igual: var(--apagado); --jg-menos: var(--bienestar); }
+/* Mejor y peor: un solo par neutro en todas las pantallas, como la ruleta y los sucesos. Sol = ganan más, sube;
+   tinta = ganan menos, baja; gris = igual. Los colores de opción (colores.ts) solo dicen cuál opción es, nunca
+   si algo es mejor o peor. --jg-mas y --jg-menos llenan barras y puntos; las -suave son fondos con texto encima
+   (tramos de la ruleta, chips de diferencia). Se declaran también en las superficies que cambian papel y tinta,
+   para que la mezcla tome las de esa superficie. */
+.jg-fondo, .vd-sol, .vd-noche, .vd-banda-noche {
+  --jg-mas: var(--sol); --jg-igual: var(--apagado); --jg-menos: var(--tinta);
+  --jg-mas-suave: color-mix(in srgb, var(--sol) 45%, var(--papel));
+  --jg-menos-suave: color-mix(in srgb, var(--tinta) 22%, var(--papel));
+  /* tutorial y portada: el color de las dos opciones de ejemplo (la primera alternativa y la base de colores.ts) */
+  --jg-gana-a: var(--dinero); --jg-gana-b: var(--bienestar);
+}
 
 /* Información extra que se abre al tocar */
 .jg-info { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
@@ -66,16 +77,14 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-info-boton i { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1.5px solid currentColor; border-radius: 50%; font: 700 10px/1 var(--mono); font-style: normal; }
 .jg-info-boton:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; border-radius: 6px; }
 .jg-info-caja { display: block; padding: 10px 12px; border-radius: 12px; background: var(--acento-suave); color: var(--tinta); font: 400 13px/19px var(--font); animation: vd-subir .35s var(--ease) both; }
-.jg-leyenda i[data-tipo="mas"] { background: var(--jg-mas); }
-.jg-leyenda i[data-tipo="menos"] { background: var(--jg-menos); }
 @keyframes jg-punto { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: none; } }
 .jg-leyenda { display: flex; flex-direction: column; gap: 2px; font: 400 13px/18px var(--font); color: var(--tinta); }
 .jg-leyenda > span { display: flex; align-items: center; gap: 6px; }
 .jg-leyenda i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--jg-igual); }
 .jg-leyenda b { font: 700 14px/18px var(--font); font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
 .jg-delta { align-self: flex-start; padding: 3px 8px; border-radius: 999px; font: 600 12px/16px var(--font); font-variant-numeric: tabular-nums; background: var(--niebla); color: var(--tinta); }
-.jg-delta[data-signo="mas"] { background: color-mix(in srgb, var(--jg-mas) 16%, var(--papel)); }
-.jg-delta[data-signo="menos"] { background: color-mix(in srgb, var(--jg-menos) 22%, var(--papel)); }
+.jg-delta[data-signo="mas"] { background: var(--jg-mas-suave); }
+.jg-delta[data-signo="menos"] { background: var(--jg-menos-suave); }
 
 /* Abanico: sueldo año a año */
 .jg-abanico { display: block; width: 100%; height: auto; overflow: visible; }
@@ -114,7 +123,7 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 
 /* Medidor simple: una barra que se llena */
 .jg-medidor { position: relative; display: block; height: 10px; border-radius: 999px; background: var(--niebla); overflow: hidden; }
-.jg-medidor i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--jg-menos); transform-origin: left center; animation: vd-crecer .9s var(--ease) .2s both; }
+.jg-medidor i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--tinta); transform-origin: left center; animation: vd-crecer .9s var(--ease) .2s both; }
 
 /* Años de la partida */
 .jg-progreso { display: flex; gap: 5px; align-items: center; }
@@ -140,17 +149,15 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-ruleta-tramo { display: flex; align-items: center; justify-content: center; min-width: 4px; border-left: 2px solid var(--tinta); background: var(--niebla); color: var(--tinta); font: 600 12px/1 var(--mono); }
 .jg-ruleta-tramo:first-child { border-left: 0; border-radius: 10px 0 0 10px; }
 .jg-ruleta-tramo:nth-last-child(2) { border-radius: 0 10px 10px 0; }
-/* bueno y malo con el tono del juego (amarillo y tinta), no con colores de opción: verde y naranjo son «Irte» y «Quedarte» */
-.jg-ruleta-tramo[data-tono="bueno"] { background: color-mix(in srgb, var(--sol) 45%, var(--papel)); }
-.jg-ruleta-tramo[data-tono="malo"] { background: color-mix(in srgb, var(--tinta) 22%, var(--papel)); }
+/* bueno y malo con el par de mejor/peor (sol y tinta), nunca con colores de opción; la leyenda usa la misma mezcla */
+.jg-ruleta-tramo[data-tono="bueno"], .jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--jg-mas-suave); }
+.jg-ruleta-tramo[data-tono="malo"], .jg-ruleta-leyenda i[data-tono="malo"] { background: var(--jg-menos-suave); }
 /* Quieta: el sorteo ya se vio en la espera; acá solo queda el resultado */
 .jg-ruleta-tramo--tuyo { box-shadow: inset 0 0 0 3px var(--tinta); }
 .jg-ruleta-ficha { position: absolute; top: -9px; left: var(--jg-meta); width: 22px; height: 50px; margin-left: -11px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--sol); box-shadow: 0 3px 0 var(--sombra); }
 .jg-ruleta-leyenda { display: flex; flex-direction: column; gap: 3px; font: 400 13px/18px var(--font); color: var(--suave); }
 .jg-ruleta-leyenda span { display: flex; align-items: baseline; gap: 6px; }
 .jg-ruleta-leyenda i { flex: none; align-self: center; width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid var(--tinta); background: var(--niebla); }
-.jg-ruleta-leyenda i[data-tono="bueno"] { background: var(--sol); }
-.jg-ruleta-leyenda i[data-tono="malo"] { background: var(--tinta); }
 .jg-ruleta-leyenda b { margin-left: auto; white-space: nowrap; font: 600 12px/18px var(--mono); }
 .jg-ruleta-tuyo { color: var(--tinta); font-weight: 600; }
 /* Después del sorteo, tu sueldo ya dibujado: nada más se simula en pantalla */
@@ -173,11 +180,11 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-como-gemelos i { aspect-ratio: 1; border-radius: 50%; background: var(--tinta); opacity: 0; transform: scale(0); transition: opacity .35s ease, transform .45s var(--rebote), background-color .5s ease; transition-delay: calc(var(--jg-i) * 22ms); }
 .jg-como:not([data-paso="0"]) .jg-como-gemelos i { opacity: 1; transform: none; }
 .jg-como[data-paso="2"] .jg-como-gemelos i, .jg-como[data-paso="3"] .jg-como-gemelos i, .jg-como[data-paso="4"] .jg-como-gemelos i { transition-delay: calc(var(--jg-i) * 34ms); }
-.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="mas"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="mas"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="mas"] { background: var(--jg-mas); }
-.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="igual"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="igual"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="igual"] { background: var(--jg-igual); }
-.jg-como[data-paso="2"] .jg-como-gemelos i[data-final="menos"], .jg-como[data-paso="3"] .jg-como-gemelos i[data-final="menos"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="menos"] { background: var(--jg-menos); }
-.jg-como[data-paso="2"] .jg-como-gemelos i { animation: jg-vivir 1.6s ease-in-out calc(var(--jg-i) * 34ms) 2; }
-@keyframes jg-vivir { 0%, 100% { transform: none; } 50% { transform: scale(.55); } }
+/* los puntos son mundos, del color de la opción que gana en él (colores.ts): «te cambias» es la primera
+   alternativa (verde) y «te quedas» la base (naranja). Es identidad de opción, no mejor o peor. */
+.jg-como[data-paso="3"] .jg-como-gemelos i[data-final="mas"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="mas"] { background: var(--jg-gana-a); }
+.jg-como[data-paso="3"] .jg-como-gemelos i[data-final="igual"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="igual"] { background: var(--jg-igual); }
+.jg-como[data-paso="3"] .jg-como-gemelos i[data-final="menos"], .jg-como[data-paso="4"] .jg-como-gemelos i[data-final="menos"] { background: var(--jg-gana-b); }
 .jg-como[data-paso="4"] .jg-como-gemelos i { opacity: .28; }
 .jg-como-dado { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; margin: -42px 0 0 -42px; border: 3px solid var(--tinta); border-radius: 20px; background: var(--sol); box-shadow: 0 5px 0 var(--sombra); font: 400 64px/1 var(--font); color: var(--sobre-sol); opacity: 0; transform: scale(.3) rotate(-40deg); transition: opacity .4s ease, transform .7s var(--rebote); }
 .jg-como-dado span { margin-top: -8px; }
@@ -187,9 +194,9 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-como-leyenda[data-visible="true"] { opacity: 1; }
 .jg-como-leyenda span { display: inline-flex; align-items: center; gap: 6px; }
 .jg-como-leyenda i { width: 9px; height: 9px; border-radius: 50%; }
-.jg-como-leyenda i[data-final="mas"] { background: var(--jg-mas); }
+.jg-como-leyenda i[data-final="mas"] { background: var(--jg-gana-a); }
 .jg-como-leyenda i[data-final="igual"] { background: var(--jg-igual); }
-.jg-como-leyenda i[data-final="menos"] { background: var(--jg-menos); }
+.jg-como-leyenda i[data-final="menos"] { background: var(--jg-gana-b); }
 .jg-como-leyenda b { color: var(--tinta); font-variant-numeric: tabular-nums; }
 .jg-como-pasos { display: flex; justify-content: center; gap: 6px; }
 .jg-como-pasos i { width: 8px; height: 8px; border-radius: 50%; background: var(--linea); transition: background-color .3s ease, width .3s var(--ease); }
@@ -203,9 +210,9 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 /* Portada: una fila de gemelos que se van coloreando */
 .jg-mini { display: grid; grid-template-columns: repeat(25, minmax(0, 1fr)); gap: 3px; }
 .jg-mini i { aspect-ratio: 1; border-radius: 50%; background: var(--tinta); animation: jg-mini 5s ease-in-out calc(var(--jg-i) * 30ms) infinite; }
-.jg-mini i[data-final="mas"] { --jg-c: var(--jg-mas); }
+.jg-mini i[data-final="mas"] { --jg-c: var(--jg-gana-a); }
 .jg-mini i[data-final="igual"] { --jg-c: var(--jg-igual); }
-.jg-mini i[data-final="menos"] { --jg-c: var(--jg-menos); }
+.jg-mini i[data-final="menos"] { --jg-c: var(--jg-gana-b); }
 @keyframes jg-mini { 0%, 15% { background: var(--tinta); transform: scale(.7); } 40%, 85% { background: var(--jg-c); transform: none; } 100% { background: var(--tinta); transform: scale(.7); } }
 
 /* La situación llega como un mensaje; mientras Claude la escribe, dos líneas de espera */
@@ -256,7 +263,7 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-vidas-suceso[data-tono="bueno"] circle { fill: var(--sol); }
 .jg-vidas-final { opacity: 0; transition: opacity .6s ease; }
 .jg-vidas-final[data-visible="true"] { opacity: 1; }
-.jg-vidas-gana { font: 700 11px var(--font); fill: var(--jg-mas); }
+.jg-vidas-gana { font: 700 11px var(--font); fill: var(--tinta); }
 .jg-vidas-pierde { font: 500 10px var(--font); fill: var(--suave); }
 .jg-como-leyenda i[data-suceso] { width: 10px; height: 10px; border: 1.5px solid var(--tinta); border-radius: 50%; }
 .jg-como-leyenda i[data-suceso="malo"] { background: var(--tinta); }
@@ -284,7 +291,6 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-mundo-punto:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
 .jg-mundo-punto[aria-pressed="true"] { transform: scale(1.3); box-shadow: 0 0 0 2px var(--papel), 0 0 0 4px var(--tinta); }
 .jg-mundo-punto[data-empate="true"] { background: var(--jg-igual); }
-.jg-leyenda i:not([data-tipo]) { background: var(--jg-igual); }
 .jg-mundo { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 2px solid var(--tinta); border-radius: 16px; background: var(--papel); animation: vd-subir .4s var(--ease) both; }
 .jg-mundo-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .jg-mundo-cabeza .jg-fuerte { font-size: 17px; line-height: 22px; }
@@ -415,15 +421,17 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 .jg-cierre-partes .jg-dato > span:first-child { display: flex; flex-direction: column; gap: 2px; font: 600 14px/18px var(--font); }
 .jg-cierre-partes small { font: 400 12px/16px var(--font); color: var(--suave); }
 .jg-cierre-partes .jg-dato > span:last-child { font: 700 18px/22px var(--font); white-space: nowrap; }
-.jg-cierre-partes [data-tono="mas"] { color: var(--dinero); }
-.jg-cierre-partes [data-tono="menos"] { color: var(--vida); }
+/* como los chips de diferencia: sol si sube, tinta si baja; el número en tinta para que se lea */
+.jg-cierre-partes [data-tono="mas"], .jg-cierre-partes [data-tono="menos"] { padding: 0 8px; border-radius: 999px; }
+.jg-cierre-partes [data-tono="mas"] { background: var(--jg-mas-suave); }
+.jg-cierre-partes [data-tono="menos"] { background: var(--jg-menos-suave); }
 
 /* La plata del año: cómo cambió el sueldo y el contador de ahorro */
 .jg-plata .jg-dato > span:first-child { display: flex; flex-direction: column; gap: 2px; }
 .jg-plata .jg-dato > span:last-child { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
 .jg-plata small { font: 400 12px/16px var(--font); color: var(--suave); white-space: normal; }
-.jg-plata [data-tono="mas"] { color: var(--dinero); }
-.jg-plata [data-tono="menos"] { color: var(--vida); }
+/* el signo dice si sube o baja; el color no: sol sobre blanco no se lee y el rosado es un color de opción */
+.jg-plata [data-tono="mas"], .jg-plata [data-tono="menos"] { color: var(--tinta); }
 .jg-plata-total > span { font-weight: 700 !important; }
 
 /* El dado de verdad: antes de tirar se ve lo que te juegas y la ficha busca; en el resultado cae donde te tocó */
@@ -449,20 +457,20 @@ html:has(.jg-pie-fijo) { scroll-padding-bottom: 170px; }
 /* Sin trabajo: la tira de los 12 meses */
 .jg-meses { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 0; padding: 0; list-style: none; }
 .jg-meses li { display: flex; align-items: flex-end; justify-content: center; height: 34px; padding-bottom: 3px; border-radius: 6px; background: var(--niebla); font: 500 10px/12px var(--font); color: var(--suave); }
-.jg-meses li[data-celda="trabajo"] { background: color-mix(in srgb, var(--jg-mas) 22%, var(--papel)); }
+.jg-meses li[data-celda="trabajo"] { background: var(--jg-mas-suave); }
 .jg-meses li[data-celda="vacio"] { background: var(--linea); }
-.jg-meses li[data-celda="rechazada"] { background: color-mix(in srgb, var(--jg-menos) 40%, var(--papel)); color: var(--tinta); }
-.jg-meses li[data-celda="aceptada"] { background: var(--jg-mas); color: var(--tinta); }
-.jg-meses li[data-celda="ahora"] { background: var(--sol); color: var(--sobre-sol); font-weight: 700; }
+.jg-meses li[data-celda="rechazada"] { background: var(--jg-menos-suave); color: var(--tinta); }
+.jg-meses li[data-celda="aceptada"] { background: var(--jg-mas); color: var(--sobre-sol); }
+.jg-meses li[data-celda="ahora"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
 .jg-meses li[data-celda="futuro"] { background: transparent; border: 1.5px dashed var(--linea); }
 .jg-meses-leyenda { display: flex; flex-wrap: wrap; gap: 4px 12px; font: 400 12px/16px var(--font); color: var(--suave); }
 .jg-meses-leyenda span { display: inline-flex; align-items: center; gap: 5px; }
 .jg-meses-leyenda i { width: 10px; height: 10px; border-radius: 3px; background: var(--niebla); }
-.jg-meses-leyenda i[data-celda="trabajo"] { background: color-mix(in srgb, var(--jg-mas) 22%, var(--papel)); }
+.jg-meses-leyenda i[data-celda="trabajo"] { background: var(--jg-mas-suave); }
 .jg-meses-leyenda i[data-celda="vacio"] { background: var(--linea); }
-.jg-meses-leyenda i[data-celda="rechazada"] { background: color-mix(in srgb, var(--jg-menos) 40%, var(--papel)); }
+.jg-meses-leyenda i[data-celda="rechazada"] { background: var(--jg-menos-suave); }
 .jg-meses-leyenda i[data-celda="aceptada"] { background: var(--jg-mas); }
-.jg-meses-leyenda i[data-celda="ahora"] { background: var(--sol); }
+.jg-meses-leyenda i[data-celda="ahora"] { background: var(--acento); }
 
 /* El gráfico de un mundo se abre a pedido: las líneas se trazan rápido para que no parezca vacío */
 .jg-duelo-mundo .jg-abanico-medio { animation-duration: .5s; animation-delay: 0s; }

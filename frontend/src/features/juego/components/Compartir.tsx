@@ -4,12 +4,11 @@ import QRCode from "qrcode";
 import { BifurcaLogo, Button, Meta, Stack, Text } from "@/shared/ui";
 import { plata } from "../textos";
 import type { Comparacion } from "../types";
+import { COLOR_EMPATE, coloresDeOpciones } from "../colores";
 import "../demo.css";
 
-/** Los colores de la pantalla, fijos: la imagen se ve igual con tema claro u oscuro. La base va naranja, como en la carta. */
-const BASE = "#F08A1C";
-const COLORES = ["#17794B", "#D6336C", "#7C5CD6", "#0E9AA7"];
-const EMPATE = "#B9BAC0";
+/** Los colores de opción de la carta, en su valor claro fijo: la imagen se ve igual con tema claro u oscuro. */
+const EMPATE = COLOR_EMPATE.claro;
 const NOMBRE = "bifurca-mi-resultado.png";
 
 /** Si el navegador puede compartir imágenes (el menú de compartir del celular): si no, se descarga. */
@@ -32,12 +31,7 @@ function comoArchivo(png: string): File {
 /** Una elección es robusta si con ella no terminas peor (ganas o empatas) en al menos 7 de cada 10 mundos. */
 const ROBUSTA = 0.7;
 
-function coloresFijos(c: Comparacion): Record<string, string> {
-  const salida: Record<string, string> = {};
-  let i = 0;
-  for (const o of c.opciones) salida[o.opcion] = o.es_base ? BASE : COLORES[i++ % COLORES.length];
-  return salida;
-}
+const coloresFijos = (c: Comparacion) => coloresDeOpciones(c.opciones, "claro");
 
 /** "Robusto" o "apuesta", con los mismos conteos que se ven en los puntos. */
 function veredicto(c: Comparacion, elegida: string) {
