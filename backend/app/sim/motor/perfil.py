@@ -66,6 +66,7 @@ class Perfil:
     anos_independiente: int | None = None  # si hoy trabaja por su cuenta: hace cuántos años
     practica: str = ""                    # tipo de empleador de su práctica (grande | pyme | startup | publico)
     toda_su_carrera_en: str = ""          # publico | startup, si todos sus empleos (dos o más) fueron ahí
+    ascensos_por_ano: float | None = None  # ascensos dentro de una misma empresa por año de experiencia
 
     @classmethod
     def a_los_18(cls, sexo: str = "m", riesgo: int = 5) -> "Perfil":
@@ -92,6 +93,24 @@ def parametros_propios(perfil: "Perfil", pq: Paquete) -> dict:
         return {"MIX_EMPLEADOR": {"grande": mix["grande"] * escala, "pyme": mix["pyme"] * escala,
                                   "startup": STARTUP_SI_SIEMPRE_STARTUP}}
     return {}
+
+
+# Ascenso extra por su ritmo de ascensos (supuesto del equipo): la mitad de lo que su ritmo supera al del
+# paquete, hasta 4 puntos al año. Ver `ascenso_extra`.
+ASCENSO_EXTRA_FACTOR, ASCENSO_EXTRA_MAX = 0.5, 0.04
+
+
+def ascenso_extra(ascensos_por_ano: float, nivel: int, pq: Paquete) -> float:
+    """Cuánto más asciende al año que lo que el paquete supone, según su CV (va a prob_ascenso_extra).
+
+    Para no contar dos veces lo que ya dice su cargo, se compara su ritmo con el que el paquete le habría
+    dado en los cargos que ya subió (ASCENSO de junior a su nivel de hoy; supuesto: partió junior), y solo
+    cuenta lo que lo supera. Un ritmo más lento no resta: prob_ascenso_extra no baja de 0 en el paquete.
+    La mitad del exceso (regresión a la media) y el tope son supuestos del equipo.
+    """
+    pasados = range(max(1, nivel))
+    esperado = sum(pq.k("ASCENSO", n) for n in pasados) / len(pasados)
+    return round(max(0.0, min(ASCENSO_EXTRA_MAX, ASCENSO_EXTRA_FACTOR * (ascensos_por_ano - esperado))), 4)
 
 
 def avance_en_carrera(perfil: Perfil, pq: Paquete) -> tuple[int, int]:
@@ -176,6 +195,8 @@ def estado_inicial(perfil: Perfil, pq: Paquete) -> dict:
         e.pop("anos_independiente", None)  # solo describe a quien hoy trabaja por su cuenta
     if perfil.practica and (perfil.estado == "estudiando" or e["primer_empleo"]):
         e["practica"] = perfil.practica  # solo pesa en su primera pega
+    if perfil.ascensos_por_ano is not None:
+        e["prob_ascenso_extra"] = ascenso_extra(perfil.ascensos_por_ano, perfil.nivel, pq)  # sin dato, 0 (estado.json)
     propios = parametros_propios(perfil, pq)
     if propios:
         e[K_PROPIOS] = propios

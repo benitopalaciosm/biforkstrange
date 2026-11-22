@@ -347,6 +347,28 @@ def test_toda_su_carrera_en_el_estado_o_en_startups_sesga_el_reempleo():
     assert any("vuelven al Estado 40%" in f and "12%" in f for f in r["inferido"])
 
 
+def test_quien_asciende_rapido_asciende_mas():
+    from app.sim.motor.paquete import paquete
+    from app.sim.motor.perfil import Perfil, ascenso_extra, estado_inicial
+
+    pq = paquete()
+    assert estado_inicial(Perfil(), pq)["prob_ascenso_extra"] == 0  # sin dato, como siempre
+    # se compara con el ritmo del paquete en los cargos que ya subió (ASCENSO 0,10 y 0,08 hasta senior)
+    assert ascenso_extra(0.15, 2, pq) == pytest.approx(0.5 * (0.15 - 0.09))
+    assert ascenso_extra(0.05, 2, pq) == 0  # más lento no resta
+    assert ascenso_extra(1.0, 1, pq) == 0.04  # tope
+    e = estado_inicial(Perfil(nivel=2, ascensos_por_ano=0.15), pq)
+    assert e["prob_ascenso_extra"] == pytest.approx(0.03)
+
+    leido = LEIDO.model_copy(update={"ascensos_internos": 2, "anios_experiencia": 8})  # nivel 2
+    r = perfil_ia.completar(leido)
+    assert r["perfil"]["ascensos_por_ano"] == 0.25 and any("ascendido 2 veces en 8 años" in f for f in r["inferido"])
+    r = perfil_ia.completar(leido.model_copy(update={"ascensos_internos": 0}))
+    assert r["perfil"]["ascensos_por_ano"] == 0 and not any("ascendido" in f for f in r["inferido"])
+    r = perfil_ia.completar(leido.model_copy(update={"anios_experiencia": 1}))  # muy poco para hablar de ritmo
+    assert r["perfil"]["ascensos_por_ano"] is None
+
+
 def test_los_gemelos_se_cambian_como_tu():
     from app.sim.motor.politicas import pesos_personales
 

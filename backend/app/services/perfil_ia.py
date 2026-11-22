@@ -121,6 +121,9 @@ class PerfilLeido(BaseModel):
     toda_su_carrera_en: Literal["publico", "startup"] | None = Field(
         None, description="\"publico\" si todos sus empleos (dos o más, contando el actual) fueron en el Estado; "
                           "\"startup\" si todos fueron en startups.")
+    ascensos_internos: int | None = Field(
+        None, description="Cuántas veces lo ascendieron DENTRO de una misma empresa (un cargo mayor con el mismo "
+                          "empleador), sumando todas sus empresas.")
     dudas_sugeridas: list[DudaSugerida] = Field(
         default_factory=list,
         description="Hasta 3 dudas de la lista DUDAS que más le calzan a esta persona, la más relevante primero.")
@@ -187,6 +190,9 @@ fue en el Estado). Si hizo varias, la más reciente.
   - toda_su_carrera_en: mira el tipo de cada empleador de su experiencia, con los criterios de \
 tipo_empleador. Solo si tuvo dos o más empleos y TODOS son del Estado ("publico") o TODOS son startups \
 ("startup"); si hay uno de otro tipo, o tuvo un solo empleo, null. Prácticas no cuentan.
+  - ascensos_internos: cuenta los cargos que aparecen uno tras otro en una MISMA empresa, cuando el \
+siguiente es mayor en la escala de CARGOS. Cambiarse de empresa a un cargo mayor no cuenta. Si el texto \
+lista un solo cargo por empresa, 0; si no trae experiencia, null.
 - empresa_actual: su empleador de hoy, sin cargo ni fechas. Si conoces su nombre legal en Chile, usa \
 ese (BancoEstado → "Banco del Estado de Chile"); si no, el nombre tal como aparece.
 - dudas_sugeridas: hasta 3 decisiones de carrera de la lista DUDAS que esta persona probablemente se \
@@ -318,7 +324,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     extras = {"ingles", "anios_experiencia", "empleadores", "empresa_actual", "situacion", "meses_sin_trabajo",
               "jornada_parcial", "remoto", "usa_ia", "empresa_propia_anos", "levanto_inversion",
               "anio_egreso_esperado", "anio_que_cursa", "anos_independiente", "practica", "toda_su_carrera_en",
-              *HISTORIA_LEIDA}
+              "ascensos_internos", *HISTORIA_LEIDA}
     datos = leido.model_dump(exclude={"inferido", "dudas_sugeridas", "retrato"} | extras)
     if datos["rubro"] not in rubros:
         datos["rubro"] = None
@@ -379,6 +385,7 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None, hoy: str | None = N
     inferido += _independiente(leido, perfil)
     inferido += _practica(leido, perfil)
     inferido += _toda_su_carrera(leido, perfil, pq)
+    inferido += _ritmo_de_ascensos(leido, perfil, pq)
     empresa = _empresa_sii(leido.empresa_actual)
     if empresa:
         if datos["tipo_empleador"] in (None, "grande", "pyme"):
@@ -479,6 +486,24 @@ def _toda_su_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]
     return [f"Toda tu carrera ha sido en startups: cuando tus gemelos cambian de pega en el sector privado, "
             f"{round(propios['MIX_EMPLEADOR']['startup'] * 100)}% de las veces es otra startup (la gente, "
             f"{round(pq.k('MIX_EMPLEADOR', 'startup') * 100)}%; supuesto del equipo)."]
+
+
+ANOS_PARA_RITMO = 2  # con menos años de experiencia, el ritmo de ascensos no dice nada (supuesto)
+
+
+def _ritmo_de_ascensos(leido: PerfilLeido, perfil: dict, pq: Paquete) -> list[str]:
+    """Ascensos dentro de una misma empresa por año: si supera al del paquete, sus gemelos ascienden más."""
+    if leido.ascensos_internos is None or not leido.anios_experiencia or leido.anios_experiencia < ANOS_PARA_RITMO:
+        return []
+    from app.sim.motor.perfil import ascenso_extra
+
+    perfil["ascensos_por_ano"] = round(min(2.0, max(0, leido.ascensos_internos) / leido.anios_experiencia), 2)
+    extra = ascenso_extra(perfil["ascensos_por_ano"], perfil["nivel"], pq)
+    if not extra:
+        return []
+    return [f"Te han ascendido {leido.ascensos_internos} veces en {leido.anios_experiencia} años, más rápido que lo "
+            f"típico para tu cargo: tus gemelos tienen {round(extra * 100)} puntos más de chance de ascenso cada año "
+            "(supuesto del equipo)."]
 
 
 def _avance_en_carrera(leido: PerfilLeido, perfil: dict, pq: Paquete, hoy: str | None) -> list[str]:

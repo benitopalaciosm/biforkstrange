@@ -49,6 +49,8 @@ export type Perfil = {
   practica?: "" | "grande" | "pyme" | "startup" | "publico";
   /** Si todos sus empleos fueron en el Estado o en startups: al cambiar de pega, sus gemelos vuelven ahí más seguido. */
   toda_su_carrera_en?: "" | "publico" | "startup";
+  /** Ascensos dentro de una misma empresa por año de experiencia. Si es más rápido que lo típico, asciende más. */
+  ascensos_por_ano?: number | null;
 };
 
 export type DudaSugerida = { decision: string; nombre?: string; por_que: string };

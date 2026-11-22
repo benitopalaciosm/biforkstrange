@@ -40,6 +40,7 @@ class PerfilIn(BaseModel):
     anos_independiente: int | None = Field(None, ge=0, le=40)
     practica: Literal["", "grande", "pyme", "startup", "publico"] = ""
     toda_su_carrera_en: Literal["", "publico", "startup"] = ""
+    ascensos_por_ano: float | None = Field(None, ge=0, le=2)
 
     def a_perfil(self) -> Perfil:
         return Perfil(**self.model_dump())
