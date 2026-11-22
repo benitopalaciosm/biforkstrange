@@ -452,3 +452,26 @@ def test_terminar_sin_trabajo_cuenta_cero_en_la_comparacion():
     for o in c["opciones"]:
         sin_trabajo = round(o["sin_trabajo_al_final"] * len(o["sueldos"]))
         assert sum(1 for s in o["sueldos"] if s == 0) >= sin_trabajo
+
+
+def test_el_magister_vespertino_cobra_su_arancel_en_la_plata_que_juntas():
+    """El arancel se descuenta del ahorro, que la carta no muestra: ahora sale en gastos e ingreso_neto."""
+    c = gemelos.comparar(_al_inicio(), "magister", n=n(40), anios=5, semilla=2, crudo=True,
+                         parametros={"vespertino": {"universidad_destino": "23"}})
+    op = {o["opcion"]: o for o in c["opciones"]}
+    assert op["vespertino"]["gastos"]["p50"] >= 8_000_000  # UAI: ~$8,5 millones al año, dos años
+    assert op["no"]["gastos"]["p50"] == 0
+    # lo que juntas descuenta el arancel: queda bajo lo que cobraste en sueldos
+    assert op["vespertino"]["ingreso_neto"]["p50"] < op["vespertino"]["ingreso_total"]["p50"]
+    assert all(o["gastos"]["p10"] <= o["gastos"]["p50"] <= o["gastos"]["p90"] for o in c["opciones"])
+
+
+def test_comprar_vivienda_no_es_un_gasto():
+    """Mover lo ahorrado a una casa no es ganar ni gastar: no entra en gastos ni en ingreso_neto."""
+    v = _al_inicio()
+    v.e["ahorro"] = 20_000_000
+    antes = (v.gastos, v.ingreso_neto)
+    v._aplicar([{"var": "ahorro", "op": "suma", "valor": "-ahorro * 0.8"}], "prueba")
+    assert (v.gastos, v.ingreso_neto) == antes and v.e["ahorro"] == pytest.approx(4_000_000)
+    v._aplicar([{"var": "ahorro", "op": "suma", "valor": "-6000000"}], "prueba")
+    assert v.gastos == antes[0] + 6_000_000 and v.ingreso_neto == antes[1] - 6_000_000

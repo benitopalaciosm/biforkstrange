@@ -251,6 +251,18 @@ function OpcionConGemelos({
               <span>Pasas por la cesantía</span>
               <b>{cesantia === 0 ? "en ningún mundo" : `en ${cesantia} de 100`}</b>
             </span>
+            {o.ingreso_neto && (
+              <span role="listitem">
+                <span>Juntas hasta los {edadFinal}</span>
+                <b>{plata(o.ingreso_neto.p50)}</b>
+              </span>
+            )}
+            {o.gastos && o.gastos.p50 > 0 && (
+              <span role="listitem">
+                <span>Pagas de tu bolsillo</span>
+                <b>{plata(o.gastos.p50)}</b>
+              </span>
+            )}
           </span>
           {veredicto && <span className="jg-frase">{veredicto}</span>}
           {o.es_base && <span className="jg-frase">Es seguir como vas: las otras opciones se comparan con esta.</span>}

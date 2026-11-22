@@ -52,7 +52,7 @@ En cada mundo, la copia toma la opción que se compara y después no recibe más
 
 ### Qué se compara
 
-El sueldo al año 10, el cargo, los meses sin trabajo y el estado (empleado, cesante, independiente). Un mundo lo gana la opción con mayor sueldo final. Si las dos primeras quedan a menos de 0,5%, es empate.
+El sueldo al año 10, el cargo, los meses sin trabajo y el estado (empleado, cesante, independiente). Además, lo que juntas en el período y lo que pagas de tu bolsillo: los costos de una vez (arancel, bootcamp, emigrar, sabático, la cuota del CAE) y las entradas de una vez (finiquito, herencia, vender tu empresa) que el paquete anota en `ahorro`. Mover lo ahorrado (comprar una vivienda) no cuenta como gasto. Un mundo lo gana la opción con mayor sueldo final; si terminas sin trabajo, ese sueldo es $0. Si las dos primeras quedan a menos de 0,5%, es empate.
 
 El ánimo y la energía existen en el modelo, pero casi no se mueven con las decisiones de trabajo, así que no se muestran.
 

@@ -215,6 +215,10 @@ export type OpcionComparada = ContraBase & {
   es_base: boolean;
   sueldo: Rango;
   ingreso_total: Rango;
+  /** Lo que juntas en el período: sueldos más plata de una vez (finiquito, herencia), menos lo que pagaste. */
+  ingreso_neto: Rango;
+  /** Lo que pagaste de una vez en el período: arancel, bootcamp, emigrar, la cuota del CAE… */
+  gastos: Rango;
   paso_por_cesantia: number;
   meses_sin_trabajo: number;
   sin_trabajo_al_final: number;

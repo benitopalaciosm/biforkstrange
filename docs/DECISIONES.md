@@ -48,7 +48,7 @@ La partida de la persona es un mundo más, aparte de los 100.
 
 ## 7. Se compara por la medida final, no por un puntaje
 
-El ganador de cada mundo es la opción con mayor sueldo al año 10. También se muestran el cargo, los meses sin trabajo y el estado. No hay un puntaje de felicidad, y el ánimo y la energía no se muestran.
+El ganador de cada mundo es la opción con mayor sueldo al año 10; si terminas sin trabajo, ese sueldo es $0. También se muestran el cargo, los meses sin trabajo, el estado, lo que juntas en el período (sueldos más la plata de una vez que entra, como un finiquito, menos la que sale, como un arancel) y lo que pagas de tu bolsillo. El ganador sigue siendo por sueldo final: la plata juntada se muestra al lado, para que un magíster o emigrar no se vea gratis. No hay un puntaje de felicidad, y el ánimo y la energía no se muestran.
 
 **Por qué.** El sueldo y los meses sin trabajo tienen datos detrás; un puntaje de felicidad no. El ánimo y la energía existen en el modelo, pero casi no cambian entre opciones de trabajo, así que mostrarlos haría creer que medimos algo que no medimos.
 

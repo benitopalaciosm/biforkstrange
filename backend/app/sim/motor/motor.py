@@ -86,6 +86,7 @@ def p_independiente_busca_empleo(e: dict) -> float:
 # Sitio del sorteo del escenario de IA: uno por gemelo, igual en todas sus opciones
 SITIO_IA = "mundo:ia"
 _USA_SUELDO = re.compile(r"\bsueldo(_ref)?\b")  # un sueldo nuevo calculado desde el anterior
+_USA_AHORRO = re.compile(r"\bahorro\b")  # mover parte de lo ahorrado (comprar una casa) no es ganar ni gastar
 
 
 class FaltaEleccion(Exception):
@@ -128,7 +129,11 @@ class Vida:
         self.historia: list[dict] = []
         self.registro: dict | None = None
         self.anios_buscando = 0
-        self.ingreso_total = 0.0
+        self.ingreso_total = 0.0          # sueldos cobrados
+        # plata de una vez, fuera del sueldo: lo que entra (finiquito, herencia, vender tu empresa) y lo que
+        # sale (arancel, bootcamp, emigrar, sabático, la cuota del CAE). `gastos` es solo lo que sale.
+        self.plata_aparte = 0.0
+        self.gastos = 0.0
         self._anios_con_hueco = 0
         self.variedad = 1.0               # peso de una carta ya vista; la partida de la persona usa REPETIR_CARTA
         # empleo actual: cuánto paga respecto del nivel de referencia (empresa × cargo); 1 = neutro
@@ -510,6 +515,8 @@ class Vida:
             if self.pq.variables[var]["inicio"] == "deriva":
                 continue  # las derivadas se recalculan; el paquete las mueve solo como referencia
             previo = self.e[var]
+            if var == "ahorro" and ef["op"] == "suma" and not _USA_AHORRO.search(str(ef["valor"])):
+                self._plata(valor)
             if ef["op"] == "suma":
                 self.e[var] = previo + valor
             elif ef["op"] == "multiplica":
@@ -695,6 +702,7 @@ class Vida:
             pago = min(e["deuda_estudios"], 12 * e["sueldo"] * PAGO_DEUDA_ESTUDIOS)
             e["deuda_estudios"] -= pago
             e["ahorro"] -= pago
+            self._plata(-pago)
         if e["ahorro"] > 0:
             e["ahorro"] *= 1 + self.pq.k("RETORNO_REAL")
 
@@ -769,6 +777,17 @@ class Vida:
         return cerrado
 
     # ------------------------------------------------------------------ lectura
+    def _plata(self, monto: float) -> None:
+        """Anota plata de una vez que entra (+) o sale (-), fuera del sueldo."""
+        self.plata_aparte += monto
+        if monto < 0:
+            self.gastos -= monto
+
+    @property
+    def ingreso_neto(self) -> float:
+        """Sueldos cobrados más la plata de una vez que entró, menos la que salió."""
+        return self.ingreso_total + self.plata_aparte
+
     def sueldo_o_ultimo(self) -> float:
         """El sueldo actual o, si está sin trabajo, el último que tuvo. Para mostrar, no para comparar."""
         return self.e["sueldo"] if self.e["sueldo"] > 0 else self.e["sueldo_ref"]
