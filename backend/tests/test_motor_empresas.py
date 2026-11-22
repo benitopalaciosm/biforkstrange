@@ -374,3 +374,34 @@ def test_la_universidad_del_magister_dice_que_su_numero_es_el_arancel():
     opcion = next(o for o in v["pendiente"]["opciones"] if o["opcion"] == "vespertino")
     nombres = {a["valor"]: a["nombre"] for i in opcion["elecciones_internas"] for a in i["alternativas"]}
     assert nombres["23"] == "UAI · arancel $8,5 millones al año · selectiva"
+
+
+def test_en_la_cesantia_cada_opcion_trae_su_propia_empresa():
+    """"Esperar algo de tu nivel" no es la misma pega que "tomar lo primero que salga": antes las dos
+    opciones mostraban la misma empresa, porque compartían el sorteo de la decisión."""
+    cesante = Perfil(edad=30, estado="buscando", sueldo=1_500_000)
+    distintas = 0
+    for semilla in range(10):
+        v = partida.vista(cesante, semilla, "cesantia", [], 0)
+        ofertas = {o["opcion"]: o["empresa"] for o in v["pendiente"]["opciones"]}
+        assert ofertas["rapido"] and ofertas["nivel"]
+        distintas += ofertas["rapido"]["empresa_id"] != ofertas["nivel"]["empresa_id"]
+    assert distintas >= 8
+
+
+def test_en_la_cesantia_vives_la_empresa_que_mostro_la_opcion():
+    """Antes el motor volvía a sortear la empresa al emplearte (y la sorteaba dos veces): la carta mostraba
+    una y vivías otra."""
+    cesante = Perfil(edad=30, estado="buscando", sueldo=1_500_000)
+    vistos = iguales = 0
+    for semilla in range(20):
+        v = partida.vista(cesante, semilla, "cesantia", [], 0)
+        ofertas = {o["opcion"]: o["empresa"] for o in v["pendiente"]["opciones"]}
+        for opcion in ("rapido", "nivel"):
+            vida = partida.jugar(cesante, semilla, [{"decision": "cesantia", "opcion": opcion}], duda="cesantia").vida
+            reg = vida.historia[0] if vida.historia else vida.registro
+            if vida.e["estado"] != "empleado" or any(x["evento"] == "separacion_empleo" for x in reg["eventos"]):
+                continue  # no encontró, o perdió esa pega el mismo año
+            vistos += 1
+            iguales += vida.e["empresa_id"] == ofertas[opcion]["empresa_id"]
+    assert vistos >= 10 and iguales == vistos
