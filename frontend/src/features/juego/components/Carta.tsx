@@ -967,6 +967,9 @@ export function Carta({
 
   /** La pregunta abierta en la hoja de abajo (a qué rubro, a qué región), o null si está cerrada. */
   const [hoja, setHoja] = useState<number | null>(null);
+  // Sin opción elegida, el botón del pie sube a las tarjetas: después de mirar los 100 mundos no hay que buscarlas
+  const opcionesRef = useRef<HTMLDivElement>(null);
+  const irAOpciones = () => opcionesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const [defectos, setDefectos] = useState<Internas>({});
   const primeraFaltante = (o: OpcionPendiente, valores: Internas) =>
     Math.max(0, o.elecciones_internas.findIndex((i) => valores[i.variable] === undefined));
@@ -1106,7 +1109,7 @@ export function Carta({
       </Stack>
 
       {comparacion ? (
-        <div className="vd-pila jg-columna jg-opciones-cortas" role="group" aria-label="Opciones" data-cargando={recalculando} style={{ gap: 14 }}>
+        <div ref={opcionesRef} className="vd-pila jg-columna jg-opciones-cortas" role="group" aria-label="Opciones" data-cargando={recalculando} style={{ gap: 14, scrollMarginTop: 16 }}>
           {comparadas.map((o) => (
             <OpcionConGemelos
               key={o.opcion}
@@ -1132,7 +1135,7 @@ export function Carta({
           ))}
         </div>
       ) : (
-        <Stack gap={12} className="jg-columna">
+        <div ref={opcionesRef} className="vd-pila jg-columna" style={{ gap: 12, scrollMarginTop: 16 }}>
           {muchas && (
             <input className="jg-campo" type="search" placeholder="Filtrar opciones" aria-label="Filtrar opciones" value={filtro} onChange={(ev) => setFiltro(ev.target.value)} />
           )}
@@ -1155,7 +1158,7 @@ export function Carta({
             }))}
           />
           {visibles.length > 40 && <Text size="sm">Hay {visibles.length - 40} más: usa el filtro.</Text>}
-        </Stack>
+        </div>
       )}
 
       {comparacion && opcion && (() => {
@@ -1238,25 +1241,18 @@ export function Carta({
 
       <div className="jg-pie-fijo">
         {error && <ErrorCaja error={error} onReintentar={onReintentar} />}
-        {/* elegir desde cualquier parte de la carta: no hay que volver arriba después de mirar los 100 mundos */}
-        {comparacion && comparadas.length >= 2 && comparadas.length <= 3 && !cargando && (
-          <div className="jg-pie-opciones" role="group" aria-label="Elegir una opción">
-            {comparadas.map((o) => (
-              <button key={o.opcion} type="button" className="vd-chip jg-pie-opcion" aria-pressed={sel === o.opcion} onClick={() => elegirOpcion(o.opcion)} disabled={recalculando}>
-                <i className="jg-color" style={{ background: colores[o.opcion] }} aria-hidden="true" />
-                {o.nombre}
-              </button>
-            ))}
-          </div>
-        )}
         {cargando && <Cargando>Sorteando y viviendo tu año…</Cargando>}
         {opcion && faltan.length > 0 && !cargando ? (
           <Button onClick={() => setHoja(primeraFaltante(opcion, internas))} disabled={recalculando}>
             Elegir el detalle
           </Button>
+        ) : opcion || cargando ? (
+          <Button onClick={confirmar} disabled={cargando || recalculando}>
+            {cargando ? "Sorteando…" : `Confirmar «${opcion?.nombre}»`}
+          </Button>
         ) : (
-          <Button onClick={confirmar} disabled={!opcion || cargando || recalculando}>
-            {cargando ? "Sorteando…" : opcion ? "Confirmar" : "Toca una opción"}
+          <Button variant="white" onClick={irAOpciones}>
+            Elige una opción ↑
           </Button>
         )}
       </div>
