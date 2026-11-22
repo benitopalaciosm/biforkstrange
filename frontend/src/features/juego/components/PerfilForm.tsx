@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { type DragEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Button, ChevronLeftIcon, Chip, Heading, IconButton, Panel, Pill, Row, Screen, ScreenFooter, ScreenHeader, Segmented, Slider, Stack, Tag, Text,
 } from "@/shared/ui";
@@ -33,6 +33,72 @@ function Revisa({ si }: { si: boolean }) {
       Supuesto: revísalo
     </Tag>
   ) : null;
+}
+
+/** El atajo: subes tu CV o el PDF de tu LinkedIn y Claude llena el formulario. */
+function SubirCv({ estado, onPdf }: { estado: EstadoLectura; onPdf: (pdfBase64: string) => void }) {
+  const entrada = useRef<HTMLInputElement>(null);
+  const [errorArchivo, setErrorArchivo] = useState<string | null>(null);
+  const leyendo = estado.fase === "leyendo";
+
+  const subir = (f: File | undefined) => {
+    if (!f) return;
+    setErrorArchivo(null);
+    if (f.type !== "application/pdf" && !/\.pdf$/i.test(f.name)) return setErrorArchivo("Sube un PDF.");
+    if (f.size > 10_000_000) return setErrorArchivo("El PDF pesa más de 10 MB.");
+    const lector = new FileReader();
+    lector.onload = () => typeof lector.result === "string" && onPdf(lector.result);
+    lector.onerror = () => setErrorArchivo("No pudimos abrir el archivo.");
+    lector.readAsDataURL(f);
+  };
+
+  return (
+    <Panel
+      className="jg-subir-cv"
+      onDragOver={(e: DragEvent) => e.preventDefault()}
+      onDrop={(e: DragEvent) => {
+        e.preventDefault();
+        subir(e.dataTransfer.files?.[0]);
+      }}
+    >
+      <Stack gap={4}>
+        <Heading level={3} as="h2">
+          Sube tu CV y nos saltamos el formulario
+        </Heading>
+        <Text size="sm">O el PDF de tu LinkedIn: en tu perfil, Más → Guardar como PDF.</Text>
+      </Stack>
+      <input
+        ref={entrada}
+        type="file"
+        accept="application/pdf,.pdf"
+        hidden
+        onChange={(e) => {
+          subir(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
+      <Button onClick={() => entrada.current?.click()} disabled={leyendo}>
+        {leyendo ? "Leyendo tu CV…" : "Subir PDF"}
+      </Button>
+      {leyendo && <Cargando>Claude está leyendo tu CV. Mientras, puedes ir revisando abajo.</Cargando>}
+      {errorArchivo && (
+        <div className="jg-error" role="alert">
+          {errorArchivo}
+        </div>
+      )}
+      {estado.fase === "error" && (
+        <div className="jg-error" role="alert">
+          No pudimos leer tu CV. {estado.detalle} Llena el formulario a mano; toma un minuto.
+        </div>
+      )}
+      {estado.fase === "listo" && (
+        <Text size="sm" role="status">
+          <strong>Listo, llenamos lo que decía tu CV.</strong>{" "}
+          {estado.supuestos.length > 0 ? `Falta lo que un CV no dice: ${estado.supuestos.join(", ")}. Lo marcamos abajo.` : "Revisa que calce."}
+        </Text>
+      )}
+    </Panel>
+  );
 }
 
 const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -72,6 +138,8 @@ export function PerfilForm({
   /** Campos que la persona tocó desde que le pidió a Claude leer: esos no se pisan cuando llega la respuesta. */
   const tocados = useRef(new Set<string>());
   const pedido = useRef(0);
+  /** De dónde vino lo que se está leyendo: el PDF de arriba o el texto del panel de Claude. */
+  const [origen, setOrigen] = useState<"pdf" | "texto">("pdf");
   useEffect(() => () => void pedido.current++, []);
 
   const set = <K extends keyof Perfil>(k: K, v: Perfil[K]) => {
@@ -81,12 +149,13 @@ export function PerfilForm({
   };
   const marca = (k: keyof Perfil) => (marcados.has(k) ? "jg-marcado" : undefined);
 
-  const llenarConClaude = async (texto: string) => {
+  const llenarConClaude = async (entrada: string | { pdf: string }) => {
     const mio = ++pedido.current;
     tocados.current = new Set();
-    setLectura({ fase: "leyendo", documento: texto.includes("```gemelo-laboral") });
+    setOrigen(typeof entrada === "string" ? "texto" : "pdf");
+    setLectura({ fase: "leyendo", documento: typeof entrada === "string" && entrada.includes("```gemelo-laboral") });
     try {
-      const r = await leerPerfil(texto);
+      const r = await leerPerfil(entrada);
       if (mio !== pedido.current) return;
       // lo que la persona editó mientras Claude leía se respeta
       const nuevos = Object.fromEntries(Object.entries(r.perfil).filter(([k]) => !tocados.current.has(k))) as Partial<Perfil>;
@@ -135,9 +204,11 @@ export function PerfilForm({
       {errorCatalogo && <ErrorCaja error={errorCatalogo} />}
       {!catalogo && !errorCatalogo && <Cargando>Cargando alternativas…</Cargando>}
 
-      <details className="jg-plegable" open={lectura.fase !== "nada"}>
-        <summary>¿Tienes tu CV o usas Claude? Llénalo solo</summary>
-        <Trayectoria estado={lectura} onLlenar={(t) => void llenarConClaude(t)} />
+      <SubirCv estado={origen === "pdf" ? lectura : { fase: "nada" }} onPdf={(pdf) => void llenarConClaude({ pdf })} />
+
+      <details className="jg-plegable" open={origen === "texto" && lectura.fase !== "nada"}>
+        <summary>¿Usas Claude o tienes tu CV en texto? Pégalo aquí</summary>
+        <Trayectoria estado={origen === "texto" ? lectura : { fase: "nada" }} onLlenar={(t) => void llenarConClaude(t)} />
       </details>
 
       {catalogo && (

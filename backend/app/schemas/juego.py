@@ -55,4 +55,6 @@ class DudasIn(BaseModel):
 class TextoPerfilIn(BaseModel):
     """Lo que la persona escribe o sube sobre sí misma (markdown, currículum pegado, un párrafo)."""
 
-    texto: str = Field(min_length=1, max_length=60_000)
+    texto: str = Field("", max_length=60_000)
+    # un PDF (el CV o el "Guardar como PDF" de LinkedIn) en base64; ~10 MB como máximo
+    pdf: str | None = Field(None, max_length=14_000_000)

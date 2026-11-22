@@ -108,7 +108,8 @@ def perfil_desde_texto(body: TextoPerfilIn):
     Claude sin que estuviera literal (`inferido`). Con 503, el cliente muestra el formulario a mano.
     """
     try:
-        return perfil_ia.perfil_desde_texto(body.texto, date.today().isoformat())
+        pdf = perfil_ia.pdf_desde_base64(body.pdf) if body.pdf else None
+        return perfil_ia.perfil_desde_texto(body.texto, date.today().isoformat(), pdf=pdf)
     except perfil_ia.ModeloNoDisponible as error:
         raise HTTPException(503, str(error)) from error
     except ValueError as error:

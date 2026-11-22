@@ -1,3 +1,4 @@
+import base64
 """Perfil desde un texto. No se llama al modelo: se prueba lo que la app hace con lo que el modelo devuelve."""
 
 import pytest
@@ -48,7 +49,7 @@ def test_sin_credenciales_ni_comando_se_avisa(monkeypatch):
 
 
 def test_api_perfil(client, monkeypatch):
-    monkeypatch.setattr(perfil_ia, "leer", lambda texto, hoy, pq=None: (LEIDO, "api"))
+    monkeypatch.setattr(perfil_ia, "leer", lambda texto, hoy, pq=None, pdf=None: (LEIDO, "api"))
     r = client.post("/api/juego/perfil", json={"texto": "Soy Camila..."})
     assert r.status_code == 200
     cuerpo = r.json()
@@ -58,13 +59,48 @@ def test_api_perfil(client, monkeypatch):
 
 
 def test_api_perfil_sin_modelo_da_503(client, monkeypatch):
-    def falla(texto, hoy, pq=None):
+    def falla(texto, hoy, pq=None, pdf=None):
         raise ModeloNoDisponible("sin credenciales")
 
     monkeypatch.setattr(perfil_ia, "leer", falla)
     assert client.post("/api/juego/perfil", json={"texto": "hola"}).status_code == 503
     assert client.post("/api/juego/perfil", json={"texto": ""}).status_code == 422
 
+
+
+def test_api_perfil_desde_pdf(client, monkeypatch):
+    recibido = {}
+
+    def leer(texto, hoy, pq=None, pdf=None):
+        recibido["pdf"] = pdf
+        return LEIDO, "api"
+
+    monkeypatch.setattr(perfil_ia, "leer", leer)
+    pdf = base64.b64encode(b"%PDF-1.7 cv de prueba").decode()
+    r = client.post("/api/juego/perfil", json={"pdf": f"data:application/pdf;base64,{pdf}"})
+    assert r.status_code == 200 and recibido["pdf"] == b"%PDF-1.7 cv de prueba"
+
+
+def test_api_perfil_rechaza_lo_que_no_es_pdf(client):
+    otro = base64.b64encode(b"PK\x03\x04 un zip").decode()
+    r = client.post("/api/juego/perfil", json={"pdf": otro})
+    assert r.status_code == 422 and "no es un PDF" in r.json()["detail"]
+    assert client.post("/api/juego/perfil", json={"pdf": "no es base64!!"}).status_code == 422
+
+
+def test_el_pdf_va_como_documento_a_la_api(monkeypatch):
+    llamada = {}
+
+    class Mensajes:
+        def parse(self, **k):
+            llamada.update(k)
+            return type("R", (), {"stop_reason": "end_turn", "parsed_output": LEIDO})()
+
+    monkeypatch.setattr(perfil_ia.anthropic, "Anthropic", lambda **k: type("C", (), {"messages": Mensajes()})())
+    perfil_ia._por_api("", "2026-11-21", perfil_ia.paquete(), b"%PDF-1.7")
+    bloques = llamada["messages"][0]["content"]
+    assert bloques[0]["type"] == "document" and bloques[0]["source"]["media_type"] == "application/pdf"
+    assert llamada["model"] == "claude-haiku-5-5" and llamada["thinking"] == {"type": "disabled"}
 
 # ── documento armado por el Claude de la persona ──────────────────────────────
 

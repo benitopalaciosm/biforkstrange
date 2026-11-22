@@ -13,6 +13,9 @@ perfil de `ant auth login`). Sin credenciales, y solo para desarrollo local, se 
 con el comando `claude` instalado en la máquina.
 """
 
+import base64
+import binascii
+import io
 import json
 import os
 import shutil
@@ -31,6 +34,33 @@ from app.sim.motor.perfil import NIVELES
 MODELO = "claude-haiku-5-5"
 ESPERA_MAX = 20  # segundos por intento; la persona está mirando la pantalla
 MAX_CARACTERES = 60_000  # un currículum largo tiene unos 15.000
+
+
+PDF_MAX = 10_000_000  # bytes
+
+
+def pdf_desde_base64(datos: str) -> bytes:
+    """El PDF que sube la persona, validado: base64 de un archivo que empieza como PDF."""
+    try:
+        pdf = base64.b64decode(datos.split(",", 1)[-1], validate=True)  # acepta también un data URL
+    except (binascii.Error, ValueError) as error:
+        raise ValueError("El archivo no llegó bien. Vuelve a subirlo.") from error
+    if not pdf.startswith(b"%PDF"):
+        raise ValueError("Ese archivo no es un PDF.")
+    if len(pdf) > PDF_MAX:
+        raise ValueError("El PDF pesa más de 10 MB. Sube uno más liviano.")
+    return pdf
+
+
+def _texto_del_pdf(pdf: bytes) -> str:
+    """Para el comando local, que no recibe archivos: el texto del PDF."""
+    from pypdf import PdfReader
+
+    try:
+        paginas = PdfReader(io.BytesIO(pdf)).pages
+        return "\n".join(p.extract_text() or "" for p in paginas)[:MAX_CARACTERES]
+    except Exception as error:  # pypdf lanza varios tipos según cómo venga roto el archivo
+        raise ValueError("No pudimos leer ese PDF. Prueba con otro o pega el texto.") from error
 
 
 class ModeloNoDisponible(RuntimeError):
@@ -109,7 +139,7 @@ def _catalogo(pq: Paquete) -> str:
     ])
 
 
-def _por_api(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
+def _por_api(texto: str, hoy: str, pq: Paquete, pdf: bytes | None = None) -> PerfilLeido:
     cliente = anthropic.Anthropic(timeout=ESPERA_MAX, max_retries=1)
     respuesta = cliente.messages.parse(
         model=MODELO,
@@ -121,7 +151,13 @@ def _por_api(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
             # el catálogo es largo y no cambia: queda en caché una hora entre llamadas
             {"type": "text", "text": _catalogo(pq), "cache_control": {"type": "ephemeral", "ttl": "1h"}},
         ],
-        messages=[{"role": "user", "content": f"Fecha de hoy: {hoy}\n\n<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>"}],
+        messages=[{"role": "user", "content": [
+            # el PDF va como documento: Claude lo lee completo, con su formato, sin extraer el texto antes
+            *([{"type": "document", "source": {"type": "base64", "media_type": "application/pdf",
+                                               "data": base64.standard_b64encode(pdf).decode()}}] if pdf else []),
+            {"type": "text", "text": f"Fecha de hoy: {hoy}\n\n<texto_de_la_persona>\n{texto}\n</texto_de_la_persona>"
+             if texto else f"Fecha de hoy: {hoy}\n\nEl documento adjunto es el CV o el perfil de LinkedIn de la persona."},
+        ]}],
         output_format=PerfilLeido,
     )
     if respuesta.stop_reason == "refusal" or respuesta.parsed_output is None:
@@ -148,17 +184,17 @@ def _por_comando(texto: str, hoy: str, pq: Paquete) -> PerfilLeido:
         raise ModeloNoDisponible(f"El comando claude no devolvió un perfil ({type(error).__name__}).") from error
 
 
-def leer(texto: str, hoy: str, pq: Paquete | None = None) -> tuple[PerfilLeido, str]:
+def leer(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = None) -> tuple[PerfilLeido, str]:
     """Devuelve lo que Claude leyó y por qué vía ("api" o "comando")."""
     pq = pq or paquete()
     texto = texto.strip()
-    if not texto:
+    if not texto and not pdf:
         raise ValueError("El texto está vacío.")
     if len(texto) > MAX_CARACTERES:
         raise ValueError(f"El texto tiene {len(texto):,} caracteres; el máximo es {MAX_CARACTERES:,}. Acórtalo.")
     if _hay_credenciales():
         try:
-            return _por_api(texto, hoy, pq), "api"
+            return _por_api(texto, hoy, pq, pdf), "api"
         except anthropic.AuthenticationError as error:
             raise ModeloNoDisponible("La llave de la API de Claude no es válida.") from error
         except anthropic.RateLimitError as error:
@@ -168,6 +204,8 @@ def leer(texto: str, hoy: str, pq: Paquete | None = None) -> tuple[PerfilLeido, 
         except anthropic.APIConnectionError as error:
             raise ModeloNoDisponible("No se pudo conectar con la API de Claude.") from error
     if shutil.which("claude"):
+        if pdf:
+            texto = f"{texto}\n\n{_texto_del_pdf(pdf)}".strip()
         return _por_comando(texto, hoy, pq), "comando"
     raise ModeloNoDisponible(
         "No hay credenciales para llamar a Claude. Define ANTHROPIC_API_KEY o llena el perfil a mano.")
@@ -220,15 +258,15 @@ def completar(leido: PerfilLeido, pq: Paquete | None = None) -> dict:
     }
 
 
-def perfil_desde_texto(texto: str, hoy: str, pq: Paquete | None = None) -> dict:
+def perfil_desde_texto(texto: str, hoy: str, pq: Paquete | None = None, pdf: bytes | None = None) -> dict:
     """Primero el documento que armó el Claude de la persona (exacto, sin llamar a un modelo);
     si el texto no lo trae, Claude lo lee como texto libre."""
     from app.services.perfil_doc import leer_documento
 
-    if not texto.strip():
+    if not texto.strip() and not pdf:
         raise ValueError("El texto está vacío.")
-    documento = leer_documento(texto, pq)
+    documento = None if pdf else leer_documento(texto, pq)
     if documento is not None:
         return {**documento, "via": "documento"}
-    leido, via = leer(texto, hoy, pq)
+    leido, via = leer(texto, hoy, pq, pdf)
     return {**completar(leido, pq), "duda": None, "avisos": [], "via": via}
