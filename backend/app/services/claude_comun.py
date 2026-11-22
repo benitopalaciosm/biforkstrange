@@ -1,3 +1,4 @@
+import logging
 """Lo que comparten los servicios que llaman a Claude: credenciales, cliente y errores.
 
 Lo usan `perfil_ia` (leer el CV) y `narrador_ia` (narrar ofertas, eventos y mundos).
@@ -35,6 +36,8 @@ def traducir_error(error: Exception, clase: type[ClaudeNoDisponible] = ClaudeNoD
     if isinstance(error, anthropic.RateLimitError):
         return clase("La API de Claude está con límite de uso; prueba en un minuto.")
     if isinstance(error, anthropic.APIStatusError):
+        # el detalle va al log del servidor (sin datos de la persona), para diagnosticar en producción
+        logging.getLogger(__name__).warning("La API de Claude respondió %s: %s", error.status_code, error.message)
         return clase(f"La API de Claude respondió con un error ({error.status_code}).")
     if isinstance(error, anthropic.APIConnectionError):
         return clase("No se pudo conectar con la API de Claude.")
